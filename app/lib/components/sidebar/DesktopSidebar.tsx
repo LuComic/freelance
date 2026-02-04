@@ -1,25 +1,45 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   PanelLeftClose,
   PanelLeftOpen,
   Settings,
   Users,
   Plus,
-  Lightbulb,
   Bell,
+  Folder,
 } from "lucide-react";
 import { Tips } from "./Tips";
 import { Connections } from "./Connections";
+import { setCookie, SIDEBAR_COOKIE } from "@/app/lib/cookies";
 
-export const DesktopSidebar = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+type DesktopSidebarProps = {
+  initialOpen?: boolean;
+};
+
+export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
+  const [sidebarOpen, setSidebarOpen] = useState(initialOpen ?? true);
 
   const [tips, setTips] = useState(true);
   const [friends, setFriends] = useState(false);
   const [settings, setSettings] = useState(false);
   const [create, setCreate] = useState(false);
+
+  useEffect(() => {
+    setCookie(SIDEBAR_COOKIE, String(sidebarOpen));
+  }, [sidebarOpen]);
+
+  useEffect(() => {
+    const onKeyDownHandler = (e: KeyboardEvent) => {
+      if (e.key === "b" && e.metaKey) {
+        setSidebarOpen((prev) => !prev);
+      }
+    };
+    document.addEventListener("keydown", onKeyDownHandler);
+
+    return () => document.removeEventListener("keydown", onKeyDownHandler);
+  }, []);
 
   const toggleControl = (
     toToggle: "tips" | "friends" | "settings" | "create"
@@ -46,10 +66,11 @@ export const DesktopSidebar = () => {
       setCreate(true);
     }
   };
+
   return (
     <div className="hidden md:block">
       {sidebarOpen ? (
-        <nav className="w-[300px] h-full min-h-screen bg-(--darkest) border-r border-(--gray) flex flex-col items-start justify-start p-2 px-3 gap-4">
+        <nav className="w-[363px] h-full min-h-screen bg-(--darkest) border-r border-(--gray) flex flex-col items-start justify-start p-2 px-3 gap-4">
           <div className="flex items-center justify-between w-full">
             <span className="text-(--gray) text-xl">Empty Canvas</span>
             <button
@@ -59,14 +80,14 @@ export const DesktopSidebar = () => {
               <PanelLeftClose size={20} />
             </button>
           </div>
-          <div className="flex items-center justify-around p-1 rounded-lg bg-(--dim) w-full gap-1">
+          <div className="flex items-center justify-around p-1 rounded-xl bg-(--dim) w-full gap-1">
             <button
               className={`cursor-pointer p-1 rounded-lg transition hover:bg-(--quite-dark) w-full ${
                 tips ? "bg-(--quite-dark) text-(--vibrant)" : ""
               }`}
               onClick={() => toggleControl("tips")}
             >
-              <Lightbulb size={20} className="mx-auto" />
+              <Folder size={20} className="mx-auto" />
             </button>
             <button
               className={`cursor-pointer p-1 rounded-lg transition hover:bg-(--quite-dark) w-full ${
@@ -96,7 +117,7 @@ export const DesktopSidebar = () => {
           {tips ? <Tips /> : null}
           {friends ? <Connections /> : null}
           <div className="mt-auto w-full h-max flex items-center justify-between">
-            <div className="w-max gap-2 flex items-center justify-start py-1 px-2 rounded-lg transition hover:bg-(--darkest-hover) cursor-pointer">
+            <div className="w-max gap-2 flex items-center justify-start py-1 pl-2 pr-3 rounded-lg transition hover:bg-(--darkest-hover) cursor-pointer">
               <div className="aspect-square w-8 h-auto bg-(--dim) rounded-full"></div>
               <span className="font-light text-sm underline underline-offset-4 decoration-(--vibrant)">
                 Create an Account
@@ -118,18 +139,18 @@ export const DesktopSidebar = () => {
           <div className="flex flex-col bg-(--dim) rounded-lg justify-center p-1 h-max gap-4">
             <button
               className={`h-full cursor-pointer p-1 rounded-lg transition hover:bg-(--quite-dark) w-full ${
-                tips ? "bg-(--quite-dark)" : ""
+                tips ? "bg-(--quite-dark) text-(--vibrant)" : ""
               }`}
               onClick={() => {
                 toggleControl("tips");
                 setSidebarOpen(true);
               }}
             >
-              <Lightbulb size={20} className="mx-auto" />
+              <Folder size={20} className="mx-auto" />
             </button>
             <button
               className={`h-full cursor-pointer p-1 rounded-lg transition hover:bg-(--quite-dark) w-full ${
-                friends ? "bg-(--quite-dark)" : ""
+                friends ? "bg-(--quite-dark) text-(--vibrant)" : ""
               }`}
               onClick={() => {
                 toggleControl("friends");
@@ -140,7 +161,7 @@ export const DesktopSidebar = () => {
             </button>
             <button
               className={`h-full cursor-pointer p-1 rounded-lg transition hover:bg-(--quite-dark) w-full ${
-                settings ? "bg-(--quite-dark)" : ""
+                settings ? "bg-(--quite-dark) text-(--vibrant)" : ""
               }`}
               onClick={() => {
                 toggleControl("settings");
@@ -151,7 +172,7 @@ export const DesktopSidebar = () => {
             </button>
             <button
               className={`h-full cursor-pointer p-1 rounded-lg transition hover:bg-(--quite-dark) w-full ${
-                create ? "bg-(--quite-dark)" : ""
+                create ? "bg-(--quite-dark) text-(--vibrant)" : ""
               }`}
               onClick={() => {
                 toggleControl("create");
@@ -162,10 +183,10 @@ export const DesktopSidebar = () => {
             </button>
           </div>
           <div className="flex flex-col gap-2 items-center justify-center mt-auto w-full">
-            <button className="cursor-pointer p-1 rounded-lg transition hover:bg-(--quite-dark) w-full">
+            <button className="cursor-pointer p-1 rounded-lg transition hover:bg-(--darkest-hover) w-full">
               <div className="aspect-square w-6 h-auto bg-(--dim) rounded-full mx-auto"></div>
             </button>
-            <button className="cursor-pointer aspect-square p-1 rounded-lg transition hover:bg-(--quite-dark) w-full">
+            <button className="cursor-pointer aspect-square p-1 rounded-lg transition hover:bg-(--darkest-hover) w-full">
               <Bell size={20} className="mx-auto" />
             </button>
           </div>

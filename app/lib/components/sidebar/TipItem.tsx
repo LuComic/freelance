@@ -1,5 +1,5 @@
 "use client";
-import { ChevronRight, StickyNote } from "lucide-react";
+import { ChevronRight, File } from "lucide-react";
 import { useState } from "react";
 
 interface TipItemProps {
@@ -20,7 +20,7 @@ export const TipItem = ({ title, description }: TipItemProps) => {
       </button>
       {itemExpanded ? (
         <p className="pl-8 flex w-full items-center cursor-pointer justify-start gap-2 hover:bg-(--darkest-hover) rounded-lg p-1 md:text-base text-sm font-light">
-          <StickyNote size={20} />
+          <File size={20} />
           {description}
         </p>
       ) : null}

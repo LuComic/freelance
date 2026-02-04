@@ -3,10 +3,14 @@
 import { DesktopSidebar } from "./DesktopSidebar";
 import { MobileSidebar } from "./MobileSidebar";
 
-export const Sidebar = () => {
+type SidebarProps = {
+  initialSidebarOpen?: boolean;
+};
+
+export const Sidebar = ({ initialSidebarOpen }: SidebarProps) => {
   return (
     <>
-      <DesktopSidebar />
+      <DesktopSidebar initialOpen={initialSidebarOpen} />
       <MobileSidebar />
     </>
   );

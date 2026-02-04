@@ -49,7 +49,7 @@ export const MobileSidebar = () => {
   return (
     <div className="block md:hidden">
       {sidebarOpen ? (
-        <nav className="w-[300px] h-full min-h-screen bg-(--darkest) border-r border-(--gray) flex flex-col items-start justify-start p-2 gap-4 fixed top-0 left-0">
+        <nav className="w-[363px] h-full min-h-screen bg-(--darkest) border-r border-(--gray) flex flex-col items-start justify-start p-2 gap-4 fixed top-0 left-0">
           <div className="flex items-center justify-between w-full">
             <span className="text-(--gray) text-xl">Empty Canvas</span>
             <button
