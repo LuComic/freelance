@@ -10,7 +10,7 @@ import {
   Bell,
   Folder,
 } from "lucide-react";
-import { Tips } from "./Tips";
+import { Files } from "./Files";
 import { Connections } from "./Connections";
 import { setCookie, SIDEBAR_COOKIE } from "@/app/lib/cookies";
 
@@ -21,7 +21,7 @@ type DesktopSidebarProps = {
 export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(initialOpen ?? true);
 
-  const [tips, setTips] = useState(true);
+  const [files, setFiles] = useState(true);
   const [friends, setFriends] = useState(false);
   const [settings, setSettings] = useState(false);
   const [create, setCreate] = useState(false);
@@ -42,25 +42,25 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
   }, []);
 
   const toggleControl = (
-    toToggle: "tips" | "friends" | "settings" | "create"
+    toToggle: "files" | "friends" | "settings" | "create",
   ) => {
-    if (toToggle === "tips") {
-      setTips(true);
+    if (toToggle === "files") {
+      setFiles(true);
       setFriends(false);
       setSettings(false);
       setCreate(false);
     } else if (toToggle == "friends") {
-      setTips(false);
+      setFiles(false);
       setFriends(true);
       setSettings(false);
       setCreate(false);
     } else if (toToggle == "settings") {
-      setTips(false);
+      setFiles(false);
       setFriends(false);
       setSettings(true);
       setCreate(false);
     } else if (toToggle == "create") {
-      setTips(false);
+      setFiles(false);
       setFriends(false);
       setSettings(false);
       setCreate(true);
@@ -83,9 +83,9 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
           <div className="flex items-center justify-around p-1 rounded-xl bg-(--dim) w-full gap-1">
             <button
               className={`cursor-pointer p-1 rounded-lg transition hover:bg-(--quite-dark) w-full ${
-                tips ? "bg-(--quite-dark) text-(--vibrant)" : ""
+                files ? "bg-(--quite-dark) text-(--vibrant)" : ""
               }`}
-              onClick={() => toggleControl("tips")}
+              onClick={() => toggleControl("files")}
             >
               <Folder size={20} className="mx-auto" />
             </button>
@@ -114,7 +114,7 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
               <Plus size={20} className="mx-auto" />
             </button>
           </div>
-          {tips ? <Tips /> : null}
+          {files ? <Files /> : null}
           {friends ? <Connections /> : null}
           <div className="mt-auto w-full h-max flex items-center justify-between">
             <div className="w-max gap-2 flex items-center justify-start py-1 pl-2 pr-3 rounded-lg transition hover:bg-(--darkest-hover) cursor-pointer">
@@ -139,10 +139,10 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
           <div className="flex flex-col bg-(--dim) rounded-lg justify-center p-1 h-max gap-4">
             <button
               className={`h-full cursor-pointer p-1 rounded-lg transition hover:bg-(--quite-dark) w-full ${
-                tips ? "bg-(--quite-dark) text-(--vibrant)" : ""
+                files ? "bg-(--quite-dark) text-(--vibrant)" : ""
               }`}
               onClick={() => {
-                toggleControl("tips");
+                toggleControl("files");
                 setSidebarOpen(true);
               }}
             >

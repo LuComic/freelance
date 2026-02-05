@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "@fontsource-variable/lexend";
+@import "@fontsource-variable/work-sans";
 
 /* @theme inline {
   --color-background: var(--background);
@@ -32,5 +33,5 @@ body {
 }
 
 * {
-  font-family: "Lexend Variable", sans-serif;
+  font-family: "Work Sans Variable", sans-serif;
 }

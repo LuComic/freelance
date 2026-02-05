@@ -6,6 +6,7 @@
       "name": "freelance-app",
       "dependencies": {
         "@fontsource-variable/lexend": "^5.2.11",
+        "@fontsource-variable/work-sans": "^5.2.8",
         "lucide-react": "^0.563.0",
         "next": "16.1.6",
         "react": "19.2.3",
@@ -87,6 +88,8 @@
     "@eslint/plugin-kit": ["@eslint/plugin-kit@0.4.1", "", { "dependencies": { "@eslint/core": "^0.17.0", "levn": "^0.4.1" } }, "sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA=="],
 
     "@fontsource-variable/lexend": ["@fontsource-variable/lexend@5.2.11", "", {}, "sha512-0hgEQ4O7Nh8fxL/WWmspJf0BErbocRkZwtLRGey/V4mUUqxfF7QUwqhcdzwpjom3NYCniY4uzQ5wYD7r9/92tQ=="],
+
+    "@fontsource-variable/work-sans": ["@fontsource-variable/work-sans@5.2.8", "", {}, "sha512-8uWtTt0/B5NxGie9xUVD5y5Ch4Q+Hy7kFYKtUpwYbzSAgJEoaMxT8rMnfnK7zfAYSLC8GnGO1/tXrFtKIYYQVQ=="],
 
     "@humanfs/core": ["@humanfs/core@0.19.1", "", {}, "sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA=="],
 

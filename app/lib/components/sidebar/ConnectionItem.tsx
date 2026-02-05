@@ -21,7 +21,7 @@ export const ConnectionItem = ({ title, connections }: ConnectionItemProps) => {
       {itemExpanded
         ? connections.map((connection) => (
             <span
-              className="pl-8 flex w-full items-center cursor-pointer justify-start gap-2 hover:bg-(--darkest-hover) rounded-lg p-1 md:text-base text-sm font-light"
+              className="pl-8 flex w-full items-center cursor-pointer justify-start gap-2 hover:bg-(--darkest-hover) rounded-lg p-1 md:text-base text-sm"
               key={connection}
             >
               <div className="aspect-square w-7 h-auto bg-(--dim) rounded-full"></div>

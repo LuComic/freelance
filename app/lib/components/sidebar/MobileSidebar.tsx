@@ -10,37 +10,37 @@ import {
   Lightbulb,
   Bell,
 } from "lucide-react";
-import { Tips } from "./Tips";
+import { Files } from "./Files";
 import { Connections } from "./Connections";
 
 export const MobileSidebar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  const [tips, setTips] = useState(true);
+  const [files, setFiles] = useState(true);
   const [friends, setFriends] = useState(false);
   const [settings, setSettings] = useState(false);
   const [create, setCreate] = useState(false);
 
   const toggleControl = (
-    toToggle: "tips" | "friends" | "settings" | "create"
+    toToggle: "files" | "friends" | "settings" | "create",
   ) => {
-    if (toToggle === "tips") {
-      setTips(true);
+    if (toToggle === "files") {
+      setFiles(true);
       setFriends(false);
       setSettings(false);
       setCreate(false);
     } else if (toToggle == "friends") {
-      setTips(false);
+      setFiles(false);
       setFriends(true);
       setSettings(false);
       setCreate(false);
     } else if (toToggle == "settings") {
-      setTips(false);
+      setFiles(false);
       setFriends(false);
       setSettings(true);
       setCreate(false);
     } else if (toToggle == "create") {
-      setTips(false);
+      setFiles(false);
       setFriends(false);
       setSettings(false);
       setCreate(true);
@@ -62,9 +62,9 @@ export const MobileSidebar = () => {
           <div className="flex items-center justify-around p-1 rounded-lg bg-(--dim) w-full gap-1">
             <button
               className={`cursor-pointer p-1 rounded-lg transition hover:bg-(--quite-dark) w-full ${
-                tips ? "bg-(--quite-dark) text-(--vibrant)" : ""
+                files ? "bg-(--quite-dark) text-(--vibrant)" : ""
               }`}
-              onClick={() => toggleControl("tips")}
+              onClick={() => toggleControl("files")}
             >
               <Lightbulb size={20} className="mx-auto" />
             </button>
@@ -93,7 +93,7 @@ export const MobileSidebar = () => {
               <Plus size={20} className="mx-auto" />
             </button>
           </div>
-          {tips ? <Tips /> : null}
+          {files ? <Files /> : null}
           {friends ? <Connections /> : null}
           <div className="mt-auto w-full h-max flex items-center justify-between">
             <div className="w-max gap-2 flex items-center justify-start py-1 px-2 rounded-lg transition hover:bg-(--darkest-hover) cursor-pointer">
