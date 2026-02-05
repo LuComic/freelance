@@ -32,7 +32,7 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
 
   useEffect(() => {
     const onKeyDownHandler = (e: KeyboardEvent) => {
-      if (e.key === "b" && e.metaKey) {
+      if (e.key === "b" && (e.metaKey || e.ctrlKey)) {
         setSidebarOpen((prev) => !prev);
       }
     };

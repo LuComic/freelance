@@ -17,7 +17,11 @@ export const Chat = ({ initialChatOpen }: ChatProps) => {
 
   useEffect(() => {
     const onKeyDownHandler = (e: KeyboardEvent) => {
-      if ((e.key === "l" || e.key === "L") && e.metaKey && e.shiftKey) {
+      if (
+        (e.key === "l" || e.key === "L") &&
+        (e.metaKey || e.ctrlKey) &&
+        e.shiftKey
+      ) {
         setChatOpen((prev) => !prev);
       }
     };
