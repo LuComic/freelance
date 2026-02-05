@@ -1,5 +1,6 @@
 "use client";
 
+import { forwardRef } from "react";
 import { ChevronRight } from "lucide-react";
 
 interface SearchBarItemProps {
@@ -7,15 +8,20 @@ interface SearchBarItemProps {
   isSelected: boolean;
 }
 
-export const SearchBarItem = ({ title, isSelected }: SearchBarItemProps) => {
-  return (
-    <div
-      className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-colors ${
-        isSelected ? "bg-(--darkest-hover)" : "hover:bg-(--darkest-hover)"
-      }`}
-    >
-      <ChevronRight size={20} className="text-(--gray)" />
-      <span className="text-base">{title}</span>
-    </div>
-  );
-};
+export const SearchBarItem = forwardRef<HTMLDivElement, SearchBarItemProps>(
+  ({ title, isSelected }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition ${
+          isSelected ? "bg-(--darkest-hover)" : "hover:bg-(--darkest-hover)"
+        }`}
+      >
+        <ChevronRight size={20} className="text-(--gray)" />
+        <span className="text-base">{title}</span>
+      </div>
+    );
+  },
+);
+
+SearchBarItem.displayName = "SearchBarItem";

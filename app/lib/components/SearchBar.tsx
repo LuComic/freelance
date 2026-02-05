@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SearchBarItem } from "./SearchBarItem";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 
@@ -26,6 +26,7 @@ export default function SearchBar() {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const selectedItemRef = useRef<HTMLDivElement>(null);
 
   const filteredFiles = PLACEHOLDER_FILES.filter((file) =>
     file.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -79,6 +80,15 @@ export default function SearchBar() {
     setSelectedIndex(0);
   }, [searchQuery]);
 
+  // Keep selected item in view when navigating with arrow keys
+  useEffect(() => {
+    if (filteredFiles.length === 0) return;
+    selectedItemRef.current?.scrollIntoView({
+      block: "nearest",
+      behavior: "smooth",
+    });
+  }, [selectedIndex, filteredFiles.length]);
+
   if (!isOpen) return null;
 
   return (
@@ -123,11 +133,12 @@ export default function SearchBar() {
         </div>
 
         {/* File List */}
-        <div className="flex flex-col w-full max-h-96 overflow-y-auto p-2">
+        <div className="flex flex-col gap-1 w-full max-h-96 overflow-y-auto p-2">
           {filteredFiles.length > 0 ? (
             filteredFiles.map((file, index) => (
               <SearchBarItem
                 key={file}
+                ref={index === selectedIndex ? selectedItemRef : null}
                 title={file}
                 isSelected={index === selectedIndex}
               />

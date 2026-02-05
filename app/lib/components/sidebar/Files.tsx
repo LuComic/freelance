@@ -5,7 +5,7 @@ export const Files = () => {
     <div className="flex flex-col gap-2 items-start justify-start w-full">
       <p className="md:text-xl text-lg font-medium">Projects</p>
       <FileItem
-        title="Getting Started - developer"
+        title="Getting Started - creator"
         description="Creating a project"
       />
       <FileItem
