@@ -13,7 +13,7 @@ export const SearchBarItem = forwardRef<HTMLDivElement, SearchBarItemProps>(
     return (
       <div
         ref={ref}
-        className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition ${
+        className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer ${
           isSelected ? "bg-(--darkest-hover)" : "hover:bg-(--darkest-hover)"
         }`}
       >

@@ -1,3 +1,7 @@
 export default function Home() {
-  return <div></div>;
+  return (
+    <div>
+      <h1 className="md:text-3xl text-lg font-medium">Empty Project</h1>
+    </div>
+  );
 }

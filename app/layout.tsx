@@ -5,6 +5,7 @@ import { Sidebar } from "./lib/components/sidebar/Sidebar";
 import { Chat } from "./lib/components/chat/Chat";
 import SearchBar from "./lib/components/SearchBar";
 import { SIDEBAR_COOKIE, CHAT_COOKIE } from "./lib/cookies";
+import { Tab } from "./lib/components/tab/Tab";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -25,10 +26,21 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className="antialiased min-h-dvh h-auto w-screen flex items-start justify-start">
+      <body
+        className="antialiased min-h-dvh h-auto w-screen flex items-start justify-start"
+        style={{
+          scrollbarColor: "gray transparent",
+          scrollbarWidth: "thin",
+        }}
+      >
         <SearchBar />
         <Sidebar initialSidebarOpen={initialSidebarOpen} />
-        <div className="w-full">{children}</div>
+        <div className="flex-1 min-w-0 flex flex-col items-start justify-start">
+          <Tab />
+          <div className="w-full px-4 py-8 flex flex-col items-start justify-start gap-4">
+            {children}
+          </div>
+        </div>
         <Chat initialChatOpen={initialChatOpen} />
       </body>
     </html>

@@ -75,14 +75,14 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
             <span className="text-(--gray) text-xl">Empty Canvas</span>
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="cursor-pointer p-1 rounded-lg transition hover:bg-(--darkest-hover)"
+              className="cursor-pointer p-1 rounded-lg hover:bg-(--darkest-hover)"
             >
               <PanelLeftClose size={20} />
             </button>
           </div>
           <div className="flex items-center justify-around p-1 rounded-xl bg-(--dim) w-full gap-1">
             <button
-              className={`cursor-pointer p-1 rounded-lg transition hover:bg-(--quite-dark) w-full ${
+              className={`cursor-pointer p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
                 files ? "bg-(--quite-dark) text-(--vibrant)" : ""
               }`}
               onClick={() => toggleControl("files")}
@@ -90,7 +90,7 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
               <Folder size={20} className="mx-auto" />
             </button>
             <button
-              className={`cursor-pointer p-1 rounded-lg transition hover:bg-(--quite-dark) w-full ${
+              className={`cursor-pointer p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
                 friends ? "bg-(--quite-dark) text-(--vibrant)" : ""
               }`}
               onClick={() => toggleControl("friends")}
@@ -98,7 +98,7 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
               <Users size={20} className="mx-auto" />
             </button>
             <button
-              className={`cursor-pointer p-1 rounded-lg transition hover:bg-(--quite-dark) w-full ${
+              className={`cursor-pointer p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
                 settings ? "bg-(--quite-dark) text-(--vibrant)" : ""
               }`}
               onClick={() => toggleControl("settings")}
@@ -106,7 +106,7 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
               <Settings size={20} className="mx-auto" />
             </button>
             <button
-              className={`cursor-pointer p-1 rounded-lg transition hover:bg-(--quite-dark) w-full ${
+              className={`cursor-pointer p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
                 create ? "bg-(--quite-dark) text-(--vibrant)" : ""
               }`}
               onClick={() => toggleControl("create")}
@@ -117,13 +117,13 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
           {files ? <Files /> : null}
           {friends ? <Connections /> : null}
           <div className="mt-auto w-full h-max flex items-center justify-between">
-            <div className="w-max gap-2 flex items-center justify-start py-1 pl-2 pr-3 rounded-lg transition hover:bg-(--darkest-hover) cursor-pointer">
+            <div className="w-max gap-2 flex items-center justify-start py-1 pl-2 pr-3 rounded-lg hover:bg-(--darkest-hover) cursor-pointer">
               <div className="aspect-square w-8 h-auto bg-(--dim) rounded-full"></div>
               <span className="font-light text-base underline underline-offset-4 decoration-(--vibrant)">
                 Create an Account
               </span>
             </div>
-            <button className="p-1 aspect-square rounded-lg transition h-full hover:bg-(--darkest-hover) cursor-pointer">
+            <button className="p-1 aspect-square rounded-lg h-full hover:bg-(--darkest-hover) cursor-pointer">
               <Bell size={20} />
             </button>
           </div>
@@ -132,13 +132,13 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
         <nav className="w-[50px] h-full min-h-screen bg-(--darkest) border-r border-(--gray) flex flex-col items-center justify-start p-2 gap-4">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="cursor-pointer p-1 rounded-lg transition hover:bg-(--darkest-hover)"
+            className="cursor-pointer p-1 rounded-lg hover:bg-(--darkest-hover)"
           >
             <PanelLeftOpen size={20} />
           </button>
           <div className="flex flex-col bg-(--dim) rounded-lg justify-center p-1 h-max gap-4">
             <button
-              className={`h-full cursor-pointer p-1 rounded-lg transition hover:bg-(--quite-dark) w-full ${
+              className={`h-full cursor-pointer p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
                 files ? "bg-(--quite-dark) text-(--vibrant)" : ""
               }`}
               onClick={() => {
@@ -149,7 +149,7 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
               <Folder size={20} className="mx-auto" />
             </button>
             <button
-              className={`h-full cursor-pointer p-1 rounded-lg transition hover:bg-(--quite-dark) w-full ${
+              className={`h-full cursor-pointer p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
                 friends ? "bg-(--quite-dark) text-(--vibrant)" : ""
               }`}
               onClick={() => {
@@ -160,7 +160,7 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
               <Users size={20} className="mx-auto" />
             </button>
             <button
-              className={`h-full cursor-pointer p-1 rounded-lg transition hover:bg-(--quite-dark) w-full ${
+              className={`h-full cursor-pointer p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
                 settings ? "bg-(--quite-dark) text-(--vibrant)" : ""
               }`}
               onClick={() => {
@@ -171,7 +171,7 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
               <Settings size={20} className="mx-auto" />
             </button>
             <button
-              className={`h-full cursor-pointer p-1 rounded-lg transition hover:bg-(--quite-dark) w-full ${
+              className={`h-full cursor-pointer p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
                 create ? "bg-(--quite-dark) text-(--vibrant)" : ""
               }`}
               onClick={() => {
@@ -183,7 +183,7 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
             </button>
           </div>
           <div className="flex flex-col gap-2 items-center justify-center mt-auto w-full">
-            <button className="cursor-pointer p-1 rounded-lg transition hover:bg-(--darkest-hover) w-full">
+            <button className="cursor-pointer p-1 rounded-lg hover:bg-(--darkest-hover) w-full">
               <div className="aspect-square w-6 h-auto bg-(--dim) rounded-full mx-auto"></div>
             </button>
             <button className="cursor-pointer aspect-square p-1 rounded-lg transition hover:bg-(--darkest-hover) w-full">

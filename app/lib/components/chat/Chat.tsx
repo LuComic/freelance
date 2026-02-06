@@ -37,7 +37,7 @@ export const Chat = ({ initialChatOpen }: ChatProps) => {
           <div className="flex items-center justify-start w-full gap-2">
             <button
               onClick={() => setChatOpen((prev) => !prev)}
-              className="cursor-pointer p-1 rounded-lg transition hover:bg-(--darkest-hover)"
+              className="cursor-pointer p-1 rounded-lg hover:bg-(--darkest-hover)"
             >
               <MessageSquare size={20} />
             </button>
@@ -48,7 +48,7 @@ export const Chat = ({ initialChatOpen }: ChatProps) => {
         <nav className="w-[50px] h-full min-h-screen bg-(--darkest) border-l border-(--gray) flex flex-col items-center justify-start p-2 gap-4">
           <button
             onClick={() => setChatOpen((prev) => !prev)}
-            className="cursor-pointer p-1 rounded-lg transition hover:bg-(--darkest-hover)"
+            className="cursor-pointer p-1 rounded-lg hover:bg-(--darkest-hover)"
           >
             <MessageSquare size={20} />
           </button>
