@@ -4,14 +4,15 @@ import { useState, useEffect } from "react";
 import {
   PanelLeftClose,
   PanelLeftOpen,
-  Settings,
   Users,
   Plus,
+  Settings,
   Bell,
   Folder,
 } from "lucide-react";
 import { Files } from "./Files";
 import { Connections } from "./Connections";
+import { SidebarSettings } from "./SidebarSettings";
 import { setCookie, SIDEBAR_COOKIE } from "@/app/lib/cookies";
 
 type DesktopSidebarProps = {
@@ -116,6 +117,7 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
           </div>
           {files ? <Files /> : null}
           {friends ? <Connections /> : null}
+          {settings ? <SidebarSettings /> : null}
           <div className="mt-auto w-full h-max flex items-center justify-between">
             <div className="w-max gap-2 flex items-center justify-start py-1 pl-2 pr-3 rounded-lg hover:bg-(--darkest-hover) cursor-pointer">
               <div className="aspect-square w-8 h-auto bg-(--dim) rounded-full"></div>

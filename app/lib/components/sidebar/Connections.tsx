@@ -6,16 +6,23 @@ export const Connections = () => {
       <p className="md:text-xl text-lg font-medium">Connections</p>
       <ConnectionItem
         title="Friends"
-        connections={["Alex", "Jordan", "Sam", "Riley"]}
+        items={["Alex", "Jordan", "Sam", "Riley"]}
+        type="friends"
       />
       <ConnectionItem
         title="Collaborations"
-        connections={["Morgan", "Casey", "Jamie"]}
+        items={["Morgan", "Casey", "Jamie"]}
+        type="collabs"
       />
-      <ConnectionItem title="Sent requests" connections={["Quinn", "Avery"]} />
+      <ConnectionItem
+        title="Sent requests"
+        items={["Quinn", "Avery"]}
+        type="sent"
+      />
       <ConnectionItem
         title="Received requests"
-        connections={["Drew", "Skyler", "Taylor"]}
+        items={["Drew", "Skyler", "Taylor"]}
+        type="got"
       />
     </div>
   );

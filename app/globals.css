@@ -26,8 +26,11 @@
   --quite-dark-hover: #303030;
   --gray: #504f4f;
   --light: #e9e8e9;
+
   --vibrant: #0061ff;
   --vibrant-hover: #0808ff;
+
+  --red: #e11d48;
 
   --radius: 0.625rem;
   --background: oklch(1 0 0);
