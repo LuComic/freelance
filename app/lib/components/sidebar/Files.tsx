@@ -5,12 +5,8 @@ export const Files = () => {
     <div className="flex flex-col gap-2 items-start justify-start w-full">
       <p className="md:text-xl text-lg font-medium">Projects</p>
       <SidebarItem
-        title="Getting Started - creator"
-        items={["Creating a project"]}
-      />
-      <SidebarItem
-        title="Getting Started - client"
-        items={["Joining a project"]}
+        title="Getting Started"
+        items={["Creating a project - Creator", "Joining a project - Client"]}
       />
     </div>
   );

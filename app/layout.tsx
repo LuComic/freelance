@@ -37,7 +37,7 @@ export default async function RootLayout({
         <Sidebar initialSidebarOpen={initialSidebarOpen} />
         <div className="flex-1 min-w-0 flex flex-col items-start justify-start">
           <Tab />
-          <div className="w-full px-4 py-8 flex flex-col items-start justify-start gap-4">
+          <div className="w-full px-4 md:pt-8 pt-15 pb-8 flex flex-col items-start justify-start gap-4">
             {children}
           </div>
         </div>

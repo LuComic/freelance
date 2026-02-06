@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Files } from "./Files";
 import { Connections } from "./Connections";
+import { SidebarSettings } from "./SidebarSettings";
 
 export const MobileSidebar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -95,6 +96,7 @@ export const MobileSidebar = () => {
           </div>
           {files ? <Files /> : null}
           {friends ? <Connections /> : null}
+          {settings ? <SidebarSettings /> : null}
           <div className="mt-auto w-full h-max flex items-center justify-between">
             <div className="w-max gap-2 flex items-center justify-start py-1 px-2 rounded-lg hover:bg-(--darkest-hover) cursor-pointer">
               <div className="aspect-square w-8 h-auto bg-(--dim) rounded-full"></div>
