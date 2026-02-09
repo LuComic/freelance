@@ -121,9 +121,7 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
           <div className="mt-auto w-full h-max flex items-center justify-between">
             <div className="w-max gap-2 flex items-center justify-start py-1 pl-2 pr-3 rounded-lg hover:bg-(--darkest-hover) cursor-pointer">
               <div className="aspect-square w-8 h-auto bg-(--dim) rounded-full"></div>
-              <span className="font-light text-base underline underline-offset-4 decoration-(--vibrant)">
-                Create an Account
-              </span>
+              <span className="font-light text-base">John Doe</span>
             </div>
             <button className="p-1 aspect-square rounded-lg h-full hover:bg-(--darkest-hover) cursor-pointer">
               <Bell size={20} />

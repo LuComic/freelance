@@ -15,7 +15,7 @@ import { Connections } from "./Connections";
 import { SidebarSettings } from "./SidebarSettings";
 
 export const MobileSidebar = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [files, setFiles] = useState(true);
   const [friends, setFriends] = useState(false);
@@ -100,9 +100,7 @@ export const MobileSidebar = () => {
           <div className="mt-auto w-full h-max flex items-center justify-between">
             <div className="w-max gap-2 flex items-center justify-start py-1 px-2 rounded-lg hover:bg-(--darkest-hover) cursor-pointer">
               <div className="aspect-square w-8 h-auto bg-(--dim) rounded-full"></div>
-              <span className="font-light text-sm underline underline-offset-4 decoration-(--vibrant)">
-                Create an Account
-              </span>
+              <span className="font-light text-sm">John Doe</span>
             </div>
             <button className="p-1 rounded-lg h-full hover:bg-(--darkest-hover) cursor-pointer">
               <Bell size={20} />

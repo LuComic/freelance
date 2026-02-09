@@ -21,9 +21,10 @@
 :root {
   --dim: #090909;
   --darkest: #111111;
-  --darkest-hover: #262626;
+  --darkest-hover: #212121;
   --quite-dark: #171717;
   --quite-dark-hover: #303030;
+  --gray-page: #8c8b8b;
   --gray: #504f4f;
   --light: #e9e8e9;
 
@@ -64,15 +65,6 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-}
-
-body {
-  background: var(--quite-dark);
-  color: var(--light);
-}
-
-* {
-  font-family: "Work Sans Variable", sans-serif;
 }
 
 @theme inline {
@@ -153,8 +145,11 @@ body {
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    font-family: "Work Sans Variable", sans-serif;
   }
   body {
     @apply bg-background text-foreground;
+    background: var(--quite-dark);
+    color: var(--light);
   }
 }
