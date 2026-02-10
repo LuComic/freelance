@@ -34,13 +34,14 @@ export const FileItem = ({ title, items, id }: SidebarItemProps) => {
 
       {itemExpanded
         ? items.map((item, index) => (
-            <span
+            <Link
               className="pl-8 flex w-full items-center cursor-pointer justify-start gap-2 hover:bg-(--darkest-hover) rounded-lg p-1 md:text-base text-sm"
               key={index}
+              href={"/" + id + "/" + item.toLowerCase()}
             >
               <File size={20} />
               {item}
-            </span>
+            </Link>
           ))
         : null}
     </>

@@ -31,6 +31,13 @@
   --vibrant: #0061ff;
   --vibrant-hover: #0808ff;
 
+  --pending-border: #ca8a04;
+  --pending-bg: #fef08a;
+  --accepted-border: #15803d;
+  --accepted-bg: #86efac;
+  --declined-border: #e11d48;
+  --declined-bg: #fda4af;
+
   --red: #e11d48;
 
   --radius: 0.625rem;

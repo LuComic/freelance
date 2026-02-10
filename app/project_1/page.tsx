@@ -11,7 +11,7 @@ export default function Page() {
         hardcoded project.
       </p>
       <h2 className="md:text-xl text-lg font-medium">## Check out these:</h2>
-      <PageLink newPage="Preferences" />
+      <PageLink newPage="Features" />
     </>
   );
 }

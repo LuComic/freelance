@@ -31,7 +31,7 @@ export const Chat = ({ initialChatOpen }: ChatProps) => {
   }, []);
 
   return (
-    <div className="hidden md:block">
+    <div className="hidden md:block self-stretch">
       {chatOpen ? (
         <nav className="w-[491px] h-full min-h-screen bg-(--darkest) border-l border-(--gray) flex flex-col items-start justify-start p-2 px-3 gap-4">
           <div className="flex items-center justify-start w-full gap-2">

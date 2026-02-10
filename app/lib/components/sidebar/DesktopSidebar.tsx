@@ -69,7 +69,7 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
   };
 
   return (
-    <div className="hidden md:block">
+    <div className="hidden md:block self-stretch">
       {sidebarOpen ? (
         <nav className="w-[363px] h-full min-h-screen bg-(--darkest) border-r border-(--gray) flex flex-col items-start justify-start p-2 px-3 gap-4">
           <div className="flex items-center justify-between w-full">
