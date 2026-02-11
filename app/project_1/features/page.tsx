@@ -1,4 +1,4 @@
-import { Feedback } from "@/app/lib/components/page_components/Feedback";
+import { Feedback } from "@/app/lib/components/page_components/feedback/Feedback";
 
 export default function Page() {
   return (
