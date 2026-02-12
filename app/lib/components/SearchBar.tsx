@@ -93,7 +93,7 @@ export default function SearchBar() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center pt-[10vh] bg-black/60"
+      className="fixed inset-0 z-30 flex items-start justify-center pt-[10vh] bg-black/60"
       onClick={() => {
         setIsOpen(false);
         setSearchQuery("");

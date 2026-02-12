@@ -1,13 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { Hourglass, ThumbsDown, ThumbsUp, Trash, X } from "lucide-react";
+import {
+  Hourglass,
+  ThumbsDown,
+  ThumbsUp,
+  TimerReset,
+  Trash,
+  X,
+  ChevronRight,
+} from "lucide-react";
 
 type itemType = {
   feature: string;
   status: "pending" | "accepted" | "declined";
   type: "nice" | "req";
   reason?: string;
+  dismissed?: boolean;
 };
 
 let IDEA_DATA: itemType[] = [
@@ -37,9 +46,9 @@ export const FeedbackClient = () => {
   const [ideaInput, setIdeaInput] = useState("");
   const [niceToHave, setNiceToHave] = useState(true);
   const [filter, setFilter] = useState<
-    "" | "accepted" | "declined" | "pending"
+    "" | "accepted" | "declined" | "pending" | "dismissed"
   >("");
-  const [filteredData, setFilteredData] = useState(data);
+  const [adding, setAdding] = useState(false);
 
   const handleNewIdea = () => {
     if (ideaInput === "") return;
@@ -47,37 +56,46 @@ export const FeedbackClient = () => {
       feature: ideaInput,
       status: "pending",
       type: niceToHave ? "nice" : "req",
+      dismissed: false,
     };
     setData((prev) => [newItem, ...prev]);
     setIdeaInput("");
+  };
+
+  const handleDismissing = (item: itemType) => {
+    setData((prev) =>
+      prev.map((p) =>
+        p.feature === item.feature
+          ? { ...p, dismissed: !(p.dismissed && p.dismissed === true) }
+          : p,
+      ),
+    );
   };
 
   const deleteIdea = (feature: string) => {
     setData((prev) => prev.filter((p) => p.feature !== feature));
   };
 
-  const changeFilter = (newFilter: "accepted" | "declined" | "pending") => {
+  const changeFilter = (
+    newFilter: "accepted" | "declined" | "pending" | "dismissed",
+  ) => {
     if (filter === newFilter) {
-      setFilteredData(data);
       setFilter("");
       return;
     }
 
-    switch (newFilter) {
-      case "accepted":
-        setFilteredData(data.filter((item) => item.status === "accepted"));
-        setFilter("accepted");
-        break;
-      case "declined":
-        setFilteredData(data.filter((item) => item.status === "declined"));
-        setFilter("declined");
-        break;
-      case "pending":
-        setFilteredData(data.filter((item) => item.status === "pending"));
-        setFilter("pending");
-        break;
-    }
+    setFilter(newFilter);
   };
+
+  const visibleData =
+    filter === ""
+      ? data.filter((item) => !item.dismissed)
+      : data.filter((item) => {
+          if (filter === "dismissed") {
+            return item.dismissed && item.dismissed === true;
+          }
+          return item.status === filter && !item.dismissed;
+        });
 
   return (
     <>
@@ -88,49 +106,59 @@ export const FeedbackClient = () => {
         Here you can submit ideas to the creator, who then either accept or
         decline them with a explanaition.
       </p>
-      <div className="border-(--gray) border-y py-1.5 w-full flex flex-col gap-2">
-        <span className="md:text-lg text-base font-medium">New idea</span>
-        <input
-          type="text"
-          placeholder="I'd like this feature added..."
-          className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
-          onChange={(e) => setIdeaInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleNewIdea();
-            }
-          }}
-        />
+      <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
+        <button
+          className="md:text-lg text-base font-medium flex items-center justify-start gap-2 cursor-pointer w-max"
+          onClick={() => setAdding((prev) => !prev)}
+        >
+          New idea
+          <ChevronRight size={18} className={`${adding && "rotate-90"}`} />
+        </button>
+        {adding && (
+          <>
+            <input
+              type="text"
+              placeholder="I'd like this feature added..."
+              className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
+              onChange={(e) => setIdeaInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleNewIdea();
+                }
+              }}
+            />
 
-        <button
-          className="flex items-center gap-2 justify-start w-full cursor-pointer"
-          onClick={() => setNiceToHave(true)}
-        >
-          <span className="h-5 flex items-center p-1 justify-center w-auto aspect-square rounded-full bg-(--darkest)">
-            {niceToHave && (
-              <span className="bg-(--vibrant) aspect-square h-full rounded-full"></span>
-            )}
-          </span>
-          Nice to have
-        </button>
-        <button
-          className="flex items-center gap-2 justify-start w-full cursor-pointer"
-          onClick={() => setNiceToHave(false)}
-        >
-          <span className="h-5 flex items-center p-1 justify-center w-auto aspect-square rounded-full bg-(--darkest)">
-            {!niceToHave && (
-              <span className="bg-(--vibrant) aspect-square h-full rounded-full"></span>
-            )}
-          </span>
-          Required
-        </button>
+            <button
+              className="flex items-center gap-2 justify-start w-full cursor-pointer"
+              onClick={() => setNiceToHave(true)}
+            >
+              <span className="h-5 flex items-center p-1 justify-center w-auto aspect-square rounded-full bg-(--darkest)">
+                {niceToHave && (
+                  <span className="bg-(--vibrant) aspect-square h-full rounded-full"></span>
+                )}
+              </span>
+              Nice to have
+            </button>
+            <button
+              className="flex items-center gap-2 justify-start w-full cursor-pointer"
+              onClick={() => setNiceToHave(false)}
+            >
+              <span className="h-5 flex items-center p-1 justify-center w-auto aspect-square rounded-full bg-(--darkest)">
+                {!niceToHave && (
+                  <span className="bg-(--vibrant) aspect-square h-full rounded-full"></span>
+                )}
+              </span>
+              Required
+            </button>
 
-        <button
-          className="w-max rounded-md px-2.5 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) cursor-pointer"
-          onClick={handleNewIdea}
-        >
-          Submit
-        </button>
+            <button
+              className="w-max rounded-md px-2.5 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) cursor-pointer"
+              onClick={handleNewIdea}
+            >
+              Submit
+            </button>
+          </>
+        )}
       </div>
       <div className="grid grid-cols-2 md:flex items-center justify-between md:justify-start w-full gap-2">
         <button
@@ -154,15 +182,23 @@ export const FeedbackClient = () => {
           <Hourglass size={16} />
           Pending
         </button>
-        <button className="flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border text-(--gray-page) border-(--gray-page) cursor-pointer hover:bg-(--gray)/20">
+        <button
+          className={`flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border ${filter !== "dismissed" && "text-(--gray-page) border-(--gray-page)"} cursor-pointer hover:bg-(--gray)/20`}
+          onClick={() => changeFilter("dismissed")}
+        >
           <X size={16} />
-          Dismissed (2)
+          Dismissed (
+          {
+            data.filter((item) => item.dismissed && item.dismissed === true)
+              .length
+          }
+          )
         </button>
       </div>
       <div
-        className={`w-full flex flex-col md:grid ${filteredData.length === 1 ? "grid-cols-[repeat(auto-fit,minmax(280px,500px))]" : "grid-cols-[repeat(auto-fit,minmax(280px,1fr))]"}  gap-2`}
+        className={`w-full flex flex-col md:grid ${visibleData.length === 1 ? "grid-cols-[repeat(auto-fit,minmax(280px,500px))]" : "grid-cols-[repeat(auto-fit,minmax(280px,1fr))]"}  gap-2`}
       >
-        {filteredData.map((feature) => (
+        {visibleData.map((feature) => (
           <div
             key={feature.feature}
             className={`rounded-md border px-2 gap-1 justify-between py-1.5 w-full min-w-0 flex flex-col min-h-0 ${
@@ -198,9 +234,21 @@ export const FeedbackClient = () => {
                 <Trash size={16} />
                 Delete
               </button>
-              <button className="gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border border-(--gray) cursor-pointer hover:bg-(--gray)/20">
-                <X size={16} />
-                Dismiss
+              <button
+                className="gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border border-(--gray) cursor-pointer hover:bg-(--gray)/20"
+                onClick={() => handleDismissing(feature)}
+              >
+                {feature.dismissed && feature.dismissed === true ? (
+                  <>
+                    <TimerReset size={16} />
+                    Restore
+                  </>
+                ) : (
+                  <>
+                    <X size={16} />
+                    Dismiss
+                  </>
+                )}
               </button>
             </div>
           </div>
