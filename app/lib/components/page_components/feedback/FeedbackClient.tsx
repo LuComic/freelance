@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Hourglass,
   ThumbsDown,
@@ -13,6 +13,7 @@ import {
   LayoutGrid,
   Pencil,
 } from "lucide-react";
+import { setCookie, FEEDBACK_CLIENT_LAYOUT_COOKIE } from "@/app/lib/cookies";
 
 type itemType = {
   feature: string;
@@ -44,7 +45,11 @@ let IDEA_DATA: itemType[] = [
   },
 ];
 
-export const FeedbackClient = () => {
+type FeedbackClientProps = {
+  initialLayout?: "grid" | "list";
+};
+
+export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
   const [data, setData] = useState(IDEA_DATA);
   const [ideaInput, setIdeaInput] = useState("");
   const [niceToHave, setNiceToHave] = useState(true);
@@ -52,7 +57,11 @@ export const FeedbackClient = () => {
     "" | "accepted" | "declined" | "pending" | "dismissed"
   >("");
   const [adding, setAdding] = useState(false);
-  const [layout, setLayout] = useState<"grid" | "list">("grid");
+  const [layout, setLayout] = useState<"grid" | "list">(initialLayout ?? "grid");
+
+  useEffect(() => {
+    setCookie(FEEDBACK_CLIENT_LAYOUT_COOKIE, layout);
+  }, [layout]);
 
   const handleNewIdea = () => {
     if (ideaInput === "") return;

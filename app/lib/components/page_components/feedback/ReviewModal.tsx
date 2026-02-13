@@ -5,6 +5,7 @@ import { ThumbsDown, ThumbsUp, X } from "lucide-react";
 export const ReviewModal = ({
   action,
   feature,
+  listView,
 }: {
   action: "accept" | "decline";
   feature: {
@@ -14,6 +15,7 @@ export const ReviewModal = ({
     reason?: string;
     dismissed?: boolean;
   };
+  listView?: boolean;
 }) => {
   const [review, setReview] = useState(false);
   const [reviewAction, setReviewAction] = useState<"decline" | "accept">();
@@ -111,18 +113,22 @@ export const ReviewModal = ({
         </div>
       )}
       <button
-        className="gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border border-(--gray) cursor-pointer hover:bg-(--gray)/20"
+        className={
+          listView
+            ? "gap-1 flex items-center justify-center p-1.5 rounded-sm h-max aspect-square cursor-pointer hover:bg-(--gray)/20"
+            : "gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border border-(--gray) cursor-pointer hover:bg-(--gray)/20"
+        }
         onClick={() => reviewIdea(action)}
       >
         {action === "accept" ? (
           <>
             <ThumbsUp size={16} />
-            Accept
+            {!listView && "Accept"}
           </>
         ) : (
           <>
             <ThumbsDown size={16} />
-            Decline
+            {!listView && "Decline"}
           </>
         )}
       </button>

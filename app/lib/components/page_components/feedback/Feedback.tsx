@@ -5,7 +5,15 @@ import { Switch } from "@/components/ui/switch";
 import { FeedbackCreator } from "./FeedbackCreator";
 import { FeedbackClient } from "./FeedbackClient";
 
-export const Feedback = () => {
+type FeedbackProps = {
+  initialClientLayout?: "grid" | "list";
+  initialCreatorLayout?: "grid" | "list";
+};
+
+export const Feedback = ({
+  initialClientLayout,
+  initialCreatorLayout,
+}: FeedbackProps) => {
   const [client, setClient] = useState(false);
 
   return (
@@ -17,7 +25,11 @@ export const Feedback = () => {
         />
         {client ? "Client's view" : "Creator's view"}
       </div>
-      {client ? <FeedbackClient /> : <FeedbackCreator />}
+      {client ? (
+        <FeedbackClient initialLayout={initialClientLayout} />
+      ) : (
+        <FeedbackCreator initialLayout={initialCreatorLayout} />
+      )}
     </div>
   );
 };

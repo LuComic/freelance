@@ -2,6 +2,9 @@ const MAX_AGE = 60 * 60 * 24 * 365; // 1 year
 
 export const SIDEBAR_COOKIE = "freelance-sidebar-open";
 export const CHAT_COOKIE = "freelance-chat-open";
+export const FEEDBACK_CLIENT_LAYOUT_COOKIE = "freelance-feedback-client-layout";
+export const FEEDBACK_CREATOR_LAYOUT_COOKIE =
+  "freelance-feedback-creator-layout";
 
 export function setCookie(name: string, value: string): void {
   if (typeof document === "undefined") return;

@@ -1,7 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { ThumbsDown, ThumbsUp, TimerReset, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+  ThumbsDown,
+  ThumbsUp,
+  TimerReset,
+  X,
+  Table,
+  LayoutGrid,
+} from "lucide-react";
+import { setCookie, FEEDBACK_CREATOR_LAYOUT_COOKIE } from "@/app/lib/cookies";
 import { ReviewModal } from "./ReviewModal";
 
 type itemType = {
@@ -34,11 +42,20 @@ let IDEA_DATA: itemType[] = [
   },
 ];
 
-export const FeedbackCreator = () => {
+type FeedbackCreatorProps = {
+  initialLayout?: "grid" | "list";
+};
+
+export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
   const [data, setData] = useState(IDEA_DATA);
   const [filter, setFilter] = useState<
     "" | "accepted" | "declined" | "pending" | "dismissed"
   >("");
+  const [layout, setLayout] = useState<"grid" | "list">(initialLayout ?? "grid");
+
+  useEffect(() => {
+    setCookie(FEEDBACK_CREATOR_LAYOUT_COOKIE, layout);
+  }, [layout]);
 
   const handleDismissing = (item: itemType) => {
     setData((prev) =>
@@ -80,6 +97,22 @@ export const FeedbackCreator = () => {
       </p>
       <div className="grid grid-cols-2 md:flex items-center justify-between md:justify-start w-full gap-2">
         <button
+          className="flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border text-(--gray-page) border-(--gray-page) cursor-pointer hover:bg-(--gray)/20"
+          onClick={() => setLayout(layout === "grid" ? "list" : "grid")}
+        >
+          {layout === "grid" ? (
+            <>
+              <LayoutGrid size={16} />
+              Grid
+            </>
+          ) : (
+            <>
+              <Table size={16} />
+              List
+            </>
+          )}
+        </button>
+        <button
           className={`flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border ${filter !== "accepted" && "text-(--gray-page) border-(--gray-page)"} cursor-pointer hover:bg-(--gray)/20`}
           onClick={() => changeFilter("accepted")}
         >
@@ -106,69 +139,149 @@ export const FeedbackCreator = () => {
           )
         </button>
       </div>
-      <div
-        className={`w-full flex flex-col md:grid ${visibleData.length === 1 ? "grid-cols-[repeat(auto-fit,minmax(280px,500px))]" : "grid-cols-[repeat(auto-fit,minmax(280px,1fr))]"}  gap-2`}
-      >
-        {visibleData.map((feature) => (
-          <div
-            key={feature.feature}
-            className={`rounded-md border px-2 gap-1 justify-between py-1.5 w-full min-w-0 flex flex-col min-h-0 ${
-              feature.status === "pending"
-                ? "border-(--gray) bg-(--gray)/10"
-                : feature.status === "accepted"
-                  ? "border-(--accepted-border) bg-(--accepted-bg)/10"
-                  : feature.status === "declined" &&
-                    "border-(--declined-border) bg-(--declined-bg)/10"
-            }
+      {layout === "grid" ? (
+        <div
+          className={`w-full flex flex-col md:grid ${visibleData.length === 1 ? "grid-cols-[repeat(auto-fit,minmax(280px,500px))]" : "grid-cols-[repeat(auto-fit,minmax(280px,1fr))]"}  gap-2`}
+        >
+          {visibleData.map((feature) => (
+            <div
+              key={feature.feature}
+              className={`rounded-md border px-2 gap-1 justify-between py-1.5 w-full min-w-0 flex flex-col min-h-0 ${
+                feature.status === "pending"
+                  ? "border-(--gray) bg-(--gray)/10"
+                  : feature.status === "accepted"
+                    ? "border-(--accepted-border) bg-(--accepted-bg)/10"
+                    : feature.status === "declined" &&
+                      "border-(--declined-border) bg-(--declined-bg)/10"
+              }
                    `}
-          >
-            <span className="font-semibold">
-              <span className="rounded-sm font-normal text-(--gray-page)">
-                {feature.type === "nice" ? "Nice" : "Required"} -{" "}
+            >
+              <span className="font-semibold">
+                <span className="rounded-sm font-normal text-(--gray-page)">
+                  {feature.type === "nice" ? "Nice" : "Required"} -{" "}
+                </span>
+                {feature.feature}
               </span>
-              {feature.feature}
-            </span>
-            {feature.status === "pending" && (
-              <span className="font-medium">Pending...</span>
-            )}
-            {feature.reason && (
-              <span className="font-medium">
-                {feature.status === "accepted" ? "Accepted: " : "Declined: "}{" "}
-                <span className="font-normal">{feature.reason}</span>
-              </span>
-            )}
-            <div className="w-full flex items-center gap-1">
-              {feature.status !== "pending" ? (
-                <ReviewModal
-                  action={feature.status === "accepted" ? "decline" : "accept"}
-                  feature={feature}
-                />
-              ) : (
-                <>
-                  <ReviewModal action="accept" feature={feature} />
-                  <ReviewModal action="decline" feature={feature} />
-                </>
+              {feature.status === "pending" && (
+                <span className="font-medium">Pending...</span>
               )}
-              <button
-                className="gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border border-(--gray) cursor-pointer hover:bg-(--gray)/20"
-                onClick={() => handleDismissing(feature)}
-              >
-                {feature.dismissed && feature.dismissed === true ? (
-                  <>
-                    <TimerReset size={16} />
-                    Restore
-                  </>
+              {feature.reason && (
+                <span className="font-medium">
+                  {feature.status === "accepted" ? "Accepted: " : "Declined: "}{" "}
+                  <span className="font-normal">{feature.reason}</span>
+                </span>
+              )}
+              <div className="w-full flex items-center gap-1">
+                {feature.status !== "pending" ? (
+                  <ReviewModal
+                    action={
+                      feature.status === "accepted" ? "decline" : "accept"
+                    }
+                    feature={feature}
+                  />
                 ) : (
                   <>
-                    <X size={16} />
-                    Dismiss
+                    <ReviewModal action="accept" feature={feature} />
+                    <ReviewModal action="decline" feature={feature} />
                   </>
                 )}
-              </button>
+                <button
+                  className="gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border border-(--gray) cursor-pointer hover:bg-(--gray)/20"
+                  onClick={() => handleDismissing(feature)}
+                >
+                  {feature.dismissed && feature.dismissed === true ? (
+                    <>
+                      <TimerReset size={16} />
+                      Restore
+                    </>
+                  ) : (
+                    <>
+                      <X size={16} />
+                      Dismiss
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
+          ))}
+        </div>
+      ) : (
+        <div className="w-full max-w-full min-w-0 overflow-x-auto">
+          <div className="min-w-[800px] flex flex-col">
+            <div className="w-full text-(--gray-page) border-b border-(--gray) text-left grid justify-between items-start grid-cols-13 bg-(--darkest)">
+              <span className="flex items-center justify-center border-r p-2 border-(--gray) h-full text-wrap">
+                Actions
+              </span>
+              <span className="border-r p-2 col-span-2 border-(--gray) h-full text-wrap">
+                Status
+              </span>
+              <span className="p-2 col-span-2 border-r border-(--gray) h-full text-wrap">
+                Urgency
+              </span>
+              <span className="p-2 col-span-4 border-r border-(--gray) h-full text-wrap">
+                Feature
+              </span>
+              <span className="text-wrap p-2 col-span-4 h-full">Reason?</span>
+            </div>
+
+            {visibleData.map((feature) => (
+              <div
+                className={`w-full ${visibleData.indexOf(feature) !== visibleData.length - 1 && "border-b"} border-(--gray) text-left grid justify-between items-start grid-cols-13 ${visibleData.indexOf(feature) % 2 !== 0 && "bg-(--gray)/10"}`}
+                key={feature.feature}
+              >
+                <div className="flex py-2 border-r border-(--gray) h-full justify-around items-center gap-1 flex-wrap">
+                  {feature.status !== "pending" ? (
+                    <ReviewModal
+                      action={
+                        feature.status === "accepted" ? "decline" : "accept"
+                      }
+                      feature={feature}
+                      listView
+                    />
+                  ) : (
+                    <>
+                      <ReviewModal
+                        action="accept"
+                        feature={feature}
+                        listView
+                      />
+                      <ReviewModal
+                        action="decline"
+                        feature={feature}
+                        listView
+                      />
+                    </>
+                  )}
+                  <button
+                    className="gap-1 flex items-center justify-center p-1.5 rounded-sm h-max aspect-square cursor-pointer hover:bg-(--gray)/20"
+                    onClick={() => handleDismissing(feature)}
+                  >
+                    {feature.dismissed && feature.dismissed === true ? (
+                      <TimerReset size={16} />
+                    ) : (
+                      <X size={16} />
+                    )}
+                  </button>
+                </div>
+                <span
+                  className={`p-2 border-r border-(--gray) h-full text-wrap col-span-2 flex items-start ${feature.status === "accepted" ? "text-(--accepted-border)" : feature.status === "declined" && "text-(--declined-border)"} capitalize`}
+                >
+                  {feature.status}
+                </span>
+                <span className="p-2 border-r border-(--gray) h-full text-wrap col-span-2 flex items-start">
+                  {feature.type === "nice" ? "Nice to have" : "Required"}
+                </span>
+                <span className="p-2 col-span-4 border-r border-(--gray) h-full text-wrap flex items-start">
+                  {feature.feature}
+                </span>
+                <span className="text-wrap p-2 px-2 col-span-4 h-full flex items-start">
+                  {feature.reason}
+                </span>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      )}
     </>
   );
 };
