@@ -15,7 +15,7 @@ import { ReviewModal } from "./ReviewModal";
 type itemType = {
   feature: string;
   status: "pending" | "accepted" | "declined";
-  type: "nice" | "req";
+  tags: string[];
   reason?: string;
   dismissed?: boolean;
 };
@@ -24,20 +24,20 @@ let IDEA_DATA: itemType[] = [
   {
     feature: "Please add an About page",
     status: "accepted",
-    type: "req",
+    tags: ["required"],
     reason:
       "Yeah sure, added it right now. Let me know if you want any changes there",
   },
   {
     feature: "Turn the selector in X page into a slider",
-    type: "nice",
+    tags: ["nice"],
     status: "pending",
   },
   {
     feature:
       "Create a 3D animation on the landing page that is 4k resolution and has no mistakes",
     status: "declined",
-    type: "nice",
+    tags: ["nice", "but also required"],
     reason: "You're not paying enough for that",
   },
 ];
@@ -51,7 +51,9 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
   const [filter, setFilter] = useState<
     "" | "accepted" | "declined" | "pending" | "dismissed"
   >("");
-  const [layout, setLayout] = useState<"grid" | "list">(initialLayout ?? "grid");
+  const [layout, setLayout] = useState<"grid" | "list">(
+    initialLayout ?? "grid",
+  );
 
   useEffect(() => {
     setCookie(FEEDBACK_CREATOR_LAYOUT_COOKIE, layout);
@@ -158,7 +160,8 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
             >
               <span className="font-semibold">
                 <span className="rounded-sm font-normal text-(--gray-page)">
-                  {feature.type === "nice" ? "Nice" : "Required"} -{" "}
+                  {feature.tags.join(", ") === "nice" ? "Nice" : "Required"}{" "}
+                  -{" "}
                 </span>
                 {feature.feature}
               </span>
@@ -216,7 +219,7 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
                 Status
               </span>
               <span className="p-2 col-span-2 border-r border-(--gray) h-full text-wrap">
-                Urgency
+                Tags
               </span>
               <span className="p-2 col-span-4 border-r border-(--gray) h-full text-wrap">
                 Feature
@@ -240,11 +243,7 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
                     />
                   ) : (
                     <>
-                      <ReviewModal
-                        action="accept"
-                        feature={feature}
-                        listView
-                      />
+                      <ReviewModal action="accept" feature={feature} listView />
                       <ReviewModal
                         action="decline"
                         feature={feature}
@@ -269,7 +268,7 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
                   {feature.status}
                 </span>
                 <span className="p-2 border-r border-(--gray) h-full text-wrap col-span-2 flex items-start">
-                  {feature.type === "nice" ? "Nice to have" : "Required"}
+                  {feature.tags.join(", ")}
                 </span>
                 <span className="p-2 col-span-4 border-r border-(--gray) h-full text-wrap flex items-start">
                   {feature.feature}

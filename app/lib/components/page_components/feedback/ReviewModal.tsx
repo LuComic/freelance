@@ -11,7 +11,7 @@ export const ReviewModal = ({
   feature: {
     feature: string;
     status: "pending" | "accepted" | "declined";
-    type: "nice" | "req";
+    tags: string[];
     reason?: string;
     dismissed?: boolean;
   };
@@ -78,7 +78,7 @@ export const ReviewModal = ({
                 {action} Client's idea
               </p>
               <span className="px-2 py-0.5 border rounded-md border-(--gray-page) text-(--gray-page)">
-                {feature.type === "nice" ? "Nice to have" : "Required"}
+                {feature.tags.join(", ")}
               </span>
             </div>
             <p className="text-(--gray-page)">{feature.feature}</p>
