@@ -18,29 +18,32 @@ import { setCookie, FEEDBACK_CLIENT_LAYOUT_COOKIE } from "@/app/lib/cookies";
 type itemType = {
   feature: string;
   status: "pending" | "accepted" | "declined";
-  type: "nice" | "req";
+  tags: string[];
   reason?: string;
   dismissed?: boolean;
 };
+
+// The possible tags are defined by the creator when creating the component
+const TAGS: string[] = ["required", "nice to have"];
 
 let IDEA_DATA: itemType[] = [
   {
     feature: "Please add an About page",
     status: "accepted",
-    type: "req",
+    tags: ["required"],
     reason:
       "Yeah sure, added it right now. Let me know if you want any changes there",
   },
   {
     feature: "Turn the selector in X page into a slider",
-    type: "nice",
+    tags: ["nice to have"],
     status: "pending",
   },
   {
     feature:
       "Create a 3D animation on the landing page that is 4k resolution and has no mistakes",
     status: "declined",
-    type: "nice",
+    tags: ["nice to have"],
     reason: "You're not paying enough for that",
   },
 ];
@@ -57,7 +60,10 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
     "" | "accepted" | "declined" | "pending" | "dismissed"
   >("");
   const [adding, setAdding] = useState(false);
-  const [layout, setLayout] = useState<"grid" | "list">(initialLayout ?? "grid");
+  const [layout, setLayout] = useState<"grid" | "list">(
+    initialLayout ?? "grid",
+  );
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   useEffect(() => {
     setCookie(FEEDBACK_CLIENT_LAYOUT_COOKIE, layout);
@@ -68,11 +74,12 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
     const newItem: itemType = {
       feature: ideaInput,
       status: "pending",
-      type: niceToHave ? "nice" : "req",
+      tags: selectedTags,
       dismissed: false,
     };
     setData((prev) => [newItem, ...prev]);
     setIdeaInput("");
+    setSelectedTags([]);
   };
 
   const handleDismissing = (item: itemType) => {
@@ -141,7 +148,7 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
               }}
             />
 
-            <button
+            {/* <button
               className="flex items-center gap-2 justify-start w-full cursor-pointer"
               onClick={() => setNiceToHave(true)}
             >
@@ -162,7 +169,26 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
                 )}
               </span>
               Required
-            </button>
+            </button> */}
+            <div className="flex items-center justify-start gap-2 w-full">
+              {TAGS.map((tag) => (
+                <button
+                  key={tag}
+                  className={`px-1.5 py-0.5 rounded-md border ${!selectedTags.includes(tag) && "border-(--gray-page) text-(--gray-page)"} cursor-pointer`}
+                  onClick={() => {
+                    if (selectedTags.includes(tag)) {
+                      setSelectedTags((prev) =>
+                        prev.filter((prevTag) => prevTag !== tag),
+                      );
+                    } else {
+                      setSelectedTags((prev) => [...prev, tag]);
+                    }
+                  }}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
 
             <button
               className="w-max rounded-md px-2.5 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) cursor-pointer"
@@ -244,7 +270,7 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
             >
               <span className="font-semibold">
                 <span className="rounded-sm font-normal text-(--gray-page)">
-                  {feature.type === "nice" ? "Nice" : "Required"} -{" "}
+                  {feature.tags.join(", ")} -{" "}
                 </span>
                 {feature.feature}
               </span>
@@ -296,7 +322,7 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
                 Status
               </span>
               <span className="p-2 col-span-2 border-r border-(--gray) h-full text-wrap">
-                Urgency
+                Tags
               </span>
               <span className="p-2 col-span-4 border-r border-(--gray) h-full text-wrap">
                 Feature
@@ -337,7 +363,7 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
                   {feature.status}
                 </span>
                 <span className="p-2 border-r border-(--gray) h-full text-wrap col-span-2 flex items-start">
-                  {feature.type === "nice" ? "Nice to have" : "Required"}
+                  {feature.tags.join(", ")}
                 </span>
                 <span className="p-2 col-span-4 border-r border-(--gray) h-full text-wrap flex items-start">
                   {feature.feature}
