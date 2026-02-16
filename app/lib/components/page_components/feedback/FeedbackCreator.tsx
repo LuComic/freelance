@@ -8,6 +8,8 @@ import {
   X,
   Table,
   LayoutGrid,
+  ChevronRight,
+  Trash,
 } from "lucide-react";
 import { setCookie, FEEDBACK_CREATOR_LAYOUT_COOKIE } from "@/app/lib/cookies";
 import { ReviewModal } from "./ReviewModal";
@@ -30,14 +32,14 @@ let IDEA_DATA: itemType[] = [
   },
   {
     feature: "Turn the selector in X page into a slider",
-    tags: ["nice"],
+    tags: ["nice to have"],
     status: "pending",
   },
   {
     feature:
       "Create a 3D animation on the landing page that is 4k resolution and has no mistakes",
     status: "declined",
-    tags: ["nice", "but also required"],
+    tags: ["nice to have", "but also required"],
     reason: "You're not paying enough for that",
   },
 ];
@@ -48,6 +50,9 @@ type FeedbackCreatorProps = {
 
 export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
   const [data, setData] = useState(IDEA_DATA);
+  const [tags, setTags] = useState<string[]>(["required", "nice to have"]);
+  const [tagInput, setTagInput] = useState("");
+  const [editing, setEditing] = useState(false);
   const [filter, setFilter] = useState<
     "" | "accepted" | "declined" | "pending" | "dismissed"
   >("");
@@ -58,6 +63,16 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
   useEffect(() => {
     setCookie(FEEDBACK_CREATOR_LAYOUT_COOKIE, layout);
   }, [layout]);
+
+  const handleNewTag = () => {
+    if (tagInput.trim() === "") return;
+    setTags((prev) => [tagInput.trim(), ...prev]);
+    setTagInput("");
+  };
+
+  const deleteTag = (tag: string) => {
+    setTags((prev) => prev.filter((t) => t !== tag));
+  };
 
   const handleDismissing = (item: itemType) => {
     setData((prev) =>
@@ -97,6 +112,57 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
         Here you can accept or decline the ideas proposed by the client and give
         an explanation to your decision.
       </p>
+      <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
+        <button
+          className="md:text-lg text-base font-medium flex items-center justify-start gap-2 cursor-pointer w-max"
+          onClick={() => setEditing((prev) => !prev)}
+        >
+          Possible tags
+          <ChevronRight size={18} className={`${editing && "rotate-90"}`} />
+        </button>
+        {editing && (
+          <>
+            <input
+              type="text"
+              placeholder="Add a new possible tag..."
+              className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleNewTag();
+                }
+              }}
+            />
+
+            <div className="flex items-center justify-start gap-2 w-full">
+              {tags.map((tag) => (
+                <div
+                  key={tag}
+                  className="pl-1.5 pr-0.5 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) flex items-center gap-1"
+                >
+                  {tag}
+                  <button
+                    type="button"
+                    className="cursor-pointer hover:bg-(--gray)/20 p-1 rounded-sm"
+                    onClick={() => deleteTag(tag)}
+                  >
+                    <Trash size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <button
+              className="w-max rounded-md px-2.5 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) cursor-pointer"
+              onClick={handleNewTag}
+            >
+              Submit
+            </button>
+          </>
+        )}
+      </div>
+
       <div className="grid grid-cols-2 md:flex items-center justify-between md:justify-start w-full gap-2">
         <button
           className="flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border text-(--gray-page) border-(--gray-page) cursor-pointer hover:bg-(--gray)/20"

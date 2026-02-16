@@ -70,7 +70,7 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
   }, [layout]);
 
   const handleNewIdea = () => {
-    if (ideaInput === "") return;
+    if (ideaInput.trim() === "") return;
     const newItem: itemType = {
       feature: ideaInput,
       status: "pending",
@@ -141,6 +141,7 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
               placeholder="I'd like this feature added..."
               className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
               onChange={(e) => setIdeaInput(e.target.value)}
+              value={ideaInput}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   handleNewIdea();
