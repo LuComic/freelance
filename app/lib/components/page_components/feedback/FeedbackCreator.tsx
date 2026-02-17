@@ -293,9 +293,9 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
               <span className="text-wrap p-2 col-span-4 h-full">Reason?</span>
             </div>
 
-            {visibleData.map((feature) => (
+            {visibleData.map((feature, index) => (
               <div
-                className={`w-full ${visibleData.indexOf(feature) !== visibleData.length - 1 && "border-b"} border-(--gray) text-left grid justify-between items-start grid-cols-13 ${visibleData.indexOf(feature) % 2 !== 0 && "bg-(--gray)/10"}`}
+                className={`w-full ${index !== visibleData.length - 1 && "border-b"} border-(--gray) text-left grid justify-between items-start grid-cols-13 ${index % 2 !== 0 && "bg-(--gray)/10"}`}
                 key={feature.feature}
               >
                 <div className="flex py-2 border-r border-(--gray) h-full justify-around items-center gap-1 flex-wrap">
