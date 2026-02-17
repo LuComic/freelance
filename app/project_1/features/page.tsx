@@ -28,10 +28,10 @@ export default async function Page() {
       <h1 className="md:text-3xl text-xl font-medium">
         This is the feature showcase page
       </h1>
-      <Feedback
+      {/* <Feedback
         initialClientLayout={initialClientLayout}
         initialCreatorLayout={initialCreatorLayout}
-      />
+      /> */}
       <Kanban />
     </>
   );

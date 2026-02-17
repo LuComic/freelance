@@ -359,17 +359,17 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
                   </button>
                 </div>
                 <span
-                  className={`p-2 border-r border-(--gray) h-full text-wrap col-span-2 flex items-start ${feature.status === "accepted" ? "text-(--accepted-border)" : feature.status === "declined" && "text-(--declined-border)"} capitalize`}
+                  className={`p-2 border-r border-(--gray) h-full text-wrap col-span-2 text-left ${feature.status === "accepted" ? "text-(--accepted-border)" : feature.status === "declined" && "text-(--declined-border)"} capitalize`}
                 >
                   {feature.status}
                 </span>
-                <span className="p-2 border-r border-(--gray) h-full text-wrap col-span-2 flex items-start">
+                <span className="p-2 border-r border-(--gray) h-full text-wrap col-span-2 text-left">
                   {feature.tags.join(", ")}
                 </span>
-                <span className="p-2 col-span-4 border-r border-(--gray) h-full text-wrap flex items-start">
+                <span className="p-2 col-span-4 border-r border-(--gray) h-full text-wrap text-left">
                   {feature.feature}
                 </span>
-                <span className="text-wrap p-2 px-2 col-span-4 h-full flex items-start">
+                <span className="text-wrap p-2 px-2 col-span-4 h-full text-left">
                   {feature.reason}
                 </span>
               </div>

@@ -2,7 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { TimerReset, X } from "lucide-react";
-import { setCookie, FEEDBACK_CREATOR_LAYOUT_COOKIE } from "@/app/lib/cookies";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type itemType = {
   feature: string;
@@ -24,6 +31,19 @@ let IDEA_DATA: itemType[] = [
       "Create a 3D animation on the landing page that is 4k resolution and has no mistakes",
     status: "Done",
   },
+  {
+    feature: "Do something like that now!",
+    status: "In Progress",
+  },
+  {
+    feature: "Finish the project in the next week!!!!",
+    status: "In Progress",
+  },
+  {
+    feature:
+      "Create a 3D animation on the landing page that is 4k resolution and has no mistakes",
+    status: "Done",
+  },
 ];
 
 export const KanbanCreator = () => {
@@ -33,9 +53,7 @@ export const KanbanCreator = () => {
   const handleDismissing = (item: itemType) => {
     setData((prev) =>
       prev.map((p) =>
-        p.feature === item.feature
-          ? { ...p, dismissed: !(p.dismissed && p.dismissed === true) }
-          : p,
+        p.feature === item.feature ? { ...p, dismissed: !p.dismissed } : p,
       ),
     );
   };
@@ -51,11 +69,25 @@ export const KanbanCreator = () => {
 
   const visibleData = data.filter((item) => {
     if (filter === "dismissed") {
-      return item.dismissed && item.dismissed === true;
+      return item.dismissed;
     }
     // By default show only non‑dismissed items
     return !item.dismissed;
   });
+
+  const getTableData = (): (itemType | undefined)[][] => {
+    const todos = visibleData.filter((t) => t.status === "Todo");
+    const progress = visibleData.filter((t) => t.status === "In Progress");
+    const done = visibleData.filter((t) => t.status === "Done");
+    const longest = Math.max(todos.length, progress.length, done.length);
+    const tableList: (itemType | undefined)[][] = [];
+    for (let i = 0; i < longest; i++) {
+      tableList.push([todos[i], progress[i], done[i]]);
+    }
+    return tableList;
+  };
+
+  const tableRows = getTableData();
 
   return (
     <>
@@ -64,71 +96,15 @@ export const KanbanCreator = () => {
         Here you can display the progress of your work as a kanban list. The
         table is divided into "Todo" (features/things to do or fix), "In
         progress" (things that are currently being developed or fixed) and
-        "Done" (list of the completed tasks)
+        "Done" (list of the completed tasks).
       </p>
-      {/* <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
-        <button
-          className="md:text-lg text-base font-medium flex items-center justify-start gap-2 cursor-pointer w-max"
-          onClick={() => setEditing((prev) => !prev)}
-        >
-          Possible
-          <ChevronRight size={18} className={`${editing && "rotate-90"}`} />
-        </button>
-        {editing && (
-          <>
-            <input
-              type="text"
-              placeholder="Add a new possible tag..."
-              className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleNewTag();
-                }
-              }}
-            />
-
-            <div className="flex items-center justify-start gap-2 w-full">
-              {tags.map((tag) => (
-                <div
-                  key={tag}
-                  className="pl-1.5 pr-0.5 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) flex items-center gap-1"
-                >
-                  {tag}
-                  <button
-                    type="button"
-                    className="cursor-pointer hover:bg-(--gray)/20 p-1 rounded-sm"
-                    onClick={() => deleteTag(tag)}
-                  >
-                    <Trash size={16} />
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            <button
-              className="w-max rounded-md px-2.5 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) cursor-pointer"
-              onClick={handleNewTag}
-            >
-              Submit
-            </button>
-          </>
-        )}
-      </div> */}
-
       <div className="grid grid-cols-2 md:flex items-center justify-between md:justify-start w-full gap-2">
         <button
           className={`flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border ${filter !== "dismissed" && "text-(--gray-page) border-(--gray-page)"} cursor-pointer hover:bg-(--gray)/20`}
           onClick={() => changeFilter()}
         >
           <X size={16} />
-          Dismissed (
-          {
-            data.filter((item) => item.dismissed && item.dismissed === true)
-              .length
-          }
-          )
+          Dismissed ({data.filter((item) => item.dismissed).length})
         </button>
       </div>
       {filter === "dismissed" ? (
@@ -156,47 +132,73 @@ export const KanbanCreator = () => {
       ) : (
         <div className="w-full max-w-full min-w-0 overflow-x-auto">
           <div className="min-w-[800px] flex flex-col">
-            {/* Header row with narrow State column and wider status columns */}
-            <div className="w-full text-(--gray-page) border-b border-(--gray) text-left grid justify-between items-start grid-cols-10 bg-(--darkest)">
-              <span className="flex items-center justify-center border-r p-2 border-(--gray) h-full text-wrap">
-                State
-              </span>
-              <span className="border-r p-2 col-span-3 border-(--gray) h-full text-wrap">
+            <div className="w-full text-(--gray-page) border-b border-(--gray) text-left grid justify-between items-start grid-cols-3 bg-(--darkest)">
+              <span className="text-(--declined-border) border-r p-2 border-(--gray) h-full text-wrap">
                 Todo
               </span>
-              <span className="p-2 col-span-3 border-r border-(--gray) h-full text-wrap">
+              <span className="p-2 border-r border-(--gray) h-full text-wrap">
                 In Progress
               </span>
-              <span className="text-wrap p-2 col-span-3 h-full">Done</span>
+              <span className="text-(--accepted-border) text-wrap p-2 h-full">
+                Done
+              </span>
             </div>
 
-            {visibleData.map((feature, index) => (
+            {tableRows.map((row, index) => (
               <div
-                key={feature.feature}
-                className={`w-full border-(--gray) text-left grid justify-between items-stretch grid-cols-10 ${
-                  index !== visibleData.length - 1 ? "border-b" : ""
-                } ${index % 2 !== 0 ? "bg-(--gray)/10" : ""}`}
+                key={index}
+                className={`w-full ${index !== tableRows.length - 1 && "border-b"} border-(--gray) text-left grid justify-between items-start grid-cols-3 ${index % 2 !== 0 && "bg-(--gray)/10"}`}
               >
-                <div className="flex py-2 border-r border-(--gray) h-full justify-around items-center gap-1 flex-wrap">
-                  <button
-                    className="gap-1 flex items-center justify-center p-1.5 rounded-sm h-max aspect-square cursor-pointer hover:bg-(--gray)/20"
-                    onClick={() => handleDismissing(feature)}
+                {row.map((item, i) => (
+                  <div
+                    key={i}
+                    className="p-2 border-r border-(--gray) last:border-r-0 h-full flex flex-col items-start justify-start gap-2 text-wrap"
                   >
-                    <X size={16} />
-                  </button>
-                </div>
-
-                <span className="p-2 border-r border-(--gray) h-full text-wrap col-span-3 flex items-start">
-                  {feature.status === "Todo" && feature.feature}
-                </span>
-
-                <span className="p-2 border-r border-(--gray) h-full text-wrap col-span-3 flex items-start">
-                  {feature.status === "In Progress" && feature.feature}
-                </span>
-
-                <span className="text-wrap p-2 col-span-3 h-full flex items-start">
-                  {feature.status === "Done" && feature.feature}
-                </span>
+                    {item ? (
+                      <>
+                        <div className="flex items-center gap-2">
+                          <button
+                            className="flex items-center justify-center p-1.5 rounded-sm cursor-pointer hover:bg-(--gray)/20 text-(--gray-page)"
+                            onClick={() => handleDismissing(item)}
+                          >
+                            <X size={16} />
+                          </button>
+                          <Select value={item.status}>
+                            <SelectTrigger className="w-max-w-48 border-none bg-(--darkest) cursor-pointer px-2">
+                              <SelectValue placeholder="Set the status" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-(--darkest) border-none text-(--gray-page)">
+                              <SelectGroup className="bg-(--darkest)">
+                                <SelectItem
+                                  value="Todo"
+                                  textValue={item.status}
+                                  className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) cursor-pointer"
+                                >
+                                  Todo
+                                </SelectItem>
+                                <SelectItem
+                                  value="In Progress"
+                                  className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) cursor-pointer"
+                                >
+                                  In Progress
+                                </SelectItem>
+                                <SelectItem
+                                  value="Done"
+                                  className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) cursor-pointer"
+                                >
+                                  Done
+                                </SelectItem>
+                              </SelectGroup>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <span>{item.feature}</span>
+                      </>
+                    ) : (
+                      <div />
+                    )}
+                  </div>
+                ))}
               </div>
             ))}
           </div>

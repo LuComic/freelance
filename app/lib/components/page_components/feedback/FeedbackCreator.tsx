@@ -278,7 +278,7 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
         <div className="w-full max-w-full min-w-0 overflow-x-auto">
           <div className="min-w-[800px] flex flex-col">
             <div className="w-full text-(--gray-page) border-b border-(--gray) text-left grid justify-between items-start grid-cols-13 bg-(--darkest)">
-              <span className="flex items-center justify-center border-r p-2 border-(--gray) h-full text-wrap">
+              <span className="border-r p-2 border-(--gray) h-full text-wrap">
                 Actions
               </span>
               <span className="border-r p-2 col-span-2 border-(--gray) h-full text-wrap">
@@ -292,7 +292,6 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
               </span>
               <span className="text-wrap p-2 col-span-4 h-full">Reason?</span>
             </div>
-
             {visibleData.map((feature, index) => (
               <div
                 className={`w-full ${index !== visibleData.length - 1 && "border-b"} border-(--gray) text-left grid justify-between items-start grid-cols-13 ${index % 2 !== 0 && "bg-(--gray)/10"}`}
@@ -329,17 +328,17 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
                   </button>
                 </div>
                 <span
-                  className={`p-2 border-r border-(--gray) h-full text-wrap col-span-2 flex items-start ${feature.status === "accepted" ? "text-(--accepted-border)" : feature.status === "declined" && "text-(--declined-border)"} capitalize`}
+                  className={`p-2 border-r border-(--gray) h-full text-wrap col-span-2 text-left ${feature.status === "accepted" ? "text-(--accepted-border)" : feature.status === "declined" && "text-(--declined-border)"} capitalize`}
                 >
                   {feature.status}
                 </span>
-                <span className="p-2 border-r border-(--gray) h-full text-wrap col-span-2 flex items-start">
+                <span className="p-2 border-r border-(--gray) h-full text-wrap col-span-2 text-left">
                   {feature.tags.join(", ")}
                 </span>
-                <span className="p-2 col-span-4 border-r border-(--gray) h-full text-wrap flex items-start">
+                <span className="p-2 col-span-4 border-r border-(--gray) h-full text-wrap text-left">
                   {feature.feature}
                 </span>
-                <span className="text-wrap p-2 px-2 col-span-4 h-full flex items-start">
+                <span className="text-wrap p-2 col-span-4 h-full text-left">
                   {feature.reason}
                 </span>
               </div>
