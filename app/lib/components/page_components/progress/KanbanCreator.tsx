@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { TimerReset, X } from "lucide-react";
+import { useState } from "react";
+import { ChevronRight, TimerReset, X } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -12,49 +12,89 @@ import {
 } from "@/components/ui/select";
 
 type itemType = {
+  id: number;
   feature: string;
   status: "Todo" | "In Progress" | "Done";
   dismissed?: boolean;
 };
 
-let IDEA_DATA: itemType[] = [
+const IDEA_DATA: itemType[] = [
   {
+    id: 1,
     feature: "Please add an About page",
     status: "Todo",
   },
   {
+    id: 2,
     feature: "Turn the selector in X page into a slider",
     status: "In Progress",
   },
   {
+    id: 3,
     feature:
       "Create a 3D animation on the landing page that is 4k resolution and has no mistakes",
     status: "Done",
   },
   {
+    id: 4,
     feature: "Do something like that now!",
     status: "In Progress",
   },
   {
+    id: 5,
     feature: "Finish the project in the next week!!!!",
     status: "In Progress",
   },
   {
+    id: 6,
     feature:
       "Create a 3D animation on the landing page that is 4k resolution and has no mistakes",
     status: "Done",
   },
 ];
 
-export const KanbanCreator = () => {
+type KanbanCreatorProps = {
+  initialLayout?: "grid" | "list";
+};
+
+const STATUS_OPTIONS: itemType["status"][] = ["Todo", "In Progress", "Done"];
+
+export const KanbanCreator = ({}: KanbanCreatorProps) => {
   const [data, setData] = useState(IDEA_DATA);
   const [filter, setFilter] = useState<"" | "dismissed">("");
+  const [adding, setAdding] = useState(false);
+  const [taskInput, setTaskInput] = useState("");
+  const [newTaskStatus, setNewTaskStatus] =
+    useState<itemType["status"]>("Todo");
+
+  const handleNewTask = () => {
+    if (taskInput.trim() === "") return;
+
+    const highestId = data.reduce((max, item) => Math.max(max, item.id), 0);
+
+    setData((prev) => [
+      {
+        id: highestId + 1,
+        feature: taskInput.trim(),
+        status: newTaskStatus,
+      },
+      ...prev,
+    ]);
+    setTaskInput("");
+    setNewTaskStatus("Todo");
+  };
 
   const handleDismissing = (item: itemType) => {
     setData((prev) =>
       prev.map((p) =>
-        p.feature === item.feature ? { ...p, dismissed: !p.dismissed } : p,
+        p.id === item.id ? { ...p, dismissed: !p.dismissed } : p,
       ),
+    );
+  };
+
+  const handleStatusChange = (id: number, status: itemType["status"]) => {
+    setData((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, status } : item)),
     );
   };
 
@@ -71,7 +111,6 @@ export const KanbanCreator = () => {
     if (filter === "dismissed") {
       return item.dismissed;
     }
-    // By default show only non‑dismissed items
     return !item.dismissed;
   });
 
@@ -94,10 +133,66 @@ export const KanbanCreator = () => {
       <p className="md:text-xl text-lg font-medium">Current Progress</p>
       <p className="text-(--gray-page)">
         Here you can display the progress of your work as a kanban list. The
-        table is divided into "Todo" (features/things to do or fix), "In
-        progress" (things that are currently being developed or fixed) and
-        "Done" (list of the completed tasks).
+        table is divided into &quot;Todo&quot; (features/things to do or fix),
+        &quot;In progress&quot; (things that are currently being developed or
+        fixed) and &quot;Done&quot; (list of the completed tasks).
       </p>
+      <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
+        <button
+          className="md:text-lg text-base font-medium flex items-center justify-start gap-2 cursor-pointer w-max"
+          onClick={() => setAdding((prev) => !prev)}
+        >
+          New Task
+          <ChevronRight size={18} className={`${adding && "rotate-90"}`} />
+        </button>
+        {adding && (
+          <>
+            <input
+              type="text"
+              placeholder="Add a task to the board..."
+              className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
+              onChange={(e) => setTaskInput(e.target.value)}
+              value={taskInput}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleNewTask();
+                }
+              }}
+            />
+
+            <Select
+              value={newTaskStatus}
+              onValueChange={(value) =>
+                setNewTaskStatus(value as itemType["status"])
+              }
+            >
+              <SelectTrigger className="w-full md:w-52 bg-(--darkest) border-(--gray-page) cursor-pointer">
+                <SelectValue placeholder="Set the status" />
+              </SelectTrigger>
+              <SelectContent className="bg-(--darkest) border-none text-(--gray-page)">
+                <SelectGroup className="bg-(--darkest)">
+                  {STATUS_OPTIONS.map((status) => (
+                    <SelectItem
+                      key={status}
+                      value={status}
+                      className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) cursor-pointer"
+                    >
+                      {status}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+
+            <button
+              className="w-max rounded-md px-2.5 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) cursor-pointer"
+              onClick={handleNewTask}
+            >
+              Submit
+            </button>
+          </>
+        )}
+      </div>
       <div className="grid grid-cols-2 md:flex items-center justify-between md:justify-start w-full gap-2">
         <button
           className={`flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border ${filter !== "dismissed" && "text-(--gray-page) border-(--gray-page)"} cursor-pointer hover:bg-(--gray)/20`}
@@ -113,7 +208,7 @@ export const KanbanCreator = () => {
         >
           {visibleData.map((feature) => (
             <div
-              key={feature.feature}
+              key={feature.id}
               className="rounded-md border px-2 gap-1 justify-between py-1.5 w-full min-w-0 flex flex-col min-h-0 border-(--gray) bg-(--gray)/10"
             >
               <span className="font-semibold">{feature.feature}</span>
@@ -163,31 +258,29 @@ export const KanbanCreator = () => {
                           >
                             <X size={16} />
                           </button>
-                          <Select value={item.status}>
+                          <Select
+                            value={item.status}
+                            onValueChange={(value) =>
+                              handleStatusChange(
+                                item.id,
+                                value as itemType["status"],
+                              )
+                            }
+                          >
                             <SelectTrigger className="w-max-w-48 border-none bg-(--darkest) cursor-pointer px-2">
                               <SelectValue placeholder="Set the status" />
                             </SelectTrigger>
                             <SelectContent className="bg-(--darkest) border-none text-(--gray-page)">
                               <SelectGroup className="bg-(--darkest)">
-                                <SelectItem
-                                  value="Todo"
-                                  textValue={item.status}
-                                  className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) cursor-pointer"
-                                >
-                                  Todo
-                                </SelectItem>
-                                <SelectItem
-                                  value="In Progress"
-                                  className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) cursor-pointer"
-                                >
-                                  In Progress
-                                </SelectItem>
-                                <SelectItem
-                                  value="Done"
-                                  className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) cursor-pointer"
-                                >
-                                  Done
-                                </SelectItem>
+                                {STATUS_OPTIONS.map((status) => (
+                                  <SelectItem
+                                    key={status}
+                                    value={status}
+                                    className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) cursor-pointer"
+                                  >
+                                    {status}
+                                  </SelectItem>
+                                ))}
                               </SelectGroup>
                             </SelectContent>
                           </Select>

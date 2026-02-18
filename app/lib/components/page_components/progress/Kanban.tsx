@@ -3,13 +3,17 @@
 import { useState } from "react";
 import { Switch } from "@/components/ui/switch";
 import { KanbanCreator } from "./KanbanCreator";
+import { KanbanClient } from "./KanbanClient";
 
 type KanbanProps = {
   initialClientLayout?: "grid" | "list";
   initialCreatorLayout?: "grid" | "list";
 };
 
-export const Kanban = ({}: KanbanProps) => {
+export const Kanban = ({
+  initialClientLayout,
+  initialCreatorLayout,
+}: KanbanProps) => {
   const [client, setClient] = useState(false);
 
   return (
@@ -21,7 +25,11 @@ export const Kanban = ({}: KanbanProps) => {
         />
         {client ? "Client's view" : "Creator's view"}
       </div>
-      {client ? <></> : <KanbanCreator />}
+      {client ? (
+        <KanbanClient initialLayout={initialClientLayout} />
+      ) : (
+        <KanbanCreator initialLayout={initialCreatorLayout} />
+      )}
     </div>
   );
 };
