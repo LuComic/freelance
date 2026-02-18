@@ -55,7 +55,6 @@ type FeedbackClientProps = {
 export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
   const [data, setData] = useState(IDEA_DATA);
   const [ideaInput, setIdeaInput] = useState("");
-  const [niceToHave, setNiceToHave] = useState(true);
   const [filter, setFilter] = useState<
     "" | "accepted" | "declined" | "pending" | "dismissed"
   >("");
