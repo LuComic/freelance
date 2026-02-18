@@ -22,7 +22,7 @@ const PLACEHOLDER_FILES = [
   "Toast",
 ];
 
-export default function SearchBar() {
+export const SearchBar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -171,4 +171,4 @@ export default function SearchBar() {
       </div>
     </div>
   );
-}
+};

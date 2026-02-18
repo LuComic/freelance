@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import "./globals.css";
 import { Sidebar } from "./lib/components/sidebar/Sidebar";
 import { Chat } from "./lib/components/chat/Chat";
-import SearchBar from "./lib/components/SearchBar";
+import { SearchBar } from "./lib/components/searchbar/SearchBar";
 import { SIDEBAR_COOKIE, CHAT_COOKIE } from "./lib/cookies";
 import { Tab } from "./lib/components/tab/Tab";
 
