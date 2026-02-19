@@ -56,7 +56,9 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
           <div className="flex items-center justify-around p-1 rounded-xl bg-(--dim) w-full gap-1">
             <button
               className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                activeTab === "files" ? "bg-(--quite-dark) text-(--vibrant)" : ""
+                activeTab === "files"
+                  ? "bg-(--quite-dark) text-(--vibrant)"
+                  : ""
               }`}
               onClick={() => setActiveTab("files")}
             >
@@ -84,7 +86,9 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
             </button>
             <button
               className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                activeTab === "create" ? "bg-(--quite-dark) text-(--vibrant)" : ""
+                activeTab === "create"
+                  ? "bg-(--quite-dark) text-(--vibrant)"
+                  : ""
               }`}
               onClick={() => setActiveTab("create")}
             >
@@ -115,7 +119,9 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
           <div className="flex flex-col bg-(--dim) rounded-lg justify-center p-1 h-max gap-4">
             <button
               className={`h-full  p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                activeTab === "files" ? "bg-(--quite-dark) text-(--vibrant)" : ""
+                activeTab === "files"
+                  ? "bg-(--quite-dark) text-(--vibrant)"
+                  : ""
               }`}
               onClick={() => {
                 setActiveTab("files");
@@ -152,7 +158,9 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
             </button>
             <button
               className={`h-full  p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                activeTab === "create" ? "bg-(--quite-dark) text-(--vibrant)" : ""
+                activeTab === "create"
+                  ? "bg-(--quite-dark) text-(--vibrant)"
+                  : ""
               }`}
               onClick={() => {
                 setActiveTab("create");
@@ -166,7 +174,7 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
             <button className=" p-1 rounded-lg hover:bg-(--darkest-hover) w-full">
               <div className="aspect-square w-6 h-auto bg-(--dim) rounded-full mx-auto"></div>
             </button>
-            <button className=" aspect-square p-1 rounded-lg transition hover:bg-(--darkest-hover) w-full">
+            <button className=" aspect-square p-1 rounded-lg hover:bg-(--darkest-hover) w-full">
               <Bell size={20} className="mx-auto" />
             </button>
           </div>

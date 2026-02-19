@@ -7,6 +7,7 @@ import { SearchBar } from "./lib/components/searchbar/SearchBar";
 import { SIDEBAR_COOKIE, CHAT_COOKIE } from "./lib/cookies";
 import { Tab } from "./lib/components/tab/Tab";
 import { TopBar } from "./lib/components/project/TopBar";
+import { EditModeProvider } from "./lib/components/project/EditModeContext";
 
 export const metadata: Metadata = {
   title: "Cliff",
@@ -38,10 +39,12 @@ export default async function RootLayout({
         <Sidebar initialSidebarOpen={initialSidebarOpen} />
         <div className="flex-1 min-w-0 flex flex-col items-start justify-start">
           <Tab />
-          <TopBar />
-          <div className="w-full px-4 md:pt-8 pt-15 pb-8 flex flex-col items-start justify-start gap-4">
-            {children}
-          </div>
+          <EditModeProvider>
+            <TopBar />
+            <div className="w-full px-4 md:pt-8 pt-15 pb-8 flex flex-col items-start justify-start gap-4">
+              {children}
+            </div>
+          </EditModeProvider>
         </div>
         <Chat initialChatOpen={initialChatOpen} />
       </body>
