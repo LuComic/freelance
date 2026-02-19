@@ -13,7 +13,7 @@ const SOME_DATA: { id: string; title: string; items: string[] }[] = [
   {
     id: "project_1",
     title: "Project 1",
-    items: ["Features"],
+    items: ["Features", "Testing"],
   },
 ];
 

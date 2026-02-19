@@ -5,7 +5,7 @@ import { Feedback } from "@/app/lib/components/page_components/feedback/Feedback
 import { Kanban } from "@/app/lib/components/page_components/progress/Kanban";
 import { Radio } from "@/app/lib/components/page_components/form/radio/Radio";
 import { Select as FieldSelect } from "@/app/lib/components/page_components/form/select/Select";
-import { TextFields } from "@/app/lib/components/page_components/content/text/TextFields";
+import { TextFields } from "@/app/lib/components/page_components/text/TextFields";
 import {
   Select,
   SelectContent,
@@ -24,10 +24,9 @@ export const FeatureSelector = ({
   initialClientLayout,
   initialCreatorLayout,
 }: FeatureSelectorProps) => {
-  const [selectedFeature, setSelectedFeature] =
-    useState<"kanban" | "feedback" | "radio" | "select" | "text">(
-      "kanban",
-    );
+  const [selectedFeature, setSelectedFeature] = useState<
+    "kanban" | "feedback" | "radio" | "select" | "text"
+  >("kanban");
 
   return (
     <div className="w-full flex flex-col gap-2">

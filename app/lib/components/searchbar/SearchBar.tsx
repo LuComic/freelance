@@ -35,7 +35,7 @@ export const SearchBar = () => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Check for Cmd+K (Mac) or Ctrl+K (Windows/Linux)
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+      if ((e.metaKey || e.ctrlKey) && e.key === "p") {
         e.preventDefault();
         setIsOpen((prev) => !prev);
         setSelectedIndex(0);
