@@ -98,13 +98,13 @@ export const ReviewModal = ({
             ></textarea>
             <div className="w-full flex items-center gap-1 mt-4">
               <button
-                className="gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border border-(--gray) cursor-pointer hover:bg-(--gray)/20"
+                className="gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border border-(--gray)  hover:bg-(--gray)/20"
                 onClick={closeReview}
               >
                 <X size={16} />
                 Cancel
               </button>
-              <button className="gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border border-(--vibrant) cursor-pointer hover:bg-(--vibrant)">
+              <button className="gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border border-(--vibrant)  hover:bg-(--vibrant)">
                 <ThumbsUp size={16} />
                 Accept
               </button>
@@ -115,8 +115,8 @@ export const ReviewModal = ({
       <button
         className={
           listView
-            ? "gap-1 flex items-center justify-center p-1.5 rounded-sm h-max aspect-square cursor-pointer hover:bg-(--gray)/20"
-            : "gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border border-(--gray) cursor-pointer hover:bg-(--gray)/20"
+            ? "gap-1 flex items-center justify-center p-1.5 rounded-sm h-max aspect-square  hover:bg-(--gray)/20"
+            : "gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border border-(--gray)  hover:bg-(--gray)/20"
         }
         onClick={() => reviewIdea(action)}
       >

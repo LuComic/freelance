@@ -60,7 +60,7 @@ export const RadioCreator = ({}: RadioCreatorProps) => {
 
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
         <button
-          className="md:text-lg text-base font-medium flex items-center justify-start gap-2 cursor-pointer w-max"
+          className="md:text-lg text-base font-medium flex items-center justify-start gap-2  w-max"
           onClick={() => setEditing((prev) => !prev)}
         >
           Edit field
@@ -105,7 +105,7 @@ export const RadioCreator = ({}: RadioCreatorProps) => {
                   {option.label}
                   <button
                     type="button"
-                    className="cursor-pointer hover:bg-(--gray)/20 p-1 rounded-sm"
+                    className=" hover:bg-(--gray)/20 p-1 rounded-sm"
                     onClick={() => deleteOption(option.id)}
                   >
                     <Trash size={16} />
@@ -115,7 +115,7 @@ export const RadioCreator = ({}: RadioCreatorProps) => {
             </div>
 
             <button
-              className="w-max rounded-md px-2.5 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) cursor-pointer"
+              className="w-max rounded-md px-2.5 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) "
               onClick={handleNewOption}
             >
               Submit
@@ -134,7 +134,7 @@ export const RadioCreator = ({}: RadioCreatorProps) => {
             return (
               <button
                 key={option.id}
-                className="flex items-center gap-2 justify-start w-full cursor-pointer"
+                className="flex items-center gap-2 justify-start w-full "
                 onClick={() => setSelectedOptionId(option.id)}
               >
                 <span className="h-5 flex items-center p-1 justify-center w-auto aspect-square rounded-full bg-(--darkest)">

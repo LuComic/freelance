@@ -16,37 +16,9 @@ import { SidebarSettings } from "./SidebarSettings";
 
 export const MobileSidebar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const [files, setFiles] = useState(true);
-  const [friends, setFriends] = useState(false);
-  const [settings, setSettings] = useState(false);
-  const [create, setCreate] = useState(false);
-
-  const toggleControl = (
-    toToggle: "files" | "friends" | "settings" | "create",
-  ) => {
-    if (toToggle === "files") {
-      setFiles(true);
-      setFriends(false);
-      setSettings(false);
-      setCreate(false);
-    } else if (toToggle == "friends") {
-      setFiles(false);
-      setFriends(true);
-      setSettings(false);
-      setCreate(false);
-    } else if (toToggle == "settings") {
-      setFiles(false);
-      setFriends(false);
-      setSettings(true);
-      setCreate(false);
-    } else if (toToggle == "create") {
-      setFiles(false);
-      setFriends(false);
-      setSettings(false);
-      setCreate(true);
-    }
-  };
+  const [activeTab, setActiveTab] = useState<
+    "files" | "friends" | "settings" | "create"
+  >("files");
   return (
     <div className="block md:hidden">
       {sidebarOpen ? (
@@ -55,54 +27,58 @@ export const MobileSidebar = () => {
             <span className="text-(--gray) text-xl">Empty Canvas</span>
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="cursor-pointer p-1 rounded-lg hover:bg-(--darkest-hover)"
+              className=" p-1 rounded-lg hover:bg-(--darkest-hover)"
             >
               <PanelLeftClose size={22} />
             </button>
           </div>
           <div className="flex items-center justify-around p-1 rounded-lg bg-(--dim) w-full gap-1">
             <button
-              className={`cursor-pointer p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                files ? "bg-(--quite-dark) text-(--vibrant)" : ""
+              className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
+                activeTab === "files" ? "bg-(--quite-dark) text-(--vibrant)" : ""
               }`}
-              onClick={() => toggleControl("files")}
+              onClick={() => setActiveTab("files")}
             >
               <Lightbulb size={20} className="mx-auto" />
             </button>
             <button
-              className={`cursor-pointer p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                friends ? "bg-(--quite-dark) text-(--vibrant)" : ""
+              className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
+                activeTab === "friends"
+                  ? "bg-(--quite-dark) text-(--vibrant)"
+                  : ""
               }`}
-              onClick={() => toggleControl("friends")}
+              onClick={() => setActiveTab("friends")}
             >
               <Users size={20} className="mx-auto" />
             </button>
             <button
-              className={`cursor-pointer p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                settings ? "bg-(--quite-dark) text-(--vibrant)" : ""
+              className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
+                activeTab === "settings"
+                  ? "bg-(--quite-dark) text-(--vibrant)"
+                  : ""
               }`}
-              onClick={() => toggleControl("settings")}
+              onClick={() => setActiveTab("settings")}
             >
               <Settings size={20} className="mx-auto" />
             </button>
             <button
-              className={`cursor-pointer p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                create ? "bg-(--quite-dark) text-(--vibrant)" : ""
+              className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
+                activeTab === "create" ? "bg-(--quite-dark) text-(--vibrant)" : ""
               }`}
-              onClick={() => toggleControl("create")}
+              onClick={() => setActiveTab("create")}
             >
               <Plus size={20} className="mx-auto" />
             </button>
           </div>
-          {files ? <Files /> : null}
-          {friends ? <Connections /> : null}
-          {settings ? <SidebarSettings /> : null}
+          {activeTab === "files" ? <Files /> : null}
+          {activeTab === "friends" ? <Connections /> : null}
+          {activeTab === "settings" ? <SidebarSettings /> : null}
           <div className="mt-auto w-full h-max flex items-center justify-between">
-            <div className="w-max gap-2 flex items-center justify-start py-1 px-2 rounded-lg hover:bg-(--darkest-hover) cursor-pointer">
+            <div className="w-max gap-2 flex items-center justify-start py-1 px-2 rounded-lg hover:bg-(--darkest-hover) ">
               <div className="aspect-square w-8 h-auto bg-(--dim) rounded-full"></div>
               <span className="font-light text-sm">John Doe</span>
             </div>
-            <button className="p-1 rounded-lg h-full hover:bg-(--darkest-hover) cursor-pointer">
+            <button className="p-1 rounded-lg h-full hover:bg-(--darkest-hover) ">
               <Bell size={20} />
             </button>
           </div>
@@ -110,7 +86,7 @@ export const MobileSidebar = () => {
       ) : (
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="bg-(--darkest) cursor-pointer p-1 rounded-lg hover:bg-(--darkest-hover) fixed top-2 left-2"
+          className="bg-(--darkest)  p-1 rounded-lg hover:bg-(--darkest-hover) fixed top-2 left-2"
         >
           <PanelLeftOpen size={24} />
         </button>

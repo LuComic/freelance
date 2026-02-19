@@ -139,7 +139,7 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
       </p>
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
         <button
-          className="md:text-lg text-base font-medium flex items-center justify-start gap-2 cursor-pointer w-max"
+          className="md:text-lg text-base font-medium flex items-center justify-start gap-2  w-max"
           onClick={() => setAdding((prev) => !prev)}
         >
           New Task
@@ -166,7 +166,7 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
                 setNewTaskStatus(value as itemType["status"])
               }
             >
-              <SelectTrigger className="w-full md:w-52 bg-(--darkest) border-(--gray-page) cursor-pointer">
+              <SelectTrigger className="w-full md:w-52 bg-(--darkest) border-(--gray-page) ">
                 <SelectValue placeholder="Set the status" />
               </SelectTrigger>
               <SelectContent className="bg-(--darkest) border-none text-(--gray-page)">
@@ -175,7 +175,7 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
                     <SelectItem
                       key={status}
                       value={status}
-                      className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) cursor-pointer"
+                      className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) "
                     >
                       {status}
                     </SelectItem>
@@ -185,7 +185,7 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
             </Select>
 
             <button
-              className="w-max rounded-md px-2.5 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) cursor-pointer"
+              className="w-max rounded-md px-2.5 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) "
               onClick={handleNewTask}
             >
               Submit
@@ -195,7 +195,7 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
       </div>
       <div className="grid grid-cols-2 md:flex items-center justify-between md:justify-start w-full gap-2">
         <button
-          className={`flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border ${filter !== "dismissed" && "text-(--gray-page) border-(--gray-page)"} cursor-pointer hover:bg-(--gray)/20`}
+          className={`flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border ${filter !== "dismissed" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
           onClick={() => changeFilter()}
         >
           <X size={16} />
@@ -214,7 +214,7 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
               <span className="font-semibold">{feature.feature}</span>
               <div className="w-full flex items-center gap-1">
                 <button
-                  className="gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border border-(--gray) cursor-pointer hover:bg-(--gray)/20"
+                  className="gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border border-(--gray)  hover:bg-(--gray)/20"
                   onClick={() => handleDismissing(feature)}
                 >
                   <TimerReset size={16} />
@@ -253,7 +253,7 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
                       <>
                         <div className="flex items-center gap-2">
                           <button
-                            className="flex items-center justify-center p-1.5 rounded-sm cursor-pointer hover:bg-(--gray)/20 text-(--gray-page)"
+                            className="flex items-center justify-center p-1.5 rounded-sm  hover:bg-(--gray)/20 text-(--gray-page)"
                             onClick={() => handleDismissing(item)}
                           >
                             <X size={16} />
@@ -267,7 +267,7 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
                               )
                             }
                           >
-                            <SelectTrigger className="w-max-w-48 border-none bg-(--darkest) cursor-pointer px-2">
+                            <SelectTrigger className="w-max-w-48 border-none bg-(--darkest)  px-2">
                               <SelectValue placeholder="Set the status" />
                             </SelectTrigger>
                             <SelectContent className="bg-(--darkest) border-none text-(--gray-page)">
@@ -276,7 +276,7 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
                                   <SelectItem
                                     key={status}
                                     value={status}
-                                    className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) cursor-pointer"
+                                    className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) "
                                   >
                                     {status}
                                   </SelectItem>

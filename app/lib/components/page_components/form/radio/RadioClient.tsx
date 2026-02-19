@@ -45,7 +45,7 @@ export const RadioClient = ({}: RadioClientProps) => {
           return (
             <button
               key={option.id}
-              className="flex items-center gap-2 justify-start w-full cursor-pointer"
+              className="flex items-center gap-2 justify-start w-full "
               onClick={() => setSelectedOptionId(option.id)}
             >
               <span className="h-5 flex items-center p-1 justify-center w-auto aspect-square rounded-full bg-(--darkest)">

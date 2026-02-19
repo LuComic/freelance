@@ -14,7 +14,7 @@ export const FileItem = ({ title, items, id }: SidebarItemProps) => {
   return (
     <>
       <Link
-        className="rounded-lg p-1 gap-2 hover:bg-(--darkest-hover) w-full text-(--gray) flex items-center justify-start cursor-pointer md:text-base text-sm"
+        className="rounded-lg p-1 gap-2 hover:bg-(--darkest-hover) w-full text-(--gray) flex items-center justify-start  md:text-base text-sm"
         onClick={() => setItemExpanded(!itemExpanded)}
         href={"/" + id}
       >
@@ -24,7 +24,7 @@ export const FileItem = ({ title, items, id }: SidebarItemProps) => {
 
       {itemExpanded && (
         <Link
-          className="pl-8 flex w-full items-center cursor-pointer justify-start gap-2 hover:bg-(--darkest-hover) rounded-lg p-1 md:text-base text-sm"
+          className="pl-8 flex w-full items-center  justify-start gap-2 hover:bg-(--darkest-hover) rounded-lg p-1 md:text-base text-sm"
           href={"/" + id}
         >
           <File size={20} />
@@ -35,7 +35,7 @@ export const FileItem = ({ title, items, id }: SidebarItemProps) => {
       {itemExpanded
         ? items.map((item, index) => (
             <Link
-              className="pl-8 flex w-full items-center cursor-pointer justify-start gap-2 hover:bg-(--darkest-hover) rounded-lg p-1 md:text-base text-sm"
+              className="pl-8 flex w-full items-center  justify-start gap-2 hover:bg-(--darkest-hover) rounded-lg p-1 md:text-base text-sm"
               key={index}
               href={"/" + id + "/" + item.toLowerCase()}
             >

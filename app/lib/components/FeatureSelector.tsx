@@ -39,38 +39,38 @@ export const FeatureSelector = ({
           )
         }
       >
-        <SelectTrigger className="w-full md:w-52 bg-(--darkest) border-(--gray-page) cursor-pointer">
+        <SelectTrigger className="w-full md:w-52 bg-(--darkest) border-(--gray-page) ">
           <SelectValue placeholder="Pick a feature" />
         </SelectTrigger>
         <SelectContent className="bg-(--darkest) border-none text-(--gray-page)">
           <SelectGroup className="bg-(--darkest)">
             <SelectItem
               value="kanban"
-              className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) cursor-pointer"
+              className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) "
             >
               Kanban
             </SelectItem>
             <SelectItem
               value="feedback"
-              className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) cursor-pointer"
+              className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) "
             >
               Feedback
             </SelectItem>
             <SelectItem
               value="radio"
-              className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) cursor-pointer"
+              className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) "
             >
               Radio
             </SelectItem>
             <SelectItem
               value="select"
-              className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) cursor-pointer"
+              className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) "
             >
               Select
             </SelectItem>
             <SelectItem
               value="text"
-              className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) cursor-pointer"
+              className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) "
             >
               Text
             </SelectItem>

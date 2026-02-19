@@ -114,7 +114,7 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
       </p>
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
         <button
-          className="md:text-lg text-base font-medium flex items-center justify-start gap-2 cursor-pointer w-max"
+          className="md:text-lg text-base font-medium flex items-center justify-start gap-2  w-max"
           onClick={() => setEditing((prev) => !prev)}
         >
           Possible tags
@@ -144,7 +144,7 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
                   {tag}
                   <button
                     type="button"
-                    className="cursor-pointer hover:bg-(--gray)/20 p-1 rounded-sm"
+                    className=" hover:bg-(--gray)/20 p-1 rounded-sm"
                     onClick={() => deleteTag(tag)}
                   >
                     <Trash size={16} />
@@ -154,7 +154,7 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
             </div>
 
             <button
-              className="w-max rounded-md px-2.5 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) cursor-pointer"
+              className="w-max rounded-md px-2.5 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) "
               onClick={handleNewTag}
             >
               Submit
@@ -165,7 +165,7 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
 
       <div className="grid grid-cols-2 md:flex items-center justify-between md:justify-start w-full gap-2">
         <button
-          className="flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border text-(--gray-page) border-(--gray-page) cursor-pointer hover:bg-(--gray)/20"
+          className="flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border text-(--gray-page) border-(--gray-page)  hover:bg-(--gray)/20"
           onClick={() => setLayout(layout === "grid" ? "list" : "grid")}
         >
           {layout === "grid" ? (
@@ -181,21 +181,21 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
           )}
         </button>
         <button
-          className={`flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border ${filter !== "accepted" && "text-(--gray-page) border-(--gray-page)"} cursor-pointer hover:bg-(--gray)/20`}
+          className={`flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border ${filter !== "accepted" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
           onClick={() => changeFilter("accepted")}
         >
           <ThumbsUp size={16} />
           Accepted
         </button>
         <button
-          className={`flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border ${filter !== "declined" && "text-(--gray-page) border-(--gray-page)"} cursor-pointer hover:bg-(--gray)/20`}
+          className={`flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border ${filter !== "declined" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
           onClick={() => changeFilter("declined")}
         >
           <ThumbsDown size={16} />
           Declined
         </button>
         <button
-          className={`flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border ${filter !== "dismissed" && "text-(--gray-page) border-(--gray-page)"} cursor-pointer hover:bg-(--gray)/20`}
+          className={`flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border ${filter !== "dismissed" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
           onClick={() => changeFilter("dismissed")}
         >
           <X size={16} />
@@ -255,7 +255,7 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
                   </>
                 )}
                 <button
-                  className="gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border border-(--gray) cursor-pointer hover:bg-(--gray)/20"
+                  className="gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border border-(--gray)  hover:bg-(--gray)/20"
                   onClick={() => handleDismissing(feature)}
                 >
                   {feature.dismissed && feature.dismissed === true ? (
@@ -317,7 +317,7 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
                     </>
                   )}
                   <button
-                    className="gap-1 flex items-center justify-center p-1.5 rounded-sm h-max aspect-square cursor-pointer hover:bg-(--gray)/20"
+                    className="gap-1 flex items-center justify-center p-1.5 rounded-sm h-max aspect-square  hover:bg-(--gray)/20"
                     onClick={() => handleDismissing(feature)}
                   >
                     {feature.dismissed && feature.dismissed === true ? (

@@ -127,7 +127,7 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
       </p>
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
         <button
-          className="md:text-lg text-base font-medium flex items-center justify-start gap-2 cursor-pointer w-max"
+          className="md:text-lg text-base font-medium flex items-center justify-start gap-2  w-max"
           onClick={() => setAdding((prev) => !prev)}
         >
           New idea
@@ -149,7 +149,7 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
             />
 
             {/* <button
-              className="flex items-center gap-2 justify-start w-full cursor-pointer"
+              className="flex items-center gap-2 justify-start w-full "
               onClick={() => setNiceToHave(true)}
             >
               <span className="h-5 flex items-center p-1 justify-center w-auto aspect-square rounded-full bg-(--darkest)">
@@ -160,7 +160,7 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
               Nice to have
             </button>
             <button
-              className="flex items-center gap-2 justify-start w-full cursor-pointer"
+              className="flex items-center gap-2 justify-start w-full "
               onClick={() => setNiceToHave(false)}
             >
               <span className="h-5 flex items-center p-1 justify-center w-auto aspect-square rounded-full bg-(--darkest)">
@@ -174,7 +174,7 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
               {TAGS.map((tag) => (
                 <button
                   key={tag}
-                  className={`px-1.5 py-0.5 rounded-md border ${!selectedTags.includes(tag) && "border-(--gray-page) text-(--gray-page)"} cursor-pointer`}
+                  className={`px-1.5 py-0.5 rounded-md border ${!selectedTags.includes(tag) && "border-(--gray-page) text-(--gray-page)"} `}
                   onClick={() => {
                     if (selectedTags.includes(tag)) {
                       setSelectedTags((prev) =>
@@ -191,7 +191,7 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
             </div>
 
             <button
-              className="w-max rounded-md px-2.5 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) cursor-pointer"
+              className="w-max rounded-md px-2.5 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) "
               onClick={handleNewIdea}
             >
               Submit
@@ -201,7 +201,7 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
       </div>
       <div className="grid grid-cols-2 md:flex items-center justify-between md:justify-start w-full gap-2">
         <button
-          className="flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border text-(--gray-page) border-(--gray-page) cursor-pointer hover:bg-(--gray)/20"
+          className="flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border text-(--gray-page) border-(--gray-page)  hover:bg-(--gray)/20"
           onClick={() => setLayout(layout === "grid" ? "list" : "grid")}
         >
           {layout === "grid" ? (
@@ -218,28 +218,28 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
         </button>
 
         <button
-          className={`flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border ${filter !== "accepted" && "text-(--gray-page) border-(--gray-page)"} cursor-pointer hover:bg-(--gray)/20`}
+          className={`flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border ${filter !== "accepted" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
           onClick={() => changeFilter("accepted")}
         >
           <ThumbsUp size={16} />
           Accepted
         </button>
         <button
-          className={`flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border ${filter !== "declined" && "text-(--gray-page) border-(--gray-page)"} cursor-pointer hover:bg-(--gray)/20`}
+          className={`flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border ${filter !== "declined" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
           onClick={() => changeFilter("declined")}
         >
           <ThumbsDown size={16} />
           Declined
         </button>
         <button
-          className={`flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border ${filter !== "pending" && "text-(--gray-page) border-(--gray-page)"} cursor-pointer hover:bg-(--gray)/20`}
+          className={`flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border ${filter !== "pending" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
           onClick={() => changeFilter("pending")}
         >
           <Hourglass size={16} />
           Pending
         </button>
         <button
-          className={`flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border ${filter !== "dismissed" && "text-(--gray-page) border-(--gray-page)"} cursor-pointer hover:bg-(--gray)/20`}
+          className={`flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border ${filter !== "dismissed" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
           onClick={() => changeFilter("dismissed")}
         >
           <X size={16} />
@@ -285,14 +285,14 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
               )}
               <div className="w-full flex items-center gap-1">
                 <button
-                  className="gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border border-(--gray) cursor-pointer hover:bg-(--gray)/20"
+                  className="gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border border-(--gray)  hover:bg-(--gray)/20"
                   onClick={() => deleteIdea(feature.feature)}
                 >
                   <Trash size={16} />
                   Delete
                 </button>
                 <button
-                  className="gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border border-(--gray) cursor-pointer hover:bg-(--gray)/20"
+                  className="gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border border-(--gray)  hover:bg-(--gray)/20"
                   onClick={() => handleDismissing(feature)}
                 >
                   {feature.dismissed && feature.dismissed === true ? (
@@ -337,13 +337,13 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
               >
                 <div className="flex py-2 border-r border-(--gray) h-full justify-around">
                   <button
-                    className="gap-1 flex items-center justify-center p-1.5 rounded-sm h-max aspect-square cursor-pointer hover:bg-(--gray)/20"
+                    className="gap-1 flex items-center justify-center p-1.5 rounded-sm h-max aspect-square  hover:bg-(--gray)/20"
                     onClick={() => deleteIdea(feature.feature)}
                   >
                     <Trash size={16} />
                   </button>
                   <button
-                    className="gap-1 flex items-center justify-center p-1.5 rounded-sm h-max aspect-square cursor-pointer hover:bg-(--gray)/20"
+                    className="gap-1 flex items-center justify-center p-1.5 rounded-sm h-max aspect-square  hover:bg-(--gray)/20"
                     onClick={() => handleDismissing(feature)}
                   >
                     {feature.dismissed && feature.dismissed === true ? (
