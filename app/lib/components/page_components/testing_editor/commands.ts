@@ -1,6 +1,7 @@
 import type { InsertableComponentCommand } from "@/app/lib/components/project/EditModeContext";
 import {
-  COMPONENT_COMMANDS,
+  INSERTABLE_COMPONENT_COMMANDS,
+  PRIMARY_INSERTABLE_COMMANDS,
   type EditorComponentCommand,
 } from "./componentRegistry";
 
@@ -23,6 +24,13 @@ function getTokenRangeAtCursor(value: string, cursor: number) {
   };
 }
 
+function resolveTagFromCommand(command: string) {
+  const match = INSERTABLE_COMPONENT_COMMANDS.find(
+    (item) => item.command === command,
+  );
+  return match?.tag;
+}
+
 export function getActiveLineFromCursor(value: string, cursor: number) {
   return value.slice(0, cursor).split("\n").length;
 }
@@ -38,14 +46,14 @@ export function completeSlashCommand(value: string, cursor: number) {
     return null;
   }
 
-  const matches = COMPONENT_COMMANDS.filter(({ command }) =>
+  const matches = PRIMARY_INSERTABLE_COMMANDS.filter((command) =>
     command.startsWith(partial),
   );
   if (matches.length !== 1) {
     return null;
   }
 
-  const completedToken = `/${matches[0].command}`;
+  const completedToken = `/${matches[0]}`;
   if (token === completedToken) {
     return null;
   }
@@ -67,14 +75,14 @@ export function getSlashCompletionSuffix(value: string, cursor: number) {
     return null;
   }
 
-  const matches = COMPONENT_COMMANDS.filter(({ command }) =>
+  const matches = PRIMARY_INSERTABLE_COMMANDS.filter((command) =>
     command.startsWith(partial),
   );
   if (matches.length !== 1) {
     return null;
   }
 
-  const completion = matches[0].command;
+  const completion = matches[0];
   if (completion === partial) {
     return null;
   }
@@ -89,12 +97,12 @@ export function replaceSlashCommandWithTag(value: string, cursor: number) {
   }
 
   const command = token.slice(1).toLowerCase() as EditorComponentCommand;
-  const match = COMPONENT_COMMANDS.find((item) => item.command === command);
-  if (!match) {
+  const tag = resolveTagFromCommand(command);
+  if (!tag) {
     return null;
   }
 
-  const tagToken = `<${match.tag} />`;
+  const tagToken = `<${tag} />`;
   return {
     nextValue: `${value.slice(0, start)}${tagToken}${value.slice(end)}`,
     nextCursor: start + tagToken.length,
@@ -106,12 +114,12 @@ export function insertComponentTagAtCursor(
   cursor: number,
   command: InsertableComponentCommand,
 ) {
-  const match = COMPONENT_COMMANDS.find((item) => item.command === command);
-  if (!match) {
+  const tag = resolveTagFromCommand(command);
+  if (!tag) {
     return null;
   }
 
-  const tagToken = `<${match.tag} />`;
+  const tagToken = `<${tag} />`;
   return {
     nextValue: `${value.slice(0, cursor)}${tagToken}${value.slice(cursor)}`,
     nextCursor: cursor + tagToken.length,

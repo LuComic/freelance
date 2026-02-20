@@ -68,8 +68,10 @@ export const MobileChat = () => {
                   ).map((tag) => (
                     <button
                       key={tag}
-                      className={`text-sm gap-1 flex items-center justify-center px-2 py-0.5 rounded-md border border-(--gray) hover:bg-(--gray)/20 ${
-                        componentFilter !== tag ? "text-(--gray-page)" : ""
+                      className={`text-sm gap-1 flex items-center justify-center px-2 py-0.5 rounded-md border hover:bg-(--gray)/20 ${
+                        componentFilter !== tag
+                          ? "text-(--gray) border-(--gray)"
+                          : ""
                       }`}
                       onClick={() => changeComponentFilter(tag)}
                     >

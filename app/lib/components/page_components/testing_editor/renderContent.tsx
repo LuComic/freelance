@@ -2,7 +2,7 @@
 
 import { type ReactNode } from "react";
 import { COMPONENT_TAG_REGEX } from "./constants";
-import { COMPONENT_COMMANDS } from "./componentRegistry";
+import { RENDERABLE_COMPONENTS } from "./componentRegistry";
 
 export function renderContentWithComponents(content: string) {
   const nodes: ReactNode[] = [];
@@ -22,7 +22,7 @@ export function renderContentWithComponents(content: string) {
       );
     }
 
-    const componentMatch = COMPONENT_COMMANDS.find((item) => item.tag === tag);
+    const componentMatch = RENDERABLE_COMPONENTS.find((item) => item.tag === tag);
     if (componentMatch) {
       const Component = componentMatch.Component;
       nodes.push(<Component key={`component-${key++}`} />);

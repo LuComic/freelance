@@ -39,11 +39,32 @@ const COMPS: {
     insertCommand: "radio",
   },
   {
-    name: "Text field",
-    desc: "Simple, differently formatted headers",
-    previewSrc: "/component-previews/text-field.svg",
+    name: "Main Headline (H1)",
+    desc: "Large top-level headline text. Commands: /mainheadline, /h1",
+    previewSrc: "/component-previews/text-h1.svg",
     tag: "text",
-    insertCommand: "textfields",
+    insertCommand: "mainheadline",
+  },
+  {
+    name: "Section Header (H2)",
+    desc: "Medium section heading text. Commands: /sectionheader, /h2",
+    previewSrc: "/component-previews/text-h2.svg",
+    tag: "text",
+    insertCommand: "sectionheader",
+  },
+  {
+    name: "Subheader (H3)",
+    desc: "Smaller heading for subsections. Commands: /subheader, /h3",
+    previewSrc: "/component-previews/text-h3.svg",
+    tag: "text",
+    insertCommand: "subheader",
+  },
+  {
+    name: "Body Text",
+    desc: "Standard paragraph text block. Commands: /bodytext, /body",
+    previewSrc: "/component-previews/text-body.svg",
+    tag: "text",
+    insertCommand: "bodytext",
   },
 ];
 

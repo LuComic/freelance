@@ -5,9 +5,13 @@ import { createContext, useContext, useMemo, useRef, useState } from "react";
 export type InsertableComponentCommand =
   | "kanban"
   | "feedback"
-  | "textfields"
   | "select"
-  | "radio";
+  | "radio"
+  | "textfields"
+  | "mainheadline"
+  | "sectionheader"
+  | "subheader"
+  | "bodytext";
 
 type PendingComponentInsert = {
   command: InsertableComponentCommand;
