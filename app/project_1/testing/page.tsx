@@ -27,7 +27,7 @@ export default function Page() {
   };
 
   if (!isEditing) {
-    return <>{content}</>;
+    return <div className="whitespace-pre-wrap">{content}</div>;
   }
 
   return (

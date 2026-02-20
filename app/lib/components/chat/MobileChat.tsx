@@ -7,6 +7,7 @@ import {
   PanelRightOpen,
   LayoutGrid,
 } from "lucide-react";
+import { ComponentLib } from "./ComponentLib";
 
 export const MobileChat = () => {
   const [chatOpen, setChatOpen] = useState(false);
@@ -46,6 +47,7 @@ export const MobileChat = () => {
               <LayoutGrid size={20} className="mx-auto" />
             </button>
           </div>
+          {activeTab === "components" ? <ComponentLib /> : null}
         </nav>
       ) : (
         <button

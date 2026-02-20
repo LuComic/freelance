@@ -8,6 +8,7 @@ import {
   LayoutGrid,
 } from "lucide-react";
 import { CHAT_COOKIE, setCookie } from "@/app/lib/cookies";
+import { ComponentLib } from "./ComponentLib";
 
 type DesktopChatProps = {
   initialOpen?: boolean;
@@ -72,6 +73,7 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
               <LayoutGrid size={20} className="mx-auto" />
             </button>
           </div>
+          {activeTab === "components" ? <ComponentLib /> : null}
         </nav>
       ) : (
         <nav className="w-[50px] h-full min-h-screen bg-(--darkest) border-l border-(--gray) flex flex-col items-center justify-start p-2 gap-4">
