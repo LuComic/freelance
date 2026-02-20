@@ -8,7 +8,7 @@ import {
   LayoutGrid,
 } from "lucide-react";
 import { CHAT_COOKIE, setCookie } from "@/app/lib/cookies";
-import { ComponentLib } from "./ComponentLib";
+import { ComponentLib, type ComponentTag } from "./ComponentLib";
 
 type DesktopChatProps = {
   initialOpen?: boolean;
@@ -17,6 +17,7 @@ type DesktopChatProps = {
 export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
   const [chatOpen, setChatOpen] = useState(initialOpen ?? true);
   const [activeTab, setActiveTab] = useState<"chat" | "components">("chat");
+  const [componentFilter, setComponentFilter] = useState<"" | ComponentTag>("");
 
   useEffect(() => {
     setCookie(CHAT_COOKIE, String(chatOpen));
@@ -37,10 +38,19 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
     return () => document.removeEventListener("keydown", onKeyDownHandler);
   }, []);
 
+  const changeComponentFilter = (newFilter: ComponentTag) => {
+    if (componentFilter === newFilter) {
+      setComponentFilter("");
+      return;
+    }
+
+    setComponentFilter(newFilter);
+  };
+
   return (
     <div className="hidden md:block self-stretch">
       {chatOpen ? (
-        <nav className="w-[491px] h-full min-h-screen bg-(--darkest) border-l border-(--gray) flex flex-col items-start justify-start p-2 px-3 gap-4">
+        <nav className="w-[491px] h-dvh max-h-dvh bg-(--darkest) border-l border-(--gray) flex flex-col items-start justify-start p-2 px-3 gap-4 overflow-hidden">
           <div className="flex items-center justify-start gap-2 w-full">
             <button
               onClick={() => setChatOpen(false)}
@@ -73,7 +83,28 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
               <LayoutGrid size={20} className="mx-auto" />
             </button>
           </div>
-          {activeTab === "components" ? <ComponentLib /> : null}
+          <div className="w-full flex-1 min-h-0 overflow-y-auto pr-1">
+            {activeTab === "components" ? (
+              <>
+                <div className="flex flex-wrap items-center justify-start gap-2 w-full mb-2">
+                  {(
+                    ["progress", "text", "input", "feedback"] as ComponentTag[]
+                  ).map((tag) => (
+                    <button
+                      key={tag}
+                      className={`text-sm gap-1 flex items-center justify-center px-2 py-0.5 rounded-md border border-(--gray) hover:bg-(--gray)/20 ${
+                        componentFilter !== tag ? "text-(--gray-page)" : ""
+                      }`}
+                      onClick={() => changeComponentFilter(tag)}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+                <ComponentLib filterTag={componentFilter} />
+              </>
+            ) : null}
+          </div>
         </nav>
       ) : (
         <nav className="w-[50px] h-full min-h-screen bg-(--darkest) border-l border-(--gray) flex flex-col items-center justify-start p-2 gap-4">

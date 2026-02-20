@@ -7,16 +7,26 @@ import {
   PanelRightOpen,
   LayoutGrid,
 } from "lucide-react";
-import { ComponentLib } from "./ComponentLib";
+import { ComponentLib, type ComponentTag } from "./ComponentLib";
 
 export const MobileChat = () => {
   const [chatOpen, setChatOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"chat" | "components">("chat");
+  const [componentFilter, setComponentFilter] = useState<"" | ComponentTag>("");
+
+  const changeComponentFilter = (newFilter: ComponentTag) => {
+    if (componentFilter === newFilter) {
+      setComponentFilter("");
+      return;
+    }
+
+    setComponentFilter(newFilter);
+  };
 
   return (
     <div className="block md:hidden">
       {chatOpen ? (
-        <nav className="w-[363px] h-full min-h-screen bg-(--darkest) border-l border-(--gray) flex flex-col items-start justify-start p-2 gap-4 fixed z-10 top-0 right-0">
+        <nav className="w-[363px] h-dvh max-h-dvh bg-(--darkest) border-l border-(--gray) flex flex-col items-start justify-start p-2 gap-4 fixed z-10 top-0 right-0 overflow-hidden">
           <div className="flex items-center justify-start gap-2 w-full">
             <button
               onClick={() => setChatOpen(false)}
@@ -47,7 +57,28 @@ export const MobileChat = () => {
               <LayoutGrid size={20} className="mx-auto" />
             </button>
           </div>
-          {activeTab === "components" ? <ComponentLib /> : null}
+          <div className="w-full flex-1 min-h-0 overflow-y-auto pr-1">
+            {activeTab === "components" ? (
+              <>
+                <div className="flex flex-wrap items-center justify-start gap-2 w-full mb-2">
+                  {(
+                    ["progress", "text", "input", "feedback"] as ComponentTag[]
+                  ).map((tag) => (
+                    <button
+                      key={tag}
+                      className={`text-sm gap-1 flex items-center justify-center px-2 py-0.5 rounded-md border border-(--gray) hover:bg-(--gray)/20 ${
+                        componentFilter !== tag ? "text-(--gray-page)" : ""
+                      }`}
+                      onClick={() => changeComponentFilter(tag)}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+                <ComponentLib filterTag={componentFilter} />
+              </>
+            ) : null}
+          </div>
         </nav>
       ) : (
         <button
