@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useContext, useMemo, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 export type InsertableComponentCommand =
   | "kanban"
@@ -22,6 +29,9 @@ type EditModeContextValue = {
   isEditing: boolean;
   setIsEditing: (value: boolean) => void;
   toggleEditing: () => void;
+  isPresenting: boolean;
+  setIsPresenting: (value: boolean) => void;
+  togglePresenting: () => void;
   pendingComponentInsert: PendingComponentInsert | null;
   requestComponentInsert: (command: InsertableComponentCommand) => void;
   clearPendingComponentInsert: () => void;
@@ -32,16 +42,54 @@ const EditModeContext = createContext<EditModeContextValue | undefined>(
 );
 
 export function EditModeProvider({ children }: { children: React.ReactNode }) {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, rawSetIsEditing] = useState(false);
+  const [isPresenting, rawSetIsPresenting] = useState(false);
   const [pendingComponentInsert, setPendingComponentInsert] =
     useState<PendingComponentInsert | null>(null);
   const insertNonceRef = useRef(0);
+
+  const setIsEditing = useCallback((value: boolean) => {
+    rawSetIsEditing(value);
+    if (value) {
+      rawSetIsPresenting(false);
+    }
+  }, []);
+
+  const setIsPresenting = useCallback((value: boolean) => {
+    rawSetIsPresenting(value);
+    if (value) {
+      rawSetIsEditing(false);
+    }
+  }, []);
+
+  const toggleEditing = useCallback(() => {
+    rawSetIsEditing((prev) => {
+      const next = !prev;
+      if (next) {
+        rawSetIsPresenting(false);
+      }
+      return next;
+    });
+  }, []);
+
+  const togglePresenting = useCallback(() => {
+    rawSetIsPresenting((prev) => {
+      const next = !prev;
+      if (next) {
+        rawSetIsEditing(false);
+      }
+      return next;
+    });
+  }, []);
 
   const value = useMemo(
     () => ({
       isEditing,
       setIsEditing,
-      toggleEditing: () => setIsEditing((prev) => !prev),
+      toggleEditing,
+      isPresenting,
+      setIsPresenting,
+      togglePresenting,
       pendingComponentInsert,
       requestComponentInsert: (command: InsertableComponentCommand) => {
         insertNonceRef.current += 1;
@@ -52,7 +100,15 @@ export function EditModeProvider({ children }: { children: React.ReactNode }) {
       },
       clearPendingComponentInsert: () => setPendingComponentInsert(null),
     }),
-    [isEditing, pendingComponentInsert],
+    [
+      isEditing,
+      isPresenting,
+      pendingComponentInsert,
+      setIsEditing,
+      setIsPresenting,
+      toggleEditing,
+      togglePresenting,
+    ],
   );
 
   return (

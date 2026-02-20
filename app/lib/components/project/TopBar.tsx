@@ -1,9 +1,11 @@
 "use client";
-import { FilePlusCorner, Pencil, Trash } from "lucide-react";
+import { Cog, FilePlusCorner, Pencil, Presentation, Trash } from "lucide-react";
 import { useEditMode } from "./EditModeContext";
 
 export const TopBar = () => {
-  const { isEditing, toggleEditing } = useEditMode();
+  const { isEditing, isPresenting, setIsEditing, setIsPresenting } =
+    useEditMode();
+  const isConfig = !isEditing && !isPresenting;
 
   return (
     <div className="w-full border-b border-(--gray) flex items-center justify-start gap-2 p-1.5">
@@ -11,8 +13,26 @@ export const TopBar = () => {
         <FilePlusCorner size={15} />
         New Page
       </button>
+      <button className="text-sm gap-1 flex items-center justify-center px-2 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) hover:bg-(--gray)/20">
+        <Trash size={15} />
+        Delete
+      </button>
       <button
-        onClick={toggleEditing}
+        onClick={() => {
+          setIsEditing(false);
+          setIsPresenting(false);
+        }}
+        className={`text-sm gap-1 flex items-center justify-center px-2 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) ${
+          isConfig
+            ? "bg-(--vibrant)/20 border-(--vibrant) text-(--light)"
+            : "hover:bg-(--gray)/20"
+        }`}
+      >
+        <Cog size={15} />
+        Config
+      </button>
+      <button
+        onClick={() => setIsEditing(true)}
         className={`text-sm gap-1 flex items-center justify-center px-2 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) ${
           isEditing
             ? "bg-(--vibrant)/20 border-(--vibrant) text-(--light)"
@@ -20,11 +40,18 @@ export const TopBar = () => {
         }`}
       >
         <Pencil size={15} />
-        {isEditing ? "Editing" : "Edit"}
+        Edit
       </button>
-      <button className="text-sm gap-1 flex items-center justify-center px-2 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) hover:bg-(--gray)/20">
-        <Trash size={15} />
-        Delete
+      <button
+        onClick={() => setIsPresenting(true)}
+        className={`text-sm gap-1 flex items-center justify-center px-2 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) ${
+          isPresenting
+            ? "bg-(--vibrant)/20 border-(--vibrant) text-(--light)"
+            : "hover:bg-(--gray)/20"
+        }`}
+      >
+        <Presentation size={15} />
+        Preview
       </button>
     </div>
   );

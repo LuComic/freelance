@@ -17,7 +17,7 @@ type DesktopChatProps = {
 
 export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
   const { isEditing, requestComponentInsert } = useEditMode();
-  const [chatOpen, setChatOpen] = useState(initialOpen ?? true);
+  const [chatOpen, setChatOpen] = useState(initialOpen ?? false);
   const [activeTab, setActiveTab] = useState<"chat" | "components">("chat");
   const [componentFilter, setComponentFilter] = useState<"" | ComponentTag>("");
 

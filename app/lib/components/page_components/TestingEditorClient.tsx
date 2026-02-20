@@ -14,8 +14,12 @@ import { INITIAL_TEXT } from "@/app/lib/components/page_components/testing_edito
 import { renderContentWithComponents } from "@/app/lib/components/page_components/testing_editor/renderContent";
 
 export default function TestingEditorClient() {
-  const { isEditing, pendingComponentInsert, clearPendingComponentInsert } =
-    useEditMode();
+  const {
+    isEditing,
+    isPresenting,
+    pendingComponentInsert,
+    clearPendingComponentInsert,
+  } = useEditMode();
   const [content, setContent] = useState(INITIAL_TEXT);
   const [activeLine, setActiveLine] = useState(1);
   const [scrollTop, setScrollTop] = useState(0);
@@ -48,7 +52,7 @@ export default function TestingEditorClient() {
   const updateGhostCompletion = useCallback(
     (value: string, cursorPosition: number) => {
       const textarea = textareaRef.current;
-      if (!textarea || !isEditing) {
+      if (!textarea || !isEditing || isPresenting) {
         setGhostCompletion(null);
         return;
       }
@@ -62,7 +66,7 @@ export default function TestingEditorClient() {
       const { top, left } = getCaretCoordinates(textarea, cursorPosition);
       setGhostCompletion({ suffix, top, left });
     },
-    [isEditing],
+    [isEditing, isPresenting],
   );
 
   const setCaretPosition = useCallback(
@@ -85,7 +89,7 @@ export default function TestingEditorClient() {
       return;
     }
 
-    if (!isEditing) {
+    if (!isEditing || isPresenting) {
       clearPendingComponentInsert();
       return;
     }
@@ -114,11 +118,12 @@ export default function TestingEditorClient() {
     clearPendingComponentInsert,
     content,
     isEditing,
+    isPresenting,
     pendingComponentInsert,
     setCaretPosition,
   ]);
 
-  if (!isEditing) {
+  if (!isEditing || isPresenting) {
     return <div className="w-full">{renderedContent}</div>;
   }
 

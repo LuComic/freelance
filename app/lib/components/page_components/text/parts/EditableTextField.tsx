@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { Switch } from "@/components/ui/switch";
+import { useEditMode } from "@/app/lib/components/project/EditModeContext";
 
 type EditableTextFieldProps = {
   initialText: string;
@@ -16,20 +16,12 @@ export const EditableTextField = ({
   multiline = false,
   renderClient,
 }: EditableTextFieldProps) => {
-  const [client, setClient] = useState(false);
+  const { isPresenting } = useEditMode();
   const [text, setText] = useState(initialText);
 
   return (
     <div className="w-full border-y border-(--gray) py-2 flex flex-col gap-2">
-      <div className="flex items-center justify-start gap-2">
-        <Switch
-          className="data-[state=checked]:bg-(--vibrant) data-[state=unchecked]:bg-(--dim)"
-          onClick={() => setClient((prev) => !prev)}
-        />
-        {client ? "Client's view" : "Creator's view"}
-      </div>
-
-      {client ? (
+      {isPresenting ? (
         renderClient(text)
       ) : multiline ? (
         <textarea
