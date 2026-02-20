@@ -37,16 +37,16 @@ export default async function RootLayout({
       >
         <SearchBar />
         <Sidebar initialSidebarOpen={initialSidebarOpen} />
-        <div className="flex-1 min-w-0 flex flex-col items-start justify-start">
-          <Tab />
-          <EditModeProvider>
+        <EditModeProvider>
+          <div className="flex-1 min-w-0 flex flex-col items-start justify-start">
+            <Tab />
             <TopBar />
             <div className="w-full px-4 md:pt-8 pt-15 pb-8 flex flex-col items-start justify-start gap-4">
               {children}
             </div>
-          </EditModeProvider>
-        </div>
-        <Chat initialChatOpen={initialChatOpen} />
+          </div>
+          <Chat initialChatOpen={initialChatOpen} />
+        </EditModeProvider>
       </body>
     </html>
   );

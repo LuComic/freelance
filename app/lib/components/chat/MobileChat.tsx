@@ -7,9 +7,11 @@ import {
   PanelRightOpen,
   LayoutGrid,
 } from "lucide-react";
+import { useEditMode } from "@/app/lib/components/project/EditModeContext";
 import { ComponentLib, type ComponentTag } from "./ComponentLib";
 
 export const MobileChat = () => {
+  const { isEditing, requestComponentInsert } = useEditMode();
   const [chatOpen, setChatOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"chat" | "components">("chat");
   const [componentFilter, setComponentFilter] = useState<"" | ComponentTag>("");
@@ -75,7 +77,13 @@ export const MobileChat = () => {
                     </button>
                   ))}
                 </div>
-                <ComponentLib filterTag={componentFilter} />
+                <ComponentLib
+                  filterTag={componentFilter}
+                  onInsertComponent={(command) => {
+                    if (!isEditing) return;
+                    requestComponentInsert(command);
+                  }}
+                />
               </>
             ) : null}
           </div>

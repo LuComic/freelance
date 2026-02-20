@@ -1,144 +1,31 @@
 "use client";
 
-import { useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useEditMode } from "@/app/lib/components/project/EditModeContext";
-import { Kanban } from "@/app/lib/components/page_components/progress/Kanban";
-import { Feedback } from "@/app/lib/components/page_components/feedback/Feedback";
-import { TextFields } from "@/app/lib/components/page_components/text/TextFields";
-import { Select } from "@/app/lib/components/page_components/form/select/Select";
-import { Radio } from "@/app/lib/components/page_components/form/radio/Radio";
-
-const INITIAL_TEXT = `Project brief\n\nWrite your page content here.\n\nThis testing page now supports a full-page editing mode.`;
-const COMPONENT_TAG_REGEX = /<([A-Za-z][A-Za-z0-9]*)\s*\/>/g;
-const COMPONENT_COMMANDS = [
-  { command: "kanban", tag: "Kanban", Component: Kanban },
-  { command: "feedback", tag: "Feedback", Component: Feedback },
-  { command: "textfields", tag: "TextFields", Component: TextFields },
-  { command: "select", tag: "Select", Component: Select },
-  { command: "radio", tag: "Radio", Component: Radio },
-] as const;
-
-function getTokenRangeAtCursor(value: string, cursor: number) {
-  let start = cursor;
-  let end = cursor;
-
-  while (start > 0 && !/\s/.test(value[start - 1])) {
-    start -= 1;
-  }
-
-  while (end < value.length && !/\s/.test(value[end])) {
-    end += 1;
-  }
-
-  return {
-    start,
-    end,
-    token: value.slice(start, end),
-  };
-}
-
-function getActiveLineFromCursor(value: string, cursor: number) {
-  return value.slice(0, cursor).split("\n").length;
-}
-
-function completeSlashCommand(value: string, cursor: number) {
-  const { start, end, token } = getTokenRangeAtCursor(value, cursor);
-  if (!token.startsWith("/")) {
-    return null;
-  }
-
-  const partial = token.slice(1).toLowerCase();
-  if (!partial) {
-    return null;
-  }
-
-  const matches = COMPONENT_COMMANDS.filter(({ command }) =>
-    command.startsWith(partial),
-  );
-  if (matches.length !== 1) {
-    return null;
-  }
-
-  const completedToken = `/${matches[0].command}`;
-  if (token === completedToken) {
-    return null;
-  }
-
-  return {
-    nextValue: `${value.slice(0, start)}${completedToken}${value.slice(end)}`,
-    nextCursor: start + completedToken.length,
-  };
-}
-
-function replaceSlashCommandWithTag(value: string, cursor: number) {
-  const { start, end, token } = getTokenRangeAtCursor(value, cursor);
-  if (!token.startsWith("/")) {
-    return null;
-  }
-
-  const command = token.slice(1).toLowerCase();
-  const match = COMPONENT_COMMANDS.find((item) => item.command === command);
-  if (!match) {
-    return null;
-  }
-
-  const tagToken = `<${match.tag} />`;
-  return {
-    nextValue: `${value.slice(0, start)}${tagToken}${value.slice(end)}`,
-    nextCursor: start + tagToken.length,
-  };
-}
-
-function renderContentWithComponents(content: string) {
-  const nodes: ReactNode[] = [];
-  let lastIndex = 0;
-  let key = 0;
-
-  for (const match of content.matchAll(COMPONENT_TAG_REGEX)) {
-    const index = match.index ?? 0;
-    const fullMatch = match[0];
-    const tag = match[1];
-
-    if (index > lastIndex) {
-      nodes.push(
-        <span className="whitespace-pre-wrap" key={`text-${key++}`}>
-          {content.slice(lastIndex, index)}
-        </span>,
-      );
-    }
-
-    const componentMatch = COMPONENT_COMMANDS.find((item) => item.tag === tag);
-    if (componentMatch) {
-      const Component = componentMatch.Component;
-      nodes.push(<Component key={`component-${key++}`} />);
-    } else {
-      nodes.push(
-        <span className="whitespace-pre-wrap" key={`unknown-${key++}`}>
-          {fullMatch}
-        </span>,
-      );
-    }
-
-    lastIndex = index + fullMatch.length;
-  }
-
-  if (lastIndex < content.length) {
-    nodes.push(
-      <span className="whitespace-pre-wrap" key={`tail-${key++}`}>
-        {content.slice(lastIndex)}
-      </span>,
-    );
-  }
-
-  return nodes;
-}
+import { getCaretCoordinates } from "@/app/lib/components/page_components/testing_editor/caret";
+import {
+  completeSlashCommand,
+  getActiveLineFromCursor,
+  getSlashCompletionSuffix,
+  insertComponentTagAtCursor,
+  replaceSlashCommandWithTag,
+} from "@/app/lib/components/page_components/testing_editor/commands";
+import { INITIAL_TEXT } from "@/app/lib/components/page_components/testing_editor/constants";
+import { renderContentWithComponents } from "@/app/lib/components/page_components/testing_editor/renderContent";
 
 export default function TestingEditorClient() {
-  const { isEditing } = useEditMode();
+  const { isEditing, pendingComponentInsert, clearPendingComponentInsert } =
+    useEditMode();
   const [content, setContent] = useState(INITIAL_TEXT);
   const [activeLine, setActiveLine] = useState(1);
   const [scrollTop, setScrollTop] = useState(0);
+  const [ghostCompletion, setGhostCompletion] = useState<{
+    suffix: string;
+    top: number;
+    left: number;
+  } | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const lastCursorRef = useRef(0);
 
   const lines = useMemo(() => {
     const lineCount = Math.max(1, content.split("\n").length);
@@ -154,21 +41,85 @@ export default function TestingEditorClient() {
     if (!textarea) return;
 
     const cursorPosition = textarea.selectionStart;
-    const line = textarea.value.slice(0, cursorPosition).split("\n").length;
-    setActiveLine(line);
-  };
-  const setCaretPosition = (position: number) => {
-    requestAnimationFrame(() => {
-      const textarea = textareaRef.current;
-      if (!textarea) return;
-      textarea.selectionStart = position;
-      textarea.selectionEnd = position;
-      textarea.focus();
-    });
+    lastCursorRef.current = cursorPosition;
+    setActiveLine(getActiveLineFromCursor(textarea.value, cursorPosition));
   };
 
+  const updateGhostCompletion = useCallback(
+    (value: string, cursorPosition: number) => {
+      const textarea = textareaRef.current;
+      if (!textarea || !isEditing) {
+        setGhostCompletion(null);
+        return;
+      }
+
+      const suffix = getSlashCompletionSuffix(value, cursorPosition);
+      if (!suffix) {
+        setGhostCompletion(null);
+        return;
+      }
+
+      const { top, left } = getCaretCoordinates(textarea, cursorPosition);
+      setGhostCompletion({ suffix, top, left });
+    },
+    [isEditing],
+  );
+
+  const setCaretPosition = useCallback(
+    (position: number) => {
+      lastCursorRef.current = position;
+      requestAnimationFrame(() => {
+        const textarea = textareaRef.current;
+        if (!textarea) return;
+        textarea.selectionStart = position;
+        textarea.selectionEnd = position;
+        textarea.focus();
+        updateGhostCompletion(textarea.value, position);
+      });
+    },
+    [updateGhostCompletion],
+  );
+
+  useEffect(() => {
+    if (!pendingComponentInsert) {
+      return;
+    }
+
+    if (!isEditing) {
+      clearPendingComponentInsert();
+      return;
+    }
+
+    const textarea = textareaRef.current;
+    const cursorPosition = textarea
+      ? textarea.selectionStart
+      : lastCursorRef.current;
+    const insertion = insertComponentTagAtCursor(
+      content,
+      cursorPosition,
+      pendingComponentInsert.command,
+    );
+    if (!insertion) {
+      clearPendingComponentInsert();
+      return;
+    }
+
+    setContent(insertion.nextValue);
+    setActiveLine(
+      getActiveLineFromCursor(insertion.nextValue, insertion.nextCursor),
+    );
+    setCaretPosition(insertion.nextCursor);
+    clearPendingComponentInsert();
+  }, [
+    clearPendingComponentInsert,
+    content,
+    isEditing,
+    pendingComponentInsert,
+    setCaretPosition,
+  ]);
+
   if (!isEditing) {
-    return <div>{renderedContent}</div>;
+    return <div className="w-full">{renderedContent}</div>;
   }
 
   return (
@@ -194,86 +145,124 @@ export default function TestingEditorClient() {
           </div>
         </div>
 
-        <textarea
-          ref={textareaRef}
-          value={content}
-          onChange={(event) => {
-            const nextValue = event.target.value;
-            const cursorPosition = event.target.selectionStart;
-            const replacement = replaceSlashCommandWithTag(
-              nextValue,
-              cursorPosition,
-            );
-
-            if (replacement) {
-              setContent(replacement.nextValue);
-              setActiveLine(
-                getActiveLineFromCursor(
-                  replacement.nextValue,
-                  replacement.nextCursor,
-                ),
-              );
-              setCaretPosition(replacement.nextCursor);
-              return;
-            }
-
-            setContent(nextValue);
-            setActiveLine(getActiveLineFromCursor(nextValue, cursorPosition));
-          }}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              const textarea = event.currentTarget;
+        <div className="relative h-full w-full">
+          <textarea
+            ref={textareaRef}
+            value={content}
+            onChange={(event) => {
+              const nextValue = event.target.value;
+              const cursorPosition = event.target.selectionStart;
+              lastCursorRef.current = cursorPosition;
               const replacement = replaceSlashCommandWithTag(
+                nextValue,
+                cursorPosition,
+              );
+
+              if (replacement) {
+                setContent(replacement.nextValue);
+                setActiveLine(
+                  getActiveLineFromCursor(
+                    replacement.nextValue,
+                    replacement.nextCursor,
+                  ),
+                );
+                setCaretPosition(replacement.nextCursor);
+                return;
+              }
+
+              setContent(nextValue);
+              setActiveLine(getActiveLineFromCursor(nextValue, cursorPosition));
+              updateGhostCompletion(nextValue, cursorPosition);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                const textarea = event.currentTarget;
+                const replacement = replaceSlashCommandWithTag(
+                  textarea.value,
+                  textarea.selectionStart,
+                );
+                if (!replacement) {
+                  return;
+                }
+
+                event.preventDefault();
+                const nextValue = `${replacement.nextValue.slice(
+                  0,
+                  replacement.nextCursor,
+                )}\n${replacement.nextValue.slice(replacement.nextCursor)}`;
+                const nextCursor = replacement.nextCursor + 1;
+                setContent(nextValue);
+                setActiveLine(getActiveLineFromCursor(nextValue, nextCursor));
+                setCaretPosition(nextCursor);
+                return;
+              }
+
+              if (event.key !== "Tab") {
+                return;
+              }
+
+              const textarea = event.currentTarget;
+              const completion = completeSlashCommand(
                 textarea.value,
                 textarea.selectionStart,
               );
-              if (!replacement) {
+              if (!completion) {
                 return;
               }
 
               event.preventDefault();
-              const nextValue = `${replacement.nextValue.slice(
-                0,
-                replacement.nextCursor,
-              )}\n${replacement.nextValue.slice(replacement.nextCursor)}`;
-              const nextCursor = replacement.nextCursor + 1;
-              setContent(nextValue);
-              setActiveLine(getActiveLineFromCursor(nextValue, nextCursor));
-              setCaretPosition(nextCursor);
-              return;
-            }
-
-            if (event.key !== "Tab") {
-              return;
-            }
-
-            const textarea = event.currentTarget;
-            const completion = completeSlashCommand(
-              textarea.value,
-              textarea.selectionStart,
-            );
-            if (!completion) {
-              return;
-            }
-
-            event.preventDefault();
-            setContent(completion.nextValue);
-            setActiveLine(
-              getActiveLineFromCursor(
-                completion.nextValue,
-                completion.nextCursor,
-              ),
-            );
-            setCaretPosition(completion.nextCursor);
-          }}
-          onClick={updateActiveLine}
-          onKeyUp={updateActiveLine}
-          onSelect={updateActiveLine}
-          onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
-          spellCheck={false}
-          className="h-full w-full resize-none bg-transparent p-0 pl-4 text-base leading-7 text-(--light) caret-(--light) border-none outline-none focus:ring-0"
-          placeholder="Start typing..."
-        />
+              setContent(completion.nextValue);
+              setActiveLine(
+                getActiveLineFromCursor(
+                  completion.nextValue,
+                  completion.nextCursor,
+                ),
+              );
+              setCaretPosition(completion.nextCursor);
+            }}
+            onClick={() => {
+              updateActiveLine();
+              const textarea = textareaRef.current;
+              if (!textarea) return;
+              updateGhostCompletion(textarea.value, textarea.selectionStart);
+            }}
+            onKeyUp={() => {
+              updateActiveLine();
+              const textarea = textareaRef.current;
+              if (!textarea) return;
+              updateGhostCompletion(textarea.value, textarea.selectionStart);
+            }}
+            onSelect={() => {
+              updateActiveLine();
+              const textarea = textareaRef.current;
+              if (!textarea) return;
+              updateGhostCompletion(textarea.value, textarea.selectionStart);
+            }}
+            onScroll={(event) => {
+              setScrollTop(event.currentTarget.scrollTop);
+              updateGhostCompletion(
+                event.currentTarget.value,
+                event.currentTarget.selectionStart,
+              );
+            }}
+            spellCheck={false}
+            className="relative z-10 h-full w-full resize-none bg-transparent p-0 pl-4 text-base leading-7 text-(--light) caret-(--light) border-none outline-none focus:ring-0"
+            placeholder="Start typing..."
+          />
+          {ghostCompletion ? (
+            <span
+              aria-hidden
+              className="pointer-events-none absolute z-20 text-base leading-7 text-(--vibrant)/50"
+              style={{
+                top: ghostCompletion.top,
+                left: ghostCompletion.left,
+                transform: "translateY(-4.5px)",
+              }}
+            >
+              {ghostCompletion.suffix}
+            </span>
+          ) : null}
+        </div>
       </div>
     </div>
   );

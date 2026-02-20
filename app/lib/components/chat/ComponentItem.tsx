@@ -4,13 +4,19 @@ export const ComponentItem = ({
   compName,
   compDesc,
   previewSrc,
+  onClick,
 }: {
   compName: string;
   compDesc: string;
   previewSrc: string;
+  onClick: () => void;
 }) => {
   return (
-    <div className="w-full h-full min-h-60 md:min-h-50 overflow-hidden border rounded-md border-(--gray) flex flex-col items-start justify-start hover:bg-(--gray)/20">
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-full h-full min-h-60 md:min-h-50 overflow-hidden border rounded-md border-(--gray) flex flex-col items-start justify-start hover:bg-(--gray)/20 text-left"
+    >
       <div className="w-full h-50 md:h-30 bg-(--dim)">
         <Image
           src={previewSrc}
@@ -25,6 +31,6 @@ export const ComponentItem = ({
         <p className="font-medium">{compName}</p>
         <p className="text-(--gray)">{compDesc}</p>
       </div>
-    </div>
+    </button>
   );
 };

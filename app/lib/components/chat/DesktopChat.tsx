@@ -8,6 +8,7 @@ import {
   LayoutGrid,
 } from "lucide-react";
 import { CHAT_COOKIE, setCookie } from "@/app/lib/cookies";
+import { useEditMode } from "@/app/lib/components/project/EditModeContext";
 import { ComponentLib, type ComponentTag } from "./ComponentLib";
 
 type DesktopChatProps = {
@@ -15,6 +16,7 @@ type DesktopChatProps = {
 };
 
 export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
+  const { isEditing, requestComponentInsert } = useEditMode();
   const [chatOpen, setChatOpen] = useState(initialOpen ?? true);
   const [activeTab, setActiveTab] = useState<"chat" | "components">("chat");
   const [componentFilter, setComponentFilter] = useState<"" | ComponentTag>("");
@@ -101,7 +103,13 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
                     </button>
                   ))}
                 </div>
-                <ComponentLib filterTag={componentFilter} />
+                <ComponentLib
+                  filterTag={componentFilter}
+                  onInsertComponent={(command) => {
+                    if (!isEditing) return;
+                    requestComponentInsert(command);
+                  }}
+                />
               </>
             ) : null}
           </div>
