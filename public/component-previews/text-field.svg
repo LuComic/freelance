@@ -1,0 +1,9 @@
+<svg width="320" height="180" viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="320" height="180" fill="#171717"/>
+  <line x1="10" y1="14" x2="310" y2="14" stroke="#454545"/>
+  <text x="10" y="36" font-size="20" fill="#ECECEC" font-family="Arial, sans-serif" font-weight="700">Main Headline</text>
+  <text x="10" y="62" font-size="12" fill="#E3E3E3" font-family="Arial, sans-serif" font-weight="700">Section Header</text>
+  <text x="10" y="84" font-size="10" fill="#D8D8D8" font-family="Arial, sans-serif" font-weight="700">Subheader</text>
+  <text x="10" y="104" font-size="8" fill="#D0D0D0" font-family="Arial, sans-serif">This is normal body text without specific styling.</text>
+  <line x1="10" y1="116" x2="310" y2="116" stroke="#454545"/>
+</svg>
