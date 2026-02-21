@@ -12,3 +12,17 @@ export function setCookie(name: string, value: string): void {
     value
   )}; path=/; max-age=${MAX_AGE}; SameSite=Lax`;
 }
+
+export function getCookie(name: string): string | undefined {
+  if (typeof document === "undefined") return undefined;
+
+  const prefixedName = `${name}=`;
+  const cookieValue = document.cookie
+    .split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(prefixedName));
+
+  if (!cookieValue) return undefined;
+
+  return decodeURIComponent(cookieValue.slice(prefixedName.length));
+}

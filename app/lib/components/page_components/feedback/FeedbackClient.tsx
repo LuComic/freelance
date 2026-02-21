@@ -13,7 +13,11 @@ import {
   LayoutGrid,
   Pencil,
 } from "lucide-react";
-import { setCookie, FEEDBACK_CLIENT_LAYOUT_COOKIE } from "@/app/lib/cookies";
+import {
+  getCookie,
+  setCookie,
+  FEEDBACK_CLIENT_LAYOUT_COOKIE,
+} from "@/app/lib/cookies";
 
 type itemType = {
   feature: string;
@@ -59,9 +63,15 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
     "" | "accepted" | "declined" | "pending" | "dismissed"
   >("");
   const [adding, setAdding] = useState(false);
-  const [layout, setLayout] = useState<"grid" | "list">(
-    initialLayout ?? "grid",
-  );
+  const [layout, setLayout] = useState<"grid" | "list">(() => {
+    const cookieLayout = getCookie(FEEDBACK_CLIENT_LAYOUT_COOKIE);
+
+    if (cookieLayout === "grid" || cookieLayout === "list") {
+      return cookieLayout;
+    }
+
+    return initialLayout ?? "grid";
+  });
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   useEffect(() => {
@@ -202,7 +212,11 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
       <div className="grid grid-cols-2 md:flex items-center justify-between md:justify-start w-full gap-2">
         <button
           className="flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border text-(--gray-page) border-(--gray-page)  hover:bg-(--gray)/20"
-          onClick={() => setLayout(layout === "grid" ? "list" : "grid")}
+          onClick={() => {
+            const nextLayout = layout === "grid" ? "list" : "grid";
+            setCookie(FEEDBACK_CLIENT_LAYOUT_COOKIE, nextLayout);
+            setLayout(nextLayout);
+          }}
         >
           {layout === "grid" ? (
             <>

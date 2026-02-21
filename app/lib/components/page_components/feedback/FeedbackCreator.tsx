@@ -11,7 +11,11 @@ import {
   ChevronRight,
   Trash,
 } from "lucide-react";
-import { setCookie, FEEDBACK_CREATOR_LAYOUT_COOKIE } from "@/app/lib/cookies";
+import {
+  getCookie,
+  setCookie,
+  FEEDBACK_CREATOR_LAYOUT_COOKIE,
+} from "@/app/lib/cookies";
 import { ReviewModal } from "./ReviewModal";
 
 type itemType = {
@@ -56,9 +60,15 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
   const [filter, setFilter] = useState<
     "" | "accepted" | "declined" | "pending" | "dismissed"
   >("");
-  const [layout, setLayout] = useState<"grid" | "list">(
-    initialLayout ?? "grid",
-  );
+  const [layout, setLayout] = useState<"grid" | "list">(() => {
+    const cookieLayout = getCookie(FEEDBACK_CREATOR_LAYOUT_COOKIE);
+
+    if (cookieLayout === "grid" || cookieLayout === "list") {
+      return cookieLayout;
+    }
+
+    return initialLayout ?? "grid";
+  });
 
   useEffect(() => {
     setCookie(FEEDBACK_CREATOR_LAYOUT_COOKIE, layout);
@@ -166,7 +176,11 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
       <div className="grid grid-cols-2 md:flex items-center justify-between md:justify-start w-full gap-2">
         <button
           className="flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border text-(--gray-page) border-(--gray-page)  hover:bg-(--gray)/20"
-          onClick={() => setLayout(layout === "grid" ? "list" : "grid")}
+          onClick={() => {
+            const nextLayout = layout === "grid" ? "list" : "grid";
+            setCookie(FEEDBACK_CREATOR_LAYOUT_COOKIE, nextLayout);
+            setLayout(nextLayout);
+          }}
         >
           {layout === "grid" ? (
             <>
