@@ -6,6 +6,7 @@ import {
   PanelRightClose,
   PanelRightOpen,
   LayoutGrid,
+  LibraryBig,
 } from "lucide-react";
 import { useEditMode } from "@/app/lib/components/project/EditModeContext";
 import { ComponentLib, type ComponentTag } from "./ComponentLib";
@@ -93,9 +94,13 @@ export const MobileChat = () => {
       ) : (
         <button
           onClick={() => setChatOpen(true)}
-          className="bg-(--darkest)  p-1 rounded-lg hover:bg-(--darkest-hover) fixed top-2 right-2"
+          className="bg-(--darkest) p-1.5 rounded-lg hover:bg-(--darkest-hover) fixed top-2 right-2"
         >
-          <PanelRightOpen size={24} />
+          {activeTab === "components" ? (
+            <LibraryBig size={24} />
+          ) : (
+            <MessageSquare size={24} />
+          )}
         </button>
       )}
     </div>

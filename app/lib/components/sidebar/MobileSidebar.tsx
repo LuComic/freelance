@@ -92,7 +92,7 @@ export const MobileSidebar = () => {
       ) : (
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="bg-(--darkest)  p-1 rounded-lg hover:bg-(--darkest-hover) fixed top-2 left-2"
+          className="bg-(--darkest)  p-1.5 rounded-lg hover:bg-(--darkest-hover) fixed top-2 left-2"
         >
           <PanelLeftOpen size={24} />
         </button>
