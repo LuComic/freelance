@@ -8,7 +8,6 @@ import { TextFields } from "@/app/lib/components/page_components/text/TextFields
 import { MainHeadline } from "@/app/lib/components/page_components/text/parts/MainHeadline";
 import { SectionHeader } from "@/app/lib/components/page_components/text/parts/SectionHeader";
 import { Subheader } from "@/app/lib/components/page_components/text/parts/Subheader";
-import { BodyText } from "@/app/lib/components/page_components/text/parts/BodyText";
 
 export const COMPONENT_REGISTRY = [
   { tag: "Kanban", Component: Kanban, commands: ["kanban"] },
@@ -27,7 +26,6 @@ export const COMPONENT_REGISTRY = [
     commands: ["sectionheader", "h2"],
   },
   { tag: "Subheader", Component: Subheader, commands: ["subheader", "h3"] },
-  { tag: "BodyText", Component: BodyText, commands: ["bodytext", "body"] },
 ] as const;
 
 export const PRIMARY_INSERTABLE_COMMANDS = COMPONENT_REGISTRY.map(

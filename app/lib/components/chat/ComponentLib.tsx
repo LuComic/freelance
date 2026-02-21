@@ -59,13 +59,6 @@ const COMPS: {
     tag: "text",
     insertCommand: "subheader",
   },
-  {
-    name: "Body Text",
-    desc: "Standard paragraph text block. Commands: /bodytext, /body",
-    previewSrc: "/component-previews/text-body.svg",
-    tag: "text",
-    insertCommand: "bodytext",
-  },
 ];
 
 type ComponentLibProps = {

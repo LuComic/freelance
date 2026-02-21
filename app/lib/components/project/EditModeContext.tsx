@@ -17,8 +17,7 @@ export type InsertableComponentCommand =
   | "textfields"
   | "mainheadline"
   | "sectionheader"
-  | "subheader"
-  | "bodytext";
+  | "subheader";
 
 type PendingComponentInsert = {
   command: InsertableComponentCommand;
@@ -42,7 +41,7 @@ const EditModeContext = createContext<EditModeContextValue | undefined>(
 );
 
 export function EditModeProvider({ children }: { children: React.ReactNode }) {
-  const [isEditing, rawSetIsEditing] = useState(false);
+  const [isEditing, rawSetIsEditing] = useState(true);
   const [isPresenting, rawSetIsPresenting] = useState(false);
   const [pendingComponentInsert, setPendingComponentInsert] =
     useState<PendingComponentInsert | null>(null);
@@ -112,7 +111,9 @@ export function EditModeProvider({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <EditModeContext.Provider value={value}>{children}</EditModeContext.Provider>
+    <EditModeContext.Provider value={value}>
+      {children}
+    </EditModeContext.Provider>
   );
 }
 

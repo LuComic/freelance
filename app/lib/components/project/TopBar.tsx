@@ -18,6 +18,17 @@ export const TopBar = () => {
         Delete
       </button>
       <button
+        onClick={() => setIsEditing(true)}
+        className={`text-sm gap-1 flex items-center justify-center px-2 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) ${
+          isEditing
+            ? "bg-(--vibrant)/20 border-(--vibrant) text-(--light)"
+            : "hover:bg-(--gray)/20"
+        }`}
+      >
+        <Pencil size={15} />
+        Edit
+      </button>
+      <button
         onClick={() => {
           setIsEditing(false);
           setIsPresenting(false);
@@ -30,17 +41,6 @@ export const TopBar = () => {
       >
         <Cog size={15} />
         Config
-      </button>
-      <button
-        onClick={() => setIsEditing(true)}
-        className={`text-sm gap-1 flex items-center justify-center px-2 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) ${
-          isEditing
-            ? "bg-(--vibrant)/20 border-(--vibrant) text-(--light)"
-            : "hover:bg-(--gray)/20"
-        }`}
-      >
-        <Pencil size={15} />
-        Edit
       </button>
       <button
         onClick={() => setIsPresenting(true)}

@@ -225,7 +225,7 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
           ))}
         </div>
       ) : (
-        <div className="w-full max-w-full min-w-0 overflow-x-auto">
+        <div className="w-full max-w-full min-w-0 overflow-x-auto border rounded-md border-(--gray)">
           <div className="min-w-[800px] flex flex-col">
             <div className="w-full text-(--gray-page) border-b border-(--gray) text-left grid justify-between items-start grid-cols-3 bg-(--darkest)">
               <span className="text-(--declined-border) border-r p-2 border-(--gray) h-full text-wrap">

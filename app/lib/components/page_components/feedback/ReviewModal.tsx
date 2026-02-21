@@ -104,9 +104,20 @@ export const ReviewModal = ({
                 <X size={16} />
                 Cancel
               </button>
-              <button className="gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border border-(--vibrant)  hover:bg-(--vibrant)">
-                <ThumbsUp size={16} />
-                Accept
+              <button
+                className={`gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border ${action === "accept" ? "border-(--accepted-border) hover:bg-(--accepted-bg)/10" : "border-(--declined-border) hover:bg-(--declined-bg)/10"}`}
+              >
+                {action === "accept" ? (
+                  <>
+                    <ThumbsUp size={16} />
+                    Accept
+                  </>
+                ) : (
+                  <>
+                    <ThumbsDown size={16} />
+                    Decline
+                  </>
+                )}
               </button>
             </div>
           </div>

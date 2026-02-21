@@ -16,7 +16,7 @@ export const Kanban = ({
   const { isPresenting } = useEditMode();
 
   return (
-    <div className="w-full border-y border-(--gray) py-2 flex flex-col gap-2">
+    <div className="w-full flex flex-col gap-2">
       {isPresenting ? (
         <KanbanClient initialLayout={initialClientLayout} />
       ) : (
