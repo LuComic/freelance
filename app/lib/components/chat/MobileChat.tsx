@@ -4,7 +4,6 @@ import { useState } from "react";
 import {
   MessageSquare,
   PanelRightClose,
-  PanelRightOpen,
   LayoutGrid,
   LibraryBig,
 } from "lucide-react";
@@ -64,21 +63,21 @@ export const MobileChat = () => {
             {activeTab === "components" ? (
               <>
                 <div className="flex flex-wrap items-center justify-start gap-2 w-full mb-2">
-                  {(
-                    ["progress", "text", "input", "feedback"] as ComponentTag[]
-                  ).map((tag) => (
-                    <button
-                      key={tag}
-                      className={`text-sm gap-1 flex items-center justify-center px-2 py-0.5 rounded-md border hover:bg-(--gray)/20 ${
-                        componentFilter !== tag
-                          ? "text-(--gray) border-(--gray)"
-                          : ""
-                      }`}
-                      onClick={() => changeComponentFilter(tag)}
-                    >
-                      {tag}
-                    </button>
-                  ))}
+                  {(["progress", "text", "input"] as ComponentTag[]).map(
+                    (tag) => (
+                      <button
+                        key={tag}
+                        className={`text-sm gap-1 flex items-center justify-center px-2 py-0.5 rounded-md border hover:bg-(--gray)/20 ${
+                          componentFilter !== tag
+                            ? "text-(--gray) border-(--gray)"
+                            : ""
+                        }`}
+                        onClick={() => changeComponentFilter(tag)}
+                      >
+                        {tag}
+                      </button>
+                    ),
+                  )}
                 </div>
                 <ComponentLib
                   filterTag={componentFilter}

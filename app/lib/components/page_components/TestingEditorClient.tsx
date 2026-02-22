@@ -16,7 +16,7 @@ import { renderContentWithComponents } from "@/app/lib/components/page_component
 export default function TestingEditorClient() {
   const {
     isEditing,
-    isPresenting,
+    isLive,
     pendingComponentInsert,
     clearPendingComponentInsert,
   } = useEditMode();
@@ -52,7 +52,7 @@ export default function TestingEditorClient() {
   const updateGhostCompletion = useCallback(
     (value: string, cursorPosition: number) => {
       const textarea = textareaRef.current;
-      if (!textarea || !isEditing || isPresenting) {
+      if (!textarea || !isEditing || isLive) {
         setGhostCompletion(null);
         return;
       }
@@ -66,7 +66,7 @@ export default function TestingEditorClient() {
       const { top, left } = getCaretCoordinates(textarea, cursorPosition);
       setGhostCompletion({ suffix, top, left });
     },
-    [isEditing, isPresenting],
+    [isEditing, isLive],
   );
 
   const setCaretPosition = useCallback(
@@ -89,7 +89,7 @@ export default function TestingEditorClient() {
       return;
     }
 
-    if (!isEditing || isPresenting) {
+    if (!isEditing || isLive) {
       clearPendingComponentInsert();
       return;
     }
@@ -118,12 +118,12 @@ export default function TestingEditorClient() {
     clearPendingComponentInsert,
     content,
     isEditing,
-    isPresenting,
+    isLive,
     pendingComponentInsert,
     setCaretPosition,
   ]);
 
-  if (!isEditing || isPresenting) {
+  if (!isEditing || isLive) {
     return <div className="w-full">{renderedContent}</div>;
   }
 

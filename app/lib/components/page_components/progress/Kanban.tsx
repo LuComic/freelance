@@ -13,11 +13,11 @@ export const Kanban = ({
   initialClientLayout,
   initialCreatorLayout,
 }: KanbanProps) => {
-  const { isPresenting } = useEditMode();
+  const { isLive } = useEditMode();
 
   return (
     <div className="w-full flex flex-col gap-2">
-      {isPresenting ? (
+      {isLive ? (
         <KanbanClient initialLayout={initialClientLayout} />
       ) : (
         <KanbanCreator initialLayout={initialCreatorLayout} />

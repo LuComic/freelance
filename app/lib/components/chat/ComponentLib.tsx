@@ -1,7 +1,7 @@
 import { ComponentItem } from "./ComponentItem";
 import type { InsertableComponentCommand } from "@/app/lib/components/project/EditModeContext";
 
-export type ComponentTag = "progress" | "text" | "input" | "feedback";
+export type ComponentTag = "progress" | "text" | "input";
 
 const COMPS: {
   name: string;
@@ -21,7 +21,7 @@ const COMPS: {
     name: "Recommend",
     desc: "Client can give feedback or recommend things they'd like",
     previewSrc: "/component-previews/recommend.svg",
-    tag: "feedback",
+    tag: "input",
     insertCommand: "feedback",
   },
   {

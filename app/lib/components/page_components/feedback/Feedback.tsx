@@ -13,11 +13,11 @@ export const Feedback = ({
   initialClientLayout,
   initialCreatorLayout,
 }: FeedbackProps) => {
-  const { isPresenting } = useEditMode();
+  const { isLive } = useEditMode();
 
   return (
     <div className="w-full flex flex-col gap-2">
-      {isPresenting ? (
+      {isLive ? (
         <FeedbackClient initialLayout={initialClientLayout} />
       ) : (
         <FeedbackCreator initialLayout={initialCreatorLayout} />

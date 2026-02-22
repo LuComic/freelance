@@ -1,7 +1,24 @@
 "use client";
-import { ChevronRight, File, Settings } from "lucide-react";
+import {
+  ChartNoAxesCombined,
+  ChevronRight,
+  Cog,
+  File,
+  Plus,
+  EllipsisVertical,
+} from "lucide-react";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
+import {
+  Menubar,
+  MenubarContent,
+  MenubarGroup,
+  MenubarItem,
+  MenubarMenu,
+  MenubarSeparator,
+  MenubarTrigger,
+} from "@/components/ui/menubar";
 
 interface SidebarItemProps {
   title: string;
@@ -10,24 +27,52 @@ interface SidebarItemProps {
 }
 
 export const FileItem = ({ title, items, id }: SidebarItemProps) => {
-  const [itemExpanded, setItemExpanded] = useState(false);
+  const pathname = usePathname();
+  const [itemExpanded, setItemExpanded] = useState(() => {
+    if (typeof window !== undefined) {
+      if (pathname.includes(id)) return true;
+    }
+    return false;
+  });
   return (
     <>
-      <Link
-        className="rounded-lg p-1 gap-2 hover:bg-(--darkest-hover) w-full text-(--gray) flex items-center justify-start  md:text-base text-sm"
-        onClick={() => setItemExpanded(!itemExpanded)}
-        href={"/" + id}
-      >
-        <ChevronRight className={`${itemExpanded ? "rotate-90" : ""}`} />
-        {title}
-      </Link>
+      <div className="rounded-lg p-1 gap-2 hover:bg-(--darkest-hover) w-full text-(--gray) flex items-center justify-start  md:text-base text-sm">
+        <button onClick={() => setItemExpanded((prev) => !prev)}>
+          <ChevronRight className={`${itemExpanded ? "rotate-90" : ""}`} />
+        </button>
+        <Link href={"/" + id}>
+          {title.length > 20 ? title.slice(0, 20) : title}
+        </Link>
+        <Menubar className="ml-auto h-auto bg-transparent border-none shadow-none p-0">
+          <MenubarMenu>
+            <MenubarTrigger className=" data-highlighted:bg-transparent data-[state=open]:bg-transparent data-highlighted:text-(--light) data-[state=open]:text-(--light) py-0">
+              <EllipsisVertical size={20} />
+            </MenubarTrigger>
+            <MenubarContent className="bg-(--quite-dark) border border-(--gray) text-(--light) transition-none!">
+              <MenubarGroup>
+                <MenubarItem className="hover:bg-(--darkest-hover)! hover:text-(--light)! ">
+                  <Cog />
+                  Settings
+                </MenubarItem>
+                <MenubarItem className="hover:bg-(--darkest-hover)! hover:text-(--light)! ">
+                  <ChartNoAxesCombined />
+                  Analytics
+                </MenubarItem>
+              </MenubarGroup>
+            </MenubarContent>
+          </MenubarMenu>
+        </Menubar>
+        <button>
+          <Plus size={20} />
+        </button>
+      </div>
 
       {itemExpanded && (
         <Link
           className="pl-8 flex w-full items-center  justify-start gap-2 hover:bg-(--darkest-hover) rounded-lg p-1 md:text-base text-sm"
           href={"/" + id}
         >
-          <File size={20} />
+          <File size={18} />
           Landing
         </Link>
       )}
@@ -39,7 +84,7 @@ export const FileItem = ({ title, items, id }: SidebarItemProps) => {
               key={index}
               href={"/" + id + "/" + item.toLowerCase()}
             >
-              <File size={20} />
+              <File size={18} />
               {item}
             </Link>
           ))

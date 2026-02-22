@@ -28,9 +28,9 @@ type EditModeContextValue = {
   isEditing: boolean;
   setIsEditing: (value: boolean) => void;
   toggleEditing: () => void;
-  isPresenting: boolean;
-  setIsPresenting: (value: boolean) => void;
-  togglePresenting: () => void;
+  isLive: boolean;
+  setIsLive: (value: boolean) => void;
+  toggleLive: () => void;
   pendingComponentInsert: PendingComponentInsert | null;
   requestComponentInsert: (command: InsertableComponentCommand) => void;
   clearPendingComponentInsert: () => void;
@@ -42,7 +42,7 @@ const EditModeContext = createContext<EditModeContextValue | undefined>(
 
 export function EditModeProvider({ children }: { children: React.ReactNode }) {
   const [isEditing, rawSetIsEditing] = useState(true);
-  const [isPresenting, rawSetIsPresenting] = useState(false);
+  const [isLive, rawSetIsLive] = useState(false);
   const [pendingComponentInsert, setPendingComponentInsert] =
     useState<PendingComponentInsert | null>(null);
   const insertNonceRef = useRef(0);
@@ -50,12 +50,12 @@ export function EditModeProvider({ children }: { children: React.ReactNode }) {
   const setIsEditing = useCallback((value: boolean) => {
     rawSetIsEditing(value);
     if (value) {
-      rawSetIsPresenting(false);
+      rawSetIsLive(false);
     }
   }, []);
 
-  const setIsPresenting = useCallback((value: boolean) => {
-    rawSetIsPresenting(value);
+  const setIsLive = useCallback((value: boolean) => {
+    rawSetIsLive(value);
     if (value) {
       rawSetIsEditing(false);
     }
@@ -65,14 +65,14 @@ export function EditModeProvider({ children }: { children: React.ReactNode }) {
     rawSetIsEditing((prev) => {
       const next = !prev;
       if (next) {
-        rawSetIsPresenting(false);
+        rawSetIsLive(false);
       }
       return next;
     });
   }, []);
 
-  const togglePresenting = useCallback(() => {
-    rawSetIsPresenting((prev) => {
+  const toggleLive = useCallback(() => {
+    rawSetIsLive((prev) => {
       const next = !prev;
       if (next) {
         rawSetIsEditing(false);
@@ -86,9 +86,9 @@ export function EditModeProvider({ children }: { children: React.ReactNode }) {
       isEditing,
       setIsEditing,
       toggleEditing,
-      isPresenting,
-      setIsPresenting,
-      togglePresenting,
+      isLive,
+      setIsLive,
+      toggleLive,
       pendingComponentInsert,
       requestComponentInsert: (command: InsertableComponentCommand) => {
         insertNonceRef.current += 1;
@@ -101,12 +101,12 @@ export function EditModeProvider({ children }: { children: React.ReactNode }) {
     }),
     [
       isEditing,
-      isPresenting,
+      isLive,
       pendingComponentInsert,
       setIsEditing,
-      setIsPresenting,
+      setIsLive,
       toggleEditing,
-      togglePresenting,
+      toggleLive,
     ],
   );
 

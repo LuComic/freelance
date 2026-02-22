@@ -13,11 +13,11 @@ export const Radio = ({
   initialClientLayout,
   initialCreatorLayout,
 }: RadioProps) => {
-  const { isPresenting } = useEditMode();
+  const { isLive } = useEditMode();
 
   return (
     <div className="w-full flex flex-col gap-2">
-      {isPresenting ? (
+      {isLive ? (
         <RadioClient initialLayout={initialClientLayout} />
       ) : (
         <RadioCreator initialLayout={initialCreatorLayout} />

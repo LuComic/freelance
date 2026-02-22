@@ -13,11 +13,11 @@ export const Select = ({
   initialClientLayout,
   initialCreatorLayout,
 }: SelectProps) => {
-  const { isPresenting } = useEditMode();
+  const { isLive } = useEditMode();
 
   return (
     <div className="w-full flex flex-col gap-2">
-      {isPresenting ? (
+      {isLive ? (
         <SelectClient initialLayout={initialClientLayout} />
       ) : (
         <SelectCreator initialLayout={initialCreatorLayout} />
