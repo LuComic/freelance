@@ -11,7 +11,7 @@ export const TopBar = () => {
 
   return (
     <div
-      className={`w-full border-b border-(--gray) ${(typeof window !== undefined && pathname.includes("settings")) || pathname.includes("analytics") ? "hidden" : "flex"} items-center justify-start gap-2 p-1.5`}
+      className={`w-full border-b border-(--gray) ${(typeof window !== undefined && pathname.includes("settings")) || pathname.includes("analytics") || pathname.includes("terms") || pathname.includes("privacy") || pathname.includes("cookies") ? "hidden" : "flex"} items-center justify-start gap-2 p-1.5`}
     >
       <button
         onClick={() => setIsEditing(true)}

@@ -151,7 +151,7 @@ export const SettingsDropdown = ({
                     Add
                   </button>
                 </div>
-              ) : (
+              ) : field.danger ? (
                 <div className="flex flex-col gap-2">
                   {fieldValues[fieldIndex].map((value, valueIndex) => (
                     <button
@@ -164,6 +164,17 @@ export const SettingsDropdown = ({
                     >
                       {value}
                     </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {fieldValues[fieldIndex].map((value, valueIndex) => (
+                    <div
+                      key={`${value}-${valueIndex}`}
+                      className="w-max rounded-md border px-2.5 py-1 border-(--gray)"
+                    >
+                      {value}
+                    </div>
                   ))}
                 </div>
               )}

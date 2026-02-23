@@ -1,4 +1,4 @@
-import { SettingsDropdown } from "@/app/lib/components/settings/SettingsDropdown";
+import { SettingsDropdown } from "@/app/lib/components/project_settings/SettingsDropdown";
 
 export type settingsDropdownItemType = {
   section: string;

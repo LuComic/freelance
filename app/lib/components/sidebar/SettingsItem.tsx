@@ -1,6 +1,8 @@
 "use client";
+
 import { ChevronRight, Settings } from "lucide-react";
 import { useState } from "react";
+import Link from "next/link";
 
 interface SidebarItemProps {
   title: string;
@@ -20,13 +22,14 @@ export const SettingsItem = ({ title, items }: SidebarItemProps) => {
       </button>
       {itemExpanded
         ? items.map((item, index) => (
-            <span
+            <Link
               className="pl-8 flex w-full items-center  justify-start gap-2 hover:bg-(--darkest-hover) rounded-lg p-1 md:text-base text-sm"
               key={index}
+              href={"/settings?section=" + title.toLowerCase()}
             >
               <Settings size={20} />
               {item}
-            </span>
+            </Link>
           ))
         : null}
     </>
