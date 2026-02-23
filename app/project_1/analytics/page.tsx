@@ -1,4 +1,4 @@
-import { InputDropdown } from "@/app/lib/components/Analytics/InputDropdown";
+import { InputDropdown } from "@/app/lib/components/analytics/InputDropdown";
 
 export type dropdownItemType = {
   page: string;
