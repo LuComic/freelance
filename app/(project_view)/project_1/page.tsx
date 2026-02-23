@@ -1,4 +1,4 @@
-import { PageLink } from "../lib/components/project/PageLink";
+import { PageLink } from "../../lib/components/project/PageLink";
 
 export default function Page() {
   return (

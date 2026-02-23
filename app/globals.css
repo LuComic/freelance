@@ -154,6 +154,7 @@
     @apply border-border outline-ring/50;
     font-family: "Work Sans Variable", sans-serif;
   }
+
   body {
     @apply bg-background text-foreground;
     background: var(--quite-dark);
