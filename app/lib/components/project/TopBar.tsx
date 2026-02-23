@@ -1,13 +1,18 @@
 "use client";
+
 import { Cog, FilePlusCorner, Pencil, Radio, Share, Trash } from "lucide-react";
 import { useEditMode } from "./EditModeContext";
+import { usePathname } from "next/navigation";
 
 export const TopBar = () => {
   const { isEditing, isLive, setIsEditing, setIsLive } = useEditMode();
   const isConfig = !isEditing && !isLive;
+  const pathname = usePathname();
 
   return (
-    <div className="w-full border-b border-(--gray) flex items-center justify-start gap-2 p-1.5">
+    <div
+      className={`w-full border-b border-(--gray) ${(typeof window !== undefined && pathname.includes("settings")) || pathname.includes("analytics") ? "hidden" : "flex"} items-center justify-start gap-2 p-1.5`}
+    >
       <button
         onClick={() => setIsEditing(true)}
         className={`text-sm gap-1 flex items-center justify-center p-1 lg:px-2 lg:py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) ${

@@ -40,7 +40,7 @@ export const FileItem = ({ title, items, id }: SidebarItemProps) => {
         <button onClick={() => setItemExpanded((prev) => !prev)}>
           <ChevronRight className={`${itemExpanded ? "rotate-90" : ""}`} />
         </button>
-        <Link href={"/" + id}>
+        <Link href={"/" + id} className="w-full">
           {title.length > 20 ? title.slice(0, 20) : title}
         </Link>
         <Menubar className="ml-auto h-auto bg-transparent border-none shadow-none p-0">
@@ -50,13 +50,23 @@ export const FileItem = ({ title, items, id }: SidebarItemProps) => {
             </MenubarTrigger>
             <MenubarContent className="bg-(--quite-dark) border border-(--gray) text-(--light) transition-none!">
               <MenubarGroup>
-                <MenubarItem className="hover:bg-(--darkest-hover)! hover:text-(--light)! ">
-                  <Cog />
-                  Settings
+                <MenubarItem className="hover:bg-(--darkest-hover)! hover:text-(--light)!">
+                  <Link
+                    href={"/" + id + "/settings"}
+                    className="flex items-center justify-start gap-2"
+                  >
+                    <Cog />
+                    Settings
+                  </Link>
                 </MenubarItem>
                 <MenubarItem className="hover:bg-(--darkest-hover)! hover:text-(--light)! ">
-                  <ChartNoAxesCombined />
-                  Analytics
+                  <Link
+                    href={"/" + id + "/analytics"}
+                    className="flex items-center justify-start gap-2"
+                  >
+                    <ChartNoAxesCombined />
+                    Analytics
+                  </Link>
                 </MenubarItem>
               </MenubarGroup>
             </MenubarContent>
