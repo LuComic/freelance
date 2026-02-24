@@ -1,6 +1,6 @@
 "use client";
 
-import type { settingsDropdownItemType } from "@/app/project_1/settings/page";
+import type { settingsDropdownItemType } from "@/app/(project_view)/projects/project_1/settings/page";
 import { ChevronRight, Trash } from "lucide-react";
 import { useState } from "react";
 

@@ -21,13 +21,13 @@ export default function Home() {
                 href="#create-account"
                 className="inline-flex h-10 items-center justify-center rounded-md bg-(--vibrant) px-2.5 py-1 font-medium hover:bg-(--vibrant-hover)"
               >
-                Create Account
+                Continue with Google
               </a>
               <a
                 href="#about"
                 className="inline-flex h-10 items-center justify-center rounded-md bg-white/90 px-2.5 py-1 font-medium text-(--dim) hover:bg-white"
               >
-                Learn More
+                Join with code
               </a>
             </div>
           </div>

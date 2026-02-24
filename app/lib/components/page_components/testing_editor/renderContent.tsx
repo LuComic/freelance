@@ -81,6 +81,14 @@ export function renderContentWithComponents(content: string) {
     }
 
     lastIndex = index + fullMatch.length;
+
+    // Component tags render as block elements, so consume one structural line
+    // break after the tag to avoid double-rendering blank space between blocks.
+    if (content[lastIndex] === "\r" && content[lastIndex + 1] === "\n") {
+      lastIndex += 2;
+    } else if (content[lastIndex] === "\n") {
+      lastIndex += 1;
+    }
   }
 
   if (lastIndex < content.length) {

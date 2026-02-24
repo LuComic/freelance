@@ -1,6 +1,6 @@
 "use client";
 
-import type { dropdownItemType } from "@/app/project_1/analytics/page";
+import type { dropdownItemType } from "@/app/(project_view)/projects/project_1/analytics/page";
 import { ChevronRight } from "lucide-react";
 import { useState } from "react";
 

@@ -28,6 +28,7 @@ interface SidebarItemProps {
 
 export const FileItem = ({ title, items, id }: SidebarItemProps) => {
   const pathname = usePathname();
+  const projectBasePath = "/projects/" + id;
   const [itemExpanded, setItemExpanded] = useState(() => {
     if (typeof window !== undefined) {
       if (pathname.includes(id)) return true;
@@ -40,7 +41,7 @@ export const FileItem = ({ title, items, id }: SidebarItemProps) => {
         <button onClick={() => setItemExpanded((prev) => !prev)}>
           <ChevronRight className={`${itemExpanded ? "rotate-90" : ""}`} />
         </button>
-        <Link href={"/" + id} className="w-full">
+        <Link href={projectBasePath} className="w-full">
           {title.length > 20 ? title.slice(0, 20) : title}
         </Link>
         <Menubar className="ml-auto h-auto bg-transparent border-none shadow-none p-0">
@@ -52,7 +53,7 @@ export const FileItem = ({ title, items, id }: SidebarItemProps) => {
               <MenubarGroup>
                 <MenubarItem className="hover:bg-(--darkest-hover)! hover:text-(--light)!">
                   <Link
-                    href={"/" + id + "/settings"}
+                    href={projectBasePath + "/settings"}
                     className="flex items-center justify-start gap-2"
                   >
                     <Cog />
@@ -61,7 +62,7 @@ export const FileItem = ({ title, items, id }: SidebarItemProps) => {
                 </MenubarItem>
                 <MenubarItem className="hover:bg-(--darkest-hover)! hover:text-(--light)! ">
                   <Link
-                    href={"/" + id + "/analytics"}
+                    href={projectBasePath + "/analytics"}
                     className="flex items-center justify-start gap-2"
                   >
                     <ChartNoAxesCombined />
@@ -80,7 +81,7 @@ export const FileItem = ({ title, items, id }: SidebarItemProps) => {
       {itemExpanded && (
         <Link
           className="pl-8 flex w-full items-center  justify-start gap-2 hover:bg-(--darkest-hover) rounded-lg p-1 md:text-base text-sm"
-          href={"/" + id}
+          href={projectBasePath}
         >
           <File size={18} />
           Landing
@@ -92,7 +93,7 @@ export const FileItem = ({ title, items, id }: SidebarItemProps) => {
             <Link
               className="pl-8 flex w-full items-center  justify-start gap-2 hover:bg-(--darkest-hover) rounded-lg p-1 md:text-base text-sm"
               key={index}
-              href={"/" + id + "/" + item.toLowerCase()}
+              href={projectBasePath + "/" + item.toLowerCase()}
             >
               <File size={18} />
               {item}
