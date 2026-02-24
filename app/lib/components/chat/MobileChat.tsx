@@ -33,7 +33,8 @@ export const MobileChat = () => {
   useEffect(() => {
     if (
       componentLibraryOpenRequestNonce === 0 ||
-      componentLibraryOpenRequestNonce === handledComponentLibraryNonceRef.current
+      componentLibraryOpenRequestNonce ===
+        handledComponentLibraryNonceRef.current
     ) {
       return;
     }
@@ -48,7 +49,7 @@ export const MobileChat = () => {
   return (
     <div className="block md:hidden">
       {chatOpen ? (
-        <nav className="w-[363px] h-dvh max-h-dvh bg-(--darkest) border-l border-(--gray) flex flex-col items-start justify-start p-2 gap-4 fixed z-10 top-0 right-0 overflow-hidden">
+        <nav className="w-[363px] h-dvh max-h-dvh bg-(--darkest) border-l border-(--gray) flex flex-col items-start justify-start p-2 gap-4 fixed z-30 top-0 right-0 overflow-hidden">
           <div className="flex items-center justify-start gap-2 w-full">
             <button
               onClick={() => setChatOpen(false)}
@@ -113,7 +114,7 @@ export const MobileChat = () => {
       ) : (
         <button
           onClick={() => setChatOpen(true)}
-          className="bg-(--darkest) p-1.5 rounded-lg hover:bg-(--darkest-hover) fixed top-2 right-2"
+          className="bg-(--darkest) z-30 p-1.5 rounded-lg hover:bg-(--darkest-hover) fixed bottom-2 right-2"
         >
           {activeTab === "components" ? (
             <LibraryBig size={24} />

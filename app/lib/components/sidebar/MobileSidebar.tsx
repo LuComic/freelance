@@ -22,7 +22,7 @@ export const MobileSidebar = () => {
   return (
     <div className="block md:hidden">
       {sidebarOpen ? (
-        <nav className="w-[363px] h-dvh max-h-dvh bg-(--darkest) border-r border-(--gray) flex flex-col items-start justify-start p-2 gap-4 fixed z-10 top-0 left-0 overflow-hidden">
+        <nav className="w-[363px] h-dvh max-h-dvh bg-(--darkest) border-r border-(--gray) flex flex-col items-start justify-start p-2 gap-4 fixed z-30 top-0 left-0 overflow-hidden">
           <div className="flex items-center justify-between w-full">
             <span className="text-(--gray) text-xl">Empty Canvas</span>
             <button
@@ -92,7 +92,7 @@ export const MobileSidebar = () => {
       ) : (
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="bg-(--darkest)  p-1.5 rounded-lg hover:bg-(--darkest-hover) fixed top-2 left-2"
+          className="bg-(--darkest) z-30 p-1.5 rounded-lg hover:bg-(--darkest-hover) fixed bottom-2 left-2"
         >
           <PanelLeftOpen size={24} />
         </button>
