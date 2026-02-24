@@ -59,8 +59,7 @@ export default function Home() {
         </h2>
         <p className="mt-4 max-w-3xl leading-8 text-(--gray-page)">
           Empty Canvas helps freelancers and small teams present work clearly,
-          collect feedback, and keep progress visible in one place. It is made
-          to be easy to understand on first open.
+          collect feedback, and keep progress visible in one place.
         </p>
       </section>
 
@@ -72,8 +71,8 @@ export default function Home() {
           <div>
             <p className="font-medium">Progress boards</p>
             <p className="mt-3 leading-7 text-(--gray-page)">
-              Clear Todo, In Progress, and Done views that clients understand
-              fast.
+              Clear Progress, Table, Feedback, Select and other components for
+              fast, easy to understand client-freelancer communication.
             </p>
           </div>
           <div>
@@ -85,7 +84,8 @@ export default function Home() {
           <div>
             <p className="font-medium">Reusable setups</p>
             <p className="mt-3 leading-7 text-(--gray-page)">
-              Start from a clean structure and adapt it to each project.
+              Start a project from scratch or pick a suitable one from all kinds
+              of templates.
             </p>
           </div>
         </div>
@@ -112,8 +112,106 @@ export default function Home() {
       </section>
 
       <section
-        id="reviews"
+        id="how"
         className="mx-auto w-full px-4 max-w-7xl scroll-mt-20 py-8 sm:pt-6 lg:pt-8 border-t border-(--gray)"
+      >
+        <div className="grid gap-4 md:grid-cols-[1.4fr_0.8fr]">
+          <div>
+            <h2
+              className="text-2xl font-semibold sm:text-3xl"
+              style={{ fontFamily: '"Lexend Variable", sans-serif' }}
+            >
+              How does it work?
+            </h2>
+            <p className="mt-4 max-w-3xl leading-8 text-(--gray-page)">
+              This example shows a page being built with the Select component:
+              first you create the page structure, then you tune each
+              component&apos;s settings, and finally the client sees the live
+              result.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-8 space-y-4">
+          <div className="rounded-lg border border-(--gray) p-3 sm:p-4">
+            <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-6">
+              <div>
+                <p className="font-medium text-(--gray-page)">Step 1</p>
+                <p className="mt-2 text-lg font-medium">Lay the foundation</p>
+                <p className="mt-3 text-(--gray-page)">
+                  Start by creating a new page and setting up the base layout.
+                  This is where you define the page idea and place the first
+                  sections before fine-tuning content.
+                </p>
+              </div>
+
+              <div>
+                <Image
+                  src="/landing/step1.webp"
+                  alt="Creating the base page layout for a Select component example"
+                  width={1600}
+                  height={900}
+                  className="h-auto w-full"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-(--gray) p-3 sm:p-4">
+            <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-6">
+              <div>
+                <p className="font-medium text-(--gray-page)">Step 2</p>
+                <p className="mt-2 text-lg font-medium">
+                  Adjust component settings
+                </p>
+                <p className="mt-3 text-(--gray-page)">
+                  Edit each block and tweak the Select component options,
+                  labels, and behavior. This is where the page becomes specific
+                  to the project and the feedback you want to collect.
+                </p>
+              </div>
+
+              <div>
+                <Image
+                  src="/landing/step2.webp"
+                  alt="Tweaking Select component settings while building a client page"
+                  width={1600}
+                  height={900}
+                  className="h-auto w-full"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-(--gray) p-3 sm:p-4">
+            <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-6">
+              <div>
+                <p className="font-medium text-(--gray-page)">Step 3</p>
+                <p className="mt-2 text-lg font-medium">Share the live page</p>
+                <p className="mt-3 text-(--gray-page)">
+                  Live view shows exactly what the client sees. They get a clear
+                  page for reviewing progress and sending feedback without extra
+                  back-and-forth.
+                </p>
+              </div>
+
+              <div>
+                <Image
+                  src="/landing/step3.webp"
+                  alt="Live client-facing page view for the Select component example"
+                  width={1600}
+                  height={900}
+                  className="h-auto w-full"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="reviews"
+        className="mx-auto w-full bg-(--gray)/10 px-4 max-w-7xl scroll-mt-20 py-8 sm:pt-6 lg:pt-8 border-t border-(--gray)"
       >
         <p
           className="max-w-4xl text-xl leading-relaxed font-medium sm:text-2xl"
@@ -127,7 +225,7 @@ export default function Home() {
 
       <section
         id="plans"
-        className="mx-auto w-full bg-(--gray)/10 px-4 max-w-7xl scroll-mt-20 py-8 sm:pt-6 lg:pt-8 border-t border-(--gray)"
+        className="mx-auto w-full px-4 max-w-7xl scroll-mt-20 py-8 sm:pt-6 lg:pt-8 border-t border-(--gray)"
       >
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
@@ -168,7 +266,7 @@ export default function Home() {
             </p>
 
             <p className="mt-5 text-3xl font-semibold">
-              $16
+              $11.99
               <span className="text-base font-medium text-(--gray-page)">
                 /mo
               </span>
@@ -190,7 +288,7 @@ export default function Home() {
             </p>
 
             <p className="mt-5 text-3xl font-semibold">
-              $22
+              $14.99
               <span className="text-base font-medium text-(--gray-page)">
                 /mo
               </span>
@@ -220,7 +318,7 @@ export default function Home() {
 
       <section
         id="create-account"
-        className="mx-auto w-full px-4 max-w-7xl scroll-mt-20 pt-8 pb-14 border-t border-(--gray)"
+        className="mx-auto w-full bg-(--gray)/10 px-4 max-w-7xl scroll-mt-20 pt-8 pb-14 border-t border-(--gray)"
       >
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>

@@ -118,7 +118,7 @@ export const RadioCreator = ({}: RadioCreatorProps) => {
               className="w-max rounded-md px-2.5 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) "
               onClick={handleNewOption}
             >
-              Submit
+              Add
             </button>
           </>
         )}
