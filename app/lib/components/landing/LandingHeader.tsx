@@ -39,13 +39,13 @@ export const LandingHeader = () => {
             href="#"
             className="hidden rounded-md border border-(--gray) bg-(--darkest) px-2.5 py-1 font-medium text-(--gray-page) hover:bg-(--darkest-hover) hover:text-(--light) sm:inline-flex"
           >
-            Sign In
+            Join Project
           </Link>
           <Link
             href="#create-account"
             className="inline-flex rounded-md bg-(--vibrant) px-2.5 py-1 font-medium hover:bg-(--vibrant-hover)"
           >
-            Create Account
+            Get started
           </Link>
         </div>
       </div>

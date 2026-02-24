@@ -49,7 +49,7 @@ export default function Home() {
 
       <section
         id="about"
-        className="mx-auto w-full max-w-7xl md:px-0 px-4 py-8 sm:pt-6 lg:pt-8 border-t border-(--gray)"
+        className="mx-auto bg-(--gray)/10 w-full max-w-7xl px-4 scroll-mt-20 py-8 sm:pt-6 lg:pt-8 border-t border-(--gray)"
       >
         <h2
           className="text-2xl font-semibold sm:text-3xl"
@@ -66,7 +66,7 @@ export default function Home() {
 
       <section
         id="features"
-        className="mx-auto w-full md:px-0 px-4 max-w-7xl py-8 sm:pt-6 lg:pt-8 border-t border-(--gray)"
+        className="mx-auto w-full px-4 max-w-7xl scroll-mt-20 py-8 sm:pt-6 lg:pt-8 border-t border-(--gray)"
       >
         <div className="grid gap-x-10 gap-y-8 md:grid-cols-3">
           <div>
@@ -93,7 +93,7 @@ export default function Home() {
 
       <section
         id="why"
-        className="mx-auto w-full md:px-0 px-4 max-w-7xl py-8 sm:pt-6 lg:pt-8 border-t border-(--gray)"
+        className="mx-auto w-full bg-(--gray)/10 px-4 max-w-7xl scroll-mt-20 py-8 sm:pt-6 lg:pt-8 border-t border-(--gray)"
       >
         <div className="grid gap-8 md:grid-cols-[1.4fr_0.8fr]">
           <div>
@@ -113,7 +113,7 @@ export default function Home() {
 
       <section
         id="reviews"
-        className="mx-auto w-full md:px-0 px-4 max-w-7xl py-8 sm:pt-6 lg:pt-8 border-t border-(--gray)"
+        className="mx-auto w-full px-4 max-w-7xl scroll-mt-20 py-8 sm:pt-6 lg:pt-8 border-t border-(--gray)"
       >
         <p
           className="max-w-4xl text-xl leading-relaxed font-medium sm:text-2xl"
@@ -127,7 +127,7 @@ export default function Home() {
 
       <section
         id="plans"
-        className="mx-auto w-full md:px-0 px-4 max-w-7xl py-8 sm:pt-6 lg:pt-8 border-t border-(--gray)"
+        className="mx-auto w-full bg-(--gray)/10 px-4 max-w-7xl scroll-mt-20 py-8 sm:pt-6 lg:pt-8 border-t border-(--gray)"
       >
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
@@ -220,7 +220,7 @@ export default function Home() {
 
       <section
         id="create-account"
-        className="mx-auto w-full md:px-0 px-4 max-w-7xl pt-8 pb-14 border-t border-(--gray)"
+        className="mx-auto w-full px-4 max-w-7xl scroll-mt-20 pt-8 pb-14 border-t border-(--gray)"
       >
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
@@ -251,7 +251,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div id="contact" className="mt-6 text-(--gray-page)">
+        <div id="contact" className="scroll-mt-20 mt-6 text-(--gray-page)">
           Questions?{" "}
           <a
             href="mailto:hello@example.com"

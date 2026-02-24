@@ -12,28 +12,28 @@ const COMPS: {
 }[] = [
   {
     name: "Kanban",
-    desc: "Display the progress as a Kanban table",
+    desc: "Display the progress as a Kanban table. Command: /kanban",
     previewSrc: "/component-previews/kanban.svg",
     tag: "progress",
     insertCommand: "kanban",
   },
   {
     name: "Recommend",
-    desc: "Client can give feedback or recommend things they'd like",
+    desc: "Client can give feedback or recommend things they'd like. Command: /feedback",
     previewSrc: "/component-previews/recommend.svg",
     tag: "input",
     insertCommand: "feedback",
   },
   {
     name: "Select",
-    desc: "Simple select component for multiple answers",
+    desc: "Simple select component for multiple answers. Command: /select",
     previewSrc: "/component-previews/select.svg",
     tag: "input",
     insertCommand: "select",
   },
   {
     name: "Radio",
-    desc: "Simple radio element for a single answer",
+    desc: "Simple radio element for a single answer. Command: /radio",
     previewSrc: "/component-previews/radio.svg",
     tag: "input",
     insertCommand: "radio",
