@@ -5,6 +5,7 @@ import { useEditMode } from "@/app/lib/components/project/EditModeContext";
 import { getCaretCoordinates } from "@/app/lib/components/page_components/testing_editor/caret";
 import {
   completeSlashCommand,
+  consumeSlashActionCommand,
   getActiveLineFromCursor,
   getSlashCompletionSuffix,
   insertComponentTagAtCursor,
@@ -19,6 +20,7 @@ export default function TestingEditorClient() {
     isLive,
     pendingComponentInsert,
     clearPendingComponentInsert,
+    requestOpenComponentLibrary,
   } = useEditMode();
   const [content, setContent] = useState(INITIAL_TEXT);
   const [activeLine, setActiveLine] = useState(1);
@@ -158,6 +160,26 @@ export default function TestingEditorClient() {
               const nextValue = event.target.value;
               const cursorPosition = event.target.selectionStart;
               lastCursorRef.current = cursorPosition;
+              const slashAction = consumeSlashActionCommand(
+                nextValue,
+                cursorPosition,
+              );
+
+              if (slashAction) {
+                if (slashAction.action === "open-component-library") {
+                  requestOpenComponentLibrary();
+                }
+                setContent(slashAction.nextValue);
+                setActiveLine(
+                  getActiveLineFromCursor(
+                    slashAction.nextValue,
+                    slashAction.nextCursor,
+                  ),
+                );
+                setCaretPosition(slashAction.nextCursor);
+                return;
+              }
+
               const replacement = replaceSlashCommandWithTag(
                 nextValue,
                 cursorPosition,

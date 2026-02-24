@@ -34,6 +34,8 @@ type EditModeContextValue = {
   pendingComponentInsert: PendingComponentInsert | null;
   requestComponentInsert: (command: InsertableComponentCommand) => void;
   clearPendingComponentInsert: () => void;
+  componentLibraryOpenRequestNonce: number;
+  requestOpenComponentLibrary: () => void;
 };
 
 const EditModeContext = createContext<EditModeContextValue | undefined>(
@@ -45,7 +47,10 @@ export function EditModeProvider({ children }: { children: React.ReactNode }) {
   const [isLive, rawSetIsLive] = useState(false);
   const [pendingComponentInsert, setPendingComponentInsert] =
     useState<PendingComponentInsert | null>(null);
+  const [componentLibraryOpenRequestNonce, setComponentLibraryOpenRequestNonce] =
+    useState(0);
   const insertNonceRef = useRef(0);
+  const componentLibraryOpenNonceRef = useRef(0);
 
   const setIsEditing = useCallback((value: boolean) => {
     rawSetIsEditing(value);
@@ -98,8 +103,14 @@ export function EditModeProvider({ children }: { children: React.ReactNode }) {
         });
       },
       clearPendingComponentInsert: () => setPendingComponentInsert(null),
+      componentLibraryOpenRequestNonce,
+      requestOpenComponentLibrary: () => {
+        componentLibraryOpenNonceRef.current += 1;
+        setComponentLibraryOpenRequestNonce(componentLibraryOpenNonceRef.current);
+      },
     }),
     [
+      componentLibraryOpenRequestNonce,
       isEditing,
       isLive,
       pendingComponentInsert,

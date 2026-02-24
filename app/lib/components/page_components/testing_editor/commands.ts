@@ -5,6 +5,14 @@ import {
   type EditorComponentCommand,
 } from "./componentRegistry";
 
+const SLASH_ACTION_COMMANDS = ["lib"] as const;
+const ALL_COMPLETABLE_SLASH_COMMANDS = [
+  ...PRIMARY_INSERTABLE_COMMANDS,
+  ...SLASH_ACTION_COMMANDS,
+] as const;
+
+type SlashAction = "open-component-library";
+
 function getTokenRangeAtCursor(value: string, cursor: number) {
   let start = cursor;
   let end = cursor;
@@ -43,10 +51,14 @@ export function completeSlashCommand(value: string, cursor: number) {
 
   const partial = token.slice(1).toLowerCase();
   if (!partial) {
-    return null;
+    const completedToken = "/lib";
+    return {
+      nextValue: `${value.slice(0, start)}${completedToken}${value.slice(end)}`,
+      nextCursor: start + completedToken.length,
+    };
   }
 
-  const matches = PRIMARY_INSERTABLE_COMMANDS.filter((command) =>
+  const matches = ALL_COMPLETABLE_SLASH_COMMANDS.filter((command) =>
     command.startsWith(partial),
   );
   if (matches.length !== 1) {
@@ -72,10 +84,10 @@ export function getSlashCompletionSuffix(value: string, cursor: number) {
 
   const partial = token.slice(1).toLowerCase();
   if (!partial) {
-    return null;
+    return "lib for all possible commands";
   }
 
-  const matches = PRIMARY_INSERTABLE_COMMANDS.filter((command) =>
+  const matches = ALL_COMPLETABLE_SLASH_COMMANDS.filter((command) =>
     command.startsWith(partial),
   );
   if (matches.length !== 1) {
@@ -88,6 +100,33 @@ export function getSlashCompletionSuffix(value: string, cursor: number) {
   }
 
   return completion.slice(partial.length);
+}
+
+function resolveSlashAction(token: string): SlashAction | null {
+  const command = token.slice(1).toLowerCase();
+  if (command === "lib") {
+    return "open-component-library";
+  }
+
+  return null;
+}
+
+export function consumeSlashActionCommand(value: string, cursor: number) {
+  const { start, end, token } = getTokenRangeAtCursor(value, cursor);
+  if (!token.startsWith("/")) {
+    return null;
+  }
+
+  const action = resolveSlashAction(token);
+  if (!action) {
+    return null;
+  }
+
+  return {
+    action,
+    nextValue: `${value.slice(0, start)}${value.slice(end)}`,
+    nextCursor: start,
+  };
 }
 
 export function replaceSlashCommandWithTag(value: string, cursor: number) {

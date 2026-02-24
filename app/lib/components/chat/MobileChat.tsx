@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { startTransition, useEffect, useRef, useState } from "react";
 import {
   MessageSquare,
   PanelRightClose,
@@ -11,10 +11,15 @@ import { useEditMode } from "@/app/lib/components/project/EditModeContext";
 import { ComponentLib, type ComponentTag } from "./ComponentLib";
 
 export const MobileChat = () => {
-  const { isEditing, requestComponentInsert } = useEditMode();
+  const {
+    isEditing,
+    requestComponentInsert,
+    componentLibraryOpenRequestNonce,
+  } = useEditMode();
   const [chatOpen, setChatOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"chat" | "components">("chat");
   const [componentFilter, setComponentFilter] = useState<"" | ComponentTag>("");
+  const handledComponentLibraryNonceRef = useRef(0);
 
   const changeComponentFilter = (newFilter: ComponentTag) => {
     if (componentFilter === newFilter) {
@@ -24,6 +29,21 @@ export const MobileChat = () => {
 
     setComponentFilter(newFilter);
   };
+
+  useEffect(() => {
+    if (
+      componentLibraryOpenRequestNonce === 0 ||
+      componentLibraryOpenRequestNonce === handledComponentLibraryNonceRef.current
+    ) {
+      return;
+    }
+
+    handledComponentLibraryNonceRef.current = componentLibraryOpenRequestNonce;
+    startTransition(() => {
+      setChatOpen(true);
+      setActiveTab("components");
+    });
+  }, [componentLibraryOpenRequestNonce]);
 
   return (
     <div className="block md:hidden">

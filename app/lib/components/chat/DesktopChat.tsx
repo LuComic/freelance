@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useRef, useState } from "react";
 import {
   MessageSquare,
   PanelRightClose,
@@ -16,10 +16,15 @@ type DesktopChatProps = {
 };
 
 export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
-  const { isEditing, requestComponentInsert } = useEditMode();
+  const {
+    isEditing,
+    requestComponentInsert,
+    componentLibraryOpenRequestNonce,
+  } = useEditMode();
   const [chatOpen, setChatOpen] = useState(initialOpen ?? false);
   const [activeTab, setActiveTab] = useState<"chat" | "components">("chat");
   const [componentFilter, setComponentFilter] = useState<"" | ComponentTag>("");
+  const handledComponentLibraryNonceRef = useRef(0);
 
   useEffect(() => {
     setCookie(CHAT_COOKIE, String(chatOpen));
@@ -39,6 +44,21 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
     document.addEventListener("keydown", onKeyDownHandler);
     return () => document.removeEventListener("keydown", onKeyDownHandler);
   }, []);
+
+  useEffect(() => {
+    if (
+      componentLibraryOpenRequestNonce === 0 ||
+      componentLibraryOpenRequestNonce === handledComponentLibraryNonceRef.current
+    ) {
+      return;
+    }
+
+    handledComponentLibraryNonceRef.current = componentLibraryOpenRequestNonce;
+    startTransition(() => {
+      setChatOpen(true);
+      setActiveTab("components");
+    });
+  }, [componentLibraryOpenRequestNonce]);
 
   const changeComponentFilter = (newFilter: ComponentTag) => {
     if (componentFilter === newFilter) {
