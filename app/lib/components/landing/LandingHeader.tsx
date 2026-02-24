@@ -22,7 +22,7 @@ export const LandingHeader = () => {
           </span>
         </a>
 
-        <nav className="hidden items-center gap-2 md:flex">
+        <nav className="hidden items-center gap-2 lg:flex">
           {NAV_LINKS.map((item) => (
             <a
               key={item.label}
@@ -37,13 +37,13 @@ export const LandingHeader = () => {
         <div className="flex items-center gap-2">
           <Link
             href="#"
-            className="hidden rounded-md border border-(--gray) bg-(--darkest) px-2.5 py-1 font-medium text-(--gray-page) hover:bg-(--darkest-hover) hover:text-(--light) sm:inline-flex"
+            className="hidden rounded-md border border-(--gray) bg-(--darkest) px-2.5 py-1 font-medium text-(--gray-page) hover:bg-(--darkest-hover) hover:text-(--light) sm:inline"
           >
             Join a Project
           </Link>
           <Link
             href="/projects/"
-            className="inline-flex rounded-md bg-(--vibrant) px-2.5 py-1 font-medium hover:bg-(--vibrant-hover)"
+            className="rounded-md bg-(--vibrant) px-2.5 py-1 font-medium hover:bg-(--vibrant-hover)"
           >
             Get started
           </Link>
