@@ -34,8 +34,9 @@ export const CreateProjectModal = ({
     "Website project for collecting preferences and feedback from the client.",
   );
   const [pageDropdowns, setPageDropdowns] = useState<boolean[]>(
-    TEMPLATE.pages.map((_, index) => index === 0),
+    TEMPLATE.pages.map(() => false),
   );
+
   const [clients, setClients] = useState<string[]>([
     "alice@client.co",
     "brand-team@client.co",
@@ -173,36 +174,25 @@ export const CreateProjectModal = ({
                               key={page.title}
                               className="w-full flex flex-col"
                             >
-                              <div className="rounded-lg p-1 gap-2 hover:bg-(--darkest-hover) w-full text-(--gray) flex items-center justify-start">
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setPageDropdowns((prev) =>
-                                      prev.map((value, index) =>
-                                        index === pageIndex ? !value : value,
-                                      ),
-                                    )
-                                  }
-                                >
-                                  <ChevronRight
-                                    size={18}
-                                    className={`${pageDropdowns[pageIndex] ? "rotate-90" : ""}`}
-                                  />
-                                </button>
-                                <button
-                                  type="button"
-                                  className="w-full text-left"
-                                  onClick={() =>
-                                    setPageDropdowns((prev) =>
-                                      prev.map((value, index) =>
-                                        index === pageIndex ? !value : value,
-                                      ),
-                                    )
-                                  }
-                                >
+                              <button
+                                type="button"
+                                className="rounded-lg p-1 gap-2 hover:bg-(--darkest-hover) w-full text-(--gray) flex items-center justify-start"
+                                onClick={() =>
+                                  setPageDropdowns((prev) =>
+                                    prev.map((value, index) =>
+                                      index === pageIndex ? !value : value,
+                                    ),
+                                  )
+                                }
+                              >
+                                <ChevronRight
+                                  size={18}
+                                  className={`${pageDropdowns[pageIndex] ? "rotate-90" : ""}`}
+                                />
+                                <span className="w-full text-left">
                                   {page.title}
-                                </button>
-                              </div>
+                                </span>
+                              </button>
 
                               {pageDropdowns[pageIndex] ? (
                                 <div className="pl-8 flex flex-col gap-2 pt-1">

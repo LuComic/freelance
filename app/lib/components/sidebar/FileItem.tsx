@@ -91,7 +91,7 @@ export const FileItem = ({ title, items, id }: SidebarItemProps) => {
       {itemExpanded
         ? items.map((item, index) => (
             <Link
-              className="pl-8 flex w-full items-center  justify-start gap-2 hover:bg-(--darkest-hover) rounded-lg p-1 md:text-base text-sm"
+              className="pl-8 flex w-full items-center justify-start gap-2 hover:bg-(--darkest-hover) rounded-lg p-1 md:text-base text-sm"
               key={index}
               href={projectBasePath + "/" + item.toLowerCase()}
             >
