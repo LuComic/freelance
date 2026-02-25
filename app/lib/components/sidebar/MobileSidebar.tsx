@@ -6,19 +6,19 @@ import {
   PanelLeftOpen,
   Settings,
   Users,
-  Plus,
   Lightbulb,
   Bell,
 } from "lucide-react";
 import { Files } from "./Files";
 import { Connections } from "./Connections";
 import { SidebarSettings } from "./SidebarSettings";
+import { CreateProjectModal } from "@/app/lib/components/project/CreateProjectModal";
 
 export const MobileSidebar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<
-    "files" | "friends" | "settings" | "create"
-  >("files");
+  const [activeTab, setActiveTab] = useState<"files" | "friends" | "settings">(
+    "files",
+  );
   return (
     <div className="block md:hidden">
       {sidebarOpen ? (
@@ -64,16 +64,7 @@ export const MobileSidebar = () => {
               >
                 <Settings size={20} className="mx-auto" />
               </button>
-              <button
-                className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                  activeTab === "create"
-                    ? "bg-(--quite-dark) text-(--vibrant)"
-                    : ""
-                }`}
-                onClick={() => setActiveTab("create")}
-              >
-                <Plus size={20} className="mx-auto" />
-              </button>
+              <CreateProjectModal buttonClassName="p-1 rounded-lg hover:bg-(--quite-dark) w-full" />
             </div>
             {activeTab === "files" ? <Files /> : null}
             {activeTab === "friends" ? <Connections /> : null}

@@ -5,7 +5,6 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Users,
-  Plus,
   Settings,
   Bell,
   Folder,
@@ -14,6 +13,7 @@ import { Files } from "./Files";
 import { Connections } from "./Connections";
 import { SidebarSettings } from "./SidebarSettings";
 import { setCookie, SIDEBAR_COOKIE } from "@/app/lib/cookies";
+import { CreateProjectModal } from "@/app/lib/components/project/CreateProjectModal";
 
 type DesktopSidebarProps = {
   initialOpen?: boolean;
@@ -21,9 +21,9 @@ type DesktopSidebarProps = {
 
 export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(initialOpen ?? true);
-  const [activeTab, setActiveTab] = useState<
-    "files" | "friends" | "settings" | "create"
-  >("files");
+  const [activeTab, setActiveTab] = useState<"files" | "friends" | "settings">(
+    "files",
+  );
 
   useEffect(() => {
     setCookie(SIDEBAR_COOKIE, String(sidebarOpen));
@@ -85,16 +85,7 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
               >
                 <Settings size={20} className="mx-auto" />
               </button>
-              <button
-                className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                  activeTab === "create"
-                    ? "bg-(--quite-dark) text-(--vibrant)"
-                    : ""
-                }`}
-                onClick={() => setActiveTab("create")}
-              >
-                <Plus size={20} className="mx-auto" />
-              </button>
+              <CreateProjectModal buttonClassName="p-1 rounded-lg hover:bg-(--quite-dark) w-full" />
             </div>
             {activeTab === "files" ? <Files /> : null}
             {activeTab === "friends" ? <Connections /> : null}
@@ -158,19 +149,7 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
             >
               <Settings size={20} className="mx-auto" />
             </button>
-            <button
-              className={`h-full  p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                activeTab === "create"
-                  ? "bg-(--quite-dark) text-(--vibrant)"
-                  : ""
-              }`}
-              onClick={() => {
-                setActiveTab("create");
-                setSidebarOpen(true);
-              }}
-            >
-              <Plus size={20} className="mx-auto" />
-            </button>
+            <CreateProjectModal buttonClassName="h-full p-1 rounded-lg hover:bg-(--quite-dark) w-full" />
           </div>
           <div className="flex flex-col gap-2 items-center justify-center mt-auto w-full">
             <button className=" p-1 rounded-lg hover:bg-(--darkest-hover) w-full">

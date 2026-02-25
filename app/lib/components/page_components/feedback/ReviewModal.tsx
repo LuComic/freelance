@@ -24,26 +24,31 @@ export const ReviewModal = ({
 
   const closeReview = () => {
     setReview(false);
-    document.body.style.overflow = "auto";
   };
 
   const reviewIdea = (action: "decline" | "accept") => {
     setReview(true);
     setReviewAction(action);
-    document.body.style.overflow = "hidden";
   };
 
   useEffect(() => {
+    if (!review) {
+      document.body.style.overflow = "auto";
+      return;
+    }
+
+    document.body.style.overflow = "hidden";
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         closeReview();
       }
     };
-    if (review) {
-      document.addEventListener("keydown", handleKeyDown);
-    } else {
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
       document.removeEventListener("keydown", handleKeyDown);
-    }
+      document.body.style.overflow = "auto";
+    };
   }, [review]);
 
   const adjustTextareaHeight = () => {
@@ -75,7 +80,7 @@ export const ReviewModal = ({
           >
             <div className="flex items-center justify-start gap-4">
               <p className="md:text-3xl text-xl font-medium capitalize">
-                {action} Client's idea
+                {action} Client&apos;s idea
               </p>
               <span className="px-2 py-0.5 border rounded-md border-(--gray-page) text-(--gray-page)">
                 {feature.tags.join(", ")}

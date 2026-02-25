@@ -1,8 +1,26 @@
 "use client";
 
-import { Cog, FilePlusCorner, Pencil, Radio, Share, Trash } from "lucide-react";
+import {
+  Cog,
+  FilePlusCorner,
+  LayoutTemplate,
+  Pencil,
+  Radio,
+  Search,
+  Share,
+  Trash,
+} from "lucide-react";
 import { useEditMode } from "./EditModeContext";
 import { usePathname } from "next/navigation";
+import {
+  Menubar,
+  MenubarContent,
+  MenubarGroup,
+  MenubarItem,
+  MenubarMenu,
+  MenubarSeparator,
+  MenubarTrigger,
+} from "@/components/ui/menubar";
 
 export const TopBar = () => {
   const { isEditing, isLive, setIsEditing, setIsLive } = useEditMode();
@@ -61,6 +79,26 @@ export const TopBar = () => {
         <Share size={15} />
         <span className="hidden lg:inline">Save template</span>
       </button>
+      <Menubar className="h-auto bg-transparent border-none shadow-none p-0">
+        <MenubarMenu>
+          <MenubarTrigger className="data-highlighted:bg-transparent data-[state=open]:bg-transparent data-highlighted:text-(--gray-page) data-[state=open]:text-(--gray-page) py-0 text-sm flex items-center justify-center p-1 lg:px-2 lg:py-0.5 rounded-md border border-(--gray-page) hover:bg-(--gray)/20 gap-1 text-(--gray-page)">
+            <LayoutTemplate size={15} />
+            <span className="hidden lg:inline">Template</span>
+          </MenubarTrigger>
+          <MenubarContent className="bg-(--quite-dark) border border-(--gray) text-(--light) transition-none!">
+            <MenubarGroup>
+              <MenubarItem className="hover:bg-(--darkest-hover)! hover:text-(--light)!">
+                <Search size={15} />
+                <span className="hidden lg:inline">Use template</span>
+              </MenubarItem>
+              <MenubarItem className="hover:bg-(--darkest-hover)! hover:text-(--light)!">
+                <Share size={15} />
+                <span className="hidden lg:inline">Save template</span>
+              </MenubarItem>
+            </MenubarGroup>
+          </MenubarContent>
+        </MenubarMenu>
+      </Menubar>
     </div>
   );
 };
