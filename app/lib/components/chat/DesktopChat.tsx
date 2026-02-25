@@ -73,7 +73,7 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
   return (
     <div className="hidden md:block self-stretch">
       {chatOpen ? (
-        <nav className="w-[491px] h-full min-h-screen bg-(--darkest) border-l border-(--gray) flex flex-col items-start justify-start p-2 px-3 gap-4 overflow-hidden">
+        <nav className="w-[491px] h-dvh min-h-dvh bg-(--darkest) border-l border-(--gray) flex flex-col items-start justify-start p-2 px-3 gap-4 overflow-hidden">
           <div className="flex items-center justify-start gap-2 w-full">
             <button
               onClick={() => setChatOpen(false)}
@@ -107,7 +107,7 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
             </button>
           </div>
 
-          <div className="w-full">
+          <div className="w-full flex-1 min-h-0 overflow-y-auto">
             {activeTab === "components" ? (
               <>
                 <div className="flex flex-wrap items-center justify-start gap-2 w-full mb-2">
