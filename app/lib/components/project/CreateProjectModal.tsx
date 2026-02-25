@@ -88,10 +88,10 @@ export const CreateProjectModal = ({
           onClick={closeModal}
         >
           <div
-            className="w-full max-h-[85vh] h-auto flex flex-col items-start justify-start gap-3 p-3 md:max-w-3xl bg-(--darkest) rounded-xl overflow-y-auto border border-(--gray)"
+            className="w-full max-h-[85vh] h-auto flex flex-col items-start justify-start gap-2 p-3 md:max-w-3xl bg-(--darkest) rounded-xl overflow-y-auto border border-(--gray)"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-full flex items-start justify-between gap-3">
+            <div className="w-full flex items-start justify-between gap-2">
               <div className="flex flex-col gap-1">
                 <p className="md:text-3xl text-xl font-medium">
                   Create Project
@@ -102,28 +102,24 @@ export const CreateProjectModal = ({
               </div>
             </div>
 
-            <div className="w-full border-y border-(--gray) py-3 flex flex-col gap-3">
-              <div className="w-full flex flex-col gap-2">
-                <p className="text-(--gray-page)">Project name</p>
-                <input
-                  type="text"
-                  className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
-                  placeholder="Project name..."
-                  value={projectName}
-                  onChange={(e) => setProjectName(e.target.value)}
-                />
-              </div>
+            <div className="w-full border-y border-(--gray) py-3 flex flex-col gap-2">
+              <p className="text-(--gray-page)">Project name</p>
+              <input
+                type="text"
+                className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
+                placeholder="Project name..."
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
+              />
 
-              <div className="w-full flex flex-col gap-2">
-                <p className="text-(--gray-page)">Project description</p>
-                <textarea
-                  rows={3}
-                  className="rounded-md bg-(--dim) px-2 py-1.5 outline-none resize-none"
-                  placeholder="Project description..."
-                  value={projectDescription}
-                  onChange={(e) => setProjectDescription(e.target.value)}
-                />
-              </div>
+              <p className="text-(--gray-page)">Project description</p>
+              <textarea
+                rows={3}
+                className="rounded-md bg-(--dim) px-2 py-1.5 outline-none resize-none"
+                placeholder="Project description..."
+                value={projectDescription}
+                onChange={(e) => setProjectDescription(e.target.value)}
+              />
             </div>
 
             <div className="w-full flex flex-col">
@@ -142,27 +138,25 @@ export const CreateProjectModal = ({
 
                 {templateSectionOpen ? (
                   <div className="pl-7 flex flex-col gap-2 pb-2">
-                    <div className="w-full flex flex-col gap-2">
-                      <p className="text-(--gray-page)">Search template</p>
-                      <div className="w-full flex items-center gap-2">
-                        <input
-                          type="text"
-                          className="rounded-md bg-(--dim) px-2 py-1.5 outline-none w-full"
-                          placeholder="Search"
-                          value={templateSearch}
-                          onChange={(e) => setTemplateSearch(e.target.value)}
-                        />
-                        <button
-                          type="button"
-                          className="rounded-md border border-(--gray) text-(--gray) p-2 hover:bg-(--gray)/20"
-                        >
-                          <Search size={18} />
-                        </button>
-                      </div>
+                    <p className="text-(--gray-page)">Search template</p>
+                    <div className="w-full flex items-center gap-2">
+                      <input
+                        type="text"
+                        className="rounded-md bg-(--dim) px-2 py-1.5 outline-none w-full"
+                        placeholder="Search"
+                        value={templateSearch}
+                        onChange={(e) => setTemplateSearch(e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        className="rounded-md border border-(--gray) text-(--gray) p-2 hover:bg-(--gray)/20"
+                      >
+                        <Search size={18} />
+                      </button>
                     </div>
 
                     {templateFound ? (
-                      <div className="w-full flex flex-col gap-2">
+                      <>
                         <div className="flex flex-wrap items-center gap-1 md:text-lg text-base">
                           <p className="font-medium">{TEMPLATE.name}</p>
                           <span className="text-(--gray-page)">
@@ -230,7 +224,7 @@ export const CreateProjectModal = ({
                             </div>
                           ))}
                         </div>
-                      </div>
+                      </>
                     ) : (
                       <p className="text-(--gray-page)">
                         No template found for &quot;{templateSearch}&quot;.
