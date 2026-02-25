@@ -32,44 +32,42 @@ export const MobileSidebar = () => {
               <PanelLeftClose size={22} />
             </button>
           </div>
-          <div className="w-full flex-1 min-h-0 overflow-y-auto pr-1 flex flex-col gap-4">
-            <div className="flex items-center justify-around p-1 rounded-lg bg-(--dim) w-full gap-1">
-              <button
-                className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                  activeTab === "files"
-                    ? "bg-(--quite-dark) text-(--vibrant)"
-                    : ""
-                }`}
-                onClick={() => setActiveTab("files")}
-              >
-                <Lightbulb size={20} className="mx-auto" />
-              </button>
-              <button
-                className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                  activeTab === "friends"
-                    ? "bg-(--quite-dark) text-(--vibrant)"
-                    : ""
-                }`}
-                onClick={() => setActiveTab("friends")}
-              >
-                <Users size={20} className="mx-auto" />
-              </button>
-              <button
-                className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                  activeTab === "settings"
-                    ? "bg-(--quite-dark) text-(--vibrant)"
-                    : ""
-                }`}
-                onClick={() => setActiveTab("settings")}
-              >
-                <Settings size={20} className="mx-auto" />
-              </button>
-              <CreateProjectModal buttonClassName="p-1 rounded-lg hover:bg-(--quite-dark) w-full" />
-            </div>
-            {activeTab === "files" ? <Files /> : null}
-            {activeTab === "friends" ? <Connections /> : null}
-            {activeTab === "settings" ? <SidebarSettings /> : null}
+          <div className="flex items-center justify-around p-1 rounded-lg bg-(--dim) w-full gap-1">
+            <button
+              className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
+                activeTab === "files"
+                  ? "bg-(--quite-dark) text-(--vibrant)"
+                  : ""
+              }`}
+              onClick={() => setActiveTab("files")}
+            >
+              <Lightbulb size={20} className="mx-auto" />
+            </button>
+            <button
+              className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
+                activeTab === "friends"
+                  ? "bg-(--quite-dark) text-(--vibrant)"
+                  : ""
+              }`}
+              onClick={() => setActiveTab("friends")}
+            >
+              <Users size={20} className="mx-auto" />
+            </button>
+            <button
+              className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
+                activeTab === "settings"
+                  ? "bg-(--quite-dark) text-(--vibrant)"
+                  : ""
+              }`}
+              onClick={() => setActiveTab("settings")}
+            >
+              <Settings size={20} className="mx-auto" />
+            </button>
+            <CreateProjectModal buttonClassName="p-1 rounded-lg hover:bg-(--quite-dark) w-full" />
           </div>
+          {activeTab === "files" ? <Files /> : null}
+          {activeTab === "friends" ? <Connections /> : null}
+          {activeTab === "settings" ? <SidebarSettings /> : null}
           <div className="mt-auto w-full h-max flex items-center justify-between">
             <div className="w-max gap-2 flex items-center justify-start py-1 px-2 rounded-lg hover:bg-(--darkest-hover) ">
               <div className="aspect-square w-8 h-auto bg-(--dim) rounded-full"></div>
