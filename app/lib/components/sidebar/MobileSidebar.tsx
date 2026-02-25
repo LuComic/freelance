@@ -6,7 +6,7 @@ import {
   PanelLeftOpen,
   Settings,
   Users,
-  Lightbulb,
+  Folder,
   Bell,
 } from "lucide-react";
 import { Files } from "./Files";
@@ -32,6 +32,7 @@ export const MobileSidebar = () => {
               <PanelLeftClose size={22} />
             </button>
           </div>
+
           <div className="flex items-center justify-around p-1 rounded-lg bg-(--dim) w-full gap-1">
             <button
               className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
@@ -41,7 +42,7 @@ export const MobileSidebar = () => {
               }`}
               onClick={() => setActiveTab("files")}
             >
-              <Lightbulb size={20} className="mx-auto" />
+              <Folder size={20} className="mx-auto" />
             </button>
             <button
               className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
@@ -65,6 +66,7 @@ export const MobileSidebar = () => {
             </button>
             <CreateProjectModal buttonClassName="p-1 rounded-lg hover:bg-(--quite-dark) w-full" />
           </div>
+
           {activeTab === "files" ? <Files /> : null}
           {activeTab === "friends" ? <Connections /> : null}
           {activeTab === "settings" ? <SidebarSettings /> : null}

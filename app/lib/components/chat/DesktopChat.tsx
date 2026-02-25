@@ -106,6 +106,7 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
               <LayoutGrid size={20} className="mx-auto" />
             </button>
           </div>
+
           <div className="w-full">
             {activeTab === "components" ? (
               <>

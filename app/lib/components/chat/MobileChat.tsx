@@ -80,7 +80,7 @@ export const MobileChat = () => {
               <LayoutGrid size={20} className="mx-auto" />
             </button>
           </div>
-          <div className="w-full flex-1 min-h-0 overflow-y-auto pr-1">
+          <div className="w-full flex-1 min-h-0 overflow-y-auto">
             {activeTab === "components" ? (
               <>
                 <div className="flex flex-wrap items-center justify-start gap-2 w-full mb-2">
