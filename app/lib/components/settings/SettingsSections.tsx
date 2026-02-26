@@ -9,12 +9,8 @@ export function SettingsSections() {
   const searchParams = useSearchParams();
   const section = searchParams.get("section");
 
-  const [overallOpen, setOverallOpen] = useState(
-    section === "overall",
-  );
-  const [accountOpen, setAccountOpen] = useState(
-    section === "account",
-  );
+  const [overallOpen, setOverallOpen] = useState(section === "overall");
+  const [accountOpen, setAccountOpen] = useState(section === "account");
   const [legalOpen, setLegalOpen] = useState(section === "legal");
 
   useEffect(() => {
@@ -168,45 +164,6 @@ export function SettingsSections() {
             <p className="text-(--gray-page)">Email</p>
             <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
               {email}
-            </div>
-
-            <p className="text-(--gray-page)">Change email</p>
-            <input
-              type="text"
-              placeholder="Enter a new email..."
-              className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
-              value={newEmail}
-              onChange={(e) => setNewEmail(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  const nextValue = newEmail.trim();
-                  if (!nextValue) return;
-                  setEmail(nextValue);
-                  setNewEmail("");
-                }
-              }}
-            />
-            <button
-              type="button"
-              className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
-              onClick={() => {
-                const nextValue = newEmail.trim();
-                if (!nextValue) return;
-                setEmail(nextValue);
-                setNewEmail("");
-              }}
-            >
-              Save
-            </button>
-
-            <p className="text-(--gray-page)">Password</p>
-            <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
-              Last changed 24 days ago
-            </div>
-
-            <p className="text-(--gray-page)">2FA</p>
-            <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
-              Not enabled
             </div>
           </div>
         ) : null}
