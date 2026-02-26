@@ -27,7 +27,7 @@ export default function Page() {
   return (
     <>
       <div className="w-full border-b border-(--gray) pb-2 flex flex-col gap-2">
-        <p className="md:text-3xl text-xl font-medium">Project Settings</p>
+        <p className="@[40rem]:text-3xl text-xl font-medium">Project Settings</p>
       </div>
       <p className="text-(--gray-page)">
         Manage project details, collaborators, and platform settings for this
@@ -38,7 +38,7 @@ export default function Page() {
         <div className="w-full p-2 flex flex-col gap-2">
           <button
             type="button"
-            className="flex font-medium md:text-lg text-base items-center justify-start gap-2"
+            className="flex font-medium @[40rem]:text-lg text-base items-center justify-start gap-2"
             onClick={() => setGeneralOpen((prev) => !prev)}
           >
             <ChevronRight
@@ -90,7 +90,7 @@ export default function Page() {
         <div className="bg-(--gray)/10 w-full p-2 flex flex-col gap-2">
           <button
             type="button"
-            className="flex font-medium md:text-lg text-base items-center justify-start gap-2"
+            className="flex font-medium @[40rem]:text-lg text-base items-center justify-start gap-2"
             onClick={() => setClientsOpen((prev) => !prev)}
           >
             <ChevronRight
@@ -160,7 +160,7 @@ export default function Page() {
         <div className="w-full p-2 flex flex-col gap-2">
           <button
             type="button"
-            className="flex font-medium md:text-lg text-base items-center justify-start gap-2"
+            className="flex font-medium @[40rem]:text-lg text-base items-center justify-start gap-2"
             onClick={() => setCoCreatorsOpen((prev) => !prev)}
           >
             <ChevronRight
@@ -230,7 +230,7 @@ export default function Page() {
         <div className="bg-(--gray)/10 w-full p-2 flex flex-col gap-2">
           <button
             type="button"
-            className="flex font-medium md:text-lg text-base items-center justify-start gap-2"
+            className="flex font-medium @[40rem]:text-lg text-base items-center justify-start gap-2"
             onClick={() => setDangerOpen((prev) => !prev)}
           >
             <ChevronRight

@@ -25,7 +25,7 @@ export default async function Page() {
 
   return (
     <>
-      <h1 className="md:text-3xl text-xl font-medium">
+      <h1 className="@[40rem]:text-3xl text-xl font-medium">
         This is the feature showcase page
       </h1>
       <FeatureSelector

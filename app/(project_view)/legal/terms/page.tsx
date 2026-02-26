@@ -2,7 +2,7 @@ export default function Page() {
   return (
     <>
       <div className="w-full border-b border-(--gray) pb-2 flex flex-col gap-2">
-        <p className="md:text-3xl text-xl font-medium">Terms of Service</p>
+        <p className="@[40rem]:text-3xl text-xl font-medium">Terms of Service</p>
       </div>
       <p className="text-(--gray-page)">
         Placeholder legal text for the platform&apos;s Terms of Service. Replace

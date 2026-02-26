@@ -41,7 +41,7 @@ export function SettingsSections() {
       <div className="w-full p-2 flex flex-col gap-2">
         <button
           type="button"
-          className="flex font-medium md:text-lg text-base items-center justify-start gap-2"
+          className="flex font-medium @[40rem]:text-lg text-base items-center justify-start gap-2"
           onClick={() => setOverallOpen((prev) => !prev)}
         >
           <ChevronRight
@@ -119,7 +119,7 @@ export function SettingsSections() {
       <div className="bg-(--gray)/10 w-full p-2 flex flex-col gap-2">
         <button
           type="button"
-          className="flex font-medium md:text-lg text-base items-center justify-start gap-2"
+          className="flex font-medium @[40rem]:text-lg text-base items-center justify-start gap-2"
           onClick={() => setAccountOpen((prev) => !prev)}
         >
           <ChevronRight
@@ -215,7 +215,7 @@ export function SettingsSections() {
       <div className="w-full p-2 flex flex-col gap-2">
         <button
           type="button"
-          className="flex font-medium md:text-lg text-base items-center justify-start gap-2"
+          className="flex font-medium @[40rem]:text-lg text-base items-center justify-start gap-2"
           onClick={() => setLegalOpen((prev) => !prev)}
         >
           <ChevronRight

@@ -19,7 +19,7 @@ export const InputDropdown = ({
     >
       <button
         type="button"
-        className={`flex font-medium md:text-lg text-base items-center justify-start gap-2`}
+        className={`flex font-medium @[40rem]:text-lg text-base items-center justify-start gap-2`}
         onClick={() => setOpen((prev) => !prev)}
       >
         <ChevronRight
