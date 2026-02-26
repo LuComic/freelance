@@ -19,13 +19,13 @@ export default function Home() {
             <div className="mt-6 flex w-full max-w-md flex-col gap-3 sm:flex-row sm:justify-center">
               <a
                 href="#create-account"
-                className="inline-flex h-10 items-center justify-center rounded-md bg-(--vibrant) px-2.5 py-1 font-medium hover:bg-(--vibrant-hover)"
+                className="inline-flex h-10 items-center justify-center rounded-md bg-(--vibrant) px-2 py-1 font-medium hover:bg-(--vibrant-hover)"
               >
                 Continue with Google
               </a>
               <a
                 href="#about"
-                className="inline-flex h-10 items-center justify-center rounded-md bg-white/90 px-2.5 py-1 font-medium text-(--dim) hover:bg-white"
+                className="inline-flex h-10 items-center justify-center rounded-md bg-white/90 px-2 py-1 font-medium text-(--dim) hover:bg-white"
               >
                 Join with code
               </a>
@@ -336,13 +336,13 @@ export default function Home() {
           <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
             <a
               href="#"
-              className="inline-flex h-10 items-center justify-center rounded-md bg-(--vibrant) px-2.5 py-1 font-medium hover:bg-(--vibrant-hover)"
+              className="inline-flex h-10 items-center justify-center rounded-md bg-(--vibrant) px-2 py-1 font-medium hover:bg-(--vibrant-hover)"
             >
               Create Account
             </a>
             <a
               href="#contact"
-              className="inline-flex h-10 items-center justify-center rounded-md border border-(--gray) bg-(--quite-dark) px-2.5 py-1 font-medium hover:bg-(--darkest-hover)"
+              className="inline-flex h-10 items-center justify-center rounded-md border border-(--gray) bg-(--quite-dark) px-2 py-1 font-medium hover:bg-(--darkest-hover)"
             >
               Contact
             </a>

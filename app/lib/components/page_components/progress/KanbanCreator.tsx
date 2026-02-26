@@ -130,7 +130,7 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
 
   return (
     <>
-      <p className="md:text-xl text-lg font-medium">Current Progress</p>
+      <p className="@[40rem]:text-xl text-lg font-medium">Current Progress</p>
       <p className="text-(--gray-page)">
         Here you can display the progress of your work as a kanban list. The
         table is divided into &quot;Todo&quot; (features/things to do or fix),
@@ -139,7 +139,7 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
       </p>
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
         <button
-          className="md:text-lg text-base font-medium flex items-center justify-start gap-2  w-max"
+          className="@[40rem]:text-lg text-base font-medium flex items-center justify-start gap-2  w-max"
           onClick={() => setAdding((prev) => !prev)}
         >
           New Task
@@ -166,7 +166,7 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
                 setNewTaskStatus(value as itemType["status"])
               }
             >
-              <SelectTrigger className="w-full md:w-52 bg-(--darkest) border-(--gray-page) ">
+              <SelectTrigger className="w-full @[40rem]:w-52 bg-(--darkest) border-(--gray-page) ">
                 <SelectValue placeholder="Set the status" />
               </SelectTrigger>
               <SelectContent className="bg-(--darkest) border-none text-(--gray-page)">
@@ -185,7 +185,7 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
             </Select>
 
             <button
-              className="w-max rounded-md px-2.5 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) "
+              className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) "
               onClick={handleNewTask}
             >
               Submit
@@ -193,9 +193,9 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
           </>
         )}
       </div>
-      <div className="grid grid-cols-2 md:flex items-center justify-between md:justify-start w-full gap-2">
+      <div className="grid grid-cols-2 @[40rem]:flex items-center justify-between @[40rem]:justify-start w-full gap-2">
         <button
-          className={`flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border ${filter !== "dismissed" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
+          className={`flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border ${filter !== "dismissed" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
           onClick={() => changeFilter()}
         >
           <X size={16} />
@@ -204,7 +204,7 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
       </div>
       {filter === "dismissed" ? (
         <div
-          className={`w-full flex flex-col md:grid ${visibleData.length === 1 ? "grid-cols-[repeat(auto-fit,minmax(280px,500px))]" : "grid-cols-[repeat(auto-fit,minmax(280px,1fr))]"}  gap-2`}
+          className={`w-full flex flex-col @[40rem]:grid ${visibleData.length === 1 ? "grid-cols-[repeat(auto-fit,minmax(280px,500px))]" : "grid-cols-[repeat(auto-fit,minmax(280px,1fr))]"}  gap-2`}
         >
           {visibleData.map((feature) => (
             <div
@@ -214,7 +214,7 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
               <span className="font-semibold">{feature.feature}</span>
               <div className="w-full flex items-center gap-1">
                 <button
-                  className="gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border border-(--gray)  hover:bg-(--gray)/20"
+                  className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm  w-full border border-(--gray)  hover:bg-(--gray)/20"
                   onClick={() => handleDismissing(feature)}
                 >
                   <TimerReset size={16} />

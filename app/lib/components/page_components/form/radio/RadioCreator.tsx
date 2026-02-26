@@ -52,7 +52,7 @@ export const RadioCreator = ({}: RadioCreatorProps) => {
 
   return (
     <>
-      <p className="md:text-xl text-lg font-medium">Radio field setup</p>
+      <p className="@[40rem]:text-xl text-lg font-medium">Radio field setup</p>
       <p className="text-(--gray-page)">
         Configure the title, description, and available choices for a
         single-choice radio component.
@@ -60,7 +60,7 @@ export const RadioCreator = ({}: RadioCreatorProps) => {
 
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
         <button
-          className="md:text-lg text-base font-medium flex items-center justify-start gap-2  w-max"
+          className="@[40rem]:text-lg text-base font-medium flex items-center justify-start gap-2  w-max"
           onClick={() => setEditing((prev) => !prev)}
         >
           Edit field

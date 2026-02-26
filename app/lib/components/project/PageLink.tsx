@@ -8,7 +8,7 @@ export const PageLink = ({ newPage }: { newPage: string }) => {
   return (
     <Link
       href={pathname + "/" + encodeURI(newPage.toLowerCase())}
-      className="rounded-md px-2.5 py-1 bg-(--darkest) hover:bg-(--darkest-hover) text-base md:text-lg"
+      className="rounded-md px-2 py-1 bg-(--darkest) hover:bg-(--darkest-hover) text-base md:text-lg"
     >
       {newPage}
     </Link>

@@ -280,7 +280,7 @@ export const CreateProjectModal = ({
                         />
                         <button
                           type="button"
-                          className="w-max rounded-md px-2.5 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
+                          className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
                           onClick={() => {
                             if (!newClient.trim()) return;
                             setClients((prev) => [newClient.trim(), ...prev]);
@@ -335,7 +335,7 @@ export const CreateProjectModal = ({
                     />
                     <button
                       type="button"
-                      className="w-max rounded-md px-2.5 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
+                      className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
                       onClick={() => {
                         if (!newCoCreator.trim()) return;
                         setCoCreators((prev) => [newCoCreator.trim(), ...prev]);
@@ -352,14 +352,14 @@ export const CreateProjectModal = ({
             <div className="w-full flex items-center gap-1 mt-1">
               <button
                 type="button"
-                className="gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm w-full border border-(--gray) hover:bg-(--gray)/20"
+                className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm w-full border border-(--gray) hover:bg-(--gray)/20"
                 onClick={closeModal}
               >
                 Cancel
               </button>
               <button
                 type="button"
-                className="gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm w-full border border-(--vibrant) bg-(--vibrant)/10 hover:bg-(--vibrant)/20"
+                className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm w-full border border-(--vibrant) bg-(--vibrant)/10 hover:bg-(--vibrant)/20"
                 onClick={closeModal}
               >
                 Create Project

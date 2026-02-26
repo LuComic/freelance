@@ -39,7 +39,7 @@ export default async function ProjectViewLayout({
         <div className="flex-1 min-w-0 flex flex-col items-start justify-start">
           <Tab />
           <TopBar />
-          <div className="w-full px-4 md:pt-8 pt-15 pb-8 flex flex-col items-start justify-start gap-4">
+          <div className="@container w-full px-4 md:pt-8 pt-15 pb-8 flex flex-col items-start justify-start gap-4">
             {children}
           </div>
         </div>

@@ -51,7 +51,7 @@ export default function Page() {
           {generalOpen ? (
             <div className="pl-7 flex flex-col gap-2 pb-2">
               <p className="text-(--gray-page)">Project name</p>
-              <div className="w-max rounded-md border px-2.5 py-1 border-(--gray)">
+              <div className="w-max rounded-md border px-2 py-1 border-(--gray)">
                 {projectName}
               </div>
 
@@ -73,7 +73,7 @@ export default function Page() {
               />
               <button
                 type="button"
-                className="w-max rounded-md px-2.5 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
+                className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
                 onClick={() => {
                   const nextValue = newProjectName.trim();
                   if (!nextValue) return;
@@ -143,7 +143,7 @@ export default function Page() {
               />
               <button
                 type="button"
-                className="w-max rounded-md px-2.5 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
+                className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
                 onClick={() => {
                   const nextValue = newClient.trim();
                   if (!nextValue) return;
@@ -213,7 +213,7 @@ export default function Page() {
               />
               <button
                 type="button"
-                className="w-max rounded-md px-2.5 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
+                className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
                 onClick={() => {
                   const nextValue = newCoCreator.trim();
                   if (!nextValue) return;
@@ -245,7 +245,7 @@ export default function Page() {
               <p className="text-(--gray-page)">Delete project</p>
               <button
                 type="button"
-                className="w-max rounded-md border px-2.5 py-1 border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20"
+                className="w-max rounded-md border px-2 py-1 border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20"
               >
                 Delete project
               </button>

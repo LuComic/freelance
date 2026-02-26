@@ -15,7 +15,7 @@ export const Subheader = ({
       initialText={text}
       placeholder="Subheader"
       renderClient={(value) => (
-        <p className="md:text-lg text-base font-medium">{value}</p>
+        <p className="@[40rem]:text-lg text-base font-medium">{value}</p>
       )}
     />
   );

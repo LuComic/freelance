@@ -128,7 +128,7 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
 
   return (
     <>
-      <p className="md:text-xl text-lg font-medium">
+      <p className="@[40rem]:text-xl text-lg font-medium">
         Submit ideas to the creator
       </p>
       <p className="text-(--gray-page)">
@@ -137,7 +137,7 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
       </p>
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
         <button
-          className="md:text-lg text-base font-medium flex items-center justify-start gap-2  w-max"
+          className="@[40rem]:text-lg text-base font-medium flex items-center justify-start gap-2  w-max"
           onClick={() => setAdding((prev) => !prev)}
         >
           New idea
@@ -201,7 +201,7 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
             </div>
 
             <button
-              className="w-max rounded-md px-2.5 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) "
+              className="w-max rounded-md py-1 px-2 bg-(--vibrant) hover:bg-(--vibrant-hover) "
               onClick={handleNewIdea}
             >
               Submit
@@ -209,9 +209,9 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
           </>
         )}
       </div>
-      <div className="grid grid-cols-2 md:flex items-center justify-between md:justify-start w-full gap-2">
+      <div className="grid grid-cols-2 @[40rem]:flex items-center justify-between @[40rem]:justify-start w-full gap-2">
         <button
-          className="flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border text-(--gray-page) border-(--gray-page)  hover:bg-(--gray)/20"
+          className="flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border text-(--gray-page) border-(--gray-page) hover:bg-(--gray)/20"
           onClick={() => {
             const nextLayout = layout === "grid" ? "list" : "grid";
             setCookie(FEEDBACK_CLIENT_LAYOUT_COOKIE, nextLayout);
@@ -232,28 +232,28 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
         </button>
 
         <button
-          className={`flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border ${filter !== "accepted" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
+          className={`flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border ${filter !== "accepted" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
           onClick={() => changeFilter("accepted")}
         >
           <ThumbsUp size={16} />
           Accepted
         </button>
         <button
-          className={`flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border ${filter !== "declined" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
+          className={`flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border ${filter !== "declined" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
           onClick={() => changeFilter("declined")}
         >
           <ThumbsDown size={16} />
           Declined
         </button>
         <button
-          className={`flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border ${filter !== "pending" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
+          className={`flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border ${filter !== "pending" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
           onClick={() => changeFilter("pending")}
         >
           <Hourglass size={16} />
           Pending
         </button>
         <button
-          className={`flex items-center justify-center gap-1 w-full md:w-max rounded-md px-2.5 py-1 border ${filter !== "dismissed" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
+          className={`flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border ${filter !== "dismissed" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
           onClick={() => changeFilter("dismissed")}
         >
           <X size={16} />
@@ -267,7 +267,7 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
       </div>
       {layout === "grid" ? (
         <div
-          className={`w-full flex flex-col md:grid ${visibleData.length === 1 ? "grid-cols-[repeat(auto-fit,minmax(280px,500px))]" : "grid-cols-[repeat(auto-fit,minmax(280px,1fr))]"} gap-2`}
+          className={`w-full flex flex-col @[40rem]:grid ${visibleData.length === 1 ? "grid-cols-[repeat(auto-fit,minmax(280px,500px))]" : "grid-cols-[repeat(auto-fit,minmax(280px,1fr))]"} gap-2`}
         >
           {visibleData.map((feature) => (
             <div
@@ -299,14 +299,14 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
               )}
               <div className="w-full flex items-center gap-1">
                 <button
-                  className="gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border border-(--gray)  hover:bg-(--gray)/20"
+                  className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm  w-full border border-(--gray)  hover:bg-(--gray)/20"
                   onClick={() => deleteIdea(feature.feature)}
                 >
                   <Trash size={16} />
                   Delete
                 </button>
                 <button
-                  className="gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border border-(--gray)  hover:bg-(--gray)/20"
+                  className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm  w-full border border-(--gray)  hover:bg-(--gray)/20"
                   onClick={() => handleDismissing(feature)}
                 >
                   {feature.dismissed && feature.dismissed === true ? (

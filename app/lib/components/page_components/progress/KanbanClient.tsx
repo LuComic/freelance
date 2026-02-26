@@ -69,7 +69,7 @@ export const KanbanClient = ({}: KanbanClientProps) => {
 
   return (
     <>
-      <p className="md:text-xl text-lg font-medium">Current Progress</p>
+      <p className="@[40rem]:text-xl text-lg font-medium">Current Progress</p>
       <p className="text-(--gray-page)">
         Here you can display the progress of your work as a kanban list. The
         table is divided into &quot;Todo&quot; (features/things to do or fix),

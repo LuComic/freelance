@@ -15,7 +15,7 @@ export const MainHeadline = ({
       initialText={text}
       placeholder="Main headline"
       renderClient={(value) => (
-        <p className="md:text-3xl text-xl font-medium">{value}</p>
+        <p className="@[40rem]:text-3xl text-xl font-medium">{value}</p>
       )}
     />
   );

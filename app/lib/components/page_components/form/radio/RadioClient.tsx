@@ -36,7 +36,7 @@ export const RadioClient = ({}: RadioClientProps) => {
 
   return (
     <>
-      <p className="md:text-xl text-lg font-medium">{config.title}</p>
+      <p className="@[40rem]:text-xl text-lg font-medium">{config.title}</p>
       <p className="text-(--gray-page)">{config.description}</p>
       <div className="border-(--gray) border-t pt-2 w-full flex flex-col gap-2">
         {config.options.map((option) => {

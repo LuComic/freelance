@@ -75,11 +75,11 @@ export const ReviewModal = ({
           }}
         >
           <div
-            className="w-full max-h-1/2 h-auto flex flex-col items-start justify-start gap-2 p-3 md:max-w-xl bg-(--darkest) rounded-xl overflow-y-auto border border-(--gray)"
+            className="w-full max-h-1/2 h-auto flex flex-col items-start justify-start gap-2 p-3 @[40rem]:max-w-xl bg-(--darkest) rounded-xl overflow-y-auto border border-(--gray)"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-start gap-4">
-              <p className="md:text-3xl text-xl font-medium capitalize">
+              <p className="@[40rem]:text-3xl text-xl font-medium capitalize">
                 {action} Client&apos;s idea
               </p>
               <span className="px-2 py-0.5 border rounded-md border-(--gray-page) text-(--gray-page)">
@@ -87,7 +87,7 @@ export const ReviewModal = ({
               </span>
             </div>
             <p className="text-(--gray-page)">{feature.feature}</p>
-            <p className="md:text-xl text-lg font-medium">
+            <p className="@[40rem]:text-xl text-lg font-medium">
               Description for {action === "accept" ? "accepting" : "declining"}
             </p>
             <textarea
@@ -103,14 +103,14 @@ export const ReviewModal = ({
             ></textarea>
             <div className="w-full flex items-center gap-1 mt-4">
               <button
-                className="gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border border-(--gray)  hover:bg-(--gray)/20"
+                className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm  w-full border border-(--gray)  hover:bg-(--gray)/20"
                 onClick={closeReview}
               >
                 <X size={16} />
                 Cancel
               </button>
               <button
-                className={`gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border ${action === "accept" ? "border-(--accepted-border) hover:bg-(--accepted-bg)/10" : "border-(--declined-border) hover:bg-(--declined-bg)/10"}`}
+                className={`gap-1 flex items-center justify-center px-2 py-1 rounded-sm  w-full border ${action === "accept" ? "border-(--accepted-border) hover:bg-(--accepted-bg)/10" : "border-(--declined-border) hover:bg-(--declined-bg)/10"}`}
               >
                 {action === "accept" ? (
                   <>
@@ -132,7 +132,7 @@ export const ReviewModal = ({
         className={
           listView
             ? "gap-1 flex items-center justify-center p-1.5 rounded-sm h-max aspect-square  hover:bg-(--gray)/20"
-            : "gap-1 flex items-center justify-center px-2.5 py-1 rounded-sm  w-full border border-(--gray)  hover:bg-(--gray)/20"
+            : "gap-1 flex items-center justify-center px-2 py-1 rounded-sm  w-full border border-(--gray)  hover:bg-(--gray)/20"
         }
         onClick={() => reviewIdea(action)}
       >

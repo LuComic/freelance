@@ -60,7 +60,7 @@ export function SettingsSections() {
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                className={`w-max rounded-md border px-2.5 py-1 ${
+                className={`w-max rounded-md border px-2 py-1 ${
                   emailNotificationsEnabled
                     ? "border-(--accepted-border) bg-(--accepted-bg)/10 hover:bg-(--accepted-bg)/20"
                     : "border-(--gray) hover:bg-(--gray)/20"
@@ -71,7 +71,7 @@ export function SettingsSections() {
               </button>
               <button
                 type="button"
-                className={`w-max rounded-md border px-2.5 py-1 ${
+                className={`w-max rounded-md border px-2 py-1 ${
                   !emailNotificationsEnabled
                     ? "border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20"
                     : "border-(--gray) hover:bg-(--gray)/20"
@@ -91,7 +91,7 @@ export function SettingsSections() {
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                className={`w-max rounded-md border px-2.5 py-1 ${
+                className={`w-max rounded-md border px-2 py-1 ${
                   newsletterEnabled
                     ? "border-(--accepted-border) bg-(--accepted-bg)/10 hover:bg-(--accepted-bg)/20"
                     : "border-(--gray) hover:bg-(--gray)/20"
@@ -102,7 +102,7 @@ export function SettingsSections() {
               </button>
               <button
                 type="button"
-                className={`w-max rounded-md border px-2.5 py-1 ${
+                className={`w-max rounded-md border px-2 py-1 ${
                   !newsletterEnabled
                     ? "border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20"
                     : "border-(--gray) hover:bg-(--gray)/20"
@@ -154,7 +154,7 @@ export function SettingsSections() {
             />
             <button
               type="button"
-              className="w-max rounded-md px-2.5 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
+              className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
               onClick={() => {
                 const nextValue = newUsername.trim();
                 if (!nextValue) return;
@@ -188,7 +188,7 @@ export function SettingsSections() {
             />
             <button
               type="button"
-              className="w-max rounded-md px-2.5 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
+              className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
               onClick={() => {
                 const nextValue = newEmail.trim();
                 if (!nextValue) return;
@@ -234,7 +234,7 @@ export function SettingsSections() {
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                className={`w-max rounded-md border px-2.5 py-1 ${
+                className={`w-max rounded-md border px-2 py-1 ${
                   cookiesAccepted
                     ? "border-(--accepted-border) bg-(--accepted-bg)/10 hover:bg-(--accepted-bg)/20"
                     : "border-(--gray) hover:bg-(--gray)/20"
@@ -245,7 +245,7 @@ export function SettingsSections() {
               </button>
               <button
                 type="button"
-                className={`w-max rounded-md border px-2.5 py-1 ${
+                className={`w-max rounded-md border px-2 py-1 ${
                   !cookiesAccepted
                     ? "border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20"
                     : "border-(--gray) hover:bg-(--gray)/20"
@@ -256,7 +256,7 @@ export function SettingsSections() {
               </button>
               <Link
                 href="/legal/cookies"
-                className="w-max rounded-md border px-2.5 py-1 border-(--gray) hover:bg-(--gray)/20"
+                className="w-max rounded-md border px-2 py-1 border-(--gray) hover:bg-(--gray)/20"
               >
                 Read cookies
               </Link>
@@ -269,7 +269,7 @@ export function SettingsSections() {
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                className={`w-max rounded-md border px-2.5 py-1 ${
+                className={`w-max rounded-md border px-2 py-1 ${
                   termsAccepted
                     ? "border-(--accepted-border) bg-(--accepted-bg)/10 hover:bg-(--accepted-bg)/20"
                     : "border-(--gray) hover:bg-(--gray)/20"
@@ -280,7 +280,7 @@ export function SettingsSections() {
               </button>
               <button
                 type="button"
-                className={`w-max rounded-md border px-2.5 py-1 ${
+                className={`w-max rounded-md border px-2 py-1 ${
                   !termsAccepted
                     ? "border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20"
                     : "border-(--gray) hover:bg-(--gray)/20"
@@ -291,7 +291,7 @@ export function SettingsSections() {
               </button>
               <Link
                 href="/legal/terms"
-                className="w-max rounded-md border px-2.5 py-1 border-(--gray) hover:bg-(--gray)/20"
+                className="w-max rounded-md border px-2 py-1 border-(--gray) hover:bg-(--gray)/20"
               >
                 Read terms
               </Link>
@@ -304,7 +304,7 @@ export function SettingsSections() {
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                className={`w-max rounded-md border px-2.5 py-1 ${
+                className={`w-max rounded-md border px-2 py-1 ${
                   privacyAccepted
                     ? "border-(--accepted-border) bg-(--accepted-bg)/10 hover:bg-(--accepted-bg)/20"
                     : "border-(--gray) hover:bg-(--gray)/20"
@@ -315,7 +315,7 @@ export function SettingsSections() {
               </button>
               <button
                 type="button"
-                className={`w-max rounded-md border px-2.5 py-1 ${
+                className={`w-max rounded-md border px-2 py-1 ${
                   !privacyAccepted
                     ? "border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20"
                     : "border-(--gray) hover:bg-(--gray)/20"
@@ -326,7 +326,7 @@ export function SettingsSections() {
               </button>
               <Link
                 href="/legal/privacy"
-                className="w-max rounded-md border px-2.5 py-1 border-(--gray) hover:bg-(--gray)/20"
+                className="w-max rounded-md border px-2 py-1 border-(--gray) hover:bg-(--gray)/20"
               >
                 Read policy
               </Link>
@@ -335,7 +335,7 @@ export function SettingsSections() {
             <p className="text-(--gray-page)">Delete account</p>
             <button
               type="button"
-              className="w-max rounded-md border px-2.5 py-1 border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20"
+              className="w-max rounded-md border px-2 py-1 border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20"
             >
               Delete account
             </button>

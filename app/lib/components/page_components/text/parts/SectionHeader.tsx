@@ -15,7 +15,7 @@ export const SectionHeader = ({
       initialText={text}
       placeholder="Section header"
       renderClient={(value) => (
-        <p className="md:text-xl text-lg font-medium">{value}</p>
+        <p className="@[40rem]:text-xl text-lg font-medium">{value}</p>
       )}
     />
   );
