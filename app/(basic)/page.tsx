@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { SignInButton } from "../lib/components/landing/SignInButton";
 
 export default function Home() {
   return (
@@ -17,12 +18,7 @@ export default function Home() {
             </p>
 
             <div className="mt-6 flex w-full max-w-md flex-col gap-3 sm:flex-row sm:justify-center">
-              <a
-                href="#create-account"
-                className="inline-flex h-10 items-center justify-center rounded-md bg-(--vibrant) px-2 py-1 font-medium hover:bg-(--vibrant-hover)"
-              >
-                Continue with Google
-              </a>
+              <SignInButton />
               <a
                 href="#about"
                 className="inline-flex h-10 items-center justify-center rounded-md bg-white/90 px-2 py-1 font-medium text-(--dim) hover:bg-white"

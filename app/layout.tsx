@@ -1,6 +1,8 @@
 import "./globals.css";
+import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
+import { ConvexClientProvider } from "./ConvexClientProvider";
 
-export default function DashboardLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -8,7 +10,9 @@ export default function DashboardLayout({
   return (
     <html lang="en">
       <body>
-        <main>{children}</main>
+        <ConvexAuthNextjsServerProvider>
+          <ConvexClientProvider>{children}</ConvexClientProvider>
+        </ConvexAuthNextjsServerProvider>
       </body>
     </html>
   );

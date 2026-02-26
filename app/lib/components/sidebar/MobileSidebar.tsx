@@ -8,11 +8,14 @@ import {
   Users,
   Folder,
   Bell,
+  LogOut,
 } from "lucide-react";
 import { Files } from "./Files";
 import { Connections } from "./Connections";
 import { SidebarSettings } from "./SidebarSettings";
 import { CreateProjectModal } from "@/app/lib/components/project/CreateProjectModal";
+import Link from "next/link";
+import { LogOutButton } from "../LogOutButton";
 
 export const MobileSidebar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -24,7 +27,9 @@ export const MobileSidebar = () => {
       {sidebarOpen ? (
         <nav className="w-[363px] h-dvh max-h-dvh bg-(--darkest) border-r border-(--gray) flex flex-col items-start justify-start p-2 gap-4 fixed z-30 top-0 left-0 overflow-hidden">
           <div className="flex items-center justify-between w-full">
-            <span className="text-(--gray) text-xl">Empty Canvas</span>
+            <Link href="/projects" className="text-(--gray) text-xl">
+              Empty Canvas
+            </Link>
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className=" p-1 rounded-lg hover:bg-(--darkest-hover)"
@@ -70,14 +75,18 @@ export const MobileSidebar = () => {
           {activeTab === "files" ? <Files /> : null}
           {activeTab === "friends" ? <Connections /> : null}
           {activeTab === "settings" ? <SidebarSettings /> : null}
-          <div className="mt-auto w-full h-max flex items-center justify-between">
-            <div className="w-max gap-2 flex items-center justify-start py-1 px-2 rounded-lg hover:bg-(--darkest-hover) ">
+          <div className="mt-auto w-full h-max flex items-center">
+            <Link
+              className="w-max gap-2 flex items-center justify-start py-1 pl-2 pr-3 rounded-lg hover:bg-(--darkest-hover)"
+              href="/settings?section=account"
+            >
               <div className="aspect-square w-8 h-auto bg-(--dim) rounded-full"></div>
-              <span className="font-light text-sm">John Doe</span>
-            </div>
-            <button className="p-1 rounded-lg h-full hover:bg-(--darkest-hover) ">
+              <span className="font-light text-base">John Doe</span>
+            </Link>
+            <button className="ml-auto p-1 flex items-center justify-center aspect-square rounded-lg h-full hover:bg-(--darkest-hover) ">
               <Bell size={20} />
             </button>
+            <LogOutButton sidebar={true} />
           </div>
         </nav>
       ) : (
