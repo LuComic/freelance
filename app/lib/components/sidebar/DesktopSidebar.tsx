@@ -8,7 +8,6 @@ import {
   Settings,
   Bell,
   Folder,
-  LogOut,
 } from "lucide-react";
 import { Files } from "./Files";
 import { Connections } from "./Connections";
