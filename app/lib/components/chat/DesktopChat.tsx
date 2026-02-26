@@ -71,9 +71,9 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
   };
 
   return (
-    <div className="hidden md:block self-stretch">
+    <div className="hidden md:block self-stretch h-full">
       {chatOpen ? (
-        <nav className="w-[491px] h-dvh min-h-dvh bg-(--darkest) border-l border-(--gray) flex flex-col items-start justify-start p-2 px-3 gap-4 overflow-hidden">
+        <div className="w-[491px] h-full min-h-dvh bg-(--darkest) border-l border-(--gray) flex flex-col items-start justify-start p-2 px-3 gap-4 overflow-hidden">
           <div className="flex items-center justify-start gap-2 w-full">
             <button
               onClick={() => setChatOpen(false)}
@@ -137,9 +137,9 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
               </>
             ) : null}
           </div>
-        </nav>
+        </div>
       ) : (
-        <nav className="w-[50px] h-full min-h-screen bg-(--darkest) border-l border-(--gray) flex flex-col items-center justify-start p-2 gap-4">
+        <div className="w-[50px] h-full min-h-screen bg-(--darkest) border-l border-(--gray) flex flex-col items-center justify-start p-2 gap-4">
           <button
             onClick={() => setChatOpen(true)}
             className=" p-1 rounded-lg hover:bg-(--darkest-hover)"
@@ -172,7 +172,7 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
               <LayoutGrid size={20} className="mx-auto" />
             </button>
           </div>
-        </nav>
+        </div>
       )}
     </div>
   );
