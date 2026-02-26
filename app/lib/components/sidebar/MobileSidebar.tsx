@@ -69,7 +69,7 @@ export const MobileSidebar = () => {
             >
               <Settings size={20} className="mx-auto" />
             </button>
-            <CreateProjectModal buttonClassName="p-1 rounded-lg hover:bg-(--quite-dark) w-full" />
+            <CreateProjectModal />
           </div>
 
           {activeTab === "files" ? <Files /> : null}

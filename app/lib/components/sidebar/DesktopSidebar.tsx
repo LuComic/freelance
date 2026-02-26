@@ -79,7 +79,7 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
               <Users size={20} className="mx-auto" />
             </button>
             <button
-              className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
+              className={`p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
                 activeTab === "settings"
                   ? "bg-(--quite-dark) text-(--vibrant)"
                   : ""
@@ -88,7 +88,7 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
             >
               <Settings size={20} className="mx-auto" />
             </button>
-            <CreateProjectModal buttonClassName="p-1 rounded-lg hover:bg-(--quite-dark) w-full" />
+            <CreateProjectModal />
           </div>
           {activeTab === "files" ? <Files /> : null}
           {activeTab === "friends" ? <Connections /> : null}
@@ -155,7 +155,7 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
             >
               <Settings size={20} className="mx-auto" />
             </button>
-            <CreateProjectModal buttonClassName="h-full p-1 rounded-lg hover:bg-(--quite-dark) w-full" />
+            <CreateProjectModal />
           </div>
           <div className="flex flex-col gap-2 items-center justify-center mt-auto w-full">
             <button className=" p-1 rounded-lg hover:bg-(--darkest-hover) w-full">

@@ -20,11 +20,7 @@ const TEMPLATE = {
   ],
 };
 
-export const CreateProjectModal = ({
-  buttonClassName,
-}: {
-  buttonClassName?: string;
-}) => {
+export const CreateProjectModal = () => {
   const [open, setOpen] = useState(false);
   const [templateSectionOpen, setTemplateSectionOpen] = useState(false);
   const [peopleSectionOpen, setPeopleSectionOpen] = useState(false);
@@ -77,7 +73,7 @@ export const CreateProjectModal = ({
     <>
       <button
         type="button"
-        className={`${buttonClassName ?? "p-1 rounded-lg hover:bg-(--quite-dark) w-full"} ${open ? "bg-(--quite-dark) text-(--vibrant)" : ""}`}
+        className={`p-1 rounded-lg hover:bg-(--quite-dark) w-full ${open ? "bg-(--quite-dark) text-(--vibrant)" : ""}`}
         onClick={() => setOpen(true)}
       >
         <Plus size={20} className="mx-auto" />
@@ -85,7 +81,7 @@ export const CreateProjectModal = ({
 
       {open ? (
         <div
-          className="fixed px-2 inset-0 z-30 flex items-center justify-center bg-black/60"
+          className="fixed px-2 inset-0 z-30 flex items-center justify-center bg-black/40 backdrop-blur-sm"
           onClick={closeModal}
         >
           <div

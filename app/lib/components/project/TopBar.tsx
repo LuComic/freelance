@@ -10,6 +10,7 @@ import {
   Share,
   Trash,
 } from "lucide-react";
+import { useState } from "react";
 import { useEditMode } from "./EditModeContext";
 import { usePathname } from "next/navigation";
 import {
@@ -18,14 +19,34 @@ import {
   MenubarGroup,
   MenubarItem,
   MenubarMenu,
-  MenubarSeparator,
   MenubarTrigger,
 } from "@/components/ui/menubar";
+import { SaveTemplateModal } from "./SaveTemplateModal";
 
 export const TopBar = () => {
   const { isEditing, isLive, setIsEditing, setIsLive } = useEditMode();
   const isConfig = !isEditing && !isLive;
   const pathname = usePathname();
+  const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
+  const [pageTitle, setPageTitle] = useState("Bazinga");
+  const [draftTitle, setDraftTitle] = useState("Bazinga");
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+
+  const startTitleEdit = () => {
+    setDraftTitle(pageTitle);
+    setIsEditingTitle(true);
+  };
+
+  const saveTitle = () => {
+    const nextTitle = draftTitle.trim();
+    setPageTitle(nextTitle || pageTitle);
+    setIsEditingTitle(false);
+  };
+
+  const cancelTitleEdit = () => {
+    setDraftTitle(pageTitle);
+    setIsEditingTitle(false);
+  };
 
   return (
     <div
@@ -62,11 +83,33 @@ export const TopBar = () => {
           isLive
             ? "bg-(--vibrant)/20 border-(--vibrant) text-(--light)"
             : "hover:bg-(--gray)/20"
-        }`}
+        } mr-auto`}
       >
         <Radio size={15} />
         <span className="hidden @[64rem]:inline">Live</span>
       </button>
+      {isEditingTitle ? (
+        <input
+          type="text"
+          id="edit_field"
+          autoFocus
+          value={draftTitle}
+          onChange={(e) => setDraftTitle(e.target.value)}
+          onBlur={saveTitle}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") saveTitle();
+            if (e.key === "Escape") cancelTitleEdit();
+          }}
+          className="h-8 px-2 rounded-md border border-(--gray-page) bg-(--darkest) text-(--light) outline-none"
+        />
+      ) : (
+        <p
+          onClick={startTitleEdit}
+          className="cursor-text px-2 py-1 rounded-md hover:bg-(--gray)/20"
+        >
+          {pageTitle}
+        </p>
+      )}
       <button className="text-sm gap-1 flex items-center justify-center p-1 @[64rem]:px-2 @[64rem]:py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) hover:bg-(--gray)/20 ml-auto">
         <FilePlusCorner size={15} />
         <span className="hidden @[64rem]:inline">New Page</span>
@@ -74,10 +117,6 @@ export const TopBar = () => {
       <button className="text-sm gap-1 flex items-center justify-center p-1 @[64rem]:px-2 @[64rem]:py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) hover:bg-(--gray)/20">
         <Trash size={15} />
         <span className="hidden @[64rem]:inline">Delete</span>
-      </button>
-      <button className="text-sm gap-1 flex items-center justify-center p-1 @[64rem]:px-2 @[64rem]:py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) hover:bg-(--gray)/20">
-        <Share size={15} />
-        <span className="hidden @[64rem]:inline">Save template</span>
       </button>
       <Menubar className="h-auto bg-transparent border-none shadow-none p-0">
         <MenubarMenu>
@@ -87,18 +126,29 @@ export const TopBar = () => {
           </MenubarTrigger>
           <MenubarContent className="bg-(--quite-dark) border border-(--gray) text-(--light) transition-none!">
             <MenubarGroup>
-              <MenubarItem className="hover:bg-(--darkest-hover)! hover:text-(--light)!">
-                <Search size={15} />
-                <span className="hidden @[64rem]:inline">Use template</span>
+              <MenubarItem className="data-highlighted:bg-(--darkest-hover) data-highlighted:text-(--light)">
+                <button className="flex w-full items-center justify-start gap-2">
+                  <Search size={15} />
+                  Use template
+                </button>
               </MenubarItem>
-              <MenubarItem className="hover:bg-(--darkest-hover)! hover:text-(--light)!">
-                <Share size={15} />
-                <span className="hidden @[64rem]:inline">Save template</span>
+              <MenubarItem
+                className="data-highlighted:bg-(--darkest-hover) data-highlighted:text-(--light)"
+                onSelect={() => setSaveTemplateOpen(true)}
+              >
+                <div className="flex w-full items-center justify-start gap-2">
+                  <Share size={15} />
+                  Save template
+                </div>
               </MenubarItem>
             </MenubarGroup>
           </MenubarContent>
         </MenubarMenu>
       </Menubar>
+      <SaveTemplateModal
+        open={saveTemplateOpen}
+        onOpenChange={setSaveTemplateOpen}
+      />
     </div>
   );
 };
