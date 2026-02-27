@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -9,12 +9,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SavePageTemplate } from "./SavePageTemplate";
+import { SaveProjectTemplate } from "./SaveProjectTemplate";
+import type { TemplatePage } from "../searchbar/SearchBarData";
 
-const TEMPLATE_PAGE = {
+const TEMPLATE_PAGE: TemplatePage = {
   title: "Preferences",
   description: "Get the basic client's preferences and info",
   components: ["Select", "Select", "Radio"],
 };
+
+const TEMPLATE_PROJECT_PAGES: TemplatePage[] = [
+  TEMPLATE_PAGE,
+  {
+    title: "Suggestions",
+    description: "Collect client feedback and get feature suggestions",
+    components: ["Feedback"],
+  },
+];
 
 type SaveTemplateModalProps = {
   open: boolean;
@@ -28,9 +40,10 @@ export const SaveTemplateModal = ({
   const [templateName, setTemplateName] = useState(
     "Freelance Website Template",
   );
+  const [templateType, setTemplateType] = useState<"page" | "project">("page");
   const [visibility, setVisibility] = useState<"private" | "public">("private");
 
-  const closeModal = () => onOpenChange(false);
+  const closeModal = useCallback(() => onOpenChange(false), [onOpenChange]);
 
   useEffect(() => {
     if (!open) {
@@ -48,7 +61,7 @@ export const SaveTemplateModal = ({
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "auto";
     };
-  }, [open]);
+  }, [closeModal, open]);
 
   if (!open) return null;
 
@@ -71,6 +84,29 @@ export const SaveTemplateModal = ({
         </div>
 
         <div className="w-full border-y border-(--gray) py-3 flex flex-col gap-2">
+          <p className="text-(--gray-page)">Template type</p>
+          <div className="w-full flex items-center gap-4">
+            {(["page", "project"] as const).map((type) => {
+              const selected = templateType === type;
+
+              return (
+                <button
+                  key={type}
+                  type="button"
+                  className="flex items-center gap-2 justify-start"
+                  onClick={() => setTemplateType(type)}
+                >
+                  <span className="h-5 flex items-center p-1 justify-center w-auto aspect-square rounded-full bg-(--dim)">
+                    {selected ? (
+                      <span className="bg-(--vibrant) aspect-square h-full rounded-full" />
+                    ) : null}
+                  </span>
+                  <span className="capitalize">{type} template</span>
+                </button>
+              );
+            })}
+          </div>
+
           <p className="text-(--gray-page)">Template name</p>
           <input
             type="text"
@@ -109,24 +145,15 @@ export const SaveTemplateModal = ({
           </Select>
         </div>
 
-        <div className="w-full p-2 flex flex-col gap-2">
-          <div className="w-full flex flex-col gap-2">
-            <p className="font-medium">{TEMPLATE_PAGE.title}</p>
-            <p className="text-(--gray-page)">{TEMPLATE_PAGE.description}</p>
-            <div className="pt-1 flex items-center justify-start gap-2 w-full flex-wrap">
-              {TEMPLATE_PAGE.components.map((componentName, componentIndex) => (
-                <div
-                  key={`${componentName}-${componentIndex}`}
-                  className="px-2 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page)"
-                >
-                  {componentName}
-                </div>
-              ))}
-            </div>
-          </div>
+        <div className="w-full flex flex-col gap-2">
+          {templateType === "page" ? (
+            <SavePageTemplate page={TEMPLATE_PAGE} />
+          ) : (
+            <SaveProjectTemplate pages={TEMPLATE_PROJECT_PAGES} />
+          )}
         </div>
 
-        <div className="w-full flex items-center gap-1 mt-1">
+        <div className="w-full flex items-center gap-1">
           <button
             type="button"
             className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm w-full border border-(--gray) hover:bg-(--gray)/20"

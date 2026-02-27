@@ -22,9 +22,11 @@ import {
   MenubarTrigger,
 } from "@/components/ui/menubar";
 import { SaveTemplateModal } from "./SaveTemplateModal";
+import { useSearchBar } from "../searchbar/SearchBarContext";
 
 export const TopBar = () => {
   const { isEditing, isLive, setIsEditing, setIsLive } = useEditMode();
+  const { openTaggedSearch } = useSearchBar();
   const isConfig = !isEditing && !isLive;
   const pathname = usePathname();
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
@@ -126,7 +128,10 @@ export const TopBar = () => {
           </MenubarTrigger>
           <MenubarContent className="bg-(--quite-dark) border border-(--gray) text-(--light) transition-none!">
             <MenubarGroup>
-              <MenubarItem className="data-highlighted:bg-(--darkest-hover) data-highlighted:text-(--light)">
+              <MenubarItem
+                className="data-highlighted:bg-(--darkest-hover) data-highlighted:text-(--light)"
+                onSelect={() => openTaggedSearch("template")}
+              >
                 <button className="flex w-full items-center justify-start gap-2">
                   <Search size={15} />
                   Use template

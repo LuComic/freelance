@@ -345,7 +345,7 @@ export const CreateProjectModal = () => {
               </div>
             </div>
 
-            <div className="w-full flex items-center gap-1 mt-1">
+            <div className="w-full flex items-center gap-1">
               <button
                 type="button"
                 className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm w-full border border-(--gray) hover:bg-(--gray)/20"

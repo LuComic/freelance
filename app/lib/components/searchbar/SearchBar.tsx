@@ -3,41 +3,101 @@
 import { useEffect, useRef, useState } from "react";
 import { SearchBarItem } from "./SearchBarItem";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
+import { Search } from "lucide-react";
+import { useSearchBar } from "./SearchBarContext";
+import {
+  PLACEHOLDER_FILES,
+  PLACEHOLDER_PEOPLE,
+  PLACEHOLDER_TEMPLATES,
+  type SearchPerson,
+  type SearchTemplate,
+} from "./SearchBarData";
+import { PersonModal } from "./PersonModal";
+import { TemplateModal } from "./TemplateModal";
 
-const PLACEHOLDER_FILES = [
-  "Docs",
-  "Components",
-  "Blocks",
-  "Charts",
-  "Directory",
-  "Create",
-  "Accordion",
-  "Button",
-  "Card",
-  "Dialog",
-  "Input",
-  "Select",
-  "Table",
-  "Tabs",
-  "Toast",
-];
+type SearchItem = {
+  key: string;
+  title: string;
+  subtitle?: string;
+  badge?: string;
+  onSelect: () => void;
+};
 
 export const SearchBar = () => {
-  const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const selectedItemRef = useRef<HTMLDivElement>(null);
-
-  const filteredFiles = PLACEHOLDER_FILES.filter((file) =>
-    file.toLowerCase().includes(searchQuery.toLowerCase()),
+  const [selectedPerson, setSelectedPerson] = useState<SearchPerson | null>(
+    null,
   );
+  const [selectedTemplate, setSelectedTemplate] = useState<SearchTemplate | null>(
+    null,
+  );
+  const selectedItemRef = useRef<HTMLButtonElement>(null);
+  const { isOpen, activeTag, openSearch, closeSearch, clearTag } =
+    useSearchBar();
+
+  const filteredFiles = PLACEHOLDER_FILES.filter((file) => {
+    return file.toLowerCase().includes(searchQuery.toLowerCase());
+  });
+  const filteredPeople = PLACEHOLDER_PEOPLE.filter((person) => {
+    const normalizedQuery = searchQuery.toLowerCase();
+    return (
+      person.name.toLowerCase().includes(normalizedQuery) ||
+      person.subtitle.toLowerCase().includes(normalizedQuery)
+    );
+  });
+  const filteredTemplates = PLACEHOLDER_TEMPLATES.filter((template) => {
+    const normalizedQuery = searchQuery.toLowerCase();
+    return (
+      template.name.toLowerCase().includes(normalizedQuery) ||
+      template.author.toLowerCase().includes(normalizedQuery)
+    );
+  });
+
+  const searchItems: SearchItem[] =
+    activeTag === "people"
+      ? filteredPeople.map((person) => ({
+          key: person.name,
+          title: person.name,
+          subtitle: person.subtitle,
+          onSelect: () => {
+            setSelectedPerson(person);
+            closeSearch();
+            setSearchQuery("");
+            setSelectedIndex(0);
+          },
+        }))
+      : activeTag === "template"
+        ? filteredTemplates.map((template) => ({
+            key: template.name,
+            title: template.name,
+            subtitle: `by ${template.author}`,
+            badge: `${template.templateType} template`,
+            onSelect: () => {
+              setSelectedTemplate(template);
+              closeSearch();
+              setSearchQuery("");
+              setSelectedIndex(0);
+            },
+          }))
+        : filteredFiles.map((file) => ({
+            key: file,
+            title: file,
+            onSelect: () => {
+              console.log("Selected:", file);
+            },
+          }));
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Check for Cmd+K (Mac) or Ctrl+K (Windows/Linux)
       if ((e.metaKey || e.ctrlKey) && e.key === "p") {
         e.preventDefault();
-        setIsOpen((prev) => !prev);
+        if (isOpen) {
+          closeSearch();
+        } else {
+          openSearch();
+        }
         setSelectedIndex(0);
       }
 
@@ -45,7 +105,7 @@ export const SearchBar = () => {
 
       // Close on Escape
       if (e.key === "Escape") {
-        setIsOpen(false);
+        closeSearch();
         setSearchQuery("");
         setSelectedIndex(0);
       }
@@ -54,7 +114,7 @@ export const SearchBar = () => {
       if (e.key === "ArrowDown") {
         e.preventDefault();
         setSelectedIndex((prev) =>
-          prev < filteredFiles.length - 1 ? prev + 1 : prev,
+          prev < searchItems.length - 1 ? prev + 1 : prev,
         );
       }
 
@@ -64,38 +124,51 @@ export const SearchBar = () => {
       }
 
       // Enter to select
-      if (e.key === "Enter" && filteredFiles.length > 0) {
+      if (e.key === "Enter" && searchItems.length > 0) {
         e.preventDefault();
-        console.log("Selected:", filteredFiles[selectedIndex]);
-        // Add your navigation logic here
+        searchItems[selectedIndex]?.onSelect();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, filteredFiles, selectedIndex]);
-
-  // Reset selected index when search query changes
-  useEffect(() => {
-    setSelectedIndex(0);
-  }, [searchQuery]);
+  }, [closeSearch, isOpen, openSearch, searchItems, selectedIndex]);
 
   // Keep selected item in view when navigating with arrow keys
   useEffect(() => {
-    if (filteredFiles.length === 0) return;
+    if (searchItems.length === 0) return;
     selectedItemRef.current?.scrollIntoView({
       block: "nearest",
       behavior: "smooth",
     });
-  }, [selectedIndex, filteredFiles.length]);
+  }, [searchItems.length, selectedIndex]);
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return (
+      <>
+        <PersonModal
+          person={selectedPerson}
+          open={selectedPerson !== null}
+          onOpenChange={(open) => {
+            if (!open) setSelectedPerson(null);
+          }}
+        />
+        <TemplateModal
+          template={selectedTemplate}
+          open={selectedTemplate !== null}
+          onOpenChange={(open) => {
+            if (!open) setSelectedTemplate(null);
+          }}
+        />
+      </>
+    );
+  }
 
   return (
     <div
       className="fixed inset-0 z-30 flex items-start justify-center pt-[10vh] bg-black/60"
       onClick={() => {
-        setIsOpen(false);
+        closeSearch();
         setSearchQuery("");
         setSelectedIndex(0);
       }}
@@ -106,24 +179,36 @@ export const SearchBar = () => {
       >
         {/* Search Input */}
         <div className="flex items-center gap-3 px-4 py-3 border-b border-(--darkest-hover)">
-          <svg
-            className="w-5 h-5 text-(--gray)"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
+          <Search size={20} color="var(--gray)" />
+          {activeTag ? (
+            <span className="rounded-md border border-(--vibrant) bg-(--vibrant)/10 px-2 h-full text-sm">
+              {activeTag}
+            </span>
+          ) : null}
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search..."
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setSelectedIndex(0);
+            }}
+            onKeyDown={(e) => {
+              if (
+                e.key === "Backspace" &&
+                searchQuery.length === 0 &&
+                activeTag
+              ) {
+                e.preventDefault();
+                clearTag();
+              }
+            }}
+            placeholder={
+              activeTag === "people"
+                ? "Search for users..."
+                : activeTag === "template"
+                  ? "Search templates..."
+                  : "Search..."
+            }
             className="flex-1 bg-transparent text-(--light) text-base outline-none placeholder:text-(--gray)"
             autoFocus
           />
@@ -134,18 +219,25 @@ export const SearchBar = () => {
 
         {/* File List */}
         <div className="flex flex-col gap-1 w-full max-h-96 overflow-y-auto p-2">
-          {filteredFiles.length > 0 ? (
-            filteredFiles.map((file, index) => (
+          {searchItems.length > 0 ? (
+            searchItems.map((item, index) => (
               <SearchBarItem
-                key={file}
+                key={item.key}
                 ref={index === selectedIndex ? selectedItemRef : null}
-                title={file}
+                title={item.title}
+                subtitle={item.subtitle}
+                badge={item.badge}
                 isSelected={index === selectedIndex}
+                onClick={item.onSelect}
               />
             ))
           ) : (
             <div className="px-4 py-8 text-center text-(--gray)">
-              No files found
+              {activeTag === "people"
+                ? "No people found"
+                : activeTag === "template"
+                  ? "No templates found"
+                  : "No files found"}
             </div>
           )}
         </div>
@@ -169,6 +261,20 @@ export const SearchBar = () => {
           </div>
         </div>
       </div>
+      <PersonModal
+        person={selectedPerson}
+        open={selectedPerson !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedPerson(null);
+        }}
+      />
+      <TemplateModal
+        template={selectedTemplate}
+        open={selectedTemplate !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedTemplate(null);
+        }}
+      />
     </div>
   );
 };

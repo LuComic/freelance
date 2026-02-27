@@ -1,9 +1,19 @@
 import { ConnectionItem } from "./ConnectionItem";
+import { useSearchBar } from "../searchbar/SearchBarContext";
 
 export const Connections = () => {
+  const { openTaggedSearch } = useSearchBar();
+
   return (
     <div className="flex flex-col gap-2 items-start justify-start w-full flex-1 min-h-0 overflow-y-auto">
       <p className="md:text-xl text-lg font-medium">Connections</p>
+      <button
+        type="button"
+        onClick={() => openTaggedSearch("people")}
+        className="gap-1 flex items-center justify-center px-2 py-1 rounded-md w-full border border-(--vibrant) bg-(--vibrant)/10 hover:bg-(--vibrant)/20"
+      >
+        Find people
+      </button>
       <ConnectionItem
         title="Friends"
         items={["Alex", "Jordan", "Sam", "Riley"]}
