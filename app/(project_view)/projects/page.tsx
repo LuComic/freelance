@@ -1,7 +1,3 @@
-import Link from "next/link";
-
-const RECENTS = ["Project 1", "Getting started"];
-
 export default function Page() {
   return (
     <div className="h-full @[40rem]:max-w-2/3 mx-auto w-full flex flex-col gap-4 items-start justify-center">
@@ -29,17 +25,11 @@ export default function Page() {
 
       <div className="w-full flex flex-col items-start justify-start overflow-hidden rounded-md border border-(--gray)">
         <div className="w-full flex items-center justify-start p-2 bg-(--darkest) text-(--gray-page) border-b border-(--gray)">
-          Open recent
+          Projects
         </div>
-        {RECENTS.map((recent, index) => (
-          <Link
-            className={`w-full flex items-center justify-start p-2 ${index % 2 !== 0 && "bg-(--gray)/10"} hover:bg-(--gray)/20`}
-            key={index}
-            href=""
-          >
-            {recent}
-          </Link>
-        ))}
+        <div className="w-full p-4 text-(--gray-page)">
+          Your projects list will appear here once project data is connected.
+        </div>
       </div>
     </div>
   );

@@ -16,21 +16,20 @@ import {
   MenubarGroup,
   MenubarItem,
   MenubarMenu,
-  MenubarSeparator,
   MenubarTrigger,
 } from "@/components/ui/menubar";
 
 interface SidebarItemProps {
   title: string;
-  items: string[];
   id: string;
+  currentPageSlug?: string | null;
 }
 
-export const FileItem = ({ title, items, id }: SidebarItemProps) => {
+export const FileItem = ({ title, id, currentPageSlug }: SidebarItemProps) => {
   const pathname = usePathname();
   const projectBasePath = "/projects/" + id;
   const [itemExpanded, setItemExpanded] = useState(() => {
-    if (typeof window !== undefined) {
+    if (typeof window !== "undefined") {
       if (pathname.includes(id)) return true;
     }
     return false;
@@ -79,27 +78,25 @@ export const FileItem = ({ title, items, id }: SidebarItemProps) => {
       </div>
 
       {itemExpanded && (
-        <Link
-          className="pl-8 flex w-full items-center  justify-start gap-2 hover:bg-(--darkest-hover) rounded-lg p-1 md:text-base text-sm"
-          href={projectBasePath}
-        >
-          <File size={18} />
-          Landing
-        </Link>
-      )}
-
-      {itemExpanded
-        ? items.map((item, index) => (
+        <>
+          <Link
+            className="pl-8 flex w-full items-center justify-start gap-2 hover:bg-(--darkest-hover) rounded-lg p-1 md:text-base text-sm"
+            href={projectBasePath}
+          >
+            <File size={18} />
+            Overview
+          </Link>
+          {currentPageSlug ? (
             <Link
               className="pl-8 flex w-full items-center justify-start gap-2 hover:bg-(--darkest-hover) rounded-lg p-1 md:text-base text-sm"
-              key={index}
-              href={projectBasePath + "/" + item.toLowerCase()}
+              href={projectBasePath + "/" + currentPageSlug}
             >
               <File size={18} />
-              {item}
+              {currentPageSlug}
             </Link>
-          ))
-        : null}
+          ) : null}
+        </>
+      )}
     </>
   );
 };

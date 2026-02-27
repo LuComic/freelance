@@ -88,3 +88,14 @@ function handleButtonPress() {
 Use the Convex CLI to push your functions to a deployment. See everything
 the Convex CLI can do by running `npx convex -h` in your project root
 directory. To learn more, launch the docs with `npx convex docs`.
+
+## Domain layout
+
+The Convex directory is organized by product domain instead of by raw table name.
+
+- `lib/` contains shared auth, permission, slug, storage, validator, and error helpers.
+- `users/`, `connections/`, `projects/`, `pages/`, and `templates/` are the primary schema-backed domains.
+- `search/` is reserved for federated search queries across visible records.
+- `pageRuntime/` is reserved for page-level interaction data such as feedback, forms, progress, and analytics.
+
+Most domain files are currently intentional stubs so the namespace layout is in place before product logic is added.

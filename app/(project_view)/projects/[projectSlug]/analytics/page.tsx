@@ -1,18 +1,18 @@
 import { InputDropdown } from "@/app/lib/components/analytics/InputDropdown";
 
-export type dropdownItemType = {
+export type DropdownItem = {
   page: string;
   components: { title: string; value: string[] }[];
 };
 
-type latestChangeType = {
+type LatestChange = {
   page: string;
   title: string;
   oldValue: string | null;
   newValue: string;
 };
 
-const LATEST_CHANGES: latestChangeType[] = [
+const LATEST_CHANGES: LatestChange[] = [
   {
     page: "Preferences",
     title: "Favourite colors",
@@ -33,7 +33,7 @@ const LATEST_CHANGES: latestChangeType[] = [
   },
 ];
 
-const CURRENT_INPUTS: dropdownItemType[] = [
+const CURRENT_INPUTS: DropdownItem[] = [
   {
     page: "Preferences",
     components: [
@@ -61,7 +61,7 @@ const CURRENT_INPUTS: dropdownItemType[] = [
   },
 ];
 
-export default function Page() {
+export default function AnalyticsPage() {
   return (
     <>
       <div className="w-full border-b border-(--gray) pb-2 flex flex-col gap-2">

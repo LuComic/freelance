@@ -1,6 +1,6 @@
 "use client";
 
-import type { dropdownItemType } from "@/app/(project_view)/projects/project_1/analytics/page";
+import type { DropdownItem } from "@/app/(project_view)/projects/[projectSlug]/analytics/page";
 import { ChevronRight } from "lucide-react";
 import { useState } from "react";
 
@@ -8,7 +8,7 @@ export const InputDropdown = ({
   item,
   index,
 }: {
-  item: dropdownItemType;
+  item: DropdownItem;
   index: number;
 }) => {
   const [isOpen, setOpen] = useState(false);

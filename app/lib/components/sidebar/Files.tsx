@@ -1,59 +1,36 @@
 "use client";
 
-import { FileItem } from "./FileItem";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-
-const SOME_DATA: { id: string; title: string; items: string[] }[] = [
-  {
-    id: "getting_started",
-    title: "Getting Started",
-    items: ["Creating a project - Creator", "Joining a project - Client"],
-  },
-  {
-    id: "project_1",
-    title: "Project 1",
-    items: ["Features", "Testing"],
-  },
-];
+import { FileItem } from "./FileItem";
+import { formatSlugLabel } from "../project/projectSlug";
 
 export const Files = () => {
   const pathname = usePathname();
-  const [currentName, setCurrentName] = useState("");
-
-  useEffect(() => {
-    // If there is no path or we're on the root, show default "Projects"
-    if (!pathname || pathname === "/") {
-      setCurrentName("");
-      return;
-    }
-
-    // Take the first non-empty segment from the path (e.g. "/project_1/xyz" -> "project_1")
-    // filter(Boolean) takes only valid url parts
-    const firstSegment = pathname.split("/").filter(Boolean)[0];
-
-    const matched = SOME_DATA.find((item) => item.id === firstSegment);
-
-    if (matched) {
-      setCurrentName(matched.title);
-    } else {
-      setCurrentName("");
-    }
-  }, [pathname]);
+  const segments = pathname.split("/").filter(Boolean);
+  const isProjectsRoot = pathname === "/projects";
+  const projectSlug = segments[1];
+  const currentPageSlug =
+    segments[2] && segments[2] !== "analytics" && segments[2] !== "settings"
+      ? segments[2]
+      : null;
+  const projectTitle = projectSlug ? formatSlugLabel(projectSlug) : "Projects";
 
   return (
     <div className="flex flex-col gap-2 items-start justify-start w-full flex-1 min-h-0 overflow-y-auto">
-      <p className="md:text-xl text-lg font-medium">
-        {currentName || "Projects"}
-      </p>
-      {SOME_DATA.map((item) => (
+      <p className="md:text-xl text-lg font-medium">{projectTitle}</p>
+      {projectSlug ? (
         <FileItem
-          key={item.id}
-          title={item.title}
-          items={item.items}
-          id={item.id}
+          id={projectSlug}
+          title={projectTitle}
+          currentPageSlug={currentPageSlug}
         />
-      ))}
+      ) : (
+        <p className="text-sm text-(--gray-page)">
+          {isProjectsRoot
+            ? "Projects will appear here once real data is connected."
+            : "Open a project to see its navigation."}
+        </p>
+      )}
     </div>
   );
 };

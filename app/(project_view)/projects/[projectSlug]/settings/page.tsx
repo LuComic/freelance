@@ -3,7 +3,7 @@
 import { ChevronRight, Trash } from "lucide-react";
 import { useState } from "react";
 
-export default function Page() {
+export default function SettingsPage() {
   const [generalOpen, setGeneralOpen] = useState(false);
   const [clientsOpen, setClientsOpen] = useState(false);
   const [coCreatorsOpen, setCoCreatorsOpen] = useState(false);
