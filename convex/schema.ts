@@ -10,6 +10,7 @@ const schema = defineSchema({
     image: v.optional(v.string()),
     isAnonymous: v.optional(v.boolean()),
     name: v.optional(v.string()),
+    bio: v.optional(v.string()),
     phone: v.optional(v.string()),
     phoneVerificationTime: v.optional(v.float64()),
     projectIds: v.optional(v.array(v.id("projects"))),

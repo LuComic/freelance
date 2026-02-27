@@ -25,8 +25,9 @@ export function SettingsSections() {
 
   const [username, setUsername] = useState("ainurakk");
   const [newUsername, setNewUsername] = useState("");
-  const [email, setEmail] = useState("ainur@example.com");
-  const [newEmail, setNewEmail] = useState("");
+  const [bio, setBio] = useState("A frontend freelancer");
+  const [newBio, setNewBio] = useState("");
+  const [email] = useState("ainur@example.com");
 
   const [cookiesAccepted, setCookiesAccepted] = useState(true);
   const [termsAccepted, setTermsAccepted] = useState(true);
@@ -156,6 +157,40 @@ export function SettingsSections() {
                 if (!nextValue) return;
                 setUsername(nextValue);
                 setNewUsername("");
+              }}
+            >
+              Save
+            </button>
+
+            <p className="text-(--gray-page)">Bio/Description</p>
+            <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
+              {bio}
+            </div>
+
+            <p className="text-(--gray-page)">Change bio</p>
+            <input
+              type="text"
+              placeholder="Enter a new bio..."
+              className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
+              value={newBio}
+              onChange={(e) => setNewBio(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  const nextValue = newBio.trim();
+                  if (!nextValue) return;
+                  setBio(nextValue);
+                  setNewBio("");
+                }
+              }}
+            />
+            <button
+              type="button"
+              className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
+              onClick={() => {
+                const nextValue = newBio.trim();
+                if (!nextValue) return;
+                setBio(nextValue);
+                setNewBio("");
               }}
             >
               Save
