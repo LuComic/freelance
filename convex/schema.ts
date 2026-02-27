@@ -39,6 +39,23 @@ const schema = defineSchema({
     .index("by_receiver_status", ["receiverUserId", "status"])
     .index("by_pair", ["requesterUserId", "receiverUserId"]),
 
+  templates: defineTable({
+    authorUserId: v.id("users"),
+    name: v.string(),
+    description: v.optional(v.string()),
+    type: v.union(v.literal("project"), v.literal("page")),
+    visibility: v.union(v.literal("private"), v.literal("public")),
+    contentStorageId: v.id("_storage"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    isArchived: v.optional(v.boolean()),
+  })
+    .index("by_author", ["authorUserId"])
+    .index("by_type", ["type"])
+    .index("by_visibility", ["visibility"])
+    .index("by_author_type", ["authorUserId", "type"])
+    .index("by_visibility_type", ["visibility", "type"]),
+
   projects: defineTable({
     ownerId: v.id("users"),
     createdByUserId: v.id("users"),
@@ -47,13 +64,9 @@ const schema = defineSchema({
     // Canonical page order for sidebar/navigation.
     pageIds: v.array(v.id("pages")),
     joinCode: v.optional(v.string()),
-    template: v.optional(
-      v.object({
-        name: v.string(),
-        author: v.optional(v.string()),
-        content: v.string(),
-      }),
-    ),
+    sourceTemplateId: v.optional(v.id("templates")),
+    // Snapshot of template blueprint used at creation time.
+    sourceTemplateContentStorageId: v.optional(v.id("_storage")),
     isArchived: v.optional(v.boolean()),
     createdAt: v.number(),
     updatedAt: v.number(),
@@ -106,12 +119,8 @@ const schema = defineSchema({
     title: v.string(),
     slug: v.string(),
     description: v.optional(v.string()),
-    // Current editor is text-based with embedded component tags (<Select />, etc.).
-    content: v.string(),
-    contentFormat: v.union(
-      v.literal("plaintext_with_component_tags_v1"),
-      v.literal("json_v1"),
-    ),
+    contentStorageId: v.id("_storage"),
+    sourceTemplateId: v.optional(v.id("templates")),
     createdByUserId: v.id("users"),
     updatedByUserId: v.id("users"),
     isArchived: v.optional(v.boolean()),
