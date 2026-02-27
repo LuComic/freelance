@@ -87,20 +87,20 @@ export const SaveTemplateModal = ({
               setVisibility(value as "private" | "public")
             }
           >
-            <SelectTrigger className="w-full bg-(--qutie-dark) text-base border-(--gray)">
-              <SelectValue placeholder="Select visibility text-base" />
+            <SelectTrigger className="w-full bg-(--qutie-dark) border-(--gray)">
+              <SelectValue placeholder="Select visibility" />
             </SelectTrigger>
-            <SelectContent className="bg-(--quite-dark) text-base border-none text-(--gray-page)">
-              <SelectGroup className="bg-(--quite-dark) text-base">
+            <SelectContent className="bg-(--quite-dark) border-none text-(--gray-page)">
+              <SelectGroup className="bg-(--quite-dark)">
                 <SelectItem
                   value="private"
-                  className="data-highlighted:bg-(--darkest-hover) text-base data-highlighted:text-(--light)"
+                  className="data-highlighted:bg-(--darkest-hover) data-highlighted:text-(--light)"
                 >
                   Private
                 </SelectItem>
                 <SelectItem
                   value="public"
-                  className="data-highlighted:bg-(--darkest-hover) text-base data-highlighted:text-(--light)"
+                  className="data-highlighted:bg-(--darkest-hover) data-highlighted:text-(--light)"
                 >
                   Public
                 </SelectItem>

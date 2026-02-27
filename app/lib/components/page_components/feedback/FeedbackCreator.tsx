@@ -127,14 +127,14 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
           className="@[40rem]:text-lg text-base font-medium flex items-center justify-start gap-2  w-max"
           onClick={() => setEditing((prev) => !prev)}
         >
-          Possible tags
+          Tags
           <ChevronRight size={18} className={`${editing && "rotate-90"}`} />
         </button>
         {editing && (
           <>
             <input
               type="text"
-              placeholder="Add a new possible tag..."
+              placeholder="Add a new tag..."
               className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
@@ -290,7 +290,7 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
         </div>
       ) : (
         <div className="w-full max-w-full min-w-0 overflow-x-auto border rounded-md border-(--gray)">
-          <div className="min-w-[800px] flex flex-col">
+          <div className="min-w-[900px] flex flex-col">
             <div className="w-full text-(--gray-page) border-b border-(--gray) text-left grid justify-between items-start grid-cols-13 bg-(--darkest)">
               <span className="border-r p-2 border-(--gray) h-full text-wrap">
                 Actions
