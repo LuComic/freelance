@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronRight, TimerReset, X } from "lucide-react";
+import { ChevronRight, TimerReset, Trash, X } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -15,6 +15,7 @@ type itemType = {
   id: number;
   feature: string;
   status: "Todo" | "In Progress" | "Done";
+  tags: string[];
   dismissed?: boolean;
 };
 
@@ -23,33 +24,39 @@ const IDEA_DATA: itemType[] = [
     id: 1,
     feature: "Please add an About page",
     status: "Todo",
+    tags: ["required"],
   },
   {
     id: 2,
     feature: "Turn the selector in X page into a slider",
     status: "In Progress",
+    tags: ["nice to have"],
   },
   {
     id: 3,
     feature:
       "Create a 3D animation on the landing page that is 4k resolution and has no mistakes",
     status: "Done",
+    tags: ["nice to have"],
   },
   {
     id: 4,
     feature: "Do something like that now!",
     status: "In Progress",
+    tags: ["required"],
   },
   {
     id: 5,
     feature: "Finish the project in the next week!!!!",
     status: "In Progress",
+    tags: ["required"],
   },
   {
     id: 6,
     feature:
       "Create a 3D animation on the landing page that is 4k resolution and has no mistakes",
     status: "Done",
+    tags: ["nice to have"],
   },
 ];
 
@@ -61,11 +68,35 @@ const STATUS_OPTIONS: itemType["status"][] = ["Todo", "In Progress", "Done"];
 
 export const KanbanCreator = ({}: KanbanCreatorProps) => {
   const [data, setData] = useState(IDEA_DATA);
+  const [tags, setTags] = useState<string[]>(["required", "nice to have"]);
+  const [tagInput, setTagInput] = useState("");
+  const [editingTags, setEditingTags] = useState(false);
   const [filter, setFilter] = useState<"" | "dismissed">("");
   const [adding, setAdding] = useState(false);
   const [taskInput, setTaskInput] = useState("");
   const [newTaskStatus, setNewTaskStatus] =
     useState<itemType["status"]>("Todo");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  const handleNewTag = () => {
+    if (tagInput.trim() === "") return;
+    if (tags.includes(tagInput.trim())) return;
+    setTags((prev) => [tagInput.trim(), ...prev]);
+    setTagInput("");
+  };
+
+  const deleteTag = (tag: string) => {
+    setTags((prev) => prev.filter((t) => t !== tag));
+    setSelectedTags((prev) =>
+      prev.filter((selectedTag) => selectedTag !== tag),
+    );
+    setData((prev) =>
+      prev.map((item) => ({
+        ...item,
+        tags: item.tags.filter((itemTag) => itemTag !== tag),
+      })),
+    );
+  };
 
   const handleNewTask = () => {
     if (taskInput.trim() === "") return;
@@ -77,11 +108,13 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
         id: highestId + 1,
         feature: taskInput.trim(),
         status: newTaskStatus,
+        tags: selectedTags,
       },
       ...prev,
     ]);
     setTaskInput("");
     setNewTaskStatus("Todo");
+    setSelectedTags([]);
   };
 
   const handleDismissing = (item: itemType) => {
@@ -139,7 +172,7 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
       </p>
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
         <button
-          className="@[40rem]:text-lg text-base font-medium flex items-center justify-start gap-2  w-max"
+          className="@[40rem]:text-lg text-base font-medium flex items-center justify-start gap-2 w-max"
           onClick={() => setAdding((prev) => !prev)}
         >
           New Task
@@ -183,12 +216,80 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
                 </SelectGroup>
               </SelectContent>
             </Select>
+            <div className="flex items-center justify-start gap-2 w-full">
+              {tags.map((tag) => (
+                <button
+                  key={tag}
+                  className={`px-1.5 py-0.5 rounded-md border ${!selectedTags.includes(tag) && "border-(--gray-page) text-(--gray-page)"} `}
+                  onClick={() => {
+                    if (selectedTags.includes(tag)) {
+                      setSelectedTags((prev) =>
+                        prev.filter((prevTag) => prevTag !== tag),
+                      );
+                    } else {
+                      setSelectedTags((prev) => [...prev, tag]);
+                    }
+                  }}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
 
             <button
               className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) "
               onClick={handleNewTask}
             >
-              Submit
+              Add idea
+            </button>
+          </>
+        )}
+
+        <div className="w-full h-px bg-(--gray)" />
+
+        <button
+          className="@[40rem]:text-lg text-base font-medium flex items-center justify-start gap-2 w-max"
+          onClick={() => setEditingTags((prev) => !prev)}
+        >
+          Tags
+          <ChevronRight size={18} className={`${editingTags && "rotate-90"}`} />
+        </button>
+        {editingTags && (
+          <>
+            <input
+              type="text"
+              placeholder="Add a new tag..."
+              className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleNewTag();
+                }
+              }}
+            />
+            <div className="flex items-center justify-start gap-2 w-full">
+              {tags.map((tag) => (
+                <div
+                  key={tag}
+                  className="pl-1.5 pr-0.5 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) flex items-center gap-1"
+                >
+                  {tag}
+                  <button
+                    type="button"
+                    className="hover:bg-(--gray)/20 p-1 rounded-sm"
+                    onClick={() => deleteTag(tag)}
+                  >
+                    <Trash size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button
+              className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
+              onClick={handleNewTag}
+            >
+              Add tag
             </button>
           </>
         )}
@@ -211,7 +312,12 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
               key={feature.id}
               className="rounded-md border px-2 gap-1 justify-between py-1.5 w-full min-w-0 flex flex-col min-h-0 border-(--gray) bg-(--gray)/10"
             >
-              <span className="font-semibold">{feature.feature}</span>
+              <span className="font-semibold">
+                <span className="rounded-sm font-normal text-(--gray-page)">
+                  {feature.tags.join(", ")} -{" "}
+                </span>
+                {feature.feature}
+              </span>
               <div className="w-full flex items-center gap-1">
                 <button
                   className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm  w-full border border-(--gray)  hover:bg-(--gray)/20"
@@ -285,7 +391,12 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
                             </SelectContent>
                           </Select>
                         </div>
-                        <span>{item.feature}</span>
+                        <span>
+                          <span className="text-(--gray-page)">
+                            {item.tags.join(", ")} -{" "}
+                          </span>
+                          {item.feature}
+                        </span>
                       </>
                     ) : (
                       <div />

@@ -240,8 +240,7 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
             >
               <span className="font-semibold">
                 <span className="rounded-sm font-normal text-(--gray-page)">
-                  {feature.tags.join(", ") === "nice" ? "Nice" : "Required"}{" "}
-                  -{" "}
+                  {feature.tags.join(", ")} -{" "}
                 </span>
                 {feature.feature}
               </span>
