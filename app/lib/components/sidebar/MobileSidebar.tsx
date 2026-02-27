@@ -8,7 +8,6 @@ import {
   Users,
   Folder,
   Bell,
-  LogOut,
 } from "lucide-react";
 import { Files } from "./Files";
 import { Connections } from "./Connections";
@@ -16,8 +15,13 @@ import { SidebarSettings } from "./SidebarSettings";
 import { CreateProjectModal } from "@/app/lib/components/project/CreateProjectModal";
 import Link from "next/link";
 import { LogOutButton } from "../LogOutButton";
+import { SidebarUserInfo, type SidebarUserProfile } from "./SidebarUserInfo";
 
-export const MobileSidebar = () => {
+export const MobileSidebar = ({
+  userProfile,
+}: {
+  userProfile: SidebarUserProfile;
+}) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"files" | "friends" | "settings">(
     "files",
@@ -76,13 +80,7 @@ export const MobileSidebar = () => {
           {activeTab === "friends" ? <Connections /> : null}
           {activeTab === "settings" ? <SidebarSettings /> : null}
           <div className="mt-auto w-full h-max flex items-center">
-            <Link
-              className="w-max gap-2 flex items-center justify-start py-1 pl-2 pr-3 rounded-lg hover:bg-(--darkest-hover)"
-              href="/settings?section=account"
-            >
-              <div className="aspect-square w-8 h-auto bg-(--dim) rounded-full"></div>
-              <span className="font-light text-base">John Doe</span>
-            </Link>
+            <SidebarUserInfo profile={userProfile} />
             <button className="ml-auto p-1 flex items-center justify-center aspect-square rounded-lg h-full hover:bg-(--darkest-hover) ">
               <Bell size={20} />
             </button>

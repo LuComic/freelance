@@ -1,5 +1,7 @@
 "use client";
 
+import { api } from "@/convex/_generated/api";
+import { useMutation, useQuery } from "convex/react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ChevronRight } from "lucide-react";
@@ -8,6 +10,8 @@ import { useEffect, useState } from "react";
 export function SettingsSections() {
   const searchParams = useSearchParams();
   const section = searchParams.get("section");
+  const profile = useQuery(api.users.queries.currentProfile);
+  const updateProfile = useMutation(api.users.mutations.updateProfile);
 
   const [overallOpen, setOverallOpen] = useState(section === "overall");
   const [accountOpen, setAccountOpen] = useState(section === "account");
@@ -21,17 +25,77 @@ export function SettingsSections() {
 
   const [emailNotificationsEnabled, setEmailNotificationsEnabled] =
     useState(true);
-  const [newsletterEnabled, setNewsletterEnabled] = useState(true);
 
-  const [username, setUsername] = useState("ainurakk");
-  const [newUsername, setNewUsername] = useState("");
-  const [bio, setBio] = useState("A frontend freelancer");
-  const [newBio, setNewBio] = useState("");
-  const [email] = useState("ainur@example.com");
+  const [nameDraft, setNameDraft] = useState("");
+  const [bioDraft, setBioDraft] = useState("");
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [isSavingName, setIsSavingName] = useState(false);
+  const [isSavingBio, setIsSavingBio] = useState(false);
 
   const [cookiesAccepted, setCookiesAccepted] = useState(true);
   const [termsAccepted, setTermsAccepted] = useState(true);
   const [privacyAccepted, setPrivacyAccepted] = useState(true);
+  const isProfileReady = profile !== undefined && profile !== null;
+  const isProfileLoading = profile === undefined;
+  const currentName = profile?.name ?? "";
+  const currentBio = profile?.bio ?? "";
+  const currentEmail = profile?.email ?? "";
+
+  useEffect(() => {
+    if (!isProfileReady) {
+      return;
+    }
+
+    setNameDraft(currentName);
+    setBioDraft(currentBio);
+  }, [currentBio, currentName, isProfileReady]);
+
+  const canSaveName =
+    !isProfileLoading &&
+    !isSavingName &&
+    nameDraft.trim().length > 0 &&
+    nameDraft.trim() !== currentName;
+
+  const canSaveBio =
+    !isProfileLoading && !isSavingBio && bioDraft.trim() !== currentBio;
+
+  const handleNameSave = async () => {
+    if (!canSaveName) {
+      return;
+    }
+
+    setIsSavingName(true);
+    setSaveError(null);
+
+    try {
+      await updateProfile({ name: nameDraft });
+    } catch (error) {
+      setSaveError(
+        error instanceof Error ? error.message : "Could not update username.",
+      );
+    } finally {
+      setIsSavingName(false);
+    }
+  };
+
+  const handleBioSave = async () => {
+    if (!canSaveBio) {
+      return;
+    }
+
+    setIsSavingBio(true);
+    setSaveError(null);
+
+    try {
+      await updateProfile({ bio: bioDraft });
+    } catch (error) {
+      setSaveError(
+        error instanceof Error ? error.message : "Could not update bio.",
+      );
+    } finally {
+      setIsSavingBio(false);
+    }
+  };
 
   return (
     <div className="flex flex-col items-start justify-start w-full">
@@ -78,37 +142,6 @@ export function SettingsSections() {
                 Disable
               </button>
             </div>
-
-            <p className="text-(--gray-page)">
-              News letter on updates and developments
-            </p>
-            <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
-              {newsletterEnabled ? "Enabled" : "Disabled"}
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                className={`w-max rounded-md border px-2 py-1 ${
-                  newsletterEnabled
-                    ? "border-(--accepted-border) bg-(--accepted-bg)/10 hover:bg-(--accepted-bg)/20"
-                    : "border-(--gray) hover:bg-(--gray)/20"
-                }`}
-                onClick={() => setNewsletterEnabled(true)}
-              >
-                Enable
-              </button>
-              <button
-                type="button"
-                className={`w-max rounded-md border px-2 py-1 ${
-                  !newsletterEnabled
-                    ? "border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20"
-                    : "border-(--gray) hover:bg-(--gray)/20"
-                }`}
-                onClick={() => setNewsletterEnabled(false)}
-              >
-                Disable
-              </button>
-            </div>
           </div>
         ) : null}
       </div>
@@ -130,7 +163,7 @@ export function SettingsSections() {
           <div className="pl-7 flex flex-col gap-2 pb-2">
             <p className="text-(--gray-page)">Username</p>
             <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
-              {username}
+              {isProfileLoading ? "Loading..." : currentName || "Not set"}
             </div>
 
             <p className="text-(--gray-page)">Change username</p>
@@ -138,33 +171,27 @@ export function SettingsSections() {
               type="text"
               placeholder="Enter a new username..."
               className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
-              value={newUsername}
-              onChange={(e) => setNewUsername(e.target.value)}
+              value={nameDraft}
+              onChange={(e) => setNameDraft(e.target.value)}
+              disabled={isProfileLoading || isSavingName}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  const nextValue = newUsername.trim();
-                  if (!nextValue) return;
-                  setUsername(nextValue);
-                  setNewUsername("");
+                  void handleNameSave();
                 }
               }}
             />
             <button
               type="button"
-              className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
-              onClick={() => {
-                const nextValue = newUsername.trim();
-                if (!nextValue) return;
-                setUsername(nextValue);
-                setNewUsername("");
-              }}
+              className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-(--vibrant)"
+              onClick={() => void handleNameSave()}
+              disabled={!canSaveName}
             >
-              Save
+              {isSavingName ? "Saving..." : "Save"}
             </button>
 
             <p className="text-(--gray-page)">Bio/Description</p>
             <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
-              {bio}
+              {isProfileLoading ? "Loading..." : currentBio || "Not set"}
             </div>
 
             <p className="text-(--gray-page)">Change bio</p>
@@ -172,34 +199,31 @@ export function SettingsSections() {
               type="text"
               placeholder="Enter a new bio..."
               className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
-              value={newBio}
-              onChange={(e) => setNewBio(e.target.value)}
+              value={bioDraft}
+              onChange={(e) => setBioDraft(e.target.value)}
+              disabled={isProfileLoading || isSavingBio}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  const nextValue = newBio.trim();
-                  if (!nextValue) return;
-                  setBio(nextValue);
-                  setNewBio("");
+                  void handleBioSave();
                 }
               }}
             />
             <button
               type="button"
-              className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
-              onClick={() => {
-                const nextValue = newBio.trim();
-                if (!nextValue) return;
-                setBio(nextValue);
-                setNewBio("");
-              }}
+              className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-(--vibrant)"
+              onClick={() => void handleBioSave()}
+              disabled={!canSaveBio}
             >
-              Save
+              {isSavingBio ? "Saving..." : "Save"}
             </button>
 
             <p className="text-(--gray-page)">Email</p>
             <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
-              {email}
+              {isProfileLoading ? "Loading..." : currentEmail || "Not set"}
             </div>
+            {saveError ? (
+              <p className="text-sm text-(--declined-border)">{saveError}</p>
+            ) : null}
           </div>
         ) : null}
       </div>

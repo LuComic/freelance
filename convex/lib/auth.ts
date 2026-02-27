@@ -1,4 +1,7 @@
-import { getAuthUserId } from "@convex-dev/auth/server";
+import {
+  getAuthSessionId,
+  getAuthUserId,
+} from "@convex-dev/auth/server";
 import type { Doc, Id } from "../_generated/dataModel";
 import type { QueryCtx, MutationCtx } from "../_generated/server";
 import { notFound, unauthorized } from "./errors";
@@ -32,4 +35,74 @@ export async function requireCurrentUser(ctx: AuthCtx): Promise<Doc<"users">> {
     throw notFound(`User ${userId} was not found.`);
   }
   return user;
+}
+
+export async function getCurrentSessionId(ctx: AuthCtx) {
+  return getAuthSessionId(ctx);
+}
+
+export async function requireCurrentSessionId(
+  ctx: AuthCtx,
+): Promise<Id<"authSessions">> {
+  const sessionId = await getCurrentSessionId(ctx);
+  if (!sessionId) {
+    throw unauthorized();
+  }
+  return sessionId;
+}
+
+export async function getCurrentSession(
+  ctx: AuthCtx,
+): Promise<Doc<"authSessions"> | null> {
+  const sessionId = await getCurrentSessionId(ctx);
+  if (!sessionId) {
+    return null;
+  }
+  return ctx.db.get(sessionId);
+}
+
+export async function requireCurrentSession(
+  ctx: AuthCtx,
+): Promise<Doc<"authSessions">> {
+  const sessionId = await requireCurrentSessionId(ctx);
+  const session = await ctx.db.get(sessionId);
+  if (!session) {
+    throw notFound(`Session ${sessionId} was not found.`);
+  }
+  return session;
+}
+
+export async function requireCurrentAuth(ctx: AuthCtx): Promise<{
+  userId: Id<"users">;
+  sessionId: Id<"authSessions">;
+  user: Doc<"users">;
+  session: Doc<"authSessions">;
+}> {
+  const [userId, sessionId] = await Promise.all([
+    getCurrentUserId(ctx),
+    getCurrentSessionId(ctx),
+  ]);
+
+  if (!userId || !sessionId) {
+    throw unauthorized();
+  }
+
+  const [user, session] = await Promise.all([
+    ctx.db.get(userId),
+    ctx.db.get(sessionId),
+  ]);
+
+  if (!user) {
+    throw notFound(`User ${userId} was not found.`);
+  }
+
+  if (!session) {
+    throw notFound(`Session ${sessionId} was not found.`);
+  }
+
+  if (session.userId !== userId) {
+    throw unauthorized();
+  }
+
+  return { userId, sessionId, user, session };
 }

@@ -16,12 +16,17 @@ import { setCookie, SIDEBAR_COOKIE } from "@/app/lib/cookies";
 import { CreateProjectModal } from "@/app/lib/components/project/CreateProjectModal";
 import Link from "next/link";
 import { LogOutButton } from "../LogOutButton";
+import { SidebarUserInfo, type SidebarUserProfile } from "./SidebarUserInfo";
 
 type DesktopSidebarProps = {
   initialOpen?: boolean;
+  userProfile: SidebarUserProfile;
 };
 
-export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
+export const DesktopSidebar = ({
+  initialOpen,
+  userProfile,
+}: DesktopSidebarProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(initialOpen ?? true);
   const [activeTab, setActiveTab] = useState<"files" | "friends" | "settings">(
     "files",
@@ -94,13 +99,7 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
           {activeTab === "friends" ? <Connections /> : null}
           {activeTab === "settings" ? <SidebarSettings /> : null}
           <div className="mt-auto w-full h-max flex items-center">
-            <Link
-              className="w-max gap-2 flex items-center justify-start py-1 pl-2 pr-3 rounded-lg hover:bg-(--darkest-hover)"
-              href="/settings?section=account"
-            >
-              <div className="aspect-square w-8 h-auto bg-(--dim) rounded-full"></div>
-              <span className="font-light text-base">John Doe</span>
-            </Link>
+            <SidebarUserInfo profile={userProfile} />
             <button className="ml-auto p-1 flex items-center justify-center aspect-square rounded-lg h-full hover:bg-(--darkest-hover) ">
               <Bell size={20} />
             </button>
@@ -158,9 +157,7 @@ export const DesktopSidebar = ({ initialOpen }: DesktopSidebarProps) => {
             <CreateProjectModal />
           </div>
           <div className="flex flex-col gap-2 items-center justify-center mt-auto w-full">
-            <button className=" p-1 rounded-lg hover:bg-(--darkest-hover) w-full">
-              <div className="aspect-square w-6 h-auto bg-(--dim) rounded-full mx-auto"></div>
-            </button>
+            <SidebarUserInfo profile={userProfile} compact={true} />
             <button className=" aspect-square p-1 rounded-lg hover:bg-(--darkest-hover) w-full">
               <Bell size={20} className="mx-auto" />
             </button>
