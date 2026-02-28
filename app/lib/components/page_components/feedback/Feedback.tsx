@@ -1,26 +1,34 @@
 "use client";
 
+import { usePageComponentState } from "@/app/lib/components/project/PageDocumentContext";
 import { useEditMode } from "@/app/lib/components/project/EditModeContext";
 import { FeedbackCreator } from "./FeedbackCreator";
 import { FeedbackClient } from "./FeedbackClient";
 
-type FeedbackProps = {
-  initialClientLayout?: "grid" | "list";
-  initialCreatorLayout?: "grid" | "list";
-};
-
 export const Feedback = ({
-  initialClientLayout,
-  initialCreatorLayout,
-}: FeedbackProps) => {
+  instanceId,
+}: {
+  instanceId: string;
+}) => {
   const { isLive } = useEditMode();
+  const { component, liveState, updateConfig, updateLiveState } =
+    usePageComponentState(instanceId, "Feedback");
 
   return (
     <div className="w-full flex flex-col gap-2">
       {isLive ? (
-        <FeedbackClient initialLayout={initialClientLayout} />
+        <FeedbackClient
+          config={component.config}
+          liveState={liveState.state}
+          onChangeLiveState={updateLiveState}
+        />
       ) : (
-        <FeedbackCreator initialLayout={initialCreatorLayout} />
+        <FeedbackCreator
+          config={component.config}
+          liveState={liveState.state}
+          onChangeConfig={updateConfig}
+          onChangeLiveState={updateLiveState}
+        />
       )}
     </div>
   );

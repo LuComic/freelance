@@ -4,7 +4,6 @@ import { Kanban } from "@/app/lib/components/page_components/progress/Kanban";
 import { Feedback } from "@/app/lib/components/page_components/feedback/Feedback";
 import { Select } from "@/app/lib/components/page_components/form/select/Select";
 import { Radio } from "@/app/lib/components/page_components/form/radio/Radio";
-import { TextFields } from "@/app/lib/components/page_components/text/TextFields";
 import { MainHeadline } from "@/app/lib/components/page_components/text/parts/MainHeadline";
 import { SectionHeader } from "@/app/lib/components/page_components/text/parts/SectionHeader";
 import { Subheader } from "@/app/lib/components/page_components/text/parts/Subheader";
@@ -14,7 +13,6 @@ export const COMPONENT_REGISTRY = [
   { tag: "Feedback", Component: Feedback, commands: ["feedback"] },
   { tag: "Select", Component: Select, commands: ["select"] },
   { tag: "Radio", Component: Radio, commands: ["radio"] },
-  { tag: "TextFields", Component: TextFields, commands: ["textfields"] },
   {
     tag: "MainHeadline",
     Component: MainHeadline,

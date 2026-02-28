@@ -1,2 +1,9 @@
-export const INITIAL_TEXT = `Project brief\n\nWrite your page content here.\n\nThis testing page now supports a full-page editing mode.`;
-export const COMPONENT_TAG_REGEX = /<([A-Za-z][A-Za-z0-9]*)\s*\/>/g;
+import {
+  DEFAULT_PAGE_EDITOR_TEXT,
+  LEGACY_COMPONENT_TAG_REGEX,
+  PAGE_COMPONENT_TOKEN_REGEX,
+} from "@/lib/pageDocument";
+
+export const INITIAL_TEXT = DEFAULT_PAGE_EDITOR_TEXT;
+export const COMPONENT_TAG_REGEX = LEGACY_COMPONENT_TAG_REGEX;
+export const COMPONENT_TOKEN_REGEX = PAGE_COMPONENT_TOKEN_REGEX;

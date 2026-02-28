@@ -10,125 +10,112 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-type itemType = {
-  id: number;
-  feature: string;
-  status: "Todo" | "In Progress" | "Done";
-  tags: string[];
-  dismissed?: boolean;
-};
-
-const IDEA_DATA: itemType[] = [
-  {
-    id: 1,
-    feature: "Please add an About page",
-    status: "Todo",
-    tags: ["required"],
-  },
-  {
-    id: 2,
-    feature: "Turn the selector in X page into a slider",
-    status: "In Progress",
-    tags: ["nice to have"],
-  },
-  {
-    id: 3,
-    feature:
-      "Create a 3D animation on the landing page that is 4k resolution and has no mistakes",
-    status: "Done",
-    tags: ["nice to have"],
-  },
-  {
-    id: 4,
-    feature: "Do something like that now!",
-    status: "In Progress",
-    tags: ["required"],
-  },
-  {
-    id: 5,
-    feature: "Finish the project in the next week!!!!",
-    status: "In Progress",
-    tags: ["required"],
-  },
-  {
-    id: 6,
-    feature:
-      "Create a 3D animation on the landing page that is 4k resolution and has no mistakes",
-    status: "Done",
-    tags: ["nice to have"],
-  },
-];
+import type {
+  KanbanItem,
+  PageComponentInstanceByType,
+  PageComponentLiveStateByType,
+} from "@/lib/pageDocument";
 
 type KanbanCreatorProps = {
-  initialLayout?: "grid" | "list";
+  config: PageComponentInstanceByType<"Kanban">["config"];
+  liveState: PageComponentLiveStateByType<"Kanban">["state"];
+  onChangeConfig: (
+    updater: (
+      config: PageComponentInstanceByType<"Kanban">["config"],
+    ) => PageComponentInstanceByType<"Kanban">["config"],
+  ) => void;
+  onChangeLiveState: (
+    updater: (
+      state: PageComponentLiveStateByType<"Kanban">["state"],
+    ) => PageComponentLiveStateByType<"Kanban">["state"],
+  ) => void;
 };
 
-const STATUS_OPTIONS: itemType["status"][] = ["Todo", "In Progress", "Done"];
+const STATUS_OPTIONS: KanbanItem["status"][] = ["Todo", "In Progress", "Done"];
 
-export const KanbanCreator = ({}: KanbanCreatorProps) => {
-  const [data, setData] = useState(IDEA_DATA);
-  const [tags, setTags] = useState<string[]>(["required", "nice to have"]);
+export const KanbanCreator = ({
+  config,
+  liveState,
+  onChangeConfig,
+  onChangeLiveState,
+}: KanbanCreatorProps) => {
   const [tagInput, setTagInput] = useState("");
   const [editingTags, setEditingTags] = useState(false);
   const [filter, setFilter] = useState<"" | "dismissed">("");
   const [adding, setAdding] = useState(false);
   const [taskInput, setTaskInput] = useState("");
   const [newTaskStatus, setNewTaskStatus] =
-    useState<itemType["status"]>("Todo");
+    useState<KanbanItem["status"]>("Todo");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const handleNewTag = () => {
     if (tagInput.trim() === "") return;
-    if (tags.includes(tagInput.trim())) return;
-    setTags((prev) => [tagInput.trim(), ...prev]);
+    if (config.tags.includes(tagInput.trim())) return;
+    onChangeConfig((currentConfig) => ({
+      ...currentConfig,
+      tags: [tagInput.trim(), ...currentConfig.tags],
+    }));
     setTagInput("");
   };
 
   const deleteTag = (tag: string) => {
-    setTags((prev) => prev.filter((t) => t !== tag));
+    onChangeConfig((currentConfig) => ({
+      ...currentConfig,
+      tags: currentConfig.tags.filter((t) => t !== tag),
+    }));
     setSelectedTags((prev) =>
       prev.filter((selectedTag) => selectedTag !== tag),
     );
-    setData((prev) =>
-      prev.map((item) => ({
+    onChangeLiveState((currentLiveState) => ({
+      ...currentLiveState,
+      items: currentLiveState.items.map((item) => ({
         ...item,
         tags: item.tags.filter((itemTag) => itemTag !== tag),
       })),
-    );
+    }));
   };
 
   const handleNewTask = () => {
     if (taskInput.trim() === "") return;
 
-    const highestId = data.reduce((max, item) => Math.max(max, item.id), 0);
+    const highestId = liveState.items.reduce(
+      (max, item) => Math.max(max, item.id),
+      0,
+    );
 
-    setData((prev) => [
-      {
-        id: highestId + 1,
-        feature: taskInput.trim(),
-        status: newTaskStatus,
-        tags: selectedTags,
-      },
-      ...prev,
-    ]);
+    onChangeLiveState((currentLiveState) => ({
+      ...currentLiveState,
+      items: [
+        {
+          id: highestId + 1,
+          feature: taskInput.trim(),
+          status: newTaskStatus,
+          tags: selectedTags,
+        },
+        ...currentLiveState.items,
+      ],
+    }));
     setTaskInput("");
     setNewTaskStatus("Todo");
     setSelectedTags([]);
   };
 
-  const handleDismissing = (item: itemType) => {
-    setData((prev) =>
-      prev.map((p) =>
-        p.id === item.id ? { ...p, dismissed: !p.dismissed } : p,
+  const handleDismissing = (itemId: number) => {
+    onChangeLiveState((currentLiveState) => ({
+      ...currentLiveState,
+      items: currentLiveState.items.map((item) =>
+        item.id === itemId ? { ...item, dismissed: !item.dismissed } : item,
       ),
-    );
+    }));
   };
 
-  const handleStatusChange = (id: number, status: itemType["status"]) => {
-    setData((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, status } : item)),
-    );
+  const handleStatusChange = (id: number, status: KanbanItem["status"]) => {
+    onChangeLiveState((currentLiveState) => ({
+      ...currentLiveState,
+      items: currentLiveState.items.map((item) =>
+        item.id === id ? { ...item, status } : item,
+      ),
+    }));
   };
 
   const changeFilter = () => {
@@ -140,19 +127,20 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
     setFilter("dismissed");
   };
 
-  const visibleData = data.filter((item) => {
+  const visibleData = liveState.items.filter((item) => {
     if (filter === "dismissed") {
       return item.dismissed;
     }
     return !item.dismissed;
   });
 
-  const getTableData = (): (itemType | undefined)[][] => {
+  const getTableData = (): (KanbanItem | undefined)[][] => {
     const todos = visibleData.filter((t) => t.status === "Todo");
     const progress = visibleData.filter((t) => t.status === "In Progress");
     const done = visibleData.filter((t) => t.status === "Done");
     const longest = Math.max(todos.length, progress.length, done.length);
-    const tableList: (itemType | undefined)[][] = [];
+    const tableList: (KanbanItem | undefined)[][] = [];
+
     for (let i = 0; i < longest; i++) {
       tableList.push([todos[i], progress[i], done[i]]);
     }
@@ -196,7 +184,7 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
             <Select
               value={newTaskStatus}
               onValueChange={(value) =>
-                setNewTaskStatus(value as itemType["status"])
+                setNewTaskStatus(value as KanbanItem["status"])
               }
             >
               <SelectTrigger className="w-full @[40rem]:w-52 bg-(--darkest) border-(--gray-page) ">
@@ -217,7 +205,7 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
               </SelectContent>
             </Select>
             <div className="flex items-center justify-start gap-2 w-full">
-              {tags.map((tag) => (
+              {config.tags.map((tag) => (
                 <button
                   key={tag}
                   className={`px-1.5 py-0.5 rounded-md border ${!selectedTags.includes(tag) && "border-(--gray-page) text-(--gray-page)"} `}
@@ -269,7 +257,7 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
               }}
             />
             <div className="flex items-center justify-start gap-2 w-full">
-              {tags.map((tag) => (
+              {config.tags.map((tag) => (
                 <div
                   key={tag}
                   className="pl-1.5 pr-0.5 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) flex items-center gap-1"
@@ -300,7 +288,7 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
           onClick={() => changeFilter()}
         >
           <X size={16} />
-          Dismissed ({data.filter((item) => item.dismissed).length})
+          Dismissed ({liveState.items.filter((item) => item.dismissed).length})
         </button>
       </div>
       {filter === "dismissed" ? (
@@ -321,7 +309,7 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
               <div className="w-full flex items-center gap-1">
                 <button
                   className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm  w-full border border-(--gray)  hover:bg-(--gray)/20"
-                  onClick={() => handleDismissing(feature)}
+                  onClick={() => handleDismissing(feature.id)}
                 >
                   <TimerReset size={16} />
                   Restore
@@ -333,7 +321,9 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
       ) : (
         <div className="w-full max-w-full min-w-0 overflow-x-auto border rounded-md border-(--gray)">
           <div className="min-w-[900px] flex flex-col">
-            <div className="w-full text-(--gray-page) border-b border-(--gray) text-left grid justify-between items-start grid-cols-3 bg-(--darkest)">
+            <div
+              className={`w-full text-(--gray-page) ${tableRows.length > 0 && "border-b"} border-(--gray) text-left grid justify-between items-start grid-cols-3 bg-(--darkest)`}
+            >
               <span className="text-(--declined-border) border-r p-2 border-(--gray) h-full text-wrap">
                 Todo
               </span>
@@ -360,7 +350,7 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
                         <div className="flex items-center gap-2">
                           <button
                             className="flex items-center justify-center p-1.5 rounded-sm  hover:bg-(--gray)/20 text-(--gray-page)"
-                            onClick={() => handleDismissing(item)}
+                            onClick={() => handleDismissing(item.id)}
                           >
                             <X size={16} />
                           </button>
@@ -369,7 +359,7 @@ export const KanbanCreator = ({}: KanbanCreatorProps) => {
                             onValueChange={(value) =>
                               handleStatusChange(
                                 item.id,
-                                value as itemType["status"],
+                                value as KanbanItem["status"],
                               )
                             }
                           >

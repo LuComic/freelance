@@ -14,7 +14,6 @@ export type InsertableComponentCommand =
   | "feedback"
   | "select"
   | "radio"
-  | "textfields"
   | "mainheadline"
   | "sectionheader"
   | "subheader";

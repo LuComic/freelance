@@ -1,64 +1,24 @@
 "use client";
 
-import { useState } from "react";
-
-type itemType = {
-  id: number;
-  feature: string;
-  status: "Todo" | "In Progress" | "Done";
-  dismissed?: boolean;
-};
-
-const IDEA_DATA: itemType[] = [
-  {
-    id: 1,
-    feature: "Please add an About page",
-    status: "Todo",
-  },
-  {
-    id: 2,
-    feature: "Turn the selector in X page into a slider",
-    status: "In Progress",
-  },
-  {
-    id: 3,
-    feature:
-      "Create a 3D animation on the landing page that is 4k resolution and has no mistakes",
-    status: "Done",
-  },
-  {
-    id: 4,
-    feature: "Do something like that now!",
-    status: "In Progress",
-  },
-  {
-    id: 5,
-    feature: "Finish the project in the next week!!!!",
-    status: "In Progress",
-  },
-  {
-    id: 6,
-    feature:
-      "Create a 3D animation on the landing page that is 4k resolution and has no mistakes",
-    status: "Done",
-  },
-];
+import type { PageComponentLiveStateByType } from "@/lib/pageDocument";
 
 type KanbanClientProps = {
-  initialLayout?: "grid" | "list";
+  liveState: PageComponentLiveStateByType<"Kanban">["state"];
 };
 
-export const KanbanClient = ({}: KanbanClientProps) => {
-  const [data] = useState(IDEA_DATA);
+export const KanbanClient = ({ liveState }: KanbanClientProps) => {
+  const visibleData = liveState.items.filter((item) => !item.dismissed);
 
-  const visibleData = data.filter((item) => !item.dismissed);
-
-  const getTableData = (): (itemType | undefined)[][] => {
+  const getTableData = (): (
+    | (typeof liveState.items)[number]
+    | undefined
+  )[][] => {
     const todos = visibleData.filter((t) => t.status === "Todo");
     const progress = visibleData.filter((t) => t.status === "In Progress");
     const done = visibleData.filter((t) => t.status === "Done");
     const longest = Math.max(todos.length, progress.length, done.length);
-    const tableList: (itemType | undefined)[][] = [];
+    const tableList: ((typeof liveState.items)[number] | undefined)[][] = [];
+
     for (let i = 0; i < longest; i++) {
       tableList.push([todos[i], progress[i], done[i]]);
     }
@@ -78,7 +38,9 @@ export const KanbanClient = ({}: KanbanClientProps) => {
       </p>
       <div className="w-full max-w-full min-w-0 overflow-x-auto border rounded-md border-(--gray)">
         <div className="min-w-[900px] flex flex-col">
-          <div className="w-full text-(--gray-page) border-b border-(--gray) text-left grid justify-between items-start grid-cols-3 bg-(--darkest)">
+          <div
+            className={`w-full text-(--gray-page) ${tableRows.length > 0 && "border-b"} border-(--gray) text-left grid justify-between items-start grid-cols-3 bg-(--darkest)`}
+          >
             <span className="text-(--declined-border) border-r p-2 border-(--gray) h-full text-wrap">
               Todo
             </span>

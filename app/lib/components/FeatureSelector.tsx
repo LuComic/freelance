@@ -1,11 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Feedback } from "@/app/lib/components/page_components/feedback/Feedback";
-import { Kanban } from "@/app/lib/components/page_components/progress/Kanban";
-import { Radio } from "@/app/lib/components/page_components/form/radio/Radio";
-import { Select as FieldSelect } from "@/app/lib/components/page_components/form/select/Select";
-import { TextFields } from "@/app/lib/components/page_components/text/TextFields";
 import {
   Select,
   SelectContent,
@@ -77,32 +72,18 @@ export const FeatureSelector = ({
         </SelectContent>
       </Select>
 
-      {selectedFeature === "feedback" ? (
-        <Feedback
-          initialClientLayout={initialClientLayout}
-          initialCreatorLayout={initialCreatorLayout}
-        />
-      ) : selectedFeature === "radio" ? (
-        <Radio
-          initialClientLayout={initialClientLayout}
-          initialCreatorLayout={initialCreatorLayout}
-        />
-      ) : selectedFeature === "select" ? (
-        <FieldSelect
-          initialClientLayout={initialClientLayout}
-          initialCreatorLayout={initialCreatorLayout}
-        />
-      ) : selectedFeature === "text" ? (
-        <TextFields
-          initialClientLayout={initialClientLayout}
-          initialCreatorLayout={initialCreatorLayout}
-        />
-      ) : (
-        <Kanban
-          initialClientLayout={initialClientLayout}
-          initialCreatorLayout={initialCreatorLayout}
-        />
-      )}
+      <div className="rounded-md border border-(--gray) bg-(--darkest) p-4 text-sm text-(--gray-page)">
+        <p className="font-medium text-(--light)">
+          {selectedFeature.charAt(0).toUpperCase() + selectedFeature.slice(1)} preview
+        </p>
+        <p className="mt-1">
+          Interactive feature previews now live inside persisted page documents.
+        </p>
+        <p className="mt-2">
+          Client layout: {initialClientLayout ?? "default"} · Creator layout:{" "}
+          {initialCreatorLayout ?? "default"}
+        </p>
+      </div>
     </div>
   );
 };

@@ -18,46 +18,26 @@ import {
   setCookie,
   FEEDBACK_CLIENT_LAYOUT_COOKIE,
 } from "@/app/lib/cookies";
-
-type itemType = {
-  feature: string;
-  status: "pending" | "accepted" | "declined";
-  tags: string[];
-  reason?: string;
-  dismissed?: boolean;
-};
-
-// The possible tags are defined by the creator when creating the component
-const TAGS: string[] = ["required", "nice to have"];
-
-let IDEA_DATA: itemType[] = [
-  {
-    feature: "Please add an About page",
-    status: "accepted",
-    tags: ["required"],
-    reason:
-      "Yeah sure, added it right now. Let me know if you want any changes there",
-  },
-  {
-    feature: "Turn the selector in X page into a slider",
-    tags: ["nice to have"],
-    status: "pending",
-  },
-  {
-    feature:
-      "Create a 3D animation on the landing page that is 4k resolution and has no mistakes",
-    status: "declined",
-    tags: ["nice to have"],
-    reason: "You're not paying enough for that",
-  },
-];
+import type {
+  PageComponentInstanceByType,
+  PageComponentLiveStateByType,
+} from "@/lib/pageDocument";
 
 type FeedbackClientProps = {
-  initialLayout?: "grid" | "list";
+  config: PageComponentInstanceByType<"Feedback">["config"];
+  liveState: PageComponentLiveStateByType<"Feedback">["state"];
+  onChangeLiveState: (
+    updater: (
+      state: PageComponentLiveStateByType<"Feedback">["state"],
+    ) => PageComponentLiveStateByType<"Feedback">["state"],
+  ) => void;
 };
 
-export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
-  const [data, setData] = useState(IDEA_DATA);
+export const FeedbackClient = ({
+  config,
+  liveState,
+  onChangeLiveState,
+}: FeedbackClientProps) => {
   const [ideaInput, setIdeaInput] = useState("");
   const [filter, setFilter] = useState<
     "" | "accepted" | "declined" | "pending" | "dismissed"
@@ -70,7 +50,7 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
       return cookieLayout;
     }
 
-    return initialLayout ?? "grid";
+    return "grid";
   });
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
@@ -80,29 +60,38 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
 
   const handleNewIdea = () => {
     if (ideaInput.trim() === "") return;
-    const newItem: itemType = {
-      feature: ideaInput,
-      status: "pending",
-      tags: selectedTags,
-      dismissed: false,
-    };
-    setData((prev) => [newItem, ...prev]);
+    onChangeLiveState((currentLiveState) => ({
+      ...currentLiveState,
+      items: [
+        {
+          feature: ideaInput,
+          status: "pending",
+          tags: selectedTags,
+          dismissed: false,
+        },
+        ...currentLiveState.items,
+      ],
+    }));
     setIdeaInput("");
     setSelectedTags([]);
   };
 
-  const handleDismissing = (item: itemType) => {
-    setData((prev) =>
-      prev.map((p) =>
-        p.feature === item.feature
-          ? { ...p, dismissed: !(p.dismissed && p.dismissed === true) }
-          : p,
+  const handleDismissing = (feature: string) => {
+    onChangeLiveState((currentLiveState) => ({
+      ...currentLiveState,
+      items: currentLiveState.items.map((item) =>
+        item.feature === feature
+          ? { ...item, dismissed: !(item.dismissed && item.dismissed === true) }
+          : item,
       ),
-    );
+    }));
   };
 
   const deleteIdea = (feature: string) => {
-    setData((prev) => prev.filter((p) => p.feature !== feature));
+    onChangeLiveState((currentLiveState) => ({
+      ...currentLiveState,
+      items: currentLiveState.items.filter((item) => item.feature !== feature),
+    }));
   };
 
   const changeFilter = (
@@ -118,8 +107,8 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
 
   const visibleData =
     filter === ""
-      ? data.filter((item) => !item.dismissed)
-      : data.filter((item) => {
+      ? liveState.items.filter((item) => !item.dismissed)
+      : liveState.items.filter((item) => {
           if (filter === "dismissed") {
             return item.dismissed && item.dismissed === true;
           }
@@ -158,30 +147,8 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
               }}
             />
 
-            {/* <button
-              className="flex items-center gap-2 justify-start w-full "
-              onClick={() => setNiceToHave(true)}
-            >
-              <span className="h-5 flex items-center p-1 justify-center w-auto aspect-square rounded-full bg-(--darkest)">
-                {niceToHave && (
-                  <span className="bg-(--vibrant) aspect-square h-full rounded-full"></span>
-                )}
-              </span>
-              Nice to have
-            </button>
-            <button
-              className="flex items-center gap-2 justify-start w-full "
-              onClick={() => setNiceToHave(false)}
-            >
-              <span className="h-5 flex items-center p-1 justify-center w-auto aspect-square rounded-full bg-(--darkest)">
-                {!niceToHave && (
-                  <span className="bg-(--vibrant) aspect-square h-full rounded-full"></span>
-                )}
-              </span>
-              Required
-            </button> */}
             <div className="flex items-center justify-start gap-2 w-full">
-              {TAGS.map((tag) => (
+              {config.tags.map((tag) => (
                 <button
                   key={tag}
                   className={`px-1.5 py-0.5 rounded-md border ${!selectedTags.includes(tag) && "border-(--gray-page) text-(--gray-page)"} `}
@@ -259,8 +226,9 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
           <X size={16} />
           Dismissed (
           {
-            data.filter((item) => item.dismissed && item.dismissed === true)
-              .length
+            liveState.items.filter(
+              (item) => item.dismissed && item.dismissed === true,
+            ).length
           }
           )
         </button>
@@ -307,7 +275,7 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
                 </button>
                 <button
                   className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm  w-full border border-(--gray)  hover:bg-(--gray)/20"
-                  onClick={() => handleDismissing(feature)}
+                  onClick={() => handleDismissing(feature.feature)}
                 >
                   {feature.dismissed && feature.dismissed === true ? (
                     <>
@@ -328,7 +296,9 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
       ) : (
         <div className="w-full max-w-full min-w-0 overflow-x-auto border rounded-md border-(--gray)">
           <div className="min-w-[900px] flex flex-col">
-            <div className="w-full text-(--gray-page) border-b border-(--gray) text-left grid justify-between items-start grid-cols-13 bg-(--darkest)">
+            <div
+              className={`w-full text-(--gray-page) ${visibleData.length > 0 && "border-b"} border-(--gray) text-left grid justify-between items-start grid-cols-13 bg-(--darkest)`}
+            >
               <span className="flex items-center justify-center border-r p-2 border-(--gray) h-full text-wrap">
                 <Pencil size={16} />
               </span>
@@ -358,7 +328,7 @@ export const FeedbackClient = ({ initialLayout }: FeedbackClientProps) => {
                   </button>
                   <button
                     className="gap-1 flex items-center justify-center p-1.5 rounded-sm h-max aspect-square  hover:bg-(--gray)/20"
-                    onClick={() => handleDismissing(feature)}
+                    onClick={() => handleDismissing(feature.feature)}
                   >
                     {feature.dismissed && feature.dismissed === true ? (
                       <>

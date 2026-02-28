@@ -1,4 +1,5 @@
 import type { InsertableComponentCommand } from "@/app/lib/components/project/EditModeContext";
+import { createComponentToken, type PageComponentType } from "@/lib/pageDocument";
 import {
   INSERTABLE_COMPONENT_COMMANDS,
   PRIMARY_INSERTABLE_COMMANDS,
@@ -32,11 +33,20 @@ function getTokenRangeAtCursor(value: string, cursor: number) {
   };
 }
 
+export function getSlashCommandTokenRange(value: string, cursor: number) {
+  const range = getTokenRangeAtCursor(value, cursor);
+  return range.token.startsWith("/") ? range : null;
+}
+
 function resolveTagFromCommand(command: string) {
   const match = INSERTABLE_COMPONENT_COMMANDS.find(
     (item) => item.command === command,
   );
   return match?.tag;
+}
+
+export function resolveComponentTypeFromCommand(command: string) {
+  return resolveTagFromCommand(command) as PageComponentType | undefined;
 }
 
 export function getActiveLineFromCursor(value: string, cursor: number) {
@@ -129,38 +139,49 @@ export function consumeSlashActionCommand(value: string, cursor: number) {
   };
 }
 
-export function replaceSlashCommandWithTag(value: string, cursor: number) {
+export function replaceSlashCommandWithToken(
+  value: string,
+  cursor: number,
+  instanceId: string,
+) {
   const { start, end, token } = getTokenRangeAtCursor(value, cursor);
   if (!token.startsWith("/")) {
     return null;
   }
 
   const command = token.slice(1).toLowerCase() as EditorComponentCommand;
-  const tag = resolveTagFromCommand(command);
-  if (!tag) {
+  const componentType = resolveComponentTypeFromCommand(command);
+  if (!componentType) {
     return null;
   }
 
-  const tagToken = `<${tag} />`;
+  const tagToken = createComponentToken(componentType, instanceId);
   return {
     nextValue: `${value.slice(0, start)}${tagToken}${value.slice(end)}`,
     nextCursor: start + tagToken.length,
+    start,
+    end,
+    componentType,
   };
 }
 
-export function insertComponentTagAtCursor(
+export function insertComponentTokenAtCursor(
   value: string,
   cursor: number,
   command: InsertableComponentCommand,
+  instanceId: string,
 ) {
-  const tag = resolveTagFromCommand(command);
-  if (!tag) {
+  const componentType = resolveComponentTypeFromCommand(command);
+  if (!componentType) {
     return null;
   }
 
-  const tagToken = `<${tag} />`;
+  const tagToken = createComponentToken(componentType, instanceId);
   return {
     nextValue: `${value.slice(0, cursor)}${tagToken}${value.slice(cursor)}`,
     nextCursor: cursor + tagToken.length,
+    start: cursor,
+    end: cursor,
+    componentType,
   };
 }

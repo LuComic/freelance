@@ -7,6 +7,7 @@ import { SIDEBAR_COOKIE, CHAT_COOKIE } from "../lib/cookies";
 import { Tab } from "../lib/components/tab/Tab";
 import { TopBar } from "../lib/components/project/TopBar";
 import { EditModeProvider } from "../lib/components/project/EditModeContext";
+import { PageDocumentProvider } from "../lib/components/project/PageDocumentContext";
 import { SearchBarProvider } from "../lib/components/searchbar/SearchBarContext";
 
 export const metadata: Metadata = {
@@ -38,13 +39,15 @@ export default async function ProjectViewLayout({
         <SearchBar />
         <Sidebar initialSidebarOpen={initialSidebarOpen} />
         <EditModeProvider>
-          <div className="flex-1 min-w-0 flex flex-col items-start justify-start">
-            <Tab />
-            <TopBar />
-            <div className="@container w-full px-4 md:pt-8 pt-15 pb-8 flex flex-col items-start justify-start gap-4">
-              {children}
+          <PageDocumentProvider>
+            <div className="flex-1 min-w-0 flex flex-col items-start justify-start">
+              <Tab />
+              <TopBar />
+              <div className="@container w-full px-4 md:pt-8 pt-15 pb-8 flex flex-col items-start justify-start gap-4">
+                {children}
+              </div>
             </div>
-          </div>
+          </PageDocumentProvider>
           <Chat initialChatOpen={initialChatOpen} />
         </EditModeProvider>
       </SearchBarProvider>

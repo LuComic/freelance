@@ -7,8 +7,10 @@ import {
   Plus,
   EllipsisVertical,
 } from "lucide-react";
-import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { api } from "@/convex/_generated/api";
+import { useMutation } from "convex/react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Menubar,
@@ -20,28 +22,50 @@ import {
 } from "@/components/ui/menubar";
 
 interface SidebarItemProps {
-  title: string;
-  id: string;
+  project: {
+    id: string;
+    slug: string;
+    name: string;
+    pages: Array<{
+      id: string;
+      slug: string;
+      title: string;
+    }>;
+  };
+  currentProjectSlug?: string | null;
   currentPageSlug?: string | null;
 }
 
-export const FileItem = ({ title, id, currentPageSlug }: SidebarItemProps) => {
-  const pathname = usePathname();
-  const projectBasePath = "/projects/" + id;
-  const [itemExpanded, setItemExpanded] = useState(() => {
-    if (typeof window !== "undefined") {
-      if (pathname.includes(id)) return true;
+export const FileItem = ({
+  project,
+  currentProjectSlug,
+  currentPageSlug,
+}: SidebarItemProps) => {
+  const router = useRouter();
+  const createPage = useMutation(api.pages.mutations.createPage);
+  const projectBasePath = "/projects/" + project.slug;
+  const isActiveProject = currentProjectSlug === project.slug;
+  const [itemExpanded, setItemExpanded] = useState(isActiveProject);
+  const [isCreatingPage, setIsCreatingPage] = useState(false);
+
+  useEffect(() => {
+    if (isActiveProject) {
+      setItemExpanded(true);
     }
-    return false;
-  });
+  }, [isActiveProject]);
+
   return (
     <>
-      <div className="rounded-lg p-1 gap-2 hover:bg-(--darkest-hover) w-full text-(--gray) flex items-center justify-start  md:text-base text-sm">
+      <div
+        className={`rounded-lg p-1 px-1.5 gap-2 hover:bg-(--darkest-hover) w-full text-(--gray) flex items-center justify-start md:text-base text-sm ${
+          isActiveProject ? "bg-(--darkest-hover) text-(--light)" : ""
+        }`}
+      >
         <button onClick={() => setItemExpanded((prev) => !prev)}>
           <ChevronRight className={`${itemExpanded ? "rotate-90" : ""}`} />
         </button>
         <Link href={projectBasePath} className="w-full">
-          {title.length > 20 ? title.slice(0, 20) : title}
+          {project.name.length > 20 ? project.name.slice(0, 20) : project.name}
         </Link>
         <Menubar className="ml-auto h-auto bg-transparent border-none shadow-none p-0">
           <MenubarMenu>
@@ -72,29 +96,46 @@ export const FileItem = ({ title, id, currentPageSlug }: SidebarItemProps) => {
             </MenubarContent>
           </MenubarMenu>
         </Menubar>
-        <button>
+        <button
+          disabled={isCreatingPage}
+          onClick={async () => {
+            if (isCreatingPage) {
+              return;
+            }
+
+            setIsCreatingPage(true);
+            try {
+              const result = await createPage({
+                projectId: project.id as never,
+              });
+              router.push(`${projectBasePath}/${result.pageSlug}`);
+            } finally {
+              setIsCreatingPage(false);
+            }
+          }}
+        >
           <Plus size={20} />
         </button>
       </div>
 
       {itemExpanded && (
         <>
-          <Link
-            className="pl-8 flex w-full items-center justify-start gap-2 hover:bg-(--darkest-hover) rounded-lg p-1 md:text-base text-sm"
-            href={projectBasePath}
-          >
-            <File size={18} />
-            Overview
-          </Link>
-          {currentPageSlug ? (
+          {project.pages.map((page) => (
             <Link
+              key={page.id}
               className="pl-8 flex w-full items-center justify-start gap-2 hover:bg-(--darkest-hover) rounded-lg p-1 md:text-base text-sm"
-              href={projectBasePath + "/" + currentPageSlug}
+              href={projectBasePath + "/" + page.slug}
             >
               <File size={18} />
-              {currentPageSlug}
+              <span
+                className={
+                  page.slug === currentPageSlug ? "text-(--light)" : ""
+                }
+              >
+                {page.title}
+              </span>
             </Link>
-          ) : null}
+          ))}
         </>
       )}
     </>

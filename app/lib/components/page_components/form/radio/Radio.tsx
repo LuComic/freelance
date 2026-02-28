@@ -1,26 +1,34 @@
 "use client";
 
+import { usePageComponentState } from "@/app/lib/components/project/PageDocumentContext";
 import { useEditMode } from "@/app/lib/components/project/EditModeContext";
 import { RadioCreator } from "./RadioCreator";
 import { RadioClient } from "./RadioClient";
 
-type RadioProps = {
-  initialClientLayout?: "grid" | "list";
-  initialCreatorLayout?: "grid" | "list";
-};
-
 export const Radio = ({
-  initialClientLayout,
-  initialCreatorLayout,
-}: RadioProps) => {
+  instanceId,
+}: {
+  instanceId: string;
+}) => {
   const { isLive } = useEditMode();
+  const { component, liveState, updateConfig, updateLiveState } =
+    usePageComponentState(instanceId, "Radio");
 
   return (
     <div className="w-full flex flex-col gap-2">
       {isLive ? (
-        <RadioClient initialLayout={initialClientLayout} />
+        <RadioClient
+          config={component.config}
+          liveState={liveState.state}
+          onChangeLiveState={updateLiveState}
+        />
       ) : (
-        <RadioCreator initialLayout={initialCreatorLayout} />
+        <RadioCreator
+          config={component.config}
+          liveState={liveState.state}
+          onChangeConfig={updateConfig}
+          onChangeLiveState={updateLiveState}
+        />
       )}
     </div>
   );

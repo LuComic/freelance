@@ -60,6 +60,7 @@ const schema = defineSchema({
   projects: defineTable({
     ownerId: v.id("users"),
     createdByUserId: v.id("users"),
+    slug: v.string(),
     name: v.string(),
     description: v.optional(v.string()),
     // Canonical page order for sidebar/navigation.
@@ -73,6 +74,8 @@ const schema = defineSchema({
     updatedAt: v.number(),
   })
     .index("by_owner", ["ownerId"])
+    .index("by_slug", ["slug"])
+    .index("by_owner_slug", ["ownerId", "slug"])
     .index("by_created_by", ["createdByUserId"])
     .index("by_join_code", ["joinCode"]),
 
@@ -120,7 +123,10 @@ const schema = defineSchema({
     title: v.string(),
     slug: v.string(),
     description: v.optional(v.string()),
-    contentStorageId: v.id("_storage"),
+    contentStorageId: v.optional(v.id("_storage")),
+    liveContentStorageId: v.optional(v.id("_storage")),
+    contentJson: v.optional(v.string()),
+    liveContentJson: v.optional(v.string()),
     sourceTemplateId: v.optional(v.id("templates")),
     createdByUserId: v.id("users"),
     updatedByUserId: v.id("users"),

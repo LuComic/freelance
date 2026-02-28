@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useEditMode } from "./EditModeContext";
+import { useOptionalPageDocument } from "./PageDocumentContext";
 import { usePathname } from "next/navigation";
 import {
   Menubar,
@@ -26,33 +27,48 @@ import { useSearchBar } from "../searchbar/SearchBarContext";
 
 export const TopBar = () => {
   const { isEditing, isLive, setIsEditing, setIsLive } = useEditMode();
+  const pageDocument = useOptionalPageDocument();
   const { openTaggedSearch } = useSearchBar();
   const isConfig = !isEditing && !isLive;
   const pathname = usePathname();
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
-  const [pageTitle, setPageTitle] = useState("Bazinga");
-  const [draftTitle, setDraftTitle] = useState("Bazinga");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const pageTitle = pageDocument?.activePage?.page.title ?? "";
+  const [titleDraft, setTitleDraft] = useState("");
+  const isHidden =
+    pathname.includes("settings") ||
+    pathname.includes("analytics") ||
+    pathname.includes("terms") ||
+    pathname.includes("privacy") ||
+    pathname.includes("cookies") ||
+    pathname === "/projects" ||
+    !pageDocument?.isActivePage;
 
   const startTitleEdit = () => {
-    setDraftTitle(pageTitle);
+    setTitleDraft(pageTitle);
     setIsEditingTitle(true);
   };
 
   const saveTitle = () => {
-    const nextTitle = draftTitle.trim();
-    setPageTitle(nextTitle || pageTitle);
+    if (!pageDocument) {
+      return;
+    }
+
+    const nextTitle = titleDraft.trim();
+    pageDocument.setPageTitle(nextTitle || pageTitle);
     setIsEditingTitle(false);
   };
 
   const cancelTitleEdit = () => {
-    setDraftTitle(pageTitle);
+    setTitleDraft(pageTitle);
     setIsEditingTitle(false);
   };
 
   return (
     <div
-      className={`@container w-full border-b border-(--gray) ${(typeof window !== undefined && pathname.includes("settings")) || pathname.includes("analytics") || pathname.includes("terms") || pathname.includes("privacy") || pathname.includes("cookies") || pathname === "/projects" ? "hidden" : "flex"} items-center justify-start gap-2 px-1.5 h-10`}
+      className={`@container w-full border-b border-(--gray) ${
+        isHidden ? "hidden" : "flex"
+      } items-center justify-start gap-2 px-1.5 h-10`}
     >
       <button
         onClick={() => setIsEditing(true)}
@@ -95,8 +111,8 @@ export const TopBar = () => {
           type="text"
           id="edit_field"
           autoFocus
-          value={draftTitle}
-          onChange={(e) => setDraftTitle(e.target.value)}
+          value={titleDraft}
+          onChange={(e) => setTitleDraft(e.target.value)}
           onBlur={saveTitle}
           onKeyDown={(e) => {
             if (e.key === "Enter") saveTitle();
@@ -112,7 +128,19 @@ export const TopBar = () => {
           {pageTitle}
         </p>
       )}
-      <button className="text-sm gap-1 flex items-center justify-center p-1 @[64rem]:px-2 @[64rem]:py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) hover:bg-(--gray)/20 ml-auto">
+      {pageDocument?.saveStatus ? (
+        <span className="text-sm text-(--gray-page) ml-auto w-16 text-right">
+          {pageDocument.saveStatus === "saving"
+            ? "Saving..."
+            : pageDocument.saveStatus === "error"
+              ? "Save error"
+              : "Saved"}
+        </span>
+      ) : null}
+      <button
+        className="text-sm gap-1 flex items-center justify-center p-1 @[64rem]:px-2 @[64rem]:py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) hover:bg-(--gray)/20"
+        onClick={() => void pageDocument?.createPageAndOpen()}
+      >
         <FilePlusCorner size={15} />
         <span className="hidden @[64rem]:inline">New Page</span>
       </button>

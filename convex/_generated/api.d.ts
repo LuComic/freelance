@@ -15,6 +15,7 @@ import type * as http from "../http.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_errors from "../lib/errors.js";
 import type * as lib_permissions from "../lib/permissions.js";
+import type * as lib_projectRecords from "../lib/projectRecords.js";
 import type * as lib_slugs from "../lib/slugs.js";
 import type * as lib_storage from "../lib/storage.js";
 import type * as lib_validators from "../lib/validators.js";
@@ -50,6 +51,7 @@ declare const fullApi: ApiFromModules<{
   "lib/auth": typeof lib_auth;
   "lib/errors": typeof lib_errors;
   "lib/permissions": typeof lib_permissions;
+  "lib/projectRecords": typeof lib_projectRecords;
   "lib/slugs": typeof lib_slugs;
   "lib/storage": typeof lib_storage;
   "lib/validators": typeof lib_validators;

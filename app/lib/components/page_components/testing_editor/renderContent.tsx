@@ -1,13 +1,46 @@
 "use client";
 
 import { type ReactNode } from "react";
-import { COMPONENT_TAG_REGEX } from "./constants";
+import {
+  COMPONENT_TAG_REGEX,
+  COMPONENT_TOKEN_REGEX,
+} from "./constants";
 import { RENDERABLE_COMPONENTS } from "./componentRegistry";
+import { Kanban } from "@/app/lib/components/page_components/progress/Kanban";
+import { Feedback } from "@/app/lib/components/page_components/feedback/Feedback";
+import { Select } from "@/app/lib/components/page_components/form/select/Select";
+import { Radio } from "@/app/lib/components/page_components/form/radio/Radio";
 import { MainHeadline } from "@/app/lib/components/page_components/text/parts/MainHeadline";
 import { SectionHeader } from "@/app/lib/components/page_components/text/parts/SectionHeader";
 import { Subheader } from "@/app/lib/components/page_components/text/parts/Subheader";
+import { isPageComponentType, type PageComponentType } from "@/lib/pageDocument";
 
 const LINE_HEADING_REGEX = /^(#{1,6})\s+(.*)$/;
+
+function RenderedComponentInstance({
+  type,
+  instanceId,
+}: {
+  type: PageComponentType;
+  instanceId: string;
+}) {
+  switch (type) {
+    case "Kanban":
+      return <Kanban instanceId={instanceId} />;
+    case "Feedback":
+      return <Feedback instanceId={instanceId} />;
+    case "Select":
+      return <Select instanceId={instanceId} />;
+    case "Radio":
+      return <Radio instanceId={instanceId} />;
+    case "MainHeadline":
+      return <MainHeadline instanceId={instanceId} />;
+    case "SectionHeader":
+      return <SectionHeader instanceId={instanceId} />;
+    case "Subheader":
+      return <Subheader instanceId={instanceId} />;
+  }
+}
 
 function renderPlainTextSegment(segment: string, keyStart: number) {
   const nodes: ReactNode[] = [];
@@ -53,8 +86,12 @@ export function renderContentWithComponents(content: string) {
   const nodes: ReactNode[] = [];
   let lastIndex = 0;
   let key = 0;
+  const matches = [
+    ...content.matchAll(COMPONENT_TOKEN_REGEX),
+    ...content.matchAll(COMPONENT_TAG_REGEX),
+  ].sort((left, right) => (left.index ?? 0) - (right.index ?? 0));
 
-  for (const match of content.matchAll(COMPONENT_TAG_REGEX)) {
+  for (const match of matches) {
     const index = match.index ?? 0;
     const fullMatch = match[0];
     const tag = match[1];
@@ -66,12 +103,37 @@ export function renderContentWithComponents(content: string) {
       key = renderedPlain.nextKey;
     }
 
-    const componentMatch = RENDERABLE_COMPONENTS.find(
-      (item) => item.tag === tag,
-    );
-    if (componentMatch) {
-      const Component = componentMatch.Component;
-      nodes.push(<Component key={`component-${key++}`} />);
+    if (fullMatch.startsWith("[[")) {
+      const instanceId = match[2];
+      if (isPageComponentType(tag) && typeof instanceId === "string") {
+        nodes.push(
+          <RenderedComponentInstance
+            key={`component-${key++}`}
+            type={tag}
+            instanceId={instanceId}
+          />,
+        );
+      } else {
+        nodes.push(
+          <span className="whitespace-pre-wrap" key={`unknown-${key++}`}>
+            {fullMatch}
+          </span>,
+        );
+      }
+    } else if (isPageComponentType(tag)) {
+      const componentMatch = RENDERABLE_COMPONENTS.find(
+        (item) => item.tag === tag,
+      );
+      if (componentMatch) {
+        const Component = componentMatch.Component as React.ComponentType;
+        nodes.push(<Component key={`legacy-${key++}`} />);
+      } else {
+        nodes.push(
+          <span className="whitespace-pre-wrap" key={`legacy-${key++}`}>
+            {fullMatch}
+          </span>,
+        );
+      }
     } else {
       nodes.push(
         <span className="whitespace-pre-wrap" key={`unknown-${key++}`}>

@@ -1,45 +1,33 @@
 "use client";
 
-import { useState } from "react";
-
-type OptionType = {
-  id: number;
-  label: string;
-};
-
-type SelectConfig = {
-  title: string;
-  description: string;
-  options: OptionType[];
-};
-
-const SELECT_CONFIG: SelectConfig = {
-  title: "Which package tier works for you?",
-  description:
-    "Pick one or more options from this select-style field. It supports multiple choices.",
-  options: [
-    { id: 1, label: "Starter" },
-    { id: 2, label: "Growth" },
-    { id: 3, label: "Enterprise" },
-  ],
-};
+import type {
+  PageComponentInstanceByType,
+  PageComponentLiveStateByType,
+} from "@/lib/pageDocument";
 
 type SelectClientProps = {
-  initialLayout?: "grid" | "list";
+  config: PageComponentInstanceByType<"Select">["config"];
+  liveState: PageComponentLiveStateByType<"Select">["state"];
+  onChangeLiveState: (
+    updater: (
+      state: PageComponentLiveStateByType<"Select">["state"],
+    ) => PageComponentLiveStateByType<"Select">["state"],
+  ) => void;
 };
 
-export const SelectClient = ({}: SelectClientProps) => {
-  const [config] = useState(SELECT_CONFIG);
-  const [selectedOptionIds, setSelectedOptionIds] = useState<number[]>(
-    config.options[0] ? [config.options[0].id] : [],
-  );
+export const SelectClient = ({
+  config,
+  liveState,
+  onChangeLiveState,
+}: SelectClientProps) => {
 
   const toggleOption = (id: number) => {
-    setSelectedOptionIds((prev) =>
-      prev.includes(id)
-        ? prev.filter((optionId) => optionId !== id)
-        : [...prev, id],
-    );
+    onChangeLiveState((currentLiveState) => ({
+      ...currentLiveState,
+      selectedOptionIds: currentLiveState.selectedOptionIds.includes(id)
+        ? currentLiveState.selectedOptionIds.filter((optionId) => optionId !== id)
+        : [...currentLiveState.selectedOptionIds, id],
+    }));
   };
 
   return (
@@ -48,7 +36,7 @@ export const SelectClient = ({}: SelectClientProps) => {
       <p className="text-(--gray-page)">{config.description}</p>
       <div className="w-full flex flex-col gap-2">
         {config.options.map((option) => {
-          const selected = selectedOptionIds.includes(option.id);
+          const selected = liveState.selectedOptionIds.includes(option.id);
 
           return (
             <button

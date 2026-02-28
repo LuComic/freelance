@@ -1,7 +1,10 @@
 "use client";
 
+import { api } from "@/convex/_generated/api";
 import { ChevronRight, Plus, Search, Trash } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useMutation } from "convex/react";
+import { useEffect, useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 
 const TEMPLATE = {
   name: "website freelance",
@@ -20,19 +23,28 @@ const TEMPLATE = {
   ],
 };
 
-export const CreateProjectModal = () => {
+type CreateProjectModalProps = {
+  trigger?: ReactNode;
+  buttonClassName?: string;
+};
+
+export const CreateProjectModal = ({
+  trigger,
+  buttonClassName,
+}: CreateProjectModalProps) => {
+  const router = useRouter();
+  const createProject = useMutation(api.projects.mutations.createProject);
   const [open, setOpen] = useState(false);
+  const [projectName, setProjectName] = useState("");
+  const [projectDescription, setProjectDescription] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [templateSectionOpen, setTemplateSectionOpen] = useState(false);
   const [peopleSectionOpen, setPeopleSectionOpen] = useState(false);
   const [templateSearch, setTemplateSearch] = useState("website freelance");
-  const [projectName, setProjectName] = useState("Freelance Website Redesign");
-  const [projectDescription, setProjectDescription] = useState(
-    "Website project for collecting preferences and feedback from the client.",
-  );
   const [pageDropdowns, setPageDropdowns] = useState<boolean[]>(
     TEMPLATE.pages.map(() => false),
   );
-
   const [clients, setClients] = useState<string[]>([
     "alice@client.co",
     "brand-team@client.co",
@@ -44,12 +56,15 @@ export const CreateProjectModal = () => {
   const [newClient, setNewClient] = useState("");
   const [newCoCreator, setNewCoCreator] = useState("");
 
-  const closeModal = () => setOpen(false);
-
   const templateFound =
     templateSearch.trim() === "" ||
     TEMPLATE.name.includes(templateSearch.trim().toLowerCase()) ||
     TEMPLATE.author.includes(templateSearch.trim().toLowerCase());
+
+  const closeModal = () => {
+    setOpen(false);
+    setError(null);
+  };
 
   useEffect(() => {
     if (!open) {
@@ -58,8 +73,10 @@ export const CreateProjectModal = () => {
     }
 
     document.body.style.overflow = "hidden";
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeModal();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeModal();
+      }
     };
 
     document.addEventListener("keydown", handleKeyDown);
@@ -69,14 +86,47 @@ export const CreateProjectModal = () => {
     };
   }, [open]);
 
+  const submit = async () => {
+    if (!projectName.trim() || isSubmitting) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const result = await createProject({
+        name: projectName,
+        description: projectDescription || undefined,
+      });
+      closeModal();
+      setProjectName("");
+      setProjectDescription("");
+      router.push(`/projects/${result.projectSlug}/${result.initialPageSlug}`);
+    } catch (submissionError) {
+      setError(
+        submissionError instanceof Error
+          ? submissionError.message
+          : "Could not create project.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <>
       <button
         type="button"
-        className={`p-1 rounded-lg hover:bg-(--quite-dark) w-full ${open ? "bg-(--quite-dark) text-(--vibrant)" : ""}`}
+        className={
+          buttonClassName ??
+          `p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
+            open ? "bg-(--quite-dark) text-(--vibrant)" : ""
+          }`
+        }
         onClick={() => setOpen(true)}
       >
-        <Plus size={20} className="mx-auto" />
+        {trigger ?? <Plus size={20} className="mx-auto" />}
       </button>
 
       {open ? (
@@ -85,18 +135,14 @@ export const CreateProjectModal = () => {
           onClick={closeModal}
         >
           <div
-            className="w-full max-h-[85vh] h-auto flex flex-col items-start justify-start gap-2 p-3 md:max-w-3xl bg-(--darkest) rounded-xl overflow-y-auto border border-(--gray)"
-            onClick={(e) => e.stopPropagation()}
+            className="w-full max-h-[85vh] h-auto flex flex-col items-start justify-start gap-3 p-3 md:max-w-3xl bg-(--darkest) rounded-xl overflow-y-auto border border-(--gray)"
+            onClick={(event) => event.stopPropagation()}
           >
-            <div className="w-full flex items-start justify-between gap-2">
-              <div className="flex flex-col gap-1">
-                <p className="md:text-3xl text-xl font-medium">
-                  Create Project
-                </p>
-                <p className="text-(--gray-page)">
-                  Pick a template and set the first collaborators.
-                </p>
-              </div>
+            <div className="w-full flex flex-col gap-1">
+              <p className="md:text-3xl text-xl font-medium">Create Project</p>
+              <p className="text-(--gray-page)">
+                Start a new project and jump straight into the first page.
+              </p>
             </div>
 
             <div className="w-full border-y border-(--gray) py-3 flex flex-col gap-2">
@@ -106,7 +152,12 @@ export const CreateProjectModal = () => {
                 className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
                 placeholder="Project name..."
                 value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
+                onChange={(event) => setProjectName(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    void submit();
+                  }
+                }}
               />
 
               <p className="text-(--gray-page)">Project description</p>
@@ -115,7 +166,7 @@ export const CreateProjectModal = () => {
                 className="rounded-md bg-(--dim) px-2 py-1.5 outline-none resize-none"
                 placeholder="Project description..."
                 value={projectDescription}
-                onChange={(e) => setProjectDescription(e.target.value)}
+                onChange={(event) => setProjectDescription(event.target.value)}
               />
             </div>
 
@@ -128,13 +179,17 @@ export const CreateProjectModal = () => {
                 >
                   <ChevronRight
                     size={20}
-                    className={`${templateSectionOpen ? "rotate-90" : "rotate-0"}`}
+                    className={templateSectionOpen ? "rotate-90" : "rotate-0"}
                   />
                   Template
                 </button>
 
                 {templateSectionOpen ? (
                   <div className="pl-7 flex flex-col gap-2 pb-2">
+                    <p className="text-(--gray-page)">
+                      Template selection UI is preserved here, but it does not
+                      affect creation yet.
+                    </p>
                     <p className="text-(--gray-page)">Search template</p>
                     <div className="w-full flex items-center gap-2">
                       <input
@@ -142,7 +197,9 @@ export const CreateProjectModal = () => {
                         className="rounded-md bg-(--dim) px-2 py-1.5 outline-none w-full"
                         placeholder="Search"
                         value={templateSearch}
-                        onChange={(e) => setTemplateSearch(e.target.value)}
+                        onChange={(event) =>
+                          setTemplateSearch(event.target.value)
+                        }
                       />
                       <button
                         type="button"
@@ -183,7 +240,9 @@ export const CreateProjectModal = () => {
                               >
                                 <ChevronRight
                                   size={18}
-                                  className={`${pageDropdowns[pageIndex] ? "rotate-90" : ""}`}
+                                  className={
+                                    pageDropdowns[pageIndex] ? "rotate-90" : ""
+                                  }
                                 />
                                 <span className="w-full text-left">
                                   {page.title}
@@ -228,7 +287,7 @@ export const CreateProjectModal = () => {
                 >
                   <ChevronRight
                     size={20}
-                    className={`${peopleSectionOpen ? "rotate-90" : "rotate-0"}`}
+                    className={peopleSectionOpen ? "rotate-90" : "rotate-0"}
                   />
                   Co-creators and clients
                 </button>
@@ -236,7 +295,8 @@ export const CreateProjectModal = () => {
                 {peopleSectionOpen ? (
                   <div className="pl-7 flex flex-col gap-2 pb-2">
                     <p className="text-(--gray-page)">
-                      These can be edited later in project settings.
+                      These controls are UI-only for now and can be wired up
+                      later.
                     </p>
                     <p className="text-(--gray-page)">Current clients</p>
                     <div className="flex items-center justify-start gap-2 w-full flex-wrap">
@@ -266,9 +326,9 @@ export const CreateProjectModal = () => {
                           placeholder="Add a client email..."
                           className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
                           value={newClient}
-                          onChange={(e) => setNewClient(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" && newClient.trim()) {
+                          onChange={(event) => setNewClient(event.target.value)}
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter" && newClient.trim()) {
                               setClients((prev) => [newClient.trim(), ...prev]);
                               setNewClient("");
                             }
@@ -318,9 +378,9 @@ export const CreateProjectModal = () => {
                       placeholder="Add a co-creator email..."
                       className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
                       value={newCoCreator}
-                      onChange={(e) => setNewCoCreator(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && newCoCreator.trim()) {
+                      onChange={(event) => setNewCoCreator(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" && newCoCreator.trim()) {
                           setCoCreators((prev) => [
                             newCoCreator.trim(),
                             ...prev,
@@ -345,20 +405,26 @@ export const CreateProjectModal = () => {
               </div>
             </div>
 
+            {error ? (
+              <p className="text-sm text-(--declined-border)">{error}</p>
+            ) : null}
+
             <div className="w-full flex items-center gap-1">
               <button
                 type="button"
                 className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm w-full border border-(--gray) hover:bg-(--gray)/20"
                 onClick={closeModal}
+                disabled={isSubmitting}
               >
                 Cancel
               </button>
               <button
                 type="button"
-                className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm w-full border border-(--vibrant) bg-(--vibrant)/10 hover:bg-(--vibrant)/20"
-                onClick={closeModal}
+                className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm w-full border border-(--vibrant) bg-(--vibrant)/10 hover:bg-(--vibrant)/20 disabled:opacity-60 disabled:hover:bg-(--vibrant)/10"
+                onClick={() => void submit()}
+                disabled={!projectName.trim() || isSubmitting}
               >
-                Create Project
+                {isSubmitting ? "Creating..." : "Create Project"}
               </button>
             </div>
           </div>

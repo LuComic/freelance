@@ -1,15 +1,19 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useEditMode } from "@/app/lib/components/project/EditModeContext";
+import {
+  useEditMode,
+  type InsertableComponentCommand,
+} from "@/app/lib/components/project/EditModeContext";
+import { useOptionalPageDocument } from "@/app/lib/components/project/PageDocumentContext";
 import { getCaretCoordinates } from "@/app/lib/components/page_components/testing_editor/caret";
 import {
   completeSlashCommand,
   consumeSlashActionCommand,
   getActiveLineFromCursor,
+  getSlashCommandTokenRange,
   getSlashCompletionSuffix,
-  insertComponentTagAtCursor,
-  replaceSlashCommandWithTag,
+  resolveComponentTypeFromCommand,
 } from "@/app/lib/components/page_components/testing_editor/commands";
 import { INITIAL_TEXT } from "@/app/lib/components/page_components/testing_editor/constants";
 import { renderContentWithComponents } from "@/app/lib/components/page_components/testing_editor/renderContent";
@@ -22,7 +26,7 @@ export default function TestingEditorClient() {
     clearPendingComponentInsert,
     requestOpenComponentLibrary,
   } = useEditMode();
-  const [content, setContent] = useState(INITIAL_TEXT);
+  const pageDocument = useOptionalPageDocument();
   const [activeLine, setActiveLine] = useState(1);
   const [scrollTop, setScrollTop] = useState(0);
   const [ghostCompletion, setGhostCompletion] = useState<{
@@ -32,6 +36,7 @@ export default function TestingEditorClient() {
   } | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lastCursorRef = useRef(0);
+  const content = pageDocument?.configDocument?.editorText ?? INITIAL_TEXT;
 
   const lines = useMemo(() => {
     const lineCount = Math.max(1, content.split("\n").length);
@@ -87,6 +92,10 @@ export default function TestingEditorClient() {
   );
 
   useEffect(() => {
+    if (!pageDocument) {
+      return;
+    }
+
     if (!pendingComponentInsert) {
       return;
     }
@@ -100,17 +109,16 @@ export default function TestingEditorClient() {
     const cursorPosition = textarea
       ? textarea.selectionStart
       : lastCursorRef.current;
-    const insertion = insertComponentTagAtCursor(
-      content,
-      cursorPosition,
-      pendingComponentInsert.command,
-    );
+    const insertion = pageDocument.insertComponentAtRange({
+        command: pendingComponentInsert.command,
+        value: content,
+        start: cursorPosition,
+      });
     if (!insertion) {
       clearPendingComponentInsert();
       return;
     }
 
-    setContent(insertion.nextValue);
     setActiveLine(
       getActiveLineFromCursor(insertion.nextValue, insertion.nextCursor),
     );
@@ -121,9 +129,16 @@ export default function TestingEditorClient() {
     content,
     isEditing,
     isLive,
+    pageDocument,
     pendingComponentInsert,
     setCaretPosition,
   ]);
+
+  if (!pageDocument || !pageDocument.activePage || !pageDocument.configDocument) {
+    return <div className="w-full text-(--gray-page)">Loading page...</div>;
+  }
+
+  const { insertComponentAtRange, updateEditorText } = pageDocument;
 
   if (!isEditing || isLive) {
     return <div className="w-full">{renderedContent}</div>;
@@ -169,7 +184,7 @@ export default function TestingEditorClient() {
                 if (slashAction.action === "open-component-library") {
                   requestOpenComponentLibrary();
                 }
-                setContent(slashAction.nextValue);
+                updateEditorText(slashAction.nextValue);
                 setActiveLine(
                   getActiveLineFromCursor(
                     slashAction.nextValue,
@@ -180,13 +195,24 @@ export default function TestingEditorClient() {
                 return;
               }
 
-              const replacement = replaceSlashCommandWithTag(
+              const slashRange = getSlashCommandTokenRange(
                 nextValue,
                 cursorPosition,
               );
+              const command = slashRange?.token
+                .slice(1)
+                .toLowerCase() as InsertableComponentCommand | undefined;
+              const replacement =
+                slashRange && command && resolveComponentTypeFromCommand(command)
+                  ? insertComponentAtRange({
+                      command,
+                      value: nextValue,
+                      start: slashRange.start,
+                      end: slashRange.end,
+                    })
+                  : null;
 
               if (replacement) {
-                setContent(replacement.nextValue);
                 setActiveLine(
                   getActiveLineFromCursor(
                     replacement.nextValue,
@@ -197,17 +223,29 @@ export default function TestingEditorClient() {
                 return;
               }
 
-              setContent(nextValue);
+              updateEditorText(nextValue);
               setActiveLine(getActiveLineFromCursor(nextValue, cursorPosition));
               updateGhostCompletion(nextValue, cursorPosition);
             }}
             onKeyDown={(event) => {
               if (event.key === "Enter") {
                 const textarea = event.currentTarget;
-                const replacement = replaceSlashCommandWithTag(
+                const slashRange = getSlashCommandTokenRange(
                   textarea.value,
                   textarea.selectionStart,
                 );
+                const command = slashRange?.token
+                  .slice(1)
+                  .toLowerCase() as InsertableComponentCommand | undefined;
+                const replacement =
+                  slashRange && command && resolveComponentTypeFromCommand(command)
+                    ? insertComponentAtRange({
+                        command,
+                        value: textarea.value,
+                        start: slashRange.start,
+                        end: slashRange.end,
+                      })
+                    : null;
                 if (!replacement) {
                   return;
                 }
@@ -218,7 +256,7 @@ export default function TestingEditorClient() {
                   replacement.nextCursor,
                 )}\n${replacement.nextValue.slice(replacement.nextCursor)}`;
                 const nextCursor = replacement.nextCursor + 1;
-                setContent(nextValue);
+                updateEditorText(nextValue);
                 setActiveLine(getActiveLineFromCursor(nextValue, nextCursor));
                 setCaretPosition(nextCursor);
                 return;
@@ -238,7 +276,7 @@ export default function TestingEditorClient() {
               }
 
               event.preventDefault();
-              setContent(completion.nextValue);
+              updateEditorText(completion.nextValue);
               setActiveLine(
                 getActiveLineFromCursor(
                   completion.nextValue,

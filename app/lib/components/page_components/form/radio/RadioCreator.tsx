@@ -2,51 +2,69 @@
 
 import { useState } from "react";
 import { ChevronRight, Trash } from "lucide-react";
-
-type OptionType = {
-  id: number;
-  label: string;
-};
-
-const DEFAULT_OPTIONS: OptionType[] = [
-  { id: 1, label: "Required" },
-  { id: 2, label: "Nice to have" },
-];
+import type {
+  PageComponentInstanceByType,
+  PageComponentLiveStateByType,
+} from "@/lib/pageDocument";
 
 type RadioCreatorProps = {
-  initialLayout?: "grid" | "list";
+  config: PageComponentInstanceByType<"Radio">["config"];
+  liveState: PageComponentLiveStateByType<"Radio">["state"];
+  onChangeConfig: (
+    updater: (
+      config: PageComponentInstanceByType<"Radio">["config"],
+    ) => PageComponentInstanceByType<"Radio">["config"],
+  ) => void;
+  onChangeLiveState: (
+    updater: (
+      state: PageComponentLiveStateByType<"Radio">["state"],
+    ) => PageComponentLiveStateByType<"Radio">["state"],
+  ) => void;
 };
 
-export const RadioCreator = ({}: RadioCreatorProps) => {
-  const [title, setTitle] = useState("What should be prioritized first?");
-  const [description, setDescription] = useState(
-    "Pick one option. This simulates how a client can cast one vote in a radio-style field.",
-  );
-  const [options, setOptions] = useState<OptionType[]>(DEFAULT_OPTIONS);
+export const RadioCreator = ({
+  config,
+  liveState,
+  onChangeConfig,
+  onChangeLiveState,
+}: RadioCreatorProps) => {
   const [optionInput, setOptionInput] = useState("");
   const [editing, setEditing] = useState(false);
-  const [selectedOptionId, setSelectedOptionId] = useState<number | null>(
-    DEFAULT_OPTIONS[0]?.id ?? null,
-  );
 
   const handleNewOption = () => {
     if (optionInput.trim() === "") return;
 
-    const highestId = options.reduce(
+    const highestId = config.options.reduce(
       (max, option) => Math.max(max, option.id),
       0,
     );
     const nextId = highestId + 1;
-    setOptions((prev) => [{ id: nextId, label: optionInput.trim() }, ...prev]);
-    setSelectedOptionId(nextId);
+    onChangeConfig((currentConfig) => ({
+      ...currentConfig,
+      options: [
+        { id: nextId, label: optionInput.trim() },
+        ...currentConfig.options,
+      ],
+    }));
+    onChangeLiveState((currentLiveState) => ({
+      ...currentLiveState,
+      selectedOptionId: nextId,
+    }));
     setOptionInput("");
   };
 
   const deleteOption = (id: number) => {
-    setOptions((prev) => prev.filter((option) => option.id !== id));
-    if (selectedOptionId === id) {
-      const fallbackId = options.find((option) => option.id !== id)?.id ?? null;
-      setSelectedOptionId(fallbackId);
+    onChangeConfig((currentConfig) => ({
+      ...currentConfig,
+      options: currentConfig.options.filter((option) => option.id !== id),
+    }));
+    if (liveState.selectedOptionId === id) {
+      const fallbackId =
+        config.options.find((option) => option.id !== id)?.id ?? null;
+      onChangeLiveState((currentLiveState) => ({
+        ...currentLiveState,
+        selectedOptionId: fallbackId,
+      }));
     }
   };
 
@@ -73,15 +91,25 @@ export const RadioCreator = ({}: RadioCreatorProps) => {
               type="text"
               placeholder="Field title..."
               className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              value={config.title}
+              onChange={(e) =>
+                onChangeConfig((currentConfig) => ({
+                  ...currentConfig,
+                  title: e.target.value,
+                }))
+              }
             />
             <input
               type="text"
               placeholder="Field description..."
               className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              value={config.description}
+              onChange={(e) =>
+                onChangeConfig((currentConfig) => ({
+                  ...currentConfig,
+                  description: e.target.value,
+                }))
+              }
             />
             <input
               type="text"
@@ -97,7 +125,7 @@ export const RadioCreator = ({}: RadioCreatorProps) => {
             />
 
             <div className="flex items-center justify-start gap-2 w-full flex-wrap">
-              {options.map((option) => (
+              {config.options.map((option) => (
                 <div
                   key={option.id}
                   className="pl-1.5 pr-0.5 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) flex items-center gap-1"
@@ -125,17 +153,22 @@ export const RadioCreator = ({}: RadioCreatorProps) => {
       </div>
 
       <div className="w-full flex flex-col gap-2">
-        <p className="font-medium">{title}</p>
-        <p className="text-(--gray-page)">{description}</p>
+        <p className="font-medium">{config.title}</p>
+        <p className="text-(--gray-page)">{config.description}</p>
         <div className="w-full flex flex-col gap-2">
-          {options.map((option) => {
-            const selected = selectedOptionId === option.id;
+          {config.options.map((option) => {
+            const selected = liveState.selectedOptionId === option.id;
 
             return (
               <button
                 key={option.id}
                 className="flex items-center gap-2 justify-start w-full "
-                onClick={() => setSelectedOptionId(option.id)}
+                onClick={() =>
+                  onChangeLiveState((currentLiveState) => ({
+                    ...currentLiveState,
+                    selectedOptionId: option.id,
+                  }))
+                }
               >
                 <span className="h-5 flex items-center p-1 justify-center w-auto aspect-square rounded-full bg-(--darkest)">
                   {selected && (

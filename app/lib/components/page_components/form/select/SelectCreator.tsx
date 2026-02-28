@@ -2,54 +2,73 @@
 
 import { useState } from "react";
 import { ChevronRight, Trash } from "lucide-react";
-
-type OptionType = {
-  id: number;
-  label: string;
-};
-
-const DEFAULT_OPTIONS: OptionType[] = [
-  { id: 1, label: "Starter" },
-  { id: 2, label: "Growth" },
-];
+import type {
+  PageComponentInstanceByType,
+  PageComponentLiveStateByType,
+} from "@/lib/pageDocument";
 
 type SelectCreatorProps = {
-  initialLayout?: "grid" | "list";
+  config: PageComponentInstanceByType<"Select">["config"];
+  liveState: PageComponentLiveStateByType<"Select">["state"];
+  onChangeConfig: (
+    updater: (
+      config: PageComponentInstanceByType<"Select">["config"],
+    ) => PageComponentInstanceByType<"Select">["config"],
+  ) => void;
+  onChangeLiveState: (
+    updater: (
+      state: PageComponentLiveStateByType<"Select">["state"],
+    ) => PageComponentLiveStateByType<"Select">["state"],
+  ) => void;
 };
 
-export const SelectCreator = ({}: SelectCreatorProps) => {
-  const [title, setTitle] = useState("Which package tier works for you?");
-  const [description, setDescription] = useState(
-    "Pick one or more options from this select-style field. It supports multiple choices.",
-  );
-  const [options, setOptions] = useState<OptionType[]>(DEFAULT_OPTIONS);
+export const SelectCreator = ({
+  config,
+  liveState,
+  onChangeConfig,
+  onChangeLiveState,
+}: SelectCreatorProps) => {
   const [optionInput, setOptionInput] = useState("");
   const [editing, setEditing] = useState(false);
-  const [selectedOptionIds, setSelectedOptionIds] = useState<number[]>([]);
 
   const handleNewOption = () => {
     if (optionInput.trim() === "") return;
 
-    const highestId = options.reduce(
+    const highestId = config.options.reduce(
       (max, option) => Math.max(max, option.id),
       0,
     );
     const nextId = highestId + 1;
-    setOptions((prev) => [{ id: nextId, label: optionInput.trim() }, ...prev]);
+    onChangeConfig((currentConfig) => ({
+      ...currentConfig,
+      options: [
+        { id: nextId, label: optionInput.trim() },
+        ...currentConfig.options,
+      ],
+    }));
     setOptionInput("");
   };
 
   const deleteOption = (id: number) => {
-    setOptions((prev) => prev.filter((option) => option.id !== id));
-    setSelectedOptionIds((prev) => prev.filter((optionId) => optionId !== id));
+    onChangeConfig((currentConfig) => ({
+      ...currentConfig,
+      options: currentConfig.options.filter((option) => option.id !== id),
+    }));
+    onChangeLiveState((currentLiveState) => ({
+      ...currentLiveState,
+      selectedOptionIds: currentLiveState.selectedOptionIds.filter(
+        (optionId) => optionId !== id,
+      ),
+    }));
   };
 
   const toggleOption = (id: number) => {
-    setSelectedOptionIds((prev) =>
-      prev.includes(id)
-        ? prev.filter((optionId) => optionId !== id)
-        : [...prev, id],
-    );
+    onChangeLiveState((currentLiveState) => ({
+      ...currentLiveState,
+      selectedOptionIds: currentLiveState.selectedOptionIds.includes(id)
+        ? currentLiveState.selectedOptionIds.filter((optionId) => optionId !== id)
+        : [...currentLiveState.selectedOptionIds, id],
+    }));
   };
 
   return (
@@ -75,15 +94,25 @@ export const SelectCreator = ({}: SelectCreatorProps) => {
               type="text"
               placeholder="Field title..."
               className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              value={config.title}
+              onChange={(e) =>
+                onChangeConfig((currentConfig) => ({
+                  ...currentConfig,
+                  title: e.target.value,
+                }))
+              }
             />
             <input
               type="text"
               placeholder="Field description..."
               className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              value={config.description}
+              onChange={(e) =>
+                onChangeConfig((currentConfig) => ({
+                  ...currentConfig,
+                  description: e.target.value,
+                }))
+              }
             />
             <input
               type="text"
@@ -99,7 +128,7 @@ export const SelectCreator = ({}: SelectCreatorProps) => {
             />
 
             <div className="flex items-center justify-start gap-2 w-full flex-wrap">
-              {options.map((option) => (
+              {config.options.map((option) => (
                 <div
                   key={option.id}
                   className="pl-1.5 pr-0.5 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) flex items-center gap-1"
@@ -127,11 +156,11 @@ export const SelectCreator = ({}: SelectCreatorProps) => {
       </div>
 
       <div className="w-full flex flex-col gap-2">
-        <p className="font-medium">{title}</p>
-        <p className="text-(--gray-page)">{description}</p>
+        <p className="font-medium">{config.title}</p>
+        <p className="text-(--gray-page)">{config.description}</p>
         <div className="w-full flex flex-col gap-2">
-          {options.map((option) => {
-            const selected = selectedOptionIds.includes(option.id);
+          {config.options.map((option) => {
+            const selected = liveState.selectedOptionIds.includes(option.id);
 
             return (
               <button

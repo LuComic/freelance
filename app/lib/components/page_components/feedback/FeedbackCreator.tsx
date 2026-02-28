@@ -17,44 +17,32 @@ import {
   FEEDBACK_CREATOR_LAYOUT_COOKIE,
 } from "@/app/lib/cookies";
 import { ReviewModal } from "./ReviewModal";
-
-type itemType = {
-  feature: string;
-  status: "pending" | "accepted" | "declined";
-  tags: string[];
-  reason?: string;
-  dismissed?: boolean;
-};
-
-let IDEA_DATA: itemType[] = [
-  {
-    feature: "Please add an About page",
-    status: "accepted",
-    tags: ["required"],
-    reason:
-      "Yeah sure, added it right now. Let me know if you want any changes there",
-  },
-  {
-    feature: "Turn the selector in X page into a slider",
-    tags: ["nice to have"],
-    status: "pending",
-  },
-  {
-    feature:
-      "Create a 3D animation on the landing page that is 4k resolution and has no mistakes",
-    status: "declined",
-    tags: ["nice to have", "but also required"],
-    reason: "You're not paying enough for that",
-  },
-];
+import type {
+  PageComponentInstanceByType,
+  PageComponentLiveStateByType,
+} from "@/lib/pageDocument";
 
 type FeedbackCreatorProps = {
-  initialLayout?: "grid" | "list";
+  config: PageComponentInstanceByType<"Feedback">["config"];
+  liveState: PageComponentLiveStateByType<"Feedback">["state"];
+  onChangeConfig: (
+    updater: (
+      config: PageComponentInstanceByType<"Feedback">["config"],
+    ) => PageComponentInstanceByType<"Feedback">["config"],
+  ) => void;
+  onChangeLiveState: (
+    updater: (
+      state: PageComponentLiveStateByType<"Feedback">["state"],
+    ) => PageComponentLiveStateByType<"Feedback">["state"],
+  ) => void;
 };
 
-export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
-  const [data, setData] = useState(IDEA_DATA);
-  const [tags, setTags] = useState<string[]>(["required", "nice to have"]);
+export const FeedbackCreator = ({
+  config,
+  liveState,
+  onChangeConfig,
+  onChangeLiveState,
+}: FeedbackCreatorProps) => {
   const [tagInput, setTagInput] = useState("");
   const [editing, setEditing] = useState(false);
   const [filter, setFilter] = useState<
@@ -67,7 +55,7 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
       return cookieLayout;
     }
 
-    return initialLayout ?? "grid";
+    return "grid";
   });
 
   useEffect(() => {
@@ -76,22 +64,48 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
 
   const handleNewTag = () => {
     if (tagInput.trim() === "") return;
-    setTags((prev) => [tagInput.trim(), ...prev]);
+    onChangeConfig((currentConfig) => ({
+      ...currentConfig,
+      tags: [tagInput.trim(), ...currentConfig.tags],
+    }));
     setTagInput("");
   };
 
   const deleteTag = (tag: string) => {
-    setTags((prev) => prev.filter((t) => t !== tag));
+    onChangeConfig((currentConfig) => ({
+      ...currentConfig,
+      tags: currentConfig.tags.filter((t) => t !== tag),
+    }));
   };
 
-  const handleDismissing = (item: itemType) => {
-    setData((prev) =>
-      prev.map((p) =>
-        p.feature === item.feature
-          ? { ...p, dismissed: !(p.dismissed && p.dismissed === true) }
-          : p,
+  const handleDismissing = (feature: string) => {
+    onChangeLiveState((currentLiveState) => ({
+      ...currentLiveState,
+      items: currentLiveState.items.map((item) =>
+        item.feature === feature
+          ? { ...item, dismissed: !(item.dismissed && item.dismissed === true) }
+          : item,
       ),
-    );
+    }));
+  };
+
+  const updateFeatureReview = (
+    featureName: string,
+    action: "accept" | "decline",
+    reason: string,
+  ) => {
+    onChangeLiveState((currentLiveState) => ({
+      ...currentLiveState,
+      items: currentLiveState.items.map((item) =>
+        item.feature === featureName
+          ? {
+              ...item,
+              status: action === "accept" ? "accepted" : "declined",
+              reason,
+            }
+          : item,
+      ),
+    }));
   };
 
   const changeFilter = (
@@ -107,8 +121,10 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
 
   const visibleData =
     filter === ""
-      ? data.filter((item) => !item.dismissed && item.status === "pending")
-      : data.filter((item) => {
+      ? liveState.items.filter(
+          (item) => !item.dismissed && item.status === "pending",
+        )
+      : liveState.items.filter((item) => {
           if (filter === "dismissed") {
             return item.dismissed && item.dismissed === true;
           }
@@ -117,7 +133,9 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
 
   return (
     <>
-      <p className="@[40rem]:text-xl text-lg font-medium">Client's ideas</p>
+      <p className="@[40rem]:text-xl text-lg font-medium">
+        Client&apos;s ideas
+      </p>
       <p className="text-(--gray-page)">
         Here you can accept or decline the ideas proposed by the client and give
         an explanation to your decision.
@@ -146,7 +164,7 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
             />
 
             <div className="flex items-center justify-start gap-2 w-full">
-              {tags.map((tag) => (
+              {config.tags.map((tag) => (
                 <div
                   key={tag}
                   className="pl-1.5 pr-0.5 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) flex items-center gap-1"
@@ -215,8 +233,9 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
           <X size={16} />
           Dismissed (
           {
-            data.filter((item) => item.dismissed && item.dismissed === true)
-              .length
+            liveState.items.filter(
+              (item) => item.dismissed && item.dismissed === true,
+            ).length
           }
           )
         </button>
@@ -260,16 +279,35 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
                       feature.status === "accepted" ? "decline" : "accept"
                     }
                     feature={feature}
+                    onSubmit={(reason) =>
+                      updateFeatureReview(
+                        feature.feature,
+                        feature.status === "accepted" ? "decline" : "accept",
+                        reason,
+                      )
+                    }
                   />
                 ) : (
                   <>
-                    <ReviewModal action="accept" feature={feature} />
-                    <ReviewModal action="decline" feature={feature} />
+                    <ReviewModal
+                      action="accept"
+                      feature={feature}
+                      onSubmit={(reason) =>
+                        updateFeatureReview(feature.feature, "accept", reason)
+                      }
+                    />
+                    <ReviewModal
+                      action="decline"
+                      feature={feature}
+                      onSubmit={(reason) =>
+                        updateFeatureReview(feature.feature, "decline", reason)
+                      }
+                    />
                   </>
                 )}
                 <button
                   className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm  w-full border border-(--gray)  hover:bg-(--gray)/20"
-                  onClick={() => handleDismissing(feature)}
+                  onClick={() => handleDismissing(feature.feature)}
                 >
                   {feature.dismissed && feature.dismissed === true ? (
                     <>
@@ -290,7 +328,9 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
       ) : (
         <div className="w-full max-w-full min-w-0 overflow-x-auto border rounded-md border-(--gray)">
           <div className="min-w-[900px] flex flex-col">
-            <div className="w-full text-(--gray-page) border-b border-(--gray) text-left grid justify-between items-start grid-cols-13 bg-(--darkest)">
+            <div
+              className={`w-full text-(--gray-page) ${visibleData.length > 0 && "border-b"} border-(--gray) text-left grid justify-between items-start grid-cols-13 bg-(--darkest)`}
+            >
               <span className="border-r p-2 border-(--gray) h-full text-wrap">
                 Actions
               </span>
@@ -318,20 +358,41 @@ export const FeedbackCreator = ({ initialLayout }: FeedbackCreatorProps) => {
                       }
                       feature={feature}
                       listView
+                      onSubmit={(reason) =>
+                        updateFeatureReview(
+                          feature.feature,
+                          feature.status === "accepted" ? "decline" : "accept",
+                          reason,
+                        )
+                      }
                     />
                   ) : (
                     <>
-                      <ReviewModal action="accept" feature={feature} listView />
+                      <ReviewModal
+                        action="accept"
+                        feature={feature}
+                        listView
+                        onSubmit={(reason) =>
+                          updateFeatureReview(feature.feature, "accept", reason)
+                        }
+                      />
                       <ReviewModal
                         action="decline"
                         feature={feature}
                         listView
+                        onSubmit={(reason) =>
+                          updateFeatureReview(
+                            feature.feature,
+                            "decline",
+                            reason,
+                          )
+                        }
                       />
                     </>
                   )}
                   <button
                     className="gap-1 flex items-center justify-center p-1.5 rounded-sm h-max aspect-square  hover:bg-(--gray)/20"
-                    onClick={() => handleDismissing(feature)}
+                    onClick={() => handleDismissing(feature.feature)}
                   >
                     {feature.dismissed && feature.dismissed === true ? (
                       <TimerReset size={16} />

@@ -1,26 +1,30 @@
 "use client";
 
+import { usePageComponentState } from "@/app/lib/components/project/PageDocumentContext";
 import { useEditMode } from "@/app/lib/components/project/EditModeContext";
 import { KanbanCreator } from "./KanbanCreator";
 import { KanbanClient } from "./KanbanClient";
 
-type KanbanProps = {
-  initialClientLayout?: "grid" | "list";
-  initialCreatorLayout?: "grid" | "list";
-};
-
 export const Kanban = ({
-  initialClientLayout,
-  initialCreatorLayout,
-}: KanbanProps) => {
+  instanceId,
+}: {
+  instanceId: string;
+}) => {
   const { isLive } = useEditMode();
+  const { component, liveState, updateConfig, updateLiveState } =
+    usePageComponentState(instanceId, "Kanban");
 
   return (
     <div className="w-full flex flex-col gap-2">
       {isLive ? (
-        <KanbanClient initialLayout={initialClientLayout} />
+        <KanbanClient liveState={liveState.state} />
       ) : (
-        <KanbanCreator initialLayout={initialCreatorLayout} />
+        <KanbanCreator
+          config={component.config}
+          liveState={liveState.state}
+          onChangeConfig={updateConfig}
+          onChangeLiveState={updateLiveState}
+        />
       )}
     </div>
   );

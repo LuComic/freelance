@@ -6,6 +6,7 @@ export const ReviewModal = ({
   action,
   feature,
   listView,
+  onSubmit,
 }: {
   action: "accept" | "decline";
   feature: {
@@ -16,9 +17,9 @@ export const ReviewModal = ({
     dismissed?: boolean;
   };
   listView?: boolean;
+  onSubmit: (reason: string) => void;
 }) => {
   const [review, setReview] = useState(false);
-  const [reviewAction, setReviewAction] = useState<"decline" | "accept">();
   const [reviewInput, setReviewInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -26,9 +27,8 @@ export const ReviewModal = ({
     setReview(false);
   };
 
-  const reviewIdea = (action: "decline" | "accept") => {
+  const reviewIdea = () => {
     setReview(true);
-    setReviewAction(action);
   };
 
   useEffect(() => {
@@ -111,6 +111,11 @@ export const ReviewModal = ({
               </button>
               <button
                 className={`gap-1 flex items-center justify-center px-2 py-1 rounded-sm  w-full border ${action === "accept" ? "border-(--accepted-border) hover:bg-(--accepted-bg)/10" : "border-(--declined-border) hover:bg-(--declined-bg)/10"}`}
+                onClick={() => {
+                  onSubmit(reviewInput);
+                  closeReview();
+                  setReviewInput("");
+                }}
               >
                 {action === "accept" ? (
                   <>
@@ -134,7 +139,7 @@ export const ReviewModal = ({
             ? "gap-1 flex items-center justify-center p-1.5 rounded-sm h-max aspect-square  hover:bg-(--gray)/20"
             : "gap-1 flex items-center justify-center px-2 py-1 rounded-sm  w-full border border-(--gray)  hover:bg-(--gray)/20"
         }
-        onClick={() => reviewIdea(action)}
+        onClick={reviewIdea}
       >
         {action === "accept" ? (
           <>
