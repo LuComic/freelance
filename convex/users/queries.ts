@@ -1,6 +1,7 @@
 import type { Doc, Id } from "../_generated/dataModel";
 import { query } from "../_generated/server";
 import { requireCurrentAuth } from "../lib/auth";
+import { APP_ERROR_CODES, ConvexDomainError } from "../lib/errors";
 
 export type CurrentProfile = {
   id: Id<"users">;
@@ -23,7 +24,19 @@ function toCurrentProfile(user: Doc<"users">): CurrentProfile {
 export const currentProfile = query({
   args: {},
   handler: async (ctx) => {
-    const { user } = await requireCurrentAuth(ctx);
-    return toCurrentProfile(user);
+    try {
+      const { user } = await requireCurrentAuth(ctx);
+      return toCurrentProfile(user);
+    } catch (error) {
+      if (
+        error instanceof ConvexDomainError &&
+        (error.code === APP_ERROR_CODES.notFound ||
+          error.code === APP_ERROR_CODES.unauthorized)
+      ) {
+        return null;
+      }
+
+      throw error;
+    }
   },
 });

@@ -1,17 +1,22 @@
 "use client";
 
 import { api } from "@/convex/_generated/api";
+import { useAuthActions } from "@convex-dev/auth/react";
 import { useMutation, useQuery } from "convex/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export function SettingsSections() {
+  const router = useRouter();
+  const { signOut } = useAuthActions();
   const searchParams = useSearchParams();
   const section = searchParams.get("section");
   const profile = useQuery(api.users.queries.currentProfile);
   const updateProfile = useMutation(api.users.mutations.updateProfile);
+  const deleteAccount = useMutation(api.users.mutations.deleteAccount);
 
   const [overallOpen, setOverallOpen] = useState(section === "overall");
   const [accountOpen, setAccountOpen] = useState(section === "account");
@@ -31,6 +36,9 @@ export function SettingsSections() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSavingName, setIsSavingName] = useState(false);
   const [isSavingBio, setIsSavingBio] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isDeleteConfirming, setIsDeleteConfirming] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   const [cookiesAccepted, setCookiesAccepted] = useState(true);
   const [termsAccepted, setTermsAccepted] = useState(true);
@@ -94,6 +102,35 @@ export function SettingsSections() {
       );
     } finally {
       setIsSavingBio(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (isDeletingAccount) {
+      return;
+    }
+
+    if (!isDeleteConfirming) {
+      setDeleteError(null);
+      setIsDeleteConfirming(true);
+      return;
+    }
+
+    setDeleteError(null);
+    setIsDeletingAccount(true);
+
+    try {
+      await deleteAccount({});
+      await signOut();
+      router.replace("/");
+      router.refresh();
+    } catch (error) {
+      setDeleteError(
+        error instanceof Error ? error.message : "Could not delete account.",
+      );
+      setIsDeleteConfirming(false);
+    } finally {
+      setIsDeletingAccount(false);
     }
   };
 
@@ -352,9 +389,18 @@ export function SettingsSections() {
             <button
               type="button"
               className="w-max rounded-md border px-2 py-1 border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20"
+              onClick={() => void handleDeleteAccount()}
+              disabled={isDeletingAccount}
             >
-              Delete account
+              {isDeletingAccount
+                ? "Deleting..."
+                : isDeleteConfirming
+                  ? "Are you sure?"
+                  : "Delete account"}
             </button>
+            {deleteError ? (
+              <p className="text-sm text-(--declined-border)">{deleteError}</p>
+            ) : null}
           </div>
         ) : null}
       </div>
