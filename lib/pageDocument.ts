@@ -325,7 +325,7 @@ function normalizeFeedbackItems(value: unknown) {
     })
     .filter((item): item is NonNullable<typeof item> => item !== null);
 
-  return items.length > 0 ? items : [...DEFAULT_FEEDBACK_ITEMS];
+  return items;
 }
 
 function normalizeKanbanItems(value: unknown) {
@@ -365,7 +365,7 @@ function normalizeKanbanItems(value: unknown) {
     })
     .filter((item): item is NonNullable<typeof item> => item !== null);
 
-  return items.length > 0 ? items : [...DEFAULT_KANBAN_ITEMS];
+  return items;
 }
 
 export function createDefaultComponentInstance(

@@ -40,6 +40,7 @@ export const Subheader = ({
     return (
       <EditableTextField
         initialText={text}
+        editable={false}
         placeholder="Subheader"
         renderClient={(value) => (
           <p className="@[40rem]:text-lg text-base font-medium">{value}</p>

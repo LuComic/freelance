@@ -57,9 +57,7 @@ export const FileItem = ({
   return (
     <>
       <div
-        className={`rounded-lg p-1 px-1.5 gap-2 hover:bg-(--darkest-hover) w-full text-(--gray) flex items-center justify-start md:text-base text-sm ${
-          isActiveProject ? "bg-(--darkest-hover) text-(--light)" : ""
-        }`}
+        className="rounded-lg p-1 px-1.5 gap-2 hover:bg-(--darkest-hover) w-full text-(--gray) flex items-center justify-start md:text-base text-sm"
       >
         <button onClick={() => setItemExpanded((prev) => !prev)}>
           <ChevronRight className={`${itemExpanded ? "rotate-90" : ""}`} />
@@ -123,17 +121,15 @@ export const FileItem = ({
           {project.pages.map((page) => (
             <Link
               key={page.id}
-              className="pl-8 flex w-full items-center justify-start gap-2 hover:bg-(--darkest-hover) rounded-lg p-1 md:text-base text-sm"
+              className={`pl-8 flex w-full items-center justify-start gap-2 rounded-lg p-1 md:text-base text-sm ${
+                page.slug === currentPageSlug
+                  ? "bg-(--darkest-hover) text-(--light)"
+                  : "hover:bg-(--darkest-hover)"
+              }`}
               href={projectBasePath + "/" + page.slug}
             >
               <File size={18} />
-              <span
-                className={
-                  page.slug === currentPageSlug ? "text-(--light)" : ""
-                }
-              >
-                {page.title}
-              </span>
+              <span>{page.title}</span>
             </Link>
           ))}
         </>

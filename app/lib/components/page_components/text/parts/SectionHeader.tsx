@@ -40,6 +40,7 @@ export const SectionHeader = ({
     return (
       <EditableTextField
         initialText={text}
+        editable={false}
         placeholder="Section header"
         renderClient={(value) => (
           <p className="@[40rem]:text-xl text-lg font-medium">{value}</p>

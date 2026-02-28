@@ -10,7 +10,7 @@ import {
   Share,
   Trash,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useEditMode } from "./EditModeContext";
 import { useOptionalPageDocument } from "./PageDocumentContext";
 import { usePathname } from "next/navigation";
@@ -33,6 +33,7 @@ export const TopBar = () => {
   const pathname = usePathname();
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [isDeleteConfirming, setIsDeleteConfirming] = useState(false);
   const pageTitle = pageDocument?.activePage?.page.title ?? "";
   const [titleDraft, setTitleDraft] = useState("");
   const isHidden =
@@ -62,6 +63,26 @@ export const TopBar = () => {
   const cancelTitleEdit = () => {
     setTitleDraft(pageTitle);
     setIsEditingTitle(false);
+  };
+
+  useEffect(() => {
+    queueMicrotask(() => {
+      setIsDeleteConfirming(false);
+    });
+  }, [pageDocument?.activePage?.page.id]);
+
+  const handleDeletePage = async () => {
+    if (!pageDocument || pageDocument.deleteStatus === "deleting") {
+      return;
+    }
+
+    if (!isDeleteConfirming) {
+      setIsDeleteConfirming(true);
+      return;
+    }
+
+    await pageDocument.deletePage();
+    setIsDeleteConfirming(false);
   };
 
   return (
@@ -101,11 +122,24 @@ export const TopBar = () => {
           isLive
             ? "bg-(--vibrant)/20 border-(--vibrant) text-(--light)"
             : "hover:bg-(--gray)/20"
-        } mr-auto`}
+        } ${isLive && "mr-auto"}`}
       >
         <Radio size={15} />
         <span className="hidden @[64rem]:inline">Live</span>
       </button>
+      {!isLive && <div className="w-px h-2/3 bg-(--gray)" />}
+      {!isLive && pageDocument?.saveStatus ? (
+        <button
+          onClick={() => void pageDocument.saveDocument()}
+          disabled={
+            pageDocument.saveStatus === "saving" ||
+            !pageDocument.hasUnsavedChanges
+          }
+          className="text-sm gap-1 flex items-center justify-center p-1 @[64rem]:px-2 @[64rem]:py-0.5 rounded-md border border-(--vibrant) bg-(--vibrant)/20 hover:bg-(--vibrant-hover)/20 disabled:border-(--gray-page) disabled:text-(--gray-page) disabled:bg-transparent disabled:hover:bg-transparent disabled:cursor-not-allowed mr-auto"
+        >
+          {pageDocument.saveStatus === "saving" ? "Saving" : "Save"}
+        </button>
+      ) : null}
       {isEditingTitle ? (
         <input
           type="text"
@@ -128,26 +162,34 @@ export const TopBar = () => {
           {pageTitle}
         </p>
       )}
-      {pageDocument?.saveStatus ? (
-        <button
-          onClick={() => void pageDocument.saveDocument()}
-          disabled={pageDocument.saveStatus === "saving"}
-          className="text-sm gap-1 flex items-center justify-center p-1 @[64rem]:px-2 @[64rem]:py-0.5 rounded-md border border-(--vibrant) bg-(--vibrant)/20 hover:bg-(--vibrant-hover)/20 ml-auto disabled:opacity-80"
-        >
-          {pageDocument.saveStatus === "saving" ? "Saving" : "Save"}
-        </button>
-      ) : null}
       <button
-        className="text-sm gap-1 flex items-center justify-center p-1 @[64rem]:px-2 @[64rem]:py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) hover:bg-(--gray)/20"
+        className="text-sm gap-1 flex items-center justify-center p-1 @[64rem]:px-2 @[64rem]:py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) hover:bg-(--gray)/20 ml-auto"
         onClick={() => void pageDocument?.createPageAndOpen()}
       >
         <FilePlusCorner size={15} />
         <span className="hidden @[64rem]:inline">New Page</span>
       </button>
-      <button className="text-sm gap-1 flex items-center justify-center p-1 @[64rem]:px-2 @[64rem]:py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) hover:bg-(--gray)/20">
-        <Trash size={15} />
-        <span className="hidden @[64rem]:inline">Delete</span>
-      </button>
+      <div className="flex flex-col items-start gap-1">
+        <button
+          className="text-sm gap-1 flex items-center justify-center p-1 @[64rem]:px-2 @[64rem]:py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) hover:bg-(--gray)/20 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+          onClick={() => void handleDeletePage()}
+          disabled={pageDocument?.deleteStatus === "deleting"}
+        >
+          <Trash size={15} />
+          <span className="hidden @[64rem]:inline">
+            {pageDocument?.deleteStatus === "deleting"
+              ? "Deleting..."
+              : isDeleteConfirming
+                ? "Are you sure?"
+                : "Delete"}
+          </span>
+        </button>
+        {pageDocument?.deleteError ? (
+          <p className="text-xs text-(--declined-border)">
+            {pageDocument.deleteError}
+          </p>
+        ) : null}
+      </div>
       <Menubar className="h-auto bg-transparent border-none shadow-none p-0">
         <MenubarMenu>
           <MenubarTrigger className="data-highlighted:bg-transparent data-[state=open]:bg-transparent data-highlighted:text-(--gray-page) data-[state=open]:text-(--gray-page) py-0 text-sm flex items-center justify-center p-1 @[64rem]:px-2 @[64rem]:py-0.5 rounded-md border border-(--gray-page) hover:bg-(--gray)/20 gap-1 text-(--gray-page)">

@@ -11,7 +11,13 @@ export const Feedback = ({
   instanceId: string;
 }) => {
   const { isLive } = useEditMode();
-  const { component, liveState, updateConfig, updateLiveState } =
+  const {
+    component,
+    liveState,
+    updateConfig,
+    updateLiveState,
+    commitLiveState,
+  } =
     usePageComponentState(instanceId, "Feedback");
 
   return (
@@ -28,6 +34,7 @@ export const Feedback = ({
           liveState={liveState.state}
           onChangeConfig={updateConfig}
           onChangeLiveState={updateLiveState}
+          onCommitLiveState={commitLiveState}
         />
       )}
     </div>

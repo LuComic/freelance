@@ -35,6 +35,11 @@ type FeedbackCreatorProps = {
       state: PageComponentLiveStateByType<"Feedback">["state"],
     ) => PageComponentLiveStateByType<"Feedback">["state"],
   ) => void;
+  onCommitLiveState: (
+    updater: (
+      state: PageComponentLiveStateByType<"Feedback">["state"],
+    ) => PageComponentLiveStateByType<"Feedback">["state"],
+  ) => Promise<void>;
 };
 
 export const FeedbackCreator = ({
@@ -42,6 +47,7 @@ export const FeedbackCreator = ({
   liveState,
   onChangeConfig,
   onChangeLiveState,
+  onCommitLiveState,
 }: FeedbackCreatorProps) => {
   const [tagInput, setTagInput] = useState("");
   const [editing, setEditing] = useState(false);
@@ -94,7 +100,7 @@ export const FeedbackCreator = ({
     action: "accept" | "decline",
     reason: string,
   ) => {
-    onChangeLiveState((currentLiveState) => ({
+    return onCommitLiveState((currentLiveState) => ({
       ...currentLiveState,
       items: currentLiveState.items.map((item) =>
         item.feature === featureName
@@ -107,6 +113,14 @@ export const FeedbackCreator = ({
       ),
     }));
   };
+
+  const acceptedCount = liveState.items.filter(
+    (item) => item.status === "accepted" && !item.dismissed,
+  ).length;
+  const declinedCount = liveState.items.filter(
+    (item) => item.status === "declined" && !item.dismissed,
+  ).length;
+  const dismissedCount = liveState.items.filter((item) => item.dismissed).length;
 
   const changeFilter = (
     newFilter: "accepted" | "declined" | "pending" | "dismissed",
@@ -185,7 +199,7 @@ export const FeedbackCreator = ({
               className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) "
               onClick={handleNewTag}
             >
-              Submit
+              Add tag
             </button>
           </>
         )}
@@ -217,27 +231,21 @@ export const FeedbackCreator = ({
           onClick={() => changeFilter("accepted")}
         >
           <ThumbsUp size={16} />
-          Accepted
+          Accepted ({acceptedCount})
         </button>
         <button
           className={`flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border ${filter !== "declined" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
           onClick={() => changeFilter("declined")}
         >
           <ThumbsDown size={16} />
-          Declined
+          Declined ({declinedCount})
         </button>
         <button
           className={`flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border ${filter !== "dismissed" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
           onClick={() => changeFilter("dismissed")}
         >
           <X size={16} />
-          Dismissed (
-          {
-            liveState.items.filter(
-              (item) => item.dismissed && item.dismissed === true,
-            ).length
-          }
-          )
+          Dismissed ({dismissedCount})
         </button>
       </div>
       {layout === "grid" ? (

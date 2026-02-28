@@ -114,6 +114,16 @@ export const FeedbackClient = ({
           }
           return item.status === filter && !item.dismissed;
         });
+  const acceptedCount = liveState.items.filter(
+    (item) => item.status === "accepted" && !item.dismissed,
+  ).length;
+  const declinedCount = liveState.items.filter(
+    (item) => item.status === "declined" && !item.dismissed,
+  ).length;
+  const pendingCount = liveState.items.filter(
+    (item) => item.status === "pending" && !item.dismissed,
+  ).length;
+  const dismissedCount = liveState.items.filter((item) => item.dismissed).length;
 
   return (
     <>
@@ -203,34 +213,28 @@ export const FeedbackClient = ({
           onClick={() => changeFilter("accepted")}
         >
           <ThumbsUp size={16} />
-          Accepted
+          Accepted ({acceptedCount})
         </button>
         <button
           className={`flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border ${filter !== "declined" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
           onClick={() => changeFilter("declined")}
         >
           <ThumbsDown size={16} />
-          Declined
+          Declined ({declinedCount})
         </button>
         <button
           className={`flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border ${filter !== "pending" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
           onClick={() => changeFilter("pending")}
         >
           <Hourglass size={16} />
-          Pending
+          Pending ({pendingCount})
         </button>
         <button
           className={`flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border ${filter !== "dismissed" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
           onClick={() => changeFilter("dismissed")}
         >
           <X size={16} />
-          Dismissed (
-          {
-            liveState.items.filter(
-              (item) => item.dismissed && item.dismissed === true,
-            ).length
-          }
-          )
+          Dismissed ({dismissedCount})
         </button>
       </div>
       {layout === "grid" ? (

@@ -17,7 +17,7 @@ export const ReviewModal = ({
     dismissed?: boolean;
   };
   listView?: boolean;
-  onSubmit: (reason: string) => void;
+  onSubmit: (reason: string) => void | Promise<void>;
 }) => {
   const [review, setReview] = useState(false);
   const [reviewInput, setReviewInput] = useState("");

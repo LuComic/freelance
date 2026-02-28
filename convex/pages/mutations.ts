@@ -169,3 +169,25 @@ export const savePage = mutation({
     };
   },
 });
+
+export const deletePage = mutation({
+  args: {
+    pageId: v.id("pages"),
+  },
+  handler: async (ctx, args) => {
+    const { userId } = await requireCurrentAuth(ctx);
+    const page = await requirePageAccess(ctx, args.pageId, userId);
+    await requireProjectEditor(ctx, page.projectId, userId);
+
+    const project = await ctx.db.get(page.projectId);
+    if (!project || project.isArchived) {
+      throw notFound(`Project ${page.projectId} was not found.`);
+    }
+
+    await ctx.db.delete(page._id);
+    await ctx.db.patch(project._id, {
+      pageIds: project.pageIds.filter((pageId) => pageId !== page._id),
+      updatedAt: Date.now(),
+    });
+  },
+});

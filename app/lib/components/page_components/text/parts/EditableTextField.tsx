@@ -8,6 +8,7 @@ type EditableTextFieldProps = {
   value?: string;
   placeholder: string;
   onChange?: (value: string) => void;
+  editable?: boolean;
   renderClient: (text: string) => ReactNode;
 };
 
@@ -16,6 +17,7 @@ export const EditableTextField = ({
   value,
   placeholder,
   onChange,
+  editable = true,
   renderClient,
 }: EditableTextFieldProps) => {
   const { isLive } = useEditMode();
@@ -31,7 +33,7 @@ export const EditableTextField = ({
 
   return (
     <div className="w-full border-b border-(--gray) pb-2 flex flex-col gap-2">
-      {isLive ? (
+      {isLive || !editable ? (
         renderClient(text)
       ) : (
         <input
