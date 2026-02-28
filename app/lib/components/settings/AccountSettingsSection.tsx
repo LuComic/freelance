@@ -20,6 +20,10 @@ type AccountSettingsSectionProps = {
   canSaveBio: boolean;
   onNameSave: () => Promise<void>;
   onBioSave: () => Promise<void>;
+  deleteError: string | null;
+  isDeleteConfirming: boolean;
+  isDeletingAccount: boolean;
+  onDeleteAccount: () => Promise<void>;
 };
 
 export function AccountSettingsSection({
@@ -39,6 +43,10 @@ export function AccountSettingsSection({
   canSaveBio,
   onNameSave,
   onBioSave,
+  deleteError,
+  isDeleteConfirming,
+  isDeletingAccount,
+  onDeleteAccount,
 }: AccountSettingsSectionProps) {
   const [open, setOpen] = useState(activeSection === "account");
 
@@ -124,6 +132,22 @@ export function AccountSettingsSection({
           <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
             {isProfileLoading ? "Loading..." : currentEmail || "Not set"}
           </div>
+          <p className="text-(--gray-page)">Delete account</p>
+          <button
+            type="button"
+            className="w-max rounded-md border px-2 py-1 border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20"
+            onClick={() => void onDeleteAccount()}
+            disabled={isDeletingAccount}
+          >
+            {isDeletingAccount
+              ? "Deleting..."
+              : isDeleteConfirming
+                ? "Are you sure?"
+                : "Delete account"}
+          </button>
+          {deleteError ? (
+            <p className="text-sm text-(--declined-border)">{deleteError}</p>
+          ) : null}
           {saveError ? (
             <p className="text-sm text-(--declined-border)">{saveError}</p>
           ) : null}

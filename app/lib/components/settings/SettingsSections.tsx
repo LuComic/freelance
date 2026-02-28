@@ -51,14 +51,12 @@ export function SettingsSections() {
         canSaveBio={canSaveBio}
         onNameSave={handleNameSave}
         onBioSave={handleBioSave}
-      />
-      <LegalSettingsSection
-        activeSection={section}
         deleteError={deleteError}
         isDeleteConfirming={isDeleteConfirming}
         isDeletingAccount={isDeletingAccount}
         onDeleteAccount={handleDeleteAccount}
       />
+      <LegalSettingsSection activeSection={section} />
     </div>
   );
 }

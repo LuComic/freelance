@@ -6,18 +6,10 @@ import { useEffect, useState } from "react";
 
 type LegalSettingsSectionProps = {
   activeSection: string | null;
-  deleteError: string | null;
-  isDeleteConfirming: boolean;
-  isDeletingAccount: boolean;
-  onDeleteAccount: () => Promise<void>;
 };
 
 export function LegalSettingsSection({
   activeSection,
-  deleteError,
-  isDeleteConfirming,
-  isDeletingAccount,
-  onDeleteAccount,
 }: LegalSettingsSectionProps) {
   const [open, setOpen] = useState(activeSection === "legal");
   const [cookiesAccepted, setCookiesAccepted] = useState(true);
@@ -150,23 +142,6 @@ export function LegalSettingsSection({
               Read policy
             </Link>
           </div>
-
-          <p className="text-(--gray-page)">Delete account</p>
-          <button
-            type="button"
-            className="w-max rounded-md border px-2 py-1 border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20"
-            onClick={() => void onDeleteAccount()}
-            disabled={isDeletingAccount}
-          >
-            {isDeletingAccount
-              ? "Deleting..."
-              : isDeleteConfirming
-                ? "Are you sure?"
-                : "Delete account"}
-          </button>
-          {deleteError ? (
-            <p className="text-sm text-(--declined-border)">{deleteError}</p>
-          ) : null}
         </div>
       ) : null}
     </div>
