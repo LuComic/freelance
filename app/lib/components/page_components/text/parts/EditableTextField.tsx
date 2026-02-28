@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useEditMode } from "@/app/lib/components/project/EditModeContext";
 
 type EditableTextFieldProps = {
@@ -23,6 +23,13 @@ export const EditableTextField = ({
   const { isLive } = useEditMode();
   const [localText, setLocalText] = useState(initialText ?? "");
   const text = value ?? localText;
+
+  useEffect(() => {
+    if (value === undefined) {
+      setLocalText(initialText ?? "");
+    }
+  }, [initialText, value]);
+
   const handleChange = (nextValue: string) => {
     if (onChange) {
       onChange(nextValue);

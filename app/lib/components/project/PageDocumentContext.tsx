@@ -71,6 +71,7 @@ type PageDocumentContextValue = {
     instanceId: string,
     updater: (liveState: PageComponentLiveState) => PageComponentLiveState,
   ) => void;
+  commitPageTitle: (title: string) => Promise<void>;
   commitComponentLiveState: (
     instanceId: string,
     updater: (liveState: PageComponentLiveState) => PageComponentLiveState,
@@ -521,6 +522,34 @@ export function PageDocumentProvider({
     await persistDocument(currentPage, currentDocument);
   }, [persistDocument]);
 
+  const commitPageTitle = useCallback(
+    async (title: string) => {
+      const currentPage = activePageRef.current;
+      const currentDocument = documentRef.current;
+
+      if (!currentPage || !currentDocument) {
+        return;
+      }
+
+      const trimmedTitle = title.trim();
+      const nextTitle = trimmedTitle || currentPage.page.title;
+      const nextPage: ActivePageState = {
+        ...currentPage,
+        page: {
+          ...currentPage.page,
+          title: nextTitle,
+        },
+      };
+
+      activePageRef.current = nextPage;
+      setActivePage(nextPage);
+      setSaveError(null);
+
+      await persistDocument(nextPage, currentDocument);
+    },
+    [persistDocument],
+  );
+
   const commitComponentLiveState = useCallback(
     async (
       instanceId: string,
@@ -621,6 +650,7 @@ export function PageDocumentProvider({
       insertComponentAtRange,
       updateComponentConfig,
       updateComponentLiveState,
+      commitPageTitle,
       commitComponentLiveState,
       saveDocument,
       createPageAndOpen,
@@ -632,6 +662,7 @@ export function PageDocumentProvider({
       deleteError,
       deletePage,
       deleteStatus,
+      commitPageTitle,
       document,
       commitComponentLiveState,
       hasUnsavedChanges,

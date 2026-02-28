@@ -60,6 +60,15 @@ export const TopBar = () => {
     setIsEditingTitle(false);
   };
 
+  const submitTitle = async () => {
+    if (!pageDocument) {
+      return;
+    }
+
+    await pageDocument.commitPageTitle(titleDraft);
+    setIsEditingTitle(false);
+  };
+
   const cancelTitleEdit = () => {
     setTitleDraft(pageTitle);
     setIsEditingTitle(false);
@@ -149,7 +158,10 @@ export const TopBar = () => {
           onChange={(e) => setTitleDraft(e.target.value)}
           onBlur={saveTitle}
           onKeyDown={(e) => {
-            if (e.key === "Enter") saveTitle();
+            if (e.key === "Enter") {
+              e.preventDefault();
+              void submitTitle();
+            }
             if (e.key === "Escape") cancelTitleEdit();
           }}
           className="h-8 px-2 rounded-md border border-(--gray-page) bg-(--darkest) text-(--light) outline-none"
