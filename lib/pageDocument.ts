@@ -184,15 +184,24 @@ export type PageComponentInstanceByType<T extends PageComponentType> =
 export type PageComponentLiveStateByType<T extends PageComponentType> =
   PageComponentLiveStateMap[T];
 
-export type PageConfigDocumentV1 = {
-  version: 1;
-  editorText: string;
-  components: Record<string, PageComponentInstance>;
+type PageComponentDocumentMap = {
+  [T in PageComponentType]: PageComponentInstanceByType<T> & {
+    state: PageComponentLiveStateByType<T>["state"];
+  };
 };
 
-export type PageLiveDocumentV1 = {
+export type PageComponentDocument = PageComponentDocumentMap[PageComponentType];
+
+export type PageComponentDocumentByType<T extends PageComponentType> =
+  PageComponentDocumentMap[T];
+
+export type PageConfigDocumentV1 = PageDocumentV1;
+export type PageLiveDocumentV1 = PageDocumentV1;
+
+export type PageDocumentV1 = {
   version: 1;
-  components: Record<string, PageComponentLiveState>;
+  editorText: string;
+  components: Record<string, PageComponentDocument>;
 };
 
 export const PAGE_COMPONENT_TOKEN_REGEX =
@@ -509,6 +518,26 @@ export function createDefaultLiveState(
   }
 }
 
+export function createDefaultComponentDocument(
+  type: PageComponentType,
+  id: string,
+): PageComponentDocument;
+export function createDefaultComponentDocument<T extends PageComponentType>(
+  type: T,
+  id: string,
+): PageComponentDocumentByType<T>;
+export function createDefaultComponentDocument(
+  type: PageComponentType,
+  id: string,
+): PageComponentDocument {
+  const instance = createDefaultComponentInstance(type, id);
+  const liveState = createDefaultLiveState(type);
+  return {
+    ...instance,
+    state: liveState.state,
+  } as PageComponentDocument;
+}
+
 function normalizeComponentInstance(
   id: string,
   type: PageComponentType,
@@ -694,17 +723,10 @@ function normalizeLiveState(
   }
 }
 
-export function createInitialPageConfigDocument(): PageConfigDocumentV1 {
+export function createInitialPageDocument(): PageDocumentV1 {
   return {
     version: 1,
     editorText: DEFAULT_PAGE_EDITOR_TEXT,
-    components: {},
-  };
-}
-
-export function createInitialPageLiveDocument(): PageLiveDocumentV1 {
-  return {
-    version: 1,
     components: {},
   };
 }
@@ -715,8 +737,8 @@ export function createComponentInstanceId(seed: number) {
 
 export function normalizePageConfigDocument(
   value: unknown,
-): PageConfigDocumentV1 {
-  const base = createInitialPageConfigDocument();
+): PageDocumentV1 {
+  const base = createInitialPageDocument();
   const record = isRecord(value) ? value : null;
   const rawEditorText =
     record && typeof record.editorText === "string"
@@ -757,41 +779,56 @@ export function normalizePageConfigDocument(
     nextComponents[id] = normalizeComponentInstance(id, type, rawComponents[id]);
   }
 
-  return {
-    version: 1,
-    editorText,
-    components: nextComponents,
-  };
-}
+  const nextDocumentComponents: Record<string, PageComponentDocument> = {};
 
-export function normalizePageLiveDocument(
-  value: unknown,
-  configDocument: PageConfigDocumentV1,
-): PageLiveDocumentV1 {
-  const record = isRecord(value) ? value : null;
-  const rawComponents =
-    record && isRecord(record.components) ? record.components : {};
-  const nextComponents: Record<string, PageComponentLiveState> = {};
-
-  for (const [id, instance] of Object.entries(configDocument.components)) {
-    nextComponents[id] = normalizeLiveState(instance.type, rawComponents[id]);
+  for (const [id, instance] of Object.entries(nextComponents)) {
+    const rawComponent = rawComponents[id];
+    const liveState = normalizeLiveState(instance.type, rawComponent);
+    nextDocumentComponents[id] = {
+      ...instance,
+      state: liveState.state,
+    } as PageComponentDocument;
   }
 
   return {
     version: 1,
+    editorText,
+    components: nextDocumentComponents,
+  };
+}
+
+export function normalizePageDocument(
+  value: unknown,
+): PageDocumentV1 {
+  const configDocument = normalizePageConfigDocument(value);
+  const nextComponents: Record<string, PageComponentDocument> = {};
+
+  for (const [id, instance] of Object.entries(configDocument.components)) {
+    const rawComponent =
+      isRecord(value) && isRecord(value.components) ? value.components[id] : undefined;
+    const liveState = normalizeLiveState(instance.type, rawComponent);
+    nextComponents[id] = {
+      ...instance,
+      state: liveState.state,
+    } as PageComponentDocument;
+  }
+
+  return {
+    version: 1,
+    editorText: configDocument.editorText,
     components: nextComponents,
   };
 }
 
 export function assertPageConfigDocumentV1(
   value: unknown,
-): asserts value is PageConfigDocumentV1 {
+): asserts value is PageDocumentV1 {
   if (!isRecord(value) || value.version !== 1) {
-    throw new Error("Page config document must be version 1.");
+    throw new Error("Page document must be version 1.");
   }
 
   if (typeof value.editorText !== "string" || !isRecord(value.components)) {
-    throw new Error("Page config document shape is invalid.");
+    throw new Error("Page document shape is invalid.");
   }
 
   for (const [id, instance] of Object.entries(value.components)) {
@@ -803,28 +840,14 @@ export function assertPageConfigDocumentV1(
       instance.id !== id ||
       typeof instance.type !== "string" ||
       !isPageComponentType(instance.type) ||
-      !isRecord(instance.config)
+      !isRecord(instance.config) ||
+      !isRecord(instance.state)
     ) {
-      throw new Error("Page component instance shape is invalid.");
+      throw new Error("Page component document shape is invalid.");
     }
   }
 }
 
-export function assertPageLiveDocumentV1(
+export const assertPageDocumentV1: (
   value: unknown,
-): asserts value is PageLiveDocumentV1 {
-  if (!isRecord(value) || value.version !== 1 || !isRecord(value.components)) {
-    throw new Error("Page live document shape is invalid.");
-  }
-
-  for (const liveState of Object.values(value.components)) {
-    if (
-      !isRecord(liveState) ||
-      typeof liveState.type !== "string" ||
-      !isPageComponentType(liveState.type) ||
-      !isRecord(liveState.state)
-    ) {
-      throw new Error("Page live component state shape is invalid.");
-    }
-  }
-}
+) => asserts value is PageDocumentV1 = assertPageConfigDocumentV1;

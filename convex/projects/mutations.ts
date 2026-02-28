@@ -5,9 +5,7 @@ import { invalidState } from "../lib/errors";
 import { uniqueSlugFromLabel } from "../lib/slugs";
 import {
   createInitialPageConfig,
-  createInitialPageLive,
   serializePageConfigDocument,
-  serializePageLiveDocument,
 } from "../pages/content";
 
 export const createProject = mutation({
@@ -32,11 +30,8 @@ export const createProject = mutation({
       "untitled-project",
     );
 
-    const initialConfigJson = serializePageConfigDocument(
+    const initialContentJson = serializePageConfigDocument(
       createInitialPageConfig(),
-    );
-    const initialLiveJson = serializePageLiveDocument(
-      createInitialPageLive(),
     );
 
     const projectId = await ctx.db.insert("projects", {
@@ -67,8 +62,7 @@ export const createProject = mutation({
       projectId,
       title: initialPageTitle,
       slug: initialPageSlug,
-      contentJson: initialConfigJson,
-      liveContentJson: initialLiveJson,
+      contentJson: initialContentJson,
       createdByUserId: userId,
       updatedByUserId: userId,
       createdAt: now,

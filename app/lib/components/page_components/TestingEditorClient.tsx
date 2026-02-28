@@ -36,7 +36,7 @@ export default function TestingEditorClient() {
   } | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lastCursorRef = useRef(0);
-  const content = pageDocument?.configDocument?.editorText ?? INITIAL_TEXT;
+  const content = pageDocument?.document?.editorText ?? INITIAL_TEXT;
 
   const lines = useMemo(() => {
     const lineCount = Math.max(1, content.split("\n").length);
@@ -134,7 +134,7 @@ export default function TestingEditorClient() {
     setCaretPosition,
   ]);
 
-  if (!pageDocument || !pageDocument.activePage || !pageDocument.configDocument) {
+  if (!pageDocument || !pageDocument.activePage || !pageDocument.document) {
     return <div className="w-full text-(--gray-page)">Loading page...</div>;
   }
 

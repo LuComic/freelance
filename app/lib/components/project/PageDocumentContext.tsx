@@ -4,15 +4,13 @@ import { api } from "@/convex/_generated/api";
 import {
   createComponentInstanceId,
   createComponentToken,
-  createDefaultComponentInstance,
-  createDefaultLiveState,
-  type PageComponentInstance,
-  type PageComponentInstanceByType,
+  createDefaultComponentDocument,
+  type PageComponentDocument,
+  type PageComponentDocumentByType,
   type PageComponentLiveState,
   type PageComponentLiveStateByType,
   type PageComponentType,
-  type PageConfigDocumentV1,
-  type PageLiveDocumentV1,
+  type PageDocumentV1,
 } from "@/lib/pageDocument";
 import { useMutation, useQuery } from "convex/react";
 import {
@@ -28,7 +26,7 @@ import { usePathname, useRouter } from "next/navigation";
 import type { InsertableComponentCommand } from "./EditModeContext";
 import { resolveComponentTypeFromCommand } from "../page_components/testing_editor/commands";
 
-type SaveStatus = "idle" | "saving" | "saved" | "error";
+type SaveStatus = "idle" | "saving" | "error";
 
 type ActivePageState = {
   project: {
@@ -52,8 +50,7 @@ type PageDocumentContextValue = {
   saveStatus: SaveStatus;
   saveError: string | null;
   activePage: ActivePageState | null;
-  configDocument: PageConfigDocumentV1 | null;
-  liveDocument: PageLiveDocumentV1 | null;
+  document: PageDocumentV1 | null;
   setPageTitle: (title: string) => void;
   updateEditorText: (value: string) => void;
   insertComponentAtRange: (args: {
@@ -64,26 +61,22 @@ type PageDocumentContextValue = {
   }) => { nextValue: string; nextCursor: number } | null;
   updateComponentConfig: (
     instanceId: string,
-    updater: (component: PageComponentInstance) => PageComponentInstance,
+    updater: (component: PageComponentDocument) => PageComponentDocument,
   ) => void;
   updateComponentLiveState: (
     instanceId: string,
     updater: (liveState: PageComponentLiveState) => PageComponentLiveState,
   ) => void;
+  saveDocument: () => Promise<void>;
   createPageAndOpen: () => Promise<void>;
 };
 
 type ActivePageDocumentContextValue = PageDocumentContextValue & {
   activePage: ActivePageState;
-  configDocument: PageConfigDocumentV1;
-  liveDocument: PageLiveDocumentV1;
+  document: PageDocumentV1;
 };
 
 const PageDocumentContext = createContext<PageDocumentContextValue | null>(null);
-
-const CONFIG_SAVE_DELAY_MS = 750;
-const LIVE_SAVE_DELAY_MS = 300;
-const TITLE_SAVE_DELAY_MS = 500;
 
 function getPageRoute(pathname: string) {
   const segments = pathname.split("/").filter(Boolean);
@@ -117,20 +110,14 @@ export function PageDocumentProvider({
   const router = useRouter();
   const route = getPageRoute(pathname);
   const [activePage, setActivePage] = useState<ActivePageState | null>(null);
-  const [configDocument, setConfigDocument] = useState<PageConfigDocumentV1 | null>(
-    null,
-  );
-  const [liveDocument, setLiveDocument] = useState<PageLiveDocumentV1 | null>(null);
-  const [isSavingConfig, setIsSavingConfig] = useState(false);
-  const [isSavingLive, setIsSavingLive] = useState(false);
-  const [isSavingTitle, setIsSavingTitle] = useState(false);
+  const [document, setDocument] = useState<PageDocumentV1 | null>(null);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [pendingRoutePageId, setPendingRoutePageId] = useState<string | null>(null);
   const componentSeedRef = useRef(0);
-  const lastSavedConfigRef = useRef<string | null>(null);
-  const lastSavedLiveRef = useRef<string | null>(null);
-  const lastSavedTitleRef = useRef<string | null>(null);
   const lastHydratedPageKeyRef = useRef<string | null>(null);
-  const pendingRoutePageIdRef = useRef<string | null>(null);
+  const activePageRef = useRef<ActivePageState | null>(null);
+  const documentRef = useRef<PageDocumentV1 | null>(null);
   const pageQueryArgs =
     route === null
       ? "skip"
@@ -138,34 +125,37 @@ export function PageDocumentProvider({
           projectSlug: route.projectSlug,
           pageSlug: route.pageSlug,
           pageId:
-            pendingRoutePageIdRef.current &&
+            pendingRoutePageId &&
             activePage &&
             activePage.project.slug === route.projectSlug &&
-            activePage.page.id === pendingRoutePageIdRef.current &&
+            activePage.page.id === pendingRoutePageId &&
             activePage.page.slug !== route.pageSlug
-              ? (pendingRoutePageIdRef.current as never)
+              ? (pendingRoutePageId as never)
               : undefined,
         };
-  const pageData = useQuery(
-    api.pages.queries.getPageEditorBySlugs,
-    pageQueryArgs,
-  );
-  const renamePage = useMutation(api.pages.mutations.renamePage);
-  const savePageConfigDocument = useMutation(
-    api.pages.mutations.savePageConfigDocument,
-  );
-  const savePageLiveDocument = useMutation(api.pages.mutations.savePageLiveDocument);
+  const pageData = useQuery(api.pages.queries.getPageEditorBySlugs, pageQueryArgs);
+  const savePage = useMutation(api.pages.mutations.savePage);
   const createPage = useMutation(api.pages.mutations.createPage);
+
+  useEffect(() => {
+    activePageRef.current = activePage;
+  }, [activePage]);
+
+  useEffect(() => {
+    documentRef.current = document;
+  }, [document]);
 
   useEffect(() => {
     if (!route || pageData === undefined) {
       if (!route) {
-        setActivePage(null);
-        setConfigDocument(null);
-        setLiveDocument(null);
-        setSaveError(null);
+        queueMicrotask(() => {
+          setActivePage(null);
+          setDocument(null);
+          setSaveStatus("idle");
+          setSaveError(null);
+          setPendingRoutePageId(null);
+        });
         lastHydratedPageKeyRef.current = null;
-        pendingRoutePageIdRef.current = null;
       }
       return;
     }
@@ -176,22 +166,24 @@ export function PageDocumentProvider({
     }
 
     lastHydratedPageKeyRef.current = nextPageKey;
-
-    setActivePage({
-      project: pageData.project,
-      page: pageData.page,
+    queueMicrotask(() => {
+      setActivePage({
+        project: pageData.project,
+        page: pageData.page,
+      });
+      setDocument(pageData.document);
+      setSaveStatus("idle");
+      setSaveError(null);
     });
-    setConfigDocument(pageData.configDocument);
-    setLiveDocument(pageData.liveDocument);
-    lastSavedConfigRef.current = JSON.stringify(pageData.configDocument);
-    lastSavedLiveRef.current = JSON.stringify(pageData.liveDocument);
-    lastSavedTitleRef.current = pageData.page.title;
-    setSaveError(null);
   }, [pageData, route]);
 
   useEffect(() => {
     if (!route || !activePage) {
-      pendingRoutePageIdRef.current = null;
+      if (pendingRoutePageId !== null) {
+        queueMicrotask(() => {
+          setPendingRoutePageId(null);
+        });
+      }
       return;
     }
 
@@ -199,126 +191,13 @@ export function PageDocumentProvider({
       route.projectSlug === activePage.project.slug &&
       route.pageSlug === activePage.page.slug
     ) {
-      pendingRoutePageIdRef.current = null;
-    }
-  }, [activePage, route]);
-
-  useEffect(() => {
-    if (!activePage || !configDocument) {
-      return;
-    }
-
-    const serialized = JSON.stringify(configDocument);
-    if (serialized === lastSavedConfigRef.current) {
-      return;
-    }
-
-    const timeoutId = window.setTimeout(async () => {
-      setIsSavingConfig(true);
-      setSaveError(null);
-
-      try {
-        await savePageConfigDocument({
-          pageId: activePage.page.id as never,
-          document: configDocument,
+      if (pendingRoutePageId !== null) {
+        queueMicrotask(() => {
+          setPendingRoutePageId(null);
         });
-        lastSavedConfigRef.current = serialized;
-      } catch (error) {
-        setSaveError(
-          error instanceof Error
-            ? error.message
-            : "Could not save page content.",
-        );
-      } finally {
-        setIsSavingConfig(false);
       }
-    }, CONFIG_SAVE_DELAY_MS);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [activePage, configDocument, savePageConfigDocument]);
-
-  useEffect(() => {
-    if (!activePage || !liveDocument) {
-      return;
     }
-
-    const serialized = JSON.stringify(liveDocument);
-    if (serialized === lastSavedLiveRef.current) {
-      return;
-    }
-
-    const timeoutId = window.setTimeout(async () => {
-      setIsSavingLive(true);
-      setSaveError(null);
-
-      try {
-        await savePageLiveDocument({
-          pageId: activePage.page.id as never,
-          document: liveDocument,
-        });
-        lastSavedLiveRef.current = serialized;
-      } catch (error) {
-        setSaveError(
-          error instanceof Error
-            ? error.message
-            : "Could not save live page state.",
-        );
-      } finally {
-        setIsSavingLive(false);
-      }
-    }, LIVE_SAVE_DELAY_MS);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [activePage, liveDocument, savePageLiveDocument]);
-
-  useEffect(() => {
-    if (!activePage) {
-      return;
-    }
-
-    const trimmedTitle = activePage.page.title.trim();
-    if (!trimmedTitle || trimmedTitle === lastSavedTitleRef.current) {
-      return;
-    }
-
-    const timeoutId = window.setTimeout(async () => {
-      setIsSavingTitle(true);
-      setSaveError(null);
-
-      try {
-        const result = await renamePage({
-          pageId: activePage.page.id as never,
-          title: trimmedTitle,
-        });
-        lastSavedTitleRef.current = result.title;
-        setActivePage((prev) =>
-          prev
-            ? {
-                ...prev,
-                page: {
-                  ...prev.page,
-                  title: result.title,
-                  slug: result.slug,
-                },
-              }
-            : prev,
-        );
-
-        if (route && result.slug !== route.pageSlug) {
-          pendingRoutePageIdRef.current = result.pageId;
-          router.replace(`/projects/${route.projectSlug}/${result.slug}`);
-        }
-      } catch (error) {
-        setSaveError(
-          error instanceof Error ? error.message : "Could not rename page.",
-        );
-      } finally {
-        setIsSavingTitle(false);
-      }
-    }, TITLE_SAVE_DELAY_MS);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [activePage, renamePage, route, router]);
+  }, [activePage, pendingRoutePageId, route]);
 
   const setPageTitle = useCallback((title: string) => {
     setActivePage((prev) =>
@@ -332,10 +211,11 @@ export function PageDocumentProvider({
           }
         : prev,
     );
+    setSaveError(null);
   }, []);
 
   const updateEditorText = useCallback((value: string) => {
-    setConfigDocument((prev) =>
+    setDocument((prev) =>
       prev
         ? {
             ...prev,
@@ -343,14 +223,15 @@ export function PageDocumentProvider({
           }
         : prev,
     );
+    setSaveError(null);
   }, []);
 
   const updateComponentConfig = useCallback(
     (
       instanceId: string,
-      updater: (component: PageComponentInstance) => PageComponentInstance,
+      updater: (component: PageComponentDocument) => PageComponentDocument,
     ) => {
-      setConfigDocument((prev) => {
+      setDocument((prev) => {
         if (!prev || !prev.components[instanceId]) {
           return prev;
         }
@@ -363,6 +244,7 @@ export function PageDocumentProvider({
           },
         };
       });
+      setSaveError(null);
     },
     [],
   );
@@ -372,19 +254,29 @@ export function PageDocumentProvider({
       instanceId: string,
       updater: (liveState: PageComponentLiveState) => PageComponentLiveState,
     ) => {
-      setLiveDocument((prev) => {
+      setDocument((prev) => {
         if (!prev || !prev.components[instanceId]) {
           return prev;
         }
+
+        const currentComponent = prev.components[instanceId];
+        const nextLiveState = updater({
+          type: currentComponent.type,
+          state: currentComponent.state,
+        } as PageComponentLiveState);
 
         return {
           ...prev,
           components: {
             ...prev.components,
-            [instanceId]: updater(prev.components[instanceId]),
+            [instanceId]: {
+              ...currentComponent,
+              state: nextLiveState.state,
+            } as PageComponentDocument,
           },
         };
       });
+      setSaveError(null);
     },
     [],
   );
@@ -415,30 +307,22 @@ export function PageDocumentProvider({
         end ?? start,
       )}`;
 
-      setConfigDocument((prev) =>
+      setDocument((prev) =>
         prev
           ? {
               ...prev,
               editorText: nextValue,
               components: {
                 ...prev.components,
-                [instanceId]: createDefaultComponentInstance(type, instanceId),
+                [instanceId]: createDefaultComponentDocument(
+                  type,
+                  instanceId,
+                ) as PageComponentDocument,
               },
             }
           : prev,
       );
-
-      setLiveDocument((prev) =>
-        prev
-          ? {
-              ...prev,
-              components: {
-                ...prev.components,
-                [instanceId]: createDefaultLiveState(type),
-              },
-            }
-          : prev,
-      );
+      setSaveError(null);
 
       return {
         nextValue,
@@ -448,24 +332,69 @@ export function PageDocumentProvider({
     [],
   );
 
+  const saveDocument = useCallback(async () => {
+    const currentPage = activePageRef.current;
+    const currentDocument = documentRef.current;
+
+    if (!currentPage || !currentDocument) {
+      return;
+    }
+
+    const trimmedTitle = currentPage.page.title.trim();
+    if (!trimmedTitle) {
+      setSaveError("Page title cannot be empty.");
+      setSaveStatus("error");
+      return;
+    }
+
+    setSaveStatus("saving");
+    setSaveError(null);
+
+    try {
+      const result = await savePage({
+        pageId: currentPage.page.id as never,
+        title: trimmedTitle,
+        document: currentDocument,
+      });
+
+      setActivePage((prev) =>
+        prev
+          ? {
+              ...prev,
+              page: {
+                ...prev.page,
+                title: result.title,
+                slug: result.slug,
+              },
+            }
+          : prev,
+      );
+
+      if (route && result.slug !== route.pageSlug) {
+        setPendingRoutePageId(result.pageId);
+        router.replace(`/projects/${route.projectSlug}/${result.slug}`);
+      }
+
+      setSaveStatus("idle");
+    } catch (error) {
+      setSaveError(
+        error instanceof Error ? error.message : "Could not save page.",
+      );
+      setSaveStatus("error");
+    }
+  }, [route, router, savePage]);
+
   const createPageAndOpen = useCallback(async () => {
-    if (!activePage) {
+    const currentPage = activePageRef.current;
+    if (!currentPage) {
       return;
     }
 
     const result = await createPage({
-      projectId: activePage.project.id as never,
+      projectId: currentPage.project.id as never,
     });
-    router.push(`/projects/${activePage.project.slug}/${result.pageSlug}`);
-  }, [activePage, createPage, router]);
-
-  const saveStatus: SaveStatus = saveError
-    ? "error"
-    : isSavingConfig || isSavingLive || isSavingTitle
-      ? "saving"
-      : lastSavedConfigRef.current !== null
-        ? "saved"
-        : "idle";
+    router.push(`/projects/${currentPage.project.slug}/${result.pageSlug}`);
+  }, [createPage, router]);
 
   const value = useMemo<PageDocumentContextValue>(
     () => ({
@@ -474,23 +403,23 @@ export function PageDocumentProvider({
       saveStatus,
       saveError,
       activePage,
-      configDocument,
-      liveDocument,
+      document,
       setPageTitle,
       updateEditorText,
       insertComponentAtRange,
       updateComponentConfig,
       updateComponentLiveState,
+      saveDocument,
       createPageAndOpen,
     }),
     [
       activePage,
-      configDocument,
       createPageAndOpen,
+      document,
       insertComponentAtRange,
-      liveDocument,
       pageData,
       route,
+      saveDocument,
       saveError,
       saveStatus,
       setPageTitle,
@@ -513,7 +442,7 @@ export function useOptionalPageDocument() {
 
 export function usePageDocument() {
   const context = useOptionalPageDocument();
-  if (!context || !context.activePage || !context.configDocument || !context.liveDocument) {
+  if (!context || !context.activePage || !context.document) {
     throw new Error("usePageDocument must be used on an active page route.");
   }
   return context as ActivePageDocumentContextValue;
@@ -524,49 +453,47 @@ export function usePageComponentState<TType extends PageComponentType>(
   expectedType: TType,
 ) {
   const context = usePageDocument();
-  const component = context.configDocument.components[
+  const component = context.document.components[
     instanceId
-  ] as PageComponentInstanceByType<TType> | undefined;
-  const liveState = context.liveDocument.components[
-    instanceId
-  ] as PageComponentLiveStateByType<TType> | undefined;
+  ] as PageComponentDocumentByType<TType> | undefined;
 
   if (!component || component.type !== expectedType) {
     throw new Error(`Component ${instanceId} was not found.`);
   }
 
-  if (!liveState || liveState.type !== expectedType) {
-    throw new Error(`Live state for component ${instanceId} was not found.`);
-  }
-
   return {
     component,
-    liveState,
+    liveState: {
+      type: component.type,
+      state: component.state,
+    } as PageComponentLiveStateByType<TType>,
     updateConfig: (
       updater: (
-        config: PageComponentInstanceByType<TType>["config"],
-      ) => PageComponentInstanceByType<TType>["config"],
+        config: PageComponentDocumentByType<TType>["config"],
+      ) => PageComponentDocumentByType<TType>["config"],
     ) =>
       context.updateComponentConfig(instanceId, (currentComponent) => {
         const typedComponent =
-          currentComponent as PageComponentInstanceByType<TType>;
+          currentComponent as PageComponentDocumentByType<TType>;
         return {
           ...typedComponent,
           config: updater(typedComponent.config),
-        } as PageComponentInstance;
+        } as PageComponentDocument;
       }),
     updateLiveState: (
       updater: (
         state: PageComponentLiveStateByType<TType>["state"],
       ) => PageComponentLiveStateByType<TType>["state"],
     ) =>
-      context.updateComponentLiveState(instanceId, (currentLiveState) => {
-        const typedLiveState =
-          currentLiveState as PageComponentLiveStateByType<TType>;
-        return {
-          ...typedLiveState,
-          state: updater(typedLiveState.state),
-        } as PageComponentLiveState;
-      }),
+      context.updateComponentLiveState(
+        instanceId,
+        (currentLiveState) =>
+          ({
+            ...currentLiveState,
+            state: updater(
+              currentLiveState.state as PageComponentLiveStateByType<TType>["state"],
+            ),
+          }) as PageComponentLiveState,
+      ),
   };
 }

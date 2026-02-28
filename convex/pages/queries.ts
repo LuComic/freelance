@@ -6,10 +6,7 @@ import {
   requirePageByProjectAndSlug,
   requireProjectBySlug,
 } from "../lib/projectRecords";
-import {
-  parsePageConfigDocument,
-  parsePageLiveDocument,
-} from "./content";
+import { parsePageDocument } from "./content";
 
 export const getPageEditorBySlugs = query({
   args: {
@@ -28,8 +25,7 @@ export const getPageEditorBySlugs = query({
       pageById.projectId === project._id
         ? pageById
         : await requirePageByProjectAndSlug(ctx, project._id, args.pageSlug);
-    const configDocument = parsePageConfigDocument(page.contentJson);
-    const liveDocument = parsePageLiveDocument(page.liveContentJson, configDocument);
+    const document = parsePageDocument(page.contentJson);
 
     return {
       project: {
@@ -45,8 +41,7 @@ export const getPageEditorBySlugs = query({
         createdAt: page.createdAt,
         updatedAt: page.updatedAt,
       },
-      configDocument,
-      liveDocument,
+      document,
     };
   },
 });

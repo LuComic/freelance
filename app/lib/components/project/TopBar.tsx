@@ -129,13 +129,13 @@ export const TopBar = () => {
         </p>
       )}
       {pageDocument?.saveStatus ? (
-        <span className="text-sm text-(--gray-page) ml-auto w-16 text-right">
-          {pageDocument.saveStatus === "saving"
-            ? "Saving..."
-            : pageDocument.saveStatus === "error"
-              ? "Save error"
-              : "Saved"}
-        </span>
+        <button
+          onClick={() => void pageDocument.saveDocument()}
+          disabled={pageDocument.saveStatus === "saving"}
+          className="text-sm gap-1 flex items-center justify-center p-1 @[64rem]:px-2 @[64rem]:py-0.5 rounded-md border border-(--vibrant) bg-(--vibrant)/20 hover:bg-(--vibrant-hover)/20 ml-auto disabled:opacity-80"
+        >
+          {pageDocument.saveStatus === "saving" ? "Saving" : "Save"}
+        </button>
       ) : null}
       <button
         className="text-sm gap-1 flex items-center justify-center p-1 @[64rem]:px-2 @[64rem]:py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) hover:bg-(--gray)/20"
