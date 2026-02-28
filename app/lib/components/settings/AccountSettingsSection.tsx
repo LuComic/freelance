@@ -1,0 +1,134 @@
+"use client";
+
+import { ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
+
+type AccountSettingsSectionProps = {
+  activeSection: string | null;
+  isProfileLoading: boolean;
+  currentName: string;
+  currentBio: string;
+  currentEmail: string;
+  nameDraft: string;
+  setNameDraft: (value: string) => void;
+  bioDraft: string;
+  setBioDraft: (value: string) => void;
+  saveError: string | null;
+  isSavingName: boolean;
+  isSavingBio: boolean;
+  canSaveName: boolean;
+  canSaveBio: boolean;
+  onNameSave: () => Promise<void>;
+  onBioSave: () => Promise<void>;
+};
+
+export function AccountSettingsSection({
+  activeSection,
+  isProfileLoading,
+  currentName,
+  currentBio,
+  currentEmail,
+  nameDraft,
+  setNameDraft,
+  bioDraft,
+  setBioDraft,
+  saveError,
+  isSavingName,
+  isSavingBio,
+  canSaveName,
+  canSaveBio,
+  onNameSave,
+  onBioSave,
+}: AccountSettingsSectionProps) {
+  const [open, setOpen] = useState(activeSection === "account");
+
+  useEffect(() => {
+    queueMicrotask(() => {
+      setOpen(activeSection === "account");
+    });
+  }, [activeSection]);
+
+  return (
+    <div className="bg-(--gray)/10 w-full p-2 flex flex-col gap-2">
+      <button
+        type="button"
+        className="flex font-medium @[40rem]:text-lg text-base items-center justify-start gap-2"
+        onClick={() => setOpen((prev) => !prev)}
+      >
+        <ChevronRight
+          size={20}
+          className={`${open ? "rotate-90" : "rotate-0"}`}
+        />
+        Account
+      </button>
+
+      {open ? (
+        <div className="pl-7 flex flex-col gap-2 pb-2">
+          <p className="text-(--gray-page)">Username</p>
+          <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
+            {isProfileLoading ? "Loading..." : currentName || "Not set"}
+          </div>
+
+          <p className="text-(--gray-page)">Change username</p>
+          <input
+            type="text"
+            placeholder="Enter a new username..."
+            className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
+            value={nameDraft}
+            onChange={(e) => setNameDraft(e.target.value)}
+            disabled={isProfileLoading || isSavingName}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                void onNameSave();
+              }
+            }}
+          />
+          <button
+            type="button"
+            className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-(--vibrant)"
+            onClick={() => void onNameSave()}
+            disabled={!canSaveName}
+          >
+            {isSavingName ? "Saving..." : "Save"}
+          </button>
+
+          <p className="text-(--gray-page)">Bio/Description</p>
+          <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
+            {isProfileLoading ? "Loading..." : currentBio || "Not set"}
+          </div>
+
+          <p className="text-(--gray-page)">Change bio</p>
+          <input
+            type="text"
+            placeholder="Enter a new bio..."
+            className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
+            value={bioDraft}
+            onChange={(e) => setBioDraft(e.target.value)}
+            disabled={isProfileLoading || isSavingBio}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                void onBioSave();
+              }
+            }}
+          />
+          <button
+            type="button"
+            className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-(--vibrant)"
+            onClick={() => void onBioSave()}
+            disabled={!canSaveBio}
+          >
+            {isSavingBio ? "Saving..." : "Save"}
+          </button>
+
+          <p className="text-(--gray-page)">Email</p>
+          <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
+            {isProfileLoading ? "Loading..." : currentEmail || "Not set"}
+          </div>
+          {saveError ? (
+            <p className="text-sm text-(--declined-border)">{saveError}</p>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
+}

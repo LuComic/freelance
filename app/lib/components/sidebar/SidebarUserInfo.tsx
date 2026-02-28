@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo, useState } from "react";
 
 export type SidebarUserProfile =
   | undefined
@@ -59,6 +60,7 @@ function Avatar({
   compact?: boolean;
 }) {
   const sizeClass = compact ? "w-6 h-6" : "w-8 h-8";
+  const imageSrc = useMemo(() => profile?.image?.trim() || null, [profile?.image]);
 
   if (profile === undefined) {
     return (
@@ -68,16 +70,14 @@ function Avatar({
 
   const displayName = profile ? getDisplayName(profile) : "Account";
 
-  if (profile?.image) {
+  if (imageSrc) {
     return (
-      <>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={profile.image}
-          alt={`${displayName} avatar`}
-          className={`aspect-square ${sizeClass} rounded-full object-cover bg-(--dim)`}
-        />
-      </>
+      <AvatarImage
+        key={imageSrc}
+        src={imageSrc}
+        alt={`${displayName} avatar`}
+        sizeClass={sizeClass}
+      />
     );
   }
 
@@ -87,6 +87,35 @@ function Avatar({
     >
       {getInitials(displayName)}
     </div>
+  );
+}
+
+function AvatarImage({
+  src,
+  alt,
+  sizeClass,
+}: {
+  src: string;
+  alt: string;
+  sizeClass: string;
+}) {
+  const [hasImageError, setHasImageError] = useState(false);
+
+  if (hasImageError) {
+    return (
+      <div className={`aspect-square ${sizeClass} bg-(--dim) rounded-full`} />
+    );
+  }
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt={alt}
+      className={`aspect-square ${sizeClass} rounded-full object-cover bg-(--dim)`}
+      referrerPolicy="no-referrer"
+      onError={() => setHasImageError(true)}
+    />
   );
 }
 
