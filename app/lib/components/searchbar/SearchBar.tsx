@@ -1,18 +1,26 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { SearchBarItem } from "./SearchBarItem";
+import { api } from "@/convex/_generated/api";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
+import { useQuery } from "convex/react";
 import { Search } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  startTransition,
+  useDeferredValue,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { PersonModal } from "./PersonModal";
+import { SearchBarItem } from "./SearchBarItem";
 import { useSearchBar } from "./SearchBarContext";
 import {
-  PLACEHOLDER_FILES,
   PLACEHOLDER_PEOPLE,
   PLACEHOLDER_TEMPLATES,
   type SearchPerson,
   type SearchTemplate,
 } from "./SearchBarData";
-import { PersonModal } from "./PersonModal";
 import { TemplateModal } from "./TemplateModal";
 
 type SearchItem = {
@@ -23,7 +31,20 @@ type SearchItem = {
   onSelect: () => void;
 };
 
+type SearchPageResult = {
+  projectId: string;
+  projectSlug: string;
+  projectName: string;
+  pageId: string;
+  pageSlug: string;
+  pageTitle: string;
+  pageDescription: string | null;
+  projectUpdatedAt: number;
+  pageUpdatedAt: number;
+};
+
 export const SearchBar = () => {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [selectedPerson, setSelectedPerson] = useState<SearchPerson | null>(
@@ -32,13 +53,50 @@ export const SearchBar = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<SearchTemplate | null>(
     null,
   );
+  const [resolvedPageSearchResults, setResolvedPageSearchResults] = useState<
+    SearchPageResult[] | undefined
+  >(undefined);
   const selectedItemRef = useRef<HTMLButtonElement>(null);
   const { isOpen, activeTag, openSearch, closeSearch, clearTag } =
     useSearchBar();
+  const deferredSearchQuery = useDeferredValue(
+    activeTag === null ? searchQuery : "",
+  );
+  const normalizedSearchQuery = searchQuery.trim();
+  const pageSearchArgs =
+    isOpen && activeTag === null
+      ? {
+          query: deferredSearchQuery.trim(),
+          limit: 10,
+        }
+      : "skip";
+  const pageSearchResults = useQuery(
+    api.search.queries.searchPagesAcrossProjects,
+    pageSearchArgs,
+  );
+  const visiblePageSearchResults =
+    pageSearchResults ?? resolvedPageSearchResults ?? [];
+  const isLoadingPages =
+    isOpen &&
+    activeTag === null &&
+    pageSearchResults === undefined &&
+    visiblePageSearchResults.length === 0;
 
-  const filteredFiles = PLACEHOLDER_FILES.filter((file) => {
-    return file.toLowerCase().includes(searchQuery.toLowerCase());
-  });
+  useEffect(() => {
+    if (!isOpen || activeTag !== null) {
+      startTransition(() => {
+        setResolvedPageSearchResults(undefined);
+      });
+      return;
+    }
+
+    if (pageSearchResults !== undefined) {
+      startTransition(() => {
+        setResolvedPageSearchResults(pageSearchResults);
+      });
+    }
+  }, [activeTag, isOpen, pageSearchResults]);
+
   const filteredPeople = PLACEHOLDER_PEOPLE.filter((person) => {
     const normalizedQuery = searchQuery.toLowerCase();
     return (
@@ -80,13 +138,21 @@ export const SearchBar = () => {
               setSelectedIndex(0);
             },
           }))
-        : filteredFiles.map((file) => ({
-            key: file,
-            title: file,
+        : visiblePageSearchResults.map((page) => ({
+            key: `${page.projectId}:${page.pageId}`,
+            title: page.pageTitle,
+            subtitle: page.projectName,
             onSelect: () => {
-              console.log("Selected:", file);
+              closeSearch();
+              setSearchQuery("");
+              setSelectedIndex(0);
+              router.push(`/projects/${page.projectSlug}/${page.pageSlug}`);
             },
           }));
+  const selectedSearchItemIndex =
+    searchItems.length === 0
+      ? 0
+      : Math.min(selectedIndex, searchItems.length - 1);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -126,13 +192,13 @@ export const SearchBar = () => {
       // Enter to select
       if (e.key === "Enter" && searchItems.length > 0) {
         e.preventDefault();
-        searchItems[selectedIndex]?.onSelect();
+        searchItems[selectedSearchItemIndex]?.onSelect();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [closeSearch, isOpen, openSearch, searchItems, selectedIndex]);
+  }, [closeSearch, isOpen, openSearch, searchItems, selectedSearchItemIndex]);
 
   // Keep selected item in view when navigating with arrow keys
   useEffect(() => {
@@ -141,7 +207,18 @@ export const SearchBar = () => {
       block: "nearest",
       behavior: "smooth",
     });
-  }, [searchItems.length, selectedIndex]);
+  }, [searchItems.length, selectedSearchItemIndex]);
+
+  const emptyMessage =
+    activeTag === "people"
+      ? "No people found"
+      : activeTag === "template"
+        ? "No templates found"
+        : isLoadingPages
+          ? "Loading pages..."
+          : normalizedSearchQuery.length === 0
+            ? "No pages yet"
+            : "No pages found";
 
   if (!isOpen) {
     return (
@@ -207,7 +284,7 @@ export const SearchBar = () => {
                 ? "Search for users..."
                 : activeTag === "template"
                   ? "Search templates..."
-                  : "Search..."
+                  : "Search pages across projects..."
             }
             className="flex-1 bg-transparent text-(--light) text-base outline-none placeholder:text-(--gray)"
             autoFocus
@@ -223,21 +300,17 @@ export const SearchBar = () => {
             searchItems.map((item, index) => (
               <SearchBarItem
                 key={item.key}
-                ref={index === selectedIndex ? selectedItemRef : null}
+                ref={index === selectedSearchItemIndex ? selectedItemRef : null}
                 title={item.title}
                 subtitle={item.subtitle}
                 badge={item.badge}
-                isSelected={index === selectedIndex}
+                isSelected={index === selectedSearchItemIndex}
                 onClick={item.onSelect}
               />
             ))
           ) : (
             <div className="px-4 py-8 text-center text-(--gray)">
-              {activeTag === "people"
-                ? "No people found"
-                : activeTag === "template"
-                  ? "No templates found"
-                  : "No files found"}
+              {emptyMessage}
             </div>
           )}
         </div>
