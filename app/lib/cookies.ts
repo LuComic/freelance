@@ -2,6 +2,7 @@ const MAX_AGE = 60 * 60 * 24 * 365; // 1 year
 
 export const SIDEBAR_COOKIE = "freelance-sidebar-open";
 export const CHAT_COOKIE = "freelance-chat-open";
+export const TABS_COOKIE = "freelance-open-tabs";
 export const FEEDBACK_CLIENT_LAYOUT_COOKIE = "freelance-feedback-client-layout";
 export const FEEDBACK_CREATOR_LAYOUT_COOKIE =
   "freelance-feedback-creator-layout";

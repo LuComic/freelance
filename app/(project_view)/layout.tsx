@@ -3,8 +3,9 @@ import { cookies } from "next/headers";
 import { Sidebar } from "../lib/components/sidebar/Sidebar";
 import { Chat } from "../lib/components/chat/Chat";
 import { SearchBar } from "../lib/components/searchbar/SearchBar";
-import { SIDEBAR_COOKIE, CHAT_COOKIE } from "../lib/cookies";
+import { SIDEBAR_COOKIE, CHAT_COOKIE, TABS_COOKIE } from "../lib/cookies";
 import { Tab } from "../lib/components/tab/Tab";
+import { parseTabsCookie } from "../lib/components/tab/tabState";
 import { TopBar } from "../lib/components/project/TopBar";
 import { EditModeProvider } from "../lib/components/project/EditModeContext";
 import { PageDocumentProvider } from "../lib/components/project/PageDocumentContext";
@@ -23,9 +24,11 @@ export default async function ProjectViewLayout({
   const cookieStore = await cookies();
   const sidebarValue = cookieStore.get(SIDEBAR_COOKIE)?.value;
   const chatValue = cookieStore.get(CHAT_COOKIE)?.value;
+  const tabsValue = cookieStore.get(TABS_COOKIE)?.value;
   const initialSidebarOpen =
     sidebarValue != null ? sidebarValue === "true" : undefined;
   const initialChatOpen = chatValue != null ? chatValue === "true" : undefined;
+  const initialTabsState = parseTabsCookie(tabsValue);
 
   return (
     <div
@@ -41,7 +44,7 @@ export default async function ProjectViewLayout({
         <EditModeProvider>
           <PageDocumentProvider>
             <div className="flex-1 min-w-0 flex flex-col items-start justify-start">
-              <Tab />
+              <Tab initialTabsState={initialTabsState} />
               <TopBar />
               <div className="@container w-full px-4 md:pt-6 pt-4 pb-8 flex flex-col items-start justify-start gap-4">
                 {children}

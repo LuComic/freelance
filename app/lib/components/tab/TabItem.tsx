@@ -1,18 +1,56 @@
 import { X } from "lucide-react";
 
 interface TabItemProps {
-  title: string;
+  pageTitle: string;
+  projectName: string;
+  isActive: boolean;
+  onSelect: () => void;
+  onClose: () => void;
 }
 
-export const TabItem = ({ title }: TabItemProps) => {
+function truncateLabel(value: string, maxLength = 8) {
+  return value.length > maxLength ? `${value.slice(0, maxLength)}...` : value;
+}
+
+export const TabItem = ({
+  pageTitle,
+  projectName,
+  isActive,
+  onSelect,
+  onClose,
+}: TabItemProps) => {
   return (
-    <div className="w-30 px-2 h-8 border border-(--gray) flex items-center border-t border-r  border-l-0 hover:bg-(--darkest-hover) shrink-0 bg-(--darkest) border-b-0">
-      <span className="flex items-center justify-between text-sm w-full cursor-default">
-        {title.length > 8 ? title.slice(0, 8) + "..." : title}
-        <button className="hover:bg-(--gray) p-1 rounded-md ">
-          <X size={16} />
-        </button>
-      </span>
+    <div
+      className={`flex h-9 min-w-[150px] shrink-0 items-center border-b-0 border-l-0 border-r border-t border-(--gray) ${
+        isActive
+          ? "bg-(--quite-dark)"
+          : "bg-(--darkest) hover:bg-(--darkest-hover)"
+      }`}
+    >
+      <button
+        type="button"
+        className="min-w-0 flex-1 px-3 py-2 text-left"
+        onClick={onSelect}
+      >
+        <span className="flex min-w-0 items-center gap-2 text-sm">
+          <span className="truncate text-(--light)">
+            {truncateLabel(pageTitle)}
+          </span>
+          <span className="truncate text-(--gray-page)">
+            {truncateLabel(projectName)}
+          </span>
+        </span>
+      </button>
+      <button
+        type="button"
+        className="mr-2 rounded-md p-1 text-(--gray) hover:bg-(--gray)/20 hover:text-(--light)"
+        onClick={(event) => {
+          event.stopPropagation();
+          onClose();
+        }}
+      >
+        <X size={16} />
+      </button>
     </div>
   );
 };
