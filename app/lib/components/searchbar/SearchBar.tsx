@@ -17,7 +17,6 @@ import { PersonModal } from "./PersonModal";
 import { SearchBarItem } from "./SearchBarItem";
 import { useSearchBar } from "./SearchBarContext";
 import {
-  PLACEHOLDER_PEOPLE,
   PLACEHOLDER_TEMPLATES,
   type SearchPerson,
   type SearchTemplate,
@@ -54,6 +53,11 @@ export const SearchBar = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<SearchTemplate | null>(
     null,
   );
+  const [debouncedPeopleQuery, setDebouncedPeopleQuery] = useState("");
+  const [resolvedPeopleSearchState, setResolvedPeopleSearchState] = useState<{
+    query: string;
+    results: SearchPerson[];
+  }>();
   const [resolvedPageSearchResults, setResolvedPageSearchResults] = useState<
     SearchPageResult[] | undefined
   >(undefined);
@@ -68,6 +72,13 @@ export const SearchBar = () => {
     activeTag === null ? searchQuery : "",
   );
   const normalizedSearchQuery = searchQuery.trim();
+  const peopleSearchArgs =
+    isOpen && activeTag === "people" && debouncedPeopleQuery.length >= 2
+      ? {
+          query: debouncedPeopleQuery,
+          limit: 10,
+        }
+      : "skip";
   const pageSearchArgs =
     isOpen && activeTag === null
       ? {
@@ -79,13 +90,60 @@ export const SearchBar = () => {
     api.search.queries.searchPagesAcrossProjects,
     pageSearchArgs,
   );
+  const peopleSearchResults = useQuery(
+    api.search.queries.searchPeople,
+    peopleSearchArgs,
+  );
+  const visiblePeopleSearchResults =
+    peopleSearchResults ?? resolvedPeopleSearchState?.results ?? [];
   const visiblePageSearchResults =
     pageSearchResults ?? resolvedPageSearchResults ?? [];
+  const isLoadingPeople =
+    isOpen &&
+    activeTag === "people" &&
+    normalizedSearchQuery.length >= 2 &&
+    (debouncedPeopleQuery !== normalizedSearchQuery ||
+      (peopleSearchResults === undefined &&
+        visiblePeopleSearchResults.length === 0));
   const isLoadingPages =
     isOpen &&
     activeTag === null &&
     pageSearchResults === undefined &&
     visiblePageSearchResults.length === 0;
+
+  useEffect(() => {
+    if (!isOpen || activeTag !== "people") {
+      startTransition(() => {
+        setDebouncedPeopleQuery("");
+        setResolvedPeopleSearchState(undefined);
+      });
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedPeopleQuery(normalizedSearchQuery);
+    }, 250);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [activeTag, isOpen, normalizedSearchQuery]);
+
+  useEffect(() => {
+    if (!isOpen || activeTag !== "people" || debouncedPeopleQuery.length < 2) {
+      startTransition(() => {
+        setResolvedPeopleSearchState(undefined);
+      });
+      return;
+    }
+
+    if (peopleSearchResults !== undefined) {
+      startTransition(() => {
+        setResolvedPeopleSearchState({
+          query: debouncedPeopleQuery,
+          results: peopleSearchResults,
+        });
+      });
+    }
+  }, [activeTag, debouncedPeopleQuery, isOpen, peopleSearchResults]);
 
   useEffect(() => {
     if (!isOpen || activeTag !== null) {
@@ -102,13 +160,6 @@ export const SearchBar = () => {
     }
   }, [activeTag, isOpen, pageSearchResults]);
 
-  const filteredPeople = PLACEHOLDER_PEOPLE.filter((person) => {
-    const normalizedQuery = searchQuery.toLowerCase();
-    return (
-      person.name.toLowerCase().includes(normalizedQuery) ||
-      person.subtitle.toLowerCase().includes(normalizedQuery)
-    );
-  });
   const filteredTemplates = PLACEHOLDER_TEMPLATES.filter((template) => {
     const normalizedQuery = searchQuery.toLowerCase();
     return (
@@ -119,18 +170,18 @@ export const SearchBar = () => {
 
   const searchItems: SearchItem[] =
     activeTag === "people"
-      ? filteredPeople.map((person) => ({
-          key: person.name,
+      ? visiblePeopleSearchResults.map((person) => ({
+          key: String(person.userId),
           title: person.name,
-          subtitle: person.subtitle,
+          subtitle: person.email ?? undefined,
           onSelect: () => {
             setSelectedPerson(person);
             closeSearch();
             setSearchQuery("");
             setSelectedIndex(0);
           },
-        }))
-      : activeTag === "template"
+          }))
+        : activeTag === "template"
         ? filteredTemplates.map((template) => ({
             key: template.name,
             title: template.name,
@@ -216,7 +267,11 @@ export const SearchBar = () => {
 
   const emptyMessage =
     activeTag === "people"
-      ? "No people found"
+      ? normalizedSearchQuery.length < 2
+        ? "Type at least 2 characters"
+        : isLoadingPeople
+          ? "Searching people..."
+          : "No people found"
       : activeTag === "template"
         ? "No templates found"
         : isLoadingPages

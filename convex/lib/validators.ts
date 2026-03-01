@@ -6,6 +6,7 @@ export const CONNECTION_STATUSES = [
   "declined",
   "canceled",
   "blocked",
+  "removed",
 ] as const;
 
 export const TEMPLATE_TYPES = ["project", "page"] as const;

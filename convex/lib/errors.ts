@@ -37,3 +37,7 @@ export function unauthorized(message = "You must be signed in to perform this ac
 export function invalidState(message: string) {
   return new ConvexDomainError(APP_ERROR_CODES.invalidState, message);
 }
+
+export function duplicateConnection(message: string) {
+  return new ConvexDomainError(APP_ERROR_CODES.duplicateConnection, message);
+}

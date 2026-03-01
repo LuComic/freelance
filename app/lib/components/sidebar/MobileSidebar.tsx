@@ -1,5 +1,7 @@
 "use client";
 
+import { api } from "@/convex/_generated/api";
+import { useQuery } from "convex/react";
 import { useState } from "react";
 import {
   PanelLeftClose,
@@ -26,6 +28,7 @@ export const MobileSidebar = ({
   const [activeTab, setActiveTab] = useState<"files" | "friends" | "settings">(
     "files",
   );
+  const connections = useQuery(api.connections.queries.listSidebarConnections);
   return (
     <div className="block md:hidden">
       {sidebarOpen ? (
@@ -77,7 +80,9 @@ export const MobileSidebar = ({
           </div>
 
           {activeTab === "files" ? <Files /> : null}
-          {activeTab === "friends" ? <Connections /> : null}
+          {activeTab === "friends" ? (
+            <Connections connections={connections} />
+          ) : null}
           {activeTab === "settings" ? <SidebarSettings /> : null}
           <div className="mt-auto w-full h-max flex items-center">
             <SidebarUserInfo profile={userProfile} />

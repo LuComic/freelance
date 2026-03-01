@@ -11,26 +11,31 @@ const schema = defineSchema({
     isAnonymous: v.optional(v.boolean()),
     name: v.optional(v.string()),
     bio: v.optional(v.string()),
+    searchText: v.optional(v.string()),
     phone: v.optional(v.string()),
     phoneVerificationTime: v.optional(v.float64()),
     projectIds: v.optional(v.array(v.id("projects"))),
     lastOpenedProjectId: v.optional(v.id("projects")),
   })
     .index("email", ["email"])
-    .index("phone", ["phone"]),
+    .index("phone", ["phone"])
+    .searchIndex("search_text", { searchField: "searchText" }),
 
   connections: defineTable({
     requesterUserId: v.id("users"),
     receiverUserId: v.id("users"),
+    pairKey: v.string(),
     status: v.union(
       v.literal("pending"),
       v.literal("accepted"),
       v.literal("declined"),
       v.literal("canceled"),
       v.literal("blocked"),
+      v.literal("removed"),
     ),
     hiddenByUserIds: v.optional(v.array(v.id("users"))),
     actedByUserId: v.optional(v.id("users")),
+    blockedByUserId: v.optional(v.id("users")),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -38,7 +43,9 @@ const schema = defineSchema({
     .index("by_receiver", ["receiverUserId"])
     .index("by_requester_status", ["requesterUserId", "status"])
     .index("by_receiver_status", ["receiverUserId", "status"])
-    .index("by_pair", ["requesterUserId", "receiverUserId"]),
+    .index("by_pair", ["requesterUserId", "receiverUserId"])
+    .index("by_pair_key", ["pairKey"])
+    .index("by_blocked_by", ["blockedByUserId"]),
 
   templates: defineTable({
     authorUserId: v.id("users"),

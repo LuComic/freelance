@@ -1,3 +1,5 @@
+import type { ConnectionPerson } from "../connections/types";
+
 export const PLACEHOLDER_FILES = [
   "Docs",
   "Components",
@@ -16,18 +18,7 @@ export const PLACEHOLDER_FILES = [
   "Toast",
 ];
 
-export type SearchPerson = {
-  name: string;
-  subtitle: string;
-};
-
-export const PLACEHOLDER_PEOPLE: SearchPerson[] = [
-  { name: "Alex Morgan", subtitle: "Product Designer" },
-  { name: "Jordan Lee", subtitle: "Frontend Engineer" },
-  { name: "Sam Carter", subtitle: "Motion Designer" },
-  { name: "Riley Kim", subtitle: "Freelance PM" },
-  { name: "Casey Nguyen", subtitle: "Brand Strategist" },
-];
+export type SearchPerson = ConnectionPerson;
 
 export type TemplatePage = {
   title: string;

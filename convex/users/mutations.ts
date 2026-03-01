@@ -1,8 +1,9 @@
 import { v } from "convex/values";
 import type { Doc } from "../_generated/dataModel";
-import { mutation } from "../_generated/server";
+import { internalMutation, mutation } from "../_generated/server";
 import { requireCurrentAuth } from "../lib/auth";
 import { invalidState } from "../lib/errors";
+import { buildUserSearchText } from "./model";
 
 export const updateProfile = mutation({
   args: {
@@ -11,6 +12,12 @@ export const updateProfile = mutation({
   },
   handler: async (ctx, args) => {
     const { userId, user } = await requireCurrentAuth(ctx);
+    const nextName =
+      args.name !== undefined ? args.name.trim() : (user.name ?? undefined);
+    const nextBio =
+      args.bio !== undefined
+        ? (args.bio.trim() || undefined)
+        : (user.bio ?? undefined);
 
     if (args.name === undefined && args.bio === undefined) {
       throw invalidState("At least one profile field must be provided.");
@@ -19,28 +26,49 @@ export const updateProfile = mutation({
     const patch: Partial<Doc<"users">> = {};
 
     if (args.name !== undefined) {
-      const trimmedName = args.name.trim();
-      if (!trimmedName) {
+      if (!nextName) {
         throw invalidState("Name cannot be empty.");
       }
 
-      if (user.name !== trimmedName) {
-        patch.name = trimmedName;
+      if (user.name !== nextName) {
+        patch.name = nextName;
       }
     }
 
     if (args.bio !== undefined) {
-      const trimmedBio = args.bio.trim();
-      const nextBio = trimmedBio || undefined;
-
       if (user.bio !== nextBio) {
         patch.bio = nextBio;
       }
     }
 
     if (Object.keys(patch).length > 0) {
+      patch.searchText = buildUserSearchText({
+        name: nextName,
+        bio: nextBio,
+        email: user.email,
+      });
       await ctx.db.patch(userId, patch);
     }
+  },
+});
+
+export const backfillUserSearchText = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const users = await ctx.db.query("users").collect();
+    let updatedCount = 0;
+
+    for (const user of users) {
+      const searchText = buildUserSearchText(user);
+      if (user.searchText === searchText) {
+        continue;
+      }
+
+      await ctx.db.patch(user._id, { searchText });
+      updatedCount += 1;
+    }
+
+    return { updatedCount };
   },
 });
 

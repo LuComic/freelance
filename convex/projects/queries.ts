@@ -91,39 +91,51 @@ async function resolveProjectByReference(
 export const listCurrentUserProjects = query({
   args: {},
   handler: async (ctx) => {
-    const { userId, user } = await requireCurrentAuth(ctx);
-    const memberships = await ctx.db
-      .query("projectMembers")
-      .withIndex("by_user", (query) => query.eq("userId", userId))
-      .collect();
+    try {
+      const { userId, user } = await requireCurrentAuth(ctx);
+      const memberships = await ctx.db
+        .query("projectMembers")
+        .withIndex("by_user", (query) => query.eq("userId", userId))
+        .collect();
 
-    const activeMemberships = memberships.filter(
-      (membership) => membership.status === "active",
-    );
-    const projects = await Promise.all(
-      activeMemberships.map((membership) => ctx.db.get(membership.projectId)),
-    );
+      const activeMemberships = memberships.filter(
+        (membership) => membership.status === "active",
+      );
+      const projects = await Promise.all(
+        activeMemberships.map((membership) => ctx.db.get(membership.projectId)),
+      );
 
-    const summaries = await Promise.all(
-      projects
-        .filter((project): project is NonNullable<typeof project> => project !== null)
-        .filter((project) => project.isArchived !== true)
-        .map((project) => toProjectSummary(ctx, project)),
-    );
-    const projectOrder = new Map(
-      (user.projectIds ?? []).map((projectId, index) => [projectId, index]),
-    );
+      const summaries = await Promise.all(
+        projects
+          .filter((project): project is NonNullable<typeof project> => project !== null)
+          .filter((project) => project.isArchived !== true)
+          .map((project) => toProjectSummary(ctx, project)),
+      );
+      const projectOrder = new Map(
+        (user.projectIds ?? []).map((projectId, index) => [projectId, index]),
+      );
 
-    return summaries
-      .sort((left, right) => compareProjects(projectOrder, left, right))
-      .map((summary) => ({
-        id: summary.id,
-        slug: summary.slug,
-        name: summary.name,
-        description: summary.description,
-        pageCount: summary.pageCount,
-        pages: summary.pages,
-      }));
+      return summaries
+        .sort((left, right) => compareProjects(projectOrder, left, right))
+        .map((summary) => ({
+          id: summary.id,
+          slug: summary.slug,
+          name: summary.name,
+          description: summary.description,
+          pageCount: summary.pageCount,
+          pages: summary.pages,
+        }));
+    } catch (error) {
+      if (
+        error instanceof ConvexDomainError &&
+        (error.code === APP_ERROR_CODES.notFound ||
+          error.code === APP_ERROR_CODES.unauthorized)
+      ) {
+        return [];
+      }
+
+      throw error;
+    }
   },
 });
 

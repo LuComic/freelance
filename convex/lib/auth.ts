@@ -67,7 +67,7 @@ export async function requireCurrentSession(
   const sessionId = await requireCurrentSessionId(ctx);
   const session = await ctx.db.get(sessionId);
   if (!session) {
-    throw notFound(`Session ${sessionId} was not found.`);
+    throw unauthorized("Your session is no longer valid. Please sign in again.");
   }
   return session;
 }
@@ -97,7 +97,7 @@ export async function requireCurrentAuth(ctx: AuthCtx): Promise<{
   }
 
   if (!session) {
-    throw notFound(`Session ${sessionId} was not found.`);
+    throw unauthorized("Your session is no longer valid. Please sign in again.");
   }
 
   if (session.userId !== userId) {

@@ -1,7 +1,12 @@
 import { ConnectionItem } from "./ConnectionItem";
 import { useSearchBar } from "../searchbar/SearchBarContext";
+import type { SidebarConnectionsData } from "../connections/types";
 
-export const Connections = () => {
+type ConnectionsProps = {
+  connections: SidebarConnectionsData | undefined;
+};
+
+export const Connections = ({ connections }: ConnectionsProps) => {
   const { openTaggedSearch } = useSearchBar();
 
   return (
@@ -10,29 +15,33 @@ export const Connections = () => {
       <button
         type="button"
         onClick={() => openTaggedSearch("people")}
-        className="gap-1 flex items-center justify-center px-2 py-1 rounded-md w-full border border-(--vibrant) bg-(--vibrant)/10 hover:bg-(--vibrant)/20"
+        className="gap-1 flex items-center justify-center px-2 py-1 rounded-md w-full border border-(--vibrant) bg-(--vibrant)/10 hover:bg-(--vibrant)/20 my-2"
       >
         Find people
       </button>
+      {connections === undefined ? (
+        <p className="text-sm text-(--gray-page)">Loading connections...</p>
+      ) : null}
       <ConnectionItem
         title="Friends"
-        items={["Alex", "Jordan", "Sam", "Riley"]}
+        items={connections?.friends ?? []}
         type="friends"
       />
-      <ConnectionItem
-        title="Collaborations"
-        items={["Morgan", "Casey", "Jamie"]}
-        type="collabs"
-      />
+      <ConnectionItem title="Collaborations" items={[]} type="collabs" />
       <ConnectionItem
         title="Sent requests"
-        items={["Quinn", "Avery"]}
+        items={connections?.sentRequests ?? []}
         type="sent"
       />
       <ConnectionItem
         title="Received requests"
-        items={["Drew", "Skyler", "Taylor"]}
+        items={connections?.receivedRequests ?? []}
         type="got"
+      />
+      <ConnectionItem
+        title="Blocked"
+        items={connections?.blocked ?? []}
+        type="blocked"
       />
     </div>
   );

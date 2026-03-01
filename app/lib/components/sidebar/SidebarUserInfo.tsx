@@ -60,7 +60,10 @@ function Avatar({
   compact?: boolean;
 }) {
   const sizeClass = compact ? "w-6 h-6" : "w-8 h-8";
-  const imageSrc = useMemo(() => profile?.image?.trim() || null, [profile?.image]);
+  const imageSrc = useMemo(
+    () => profile?.image?.trim() || null,
+    [profile?.image],
+  );
 
   if (profile === undefined) {
     return (
@@ -151,7 +154,11 @@ export const SidebarUserInfo = ({
       href="/settings?section=account"
     >
       <Avatar profile={profile} />
-      <span className="font-light text-base">{displayName}</span>
+      <span className="font-light text-base">
+        {displayName.length > 20
+          ? displayName.slice(0, 20) + "..."
+          : displayName}
+      </span>
     </Link>
   );
 };

@@ -9,6 +9,7 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as connections_model from "../connections/model.js";
 import type * as connections_mutations from "../connections/mutations.js";
 import type * as connections_queries from "../connections/queries.js";
 import type * as http from "../http.js";
@@ -34,6 +35,7 @@ import type * as search_queries from "../search/queries.js";
 import type * as templates_content from "../templates/content.js";
 import type * as templates_mutations from "../templates/mutations.js";
 import type * as templates_queries from "../templates/queries.js";
+import type * as users_model from "../users/model.js";
 import type * as users_mutations from "../users/mutations.js";
 import type * as users_queries from "../users/queries.js";
 
@@ -45,6 +47,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  "connections/model": typeof connections_model;
   "connections/mutations": typeof connections_mutations;
   "connections/queries": typeof connections_queries;
   http: typeof http;
@@ -70,6 +73,7 @@ declare const fullApi: ApiFromModules<{
   "templates/content": typeof templates_content;
   "templates/mutations": typeof templates_mutations;
   "templates/queries": typeof templates_queries;
+  "users/model": typeof users_model;
   "users/mutations": typeof users_mutations;
   "users/queries": typeof users_queries;
 }>;

@@ -1,7 +1,9 @@
 import { v } from "convex/values";
 import type { Doc } from "../_generated/dataModel";
 import { query } from "../_generated/server";
+import { getConnectionByPairKey, toConnectionUserListItem } from "../connections/model";
 import { requireCurrentAuth } from "../lib/auth";
+import { APP_ERROR_CODES, ConvexDomainError } from "../lib/errors";
 import { getOrderedProjectPages } from "../lib/projectRecords";
 
 type ProjectSearchOrder = {
@@ -120,88 +122,155 @@ export const searchPagesAcrossProjects = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const { userId, user } = await requireCurrentAuth(ctx);
-    const normalizedQuery = normalizeSearchQuery(args.query);
-    const limit = Math.max(1, Math.floor(args.limit ?? 10));
-    const memberships = await ctx.db
-      .query("projectMembers")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .collect();
-    const activeMemberships = memberships.filter(
-      (membership) => membership.status === "active",
-    );
-    const projects = await Promise.all(
-      activeMemberships.map((membership) => ctx.db.get(membership.projectId)),
-    );
-    const visibleProjects = new Map<Doc<"projects">["_id"], Doc<"projects">>();
+    try {
+      const { userId, user } = await requireCurrentAuth(ctx);
+      const normalizedQuery = normalizeSearchQuery(args.query);
+      const limit = Math.max(1, Math.floor(args.limit ?? 10));
+      const memberships = await ctx.db
+        .query("projectMembers")
+        .withIndex("by_user", (q) => q.eq("userId", userId))
+        .collect();
+      const activeMemberships = memberships.filter(
+        (membership) => membership.status === "active",
+      );
+      const projects = await Promise.all(
+        activeMemberships.map((membership) => ctx.db.get(membership.projectId)),
+      );
+      const visibleProjects = new Map<Doc<"projects">["_id"], Doc<"projects">>();
 
-    for (const project of projects) {
-      if (!project || project.isArchived === true) {
-        continue;
-      }
-
-      visibleProjects.set(project._id, project);
-    }
-
-    const candidates = (
-      await Promise.all(
-        Array.from(visibleProjects.values()).map(async (project) => {
-          const pages = await getOrderedProjectPages(ctx, project);
-          const orderedPages = [...pages].sort(
-            (left, right) => right.updatedAt - left.updatedAt,
-          );
-
-          return orderedPages.map((page) => ({
-            projectId: project._id,
-            projectSlug: project.slug,
-            projectName: project.name,
-            pageId: page._id,
-            pageSlug: page.slug,
-            pageTitle: page.title,
-            pageDescription: page.description ?? null,
-            projectUpdatedAt: project.updatedAt,
-            pageUpdatedAt: page.updatedAt,
-            normalizedProjectName: normalizeSearchQuery(project.name),
-            normalizedPageTitle: normalizeSearchQuery(page.title),
-          }));
-        }),
-      )
-    ).flat();
-
-    if (!normalizedQuery) {
-      return candidates
-        .sort((left, right) =>
-          compareCandidates(user.lastOpenedProjectId, left, right),
-        )
-        .slice(0, limit)
-        .map(toPageSearchResult);
-    }
-
-    return candidates
-      .map((candidate) => ({
-        candidate,
-        rank: getSearchRank(normalizedQuery, candidate),
-      }))
-      .filter(
-        (
-          entry,
-        ): entry is {
-          candidate: PageSearchCandidate;
-          rank: number;
-        } => entry.rank !== null,
-      )
-      .sort((left, right) => {
-        if (left.rank !== right.rank) {
-          return left.rank - right.rank;
+      for (const project of projects) {
+        if (!project || project.isArchived === true) {
+          continue;
         }
 
-        return compareCandidates(
-          user.lastOpenedProjectId,
-          left.candidate,
-          right.candidate,
-        );
-      })
-      .slice(0, limit)
-      .map(({ candidate }) => toPageSearchResult(candidate));
+        visibleProjects.set(project._id, project);
+      }
+
+      const candidates = (
+        await Promise.all(
+          Array.from(visibleProjects.values()).map(async (project) => {
+            const pages = await getOrderedProjectPages(ctx, project);
+            const orderedPages = [...pages].sort(
+              (left, right) => right.updatedAt - left.updatedAt,
+            );
+
+            return orderedPages.map((page) => ({
+              projectId: project._id,
+              projectSlug: project.slug,
+              projectName: project.name,
+              pageId: page._id,
+              pageSlug: page.slug,
+              pageTitle: page.title,
+              pageDescription: page.description ?? null,
+              projectUpdatedAt: project.updatedAt,
+              pageUpdatedAt: page.updatedAt,
+              normalizedProjectName: normalizeSearchQuery(project.name),
+              normalizedPageTitle: normalizeSearchQuery(page.title),
+            }));
+          }),
+        )
+      ).flat();
+
+      if (!normalizedQuery) {
+        return candidates
+          .sort((left, right) =>
+            compareCandidates(user.lastOpenedProjectId, left, right),
+          )
+          .slice(0, limit)
+          .map(toPageSearchResult);
+      }
+
+      return candidates
+        .map((candidate) => ({
+          candidate,
+          rank: getSearchRank(normalizedQuery, candidate),
+        }))
+        .filter(
+          (
+            entry,
+          ): entry is {
+            candidate: PageSearchCandidate;
+            rank: number;
+          } => entry.rank !== null,
+        )
+        .sort((left, right) => {
+          if (left.rank !== right.rank) {
+            return left.rank - right.rank;
+          }
+
+          return compareCandidates(
+            user.lastOpenedProjectId,
+            left.candidate,
+            right.candidate,
+          );
+        })
+        .slice(0, limit)
+        .map(({ candidate }) => toPageSearchResult(candidate));
+    } catch (error) {
+      if (
+        error instanceof ConvexDomainError &&
+        (error.code === APP_ERROR_CODES.notFound ||
+          error.code === APP_ERROR_CODES.unauthorized)
+      ) {
+        return [];
+      }
+
+      throw error;
+    }
+  },
+});
+
+export const searchPeople = query({
+  args: {
+    query: v.string(),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    try {
+      const { userId } = await requireCurrentAuth(ctx);
+      const normalizedQuery = normalizeSearchQuery(args.query);
+
+      if (normalizedQuery.length < 2) {
+        return [];
+      }
+
+      const limit = Math.max(1, Math.floor(args.limit ?? 10));
+      const searchResults = await ctx.db
+        .query("users")
+        .withSearchIndex("search_text", (query) =>
+          query.search("searchText", normalizedQuery),
+        )
+        .take(Math.max(limit * 4, 20));
+      const visibleResults = [];
+
+      for (const result of searchResults) {
+        if (result._id === userId) {
+          continue;
+        }
+
+        const connection = await getConnectionByPairKey(ctx, userId, result._id);
+        if (connection?.status === "blocked") {
+          continue;
+        }
+
+        visibleResults.push(toConnectionUserListItem(result));
+
+        if (visibleResults.length >= limit) {
+          break;
+        }
+      }
+
+      return visibleResults;
+    } catch (error) {
+      if (
+        error instanceof ConvexDomainError &&
+        (error.code === APP_ERROR_CODES.notFound ||
+          error.code === APP_ERROR_CODES.unauthorized)
+      ) {
+        return [];
+      }
+
+      throw error;
+    }
   },
 });
