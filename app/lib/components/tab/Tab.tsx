@@ -190,26 +190,26 @@ export const Tab = ({ initialTabsState }: TabProps) => {
     router.replace("/projects");
   };
 
-  if (resolvedTabs.length === 0) {
-    return null;
-  }
-
-  if (isClosingLastTab && pathname === "/projects") {
-    return null;
-  }
-
   return (
     <div className="hidden bg-(--darkest) max-w-full w-full items-center justify-start overflow-x-auto border-b border-(--gray) md:flex">
-      {resolvedTabs.map((tab) => (
-        <TabItem
-          key={tab.pageId}
-          pageTitle={tab.pageTitle}
-          projectName={tab.projectName}
-          isActive={tab.pageId === activePageId}
-          onSelect={() => openTab(tab)}
-          onClose={() => closeTab(tab.pageId)}
-        />
-      ))}
+      {resolvedTabs.length > 0 ? (
+        <>
+          {resolvedTabs.map((tab) => (
+            <TabItem
+              key={tab.pageId}
+              pageTitle={tab.pageTitle}
+              projectName={tab.projectName}
+              isActive={tab.pageId === activePageId}
+              onSelect={() => openTab(tab)}
+              onClose={() => closeTab(tab.pageId)}
+            />
+          ))}
+        </>
+      ) : (
+        <span className="text-(--gray-page) h-9 flex items-center justify-center w-full">
+          Communication between freelancers and clients
+        </span>
+      )}
     </div>
   );
 };
