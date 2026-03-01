@@ -21,6 +21,9 @@ export function useConnectionActions() {
     api.connections.mutations.cancelFriendRequest,
   );
   const removeFriend = useMutation(api.connections.mutations.removeFriend);
+  const forgetCollaborator = useMutation(
+    api.connections.mutations.forgetCollaborator,
+  );
   const blockUser = useMutation(api.connections.mutations.blockUser);
   const unblockUser = useMutation(api.connections.mutations.unblockUser);
   const [pendingAction, setPendingAction] =
@@ -49,6 +52,8 @@ export function useConnectionActions() {
         await cancelFriendRequest({ targetUserId: userId });
       } else if (action === "removeFriend") {
         await removeFriend({ targetUserId: userId });
+      } else if (action === "forgetCollaborator") {
+        await forgetCollaborator({ targetUserId: userId });
       } else if (action === "blockUser") {
         await blockUser({ targetUserId: userId });
       } else {

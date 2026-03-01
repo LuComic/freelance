@@ -18,6 +18,7 @@ type DesktopChatProps = {
 export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
   const {
     isEditing,
+    modeLock,
     requestComponentInsert,
     componentLibraryOpenRequestNonce,
   } = useEditMode();
@@ -25,6 +26,8 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
   const [activeTab, setActiveTab] = useState<"chat" | "components">("chat");
   const [componentFilter, setComponentFilter] = useState<"" | ComponentTag>("");
   const handledComponentLibraryNonceRef = useRef(0);
+  const componentsLocked = modeLock === "live";
+  const visibleActiveTab = componentsLocked ? "chat" : activeTab;
 
   useEffect(() => {
     setCookie(CHAT_COOKIE, String(chatOpen));
@@ -47,6 +50,7 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
 
   useEffect(() => {
     if (
+      componentsLocked ||
       componentLibraryOpenRequestNonce === 0 ||
       componentLibraryOpenRequestNonce ===
         handledComponentLibraryNonceRef.current
@@ -59,7 +63,7 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
       setChatOpen(true);
       setActiveTab("components");
     });
-  }, [componentLibraryOpenRequestNonce]);
+  }, [componentLibraryOpenRequestNonce, componentsLocked]);
 
   const changeComponentFilter = (newFilter: ComponentTag) => {
     if (componentFilter === newFilter) {
@@ -82,33 +86,37 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
               <PanelRightClose size={20} />
             </button>
             <span className="text-(--gray) text-xl">
-              {activeTab === "chat" ? "Chat" : "Components"}
+              {visibleActiveTab === "chat" ? "Chat" : "Components"}
             </span>
           </div>
 
           <div className="flex items-center justify-around p-1 rounded-xl bg-(--dim) w-full gap-1">
             <button
               className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                activeTab === "chat" ? "bg-(--quite-dark) text-(--vibrant)" : ""
+                visibleActiveTab === "chat"
+                  ? "bg-(--quite-dark) text-(--vibrant)"
+                  : ""
               }`}
               onClick={() => setActiveTab("chat")}
             >
               <MessageSquare size={20} className="mx-auto" />
             </button>
-            <button
-              className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                activeTab === "components"
-                  ? "bg-(--quite-dark) text-(--vibrant)"
-                  : ""
-              }`}
-              onClick={() => setActiveTab("components")}
-            >
-              <LayoutGrid size={20} className="mx-auto" />
-            </button>
+            {!componentsLocked ? (
+              <button
+                className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
+                  visibleActiveTab === "components"
+                    ? "bg-(--quite-dark) text-(--vibrant)"
+                    : ""
+                }`}
+                onClick={() => setActiveTab("components")}
+              >
+                <LayoutGrid size={20} className="mx-auto" />
+              </button>
+            ) : null}
           </div>
 
           <div className="w-full flex-1 min-h-0 overflow-y-auto">
-            {activeTab === "components" ? (
+            {visibleActiveTab === "components" ? (
               <>
                 <div className="flex flex-wrap items-center justify-start gap-2 w-full mb-2">
                   {(["progress", "text", "input"] as ComponentTag[]).map(
@@ -149,7 +157,9 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
           <div className="flex flex-col bg-(--dim) rounded-lg justify-center p-1 h-max gap-4">
             <button
               className={`h-full  p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                activeTab === "chat" ? "bg-(--quite-dark) text-(--vibrant)" : ""
+                visibleActiveTab === "chat"
+                  ? "bg-(--quite-dark) text-(--vibrant)"
+                  : ""
               }`}
               onClick={() => {
                 setActiveTab("chat");
@@ -158,19 +168,21 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
             >
               <MessageSquare size={20} className="mx-auto" />
             </button>
-            <button
-              className={`h-full  p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                activeTab === "components"
-                  ? "bg-(--quite-dark) text-(--vibrant)"
-                  : ""
-              }`}
-              onClick={() => {
-                setActiveTab("components");
-                setChatOpen(true);
-              }}
-            >
-              <LayoutGrid size={20} className="mx-auto" />
-            </button>
+            {!componentsLocked ? (
+              <button
+                className={`h-full  p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
+                  visibleActiveTab === "components"
+                    ? "bg-(--quite-dark) text-(--vibrant)"
+                    : ""
+                }`}
+                onClick={() => {
+                  setActiveTab("components");
+                  setChatOpen(true);
+                }}
+              >
+                <LayoutGrid size={20} className="mx-auto" />
+              </button>
+            ) : null}
           </div>
         </div>
       )}

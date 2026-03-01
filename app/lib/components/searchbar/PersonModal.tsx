@@ -1,7 +1,8 @@
 "use client";
 
 import { api } from "@/convex/_generated/api";
-import { useQuery } from "convex/react";
+import type { Id } from "@/convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
 import { useCallback, useEffect, useState } from "react";
 import type { SearchPerson } from "./SearchBarData";
 import { ChevronRight, X } from "lucide-react";
@@ -15,18 +16,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { InviteRole, PersonInviteDefaults } from "./SearchBarContext";
 
 type PersonModalProps = {
   person: SearchPerson | null;
+  inviteDefaults?: PersonInviteDefaults | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
-
-const MOCK_INVITEABLE_PROJECTS = [
-  { id: "brand-refresh", name: "Brand Refresh" },
-  { id: "marketing-site", name: "Marketing Site" },
-  { id: "client-portal", name: "Client Portal" },
-] as const;
 
 const INVITE_ROLE_OPTIONS = [
   { value: "client", label: "Client" },
@@ -35,6 +32,7 @@ const INVITE_ROLE_OPTIONS = [
 
 export const PersonModal = ({
   person,
+  inviteDefaults,
   open,
   onOpenChange,
 }: PersonModalProps) => {
@@ -43,17 +41,30 @@ export const PersonModal = ({
     api.connections.queries.getRelationshipWithUser,
     open && person ? { targetUserId: person.userId } : "skip",
   );
+  const inviteableProjects = useQuery(
+    api.projects.invites.listInviteableProjects,
+    open && person ? {} : "skip",
+  );
+  const inviteUserToProject = useMutation(
+    api.projects.invites.inviteUserToProject,
+  );
   const { runConnectionAction, pendingAction, error, clearError } =
     useConnectionActions();
   const visiblePerson = relationshipData?.user ?? person;
   const relationship = relationshipData?.relationship;
   const isPending = person ? pendingAction?.userId === person.userId : false;
-  const [selectedProjectId, setSelectedProjectId] = useState("");
-  const [selectedRole, setSelectedRole] = useState<
-    (typeof INVITE_ROLE_OPTIONS)[number]["value"] | ""
-  >("client");
+  const [selectedProjectId, setSelectedProjectId] = useState<
+    Id<"projects"> | ""
+  >(inviteDefaults?.projectId ?? "");
+  const [selectedRole, setSelectedRole] = useState<InviteRole | "">(
+    inviteDefaults?.role ?? "client",
+  );
   const [inviteMessage, setInviteMessage] = useState<string | null>(null);
-  const [showInviteDropdown, setShowInviteDropdown] = useState(false);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+  const [isInviting, setIsInviting] = useState(false);
+  const [showInviteDropdown, setShowInviteDropdown] = useState(
+    Boolean(inviteDefaults?.expandInviteSection),
+  );
 
   const handleAction = async (action: ConnectionAction) => {
     if (!person) {
@@ -62,6 +73,46 @@ export const PersonModal = ({
 
     clearError();
     await runConnectionAction(action, person.userId);
+  };
+
+  const handleInvite = async () => {
+    if (!person || !selectedProjectId || !selectedRole) {
+      return;
+    }
+
+    const selectedProject =
+      inviteableProjects?.find((project) => project.id === selectedProjectId) ??
+      null;
+    const roleLabel = INVITE_ROLE_OPTIONS.find(
+      (role) => role.value === selectedRole,
+    )?.label;
+
+    if (!selectedProject || !roleLabel) {
+      return;
+    }
+
+    setInviteError(null);
+    setInviteMessage(null);
+    setIsInviting(true);
+
+    try {
+      await inviteUserToProject({
+        projectId: selectedProjectId,
+        targetUserId: person.userId,
+        role: selectedRole,
+      });
+      setInviteMessage(
+        `Invite sent to ${visiblePerson?.name ?? person.name} for ${selectedProject.name} as ${roleLabel}.`,
+      );
+    } catch (inviteActionError) {
+      setInviteError(
+        inviteActionError instanceof Error
+          ? inviteActionError.message
+          : "Could not invite this user to the project.",
+      );
+    } finally {
+      setIsInviting(false);
+    }
   };
 
   useEffect(() => {
@@ -82,17 +133,18 @@ export const PersonModal = ({
     };
   }, [closeModal, open]);
 
-  useEffect(() => {
-    clearError();
-  }, [clearError, open, person?.userId]);
-
-  useEffect(() => {
-    if (!open) {
-      setShowInviteDropdown(false);
-    }
-  }, [open, person?.userId]);
-
   if (!open || !person || !visiblePerson) return null;
+
+  const selectedProject =
+    inviteableProjects?.find((project) => project.id === selectedProjectId) ??
+    null;
+  const canReceiveProjectInvite = Boolean(visiblePerson.email?.trim());
+  const canInvite =
+    Boolean(selectedProject) &&
+    Boolean(selectedRole) &&
+    !isInviting &&
+    (inviteableProjects?.length ?? 0) > 0 &&
+    canReceiveProjectInvite;
 
   return (
     <div
@@ -136,17 +188,18 @@ export const PersonModal = ({
           </button>
           {showInviteDropdown ? (
             <div className="w-full flex flex-col gap-2">
-              {/* Eventually this should list projects where the current user is the owner or a co-creator. */}
               <Select
                 value={selectedProjectId}
-                onValueChange={setSelectedProjectId}
+                onValueChange={(value) =>
+                  setSelectedProjectId(value as Id<"projects">)
+                }
               >
                 <SelectTrigger className="w-full bg-(--qutie-dark) border-(--gray)">
                   <SelectValue placeholder="Select project" />
                 </SelectTrigger>
                 <SelectContent className="bg-(--quite-dark) border-none text-(--gray-page)">
                   <SelectGroup className="bg-(--quite-dark)">
-                    {MOCK_INVITEABLE_PROJECTS.map((project) => (
+                    {inviteableProjects?.map((project) => (
                       <SelectItem
                         key={project.id}
                         value={project.id}
@@ -184,29 +237,33 @@ export const PersonModal = ({
               <button
                 type="button"
                 className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-(--vibrant)"
-                disabled={!selectedProjectId || !selectedRole}
-                onClick={() => {
-                  const selectedProject = MOCK_INVITEABLE_PROJECTS.find(
-                    (project) => project.id === selectedProjectId,
-                  );
-                  const roleLabel = INVITE_ROLE_OPTIONS.find(
-                    (role) => role.value === selectedRole,
-                  )?.label;
-
-                  if (!selectedProject || !roleLabel) {
-                    return;
-                  }
-
-                  setInviteMessage(
-                    `Invite mock ready: ${visiblePerson.name} -> ${selectedProject.name} as ${roleLabel}.`,
-                  );
-                }}
+                disabled={!canInvite}
+                onClick={() => void handleInvite()}
               >
-                Invite
+                {isInviting ? "Inviting..." : "Invite"}
               </button>
 
+              {inviteableProjects === undefined ? (
+                <p className="pt-2 text-(--gray-page)">Loading projects...</p>
+              ) : null}
+              {inviteableProjects !== undefined &&
+              inviteableProjects.length === 0 ? (
+                <p className="pt-2 text-(--gray-page)">
+                  You can only invite people to projects where you are the owner
+                  or a co-creator.
+                </p>
+              ) : null}
+              {!canReceiveProjectInvite ? (
+                <p className="pt-2 text-(--gray-page)">
+                  This account cannot receive a project invite until it has an
+                  email address.
+                </p>
+              ) : null}
               {inviteMessage ? (
-                <p className="text-sm text-(--gray-page)">{inviteMessage}</p>
+                <p className="pt-2 text-(--gray-page)">{inviteMessage}</p>
+              ) : null}
+              {inviteError ? (
+                <p className="pt-2 text-(--declined-border)">{inviteError}</p>
               ) : null}
             </div>
           ) : null}

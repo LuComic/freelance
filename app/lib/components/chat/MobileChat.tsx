@@ -13,6 +13,7 @@ import { ComponentLib, type ComponentTag } from "./ComponentLib";
 export const MobileChat = () => {
   const {
     isEditing,
+    modeLock,
     requestComponentInsert,
     componentLibraryOpenRequestNonce,
   } = useEditMode();
@@ -20,6 +21,8 @@ export const MobileChat = () => {
   const [activeTab, setActiveTab] = useState<"chat" | "components">("chat");
   const [componentFilter, setComponentFilter] = useState<"" | ComponentTag>("");
   const handledComponentLibraryNonceRef = useRef(0);
+  const componentsLocked = modeLock === "live";
+  const visibleActiveTab = componentsLocked ? "chat" : activeTab;
 
   const changeComponentFilter = (newFilter: ComponentTag) => {
     if (componentFilter === newFilter) {
@@ -32,6 +35,7 @@ export const MobileChat = () => {
 
   useEffect(() => {
     if (
+      componentsLocked ||
       componentLibraryOpenRequestNonce === 0 ||
       componentLibraryOpenRequestNonce ===
         handledComponentLibraryNonceRef.current
@@ -44,7 +48,7 @@ export const MobileChat = () => {
       setChatOpen(true);
       setActiveTab("components");
     });
-  }, [componentLibraryOpenRequestNonce]);
+  }, [componentLibraryOpenRequestNonce, componentsLocked]);
 
   return (
     <div className="block md:hidden">
@@ -63,25 +67,29 @@ export const MobileChat = () => {
           <div className="flex items-center justify-around p-1 rounded-lg bg-(--dim) w-full gap-1">
             <button
               className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                activeTab === "chat" ? "bg-(--quite-dark) text-(--vibrant)" : ""
+                visibleActiveTab === "chat"
+                  ? "bg-(--quite-dark) text-(--vibrant)"
+                  : ""
               }`}
               onClick={() => setActiveTab("chat")}
             >
               <MessageSquare size={20} className="mx-auto" />
             </button>
-            <button
-              className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                activeTab === "components"
-                  ? "bg-(--quite-dark) text-(--vibrant)"
-                  : ""
-              }`}
-              onClick={() => setActiveTab("components")}
-            >
-              <LayoutGrid size={20} className="mx-auto" />
-            </button>
+            {!componentsLocked ? (
+              <button
+                className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
+                  visibleActiveTab === "components"
+                    ? "bg-(--quite-dark) text-(--vibrant)"
+                    : ""
+                }`}
+                onClick={() => setActiveTab("components")}
+              >
+                <LayoutGrid size={20} className="mx-auto" />
+              </button>
+            ) : null}
           </div>
           <div className="w-full flex-1 min-h-0 overflow-y-auto">
-            {activeTab === "components" ? (
+            {visibleActiveTab === "components" ? (
               <>
                 <div className="flex flex-wrap items-center justify-start gap-2 w-full mb-2">
                   {(["progress", "text", "input"] as ComponentTag[]).map(
@@ -116,7 +124,7 @@ export const MobileChat = () => {
           onClick={() => setChatOpen(true)}
           className="bg-(--darkest) z-30 p-1.5 rounded-lg hover:bg-(--darkest-hover) fixed bottom-2 right-2"
         >
-          {activeTab === "components" ? (
+          {!componentsLocked && visibleActiveTab === "components" ? (
             <LibraryBig size={24} />
           ) : (
             <MessageSquare size={24} />

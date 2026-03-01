@@ -1,6 +1,7 @@
 "use client";
 
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -18,9 +19,16 @@ export function useProjectSettingsController(projectSlug: string) {
   const [savedNameSnapshot, setSavedNameSnapshot] = useState<string | null>(null);
   const [renameError, setRenameError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [leaveError, setLeaveError] = useState<string | null>(null);
+  const [memberActionError, setMemberActionError] = useState<string | null>(null);
   const [isSavingName, setIsSavingName] = useState(false);
   const [isDeleteConfirming, setIsDeleteConfirming] = useState(false);
   const [isDeletingProject, setIsDeletingProject] = useState(false);
+  const [isLeaveConfirming, setIsLeaveConfirming] = useState(false);
+  const [isLeavingProject, setIsLeavingProject] = useState(false);
+  const [pendingMemberRemovalUserId, setPendingMemberRemovalUserId] = useState<
+    Id<"users"> | null
+  >(null);
   const lastRouteCorrectionKeyRef = useRef<string | null>(null);
 
   const redirectToProjectsIndex = () => {
@@ -44,6 +52,8 @@ export function useProjectSettingsController(projectSlug: string) {
   );
   const renameProject = useMutation(api.projects.mutations.renameProject);
   const deleteProject = useMutation(api.projects.mutations.deleteProject);
+  const leaveProject = useMutation(api.projects.mutations.leaveProject);
+  const removeProjectMember = useMutation(api.projects.members.removeProjectMember);
   const currentProjectName = projectData?.project.name ?? "";
   const isNameDirty =
     savedNameSnapshot !== null && nameDraft.trim() !== savedNameSnapshot;
@@ -119,6 +129,15 @@ export function useProjectSettingsController(projectSlug: string) {
     queueMicrotask(() => {
       setIsDeleteConfirming(false);
       setDeleteError(null);
+      setIsLeaveConfirming(false);
+      setLeaveError(null);
+    });
+  }, [projectData?.project.id]);
+
+  useEffect(() => {
+    queueMicrotask(() => {
+      setMemberActionError(null);
+      setPendingMemberRemovalUserId(null);
     });
   }, [projectData?.project.id]);
 
@@ -126,9 +145,24 @@ export function useProjectSettingsController(projectSlug: string) {
     () => projectData?.project.id ?? projectIdSnapshot,
     [projectData?.project.id, projectIdSnapshot],
   );
+  const projectMembers = useQuery(
+    api.projects.members.getProjectMembers,
+    currentProjectId ? { projectId: currentProjectId as never } : "skip",
+  );
+  const canManageMembers =
+    projectMembers?.viewerRole === "owner" ||
+    projectMembers?.viewerRole === "coCreator";
+  const canDeleteProject = projectMembers?.viewerRole === "owner";
+  const canLeaveProject =
+    projectMembers !== undefined &&
+    projectMembers !== null &&
+    projectMembers.viewerRole !== "owner";
+  const canRenameProject =
+    projectMembers?.viewerRole === "owner" ||
+    projectMembers?.viewerRole === "coCreator";
 
   const handleProjectRename = async () => {
-    if (!currentProjectId || isSavingName) {
+    if (!currentProjectId || isSavingName || !canRenameProject) {
       return;
     }
 
@@ -168,7 +202,7 @@ export function useProjectSettingsController(projectSlug: string) {
   };
 
   const handleDeleteProject = async () => {
-    if (!currentProjectId || isDeletingProject) {
+    if (!currentProjectId || isDeletingProject || !canDeleteProject) {
       return;
     }
 
@@ -196,18 +230,82 @@ export function useProjectSettingsController(projectSlug: string) {
     }
   };
 
+  const handleLeaveProject = async () => {
+    if (!currentProjectId || isLeavingProject || !canLeaveProject) {
+      return;
+    }
+
+    if (!isLeaveConfirming) {
+      setLeaveError(null);
+      setIsLeaveConfirming(true);
+      return;
+    }
+
+    setLeaveError(null);
+    setIsLeavingProject(true);
+
+    try {
+      await leaveProject({
+        projectId: currentProjectId as never,
+      });
+      redirectToProjectsIndex();
+    } catch (error) {
+      setLeaveError(
+        error instanceof Error ? error.message : "Could not leave project.",
+      );
+      setIsLeaveConfirming(false);
+    } finally {
+      setIsLeavingProject(false);
+    }
+  };
+
+  const handleRemoveProjectMember = async (targetUserId: Id<"users">) => {
+    if (!currentProjectId || pendingMemberRemovalUserId !== null) {
+      return;
+    }
+
+    setMemberActionError(null);
+    setPendingMemberRemovalUserId(targetUserId);
+
+    try {
+      await removeProjectMember({
+        projectId: currentProjectId as never,
+        targetUserId: targetUserId as never,
+      });
+    } catch (error) {
+      setMemberActionError(
+        error instanceof Error
+          ? error.message
+          : "Could not update this project member.",
+      );
+    } finally {
+      setPendingMemberRemovalUserId(null);
+    }
+  };
+
   return {
     projectData,
+    projectMembers,
     currentProjectName,
+    canManageMembers,
+    canDeleteProject,
+    canLeaveProject,
     nameDraft,
     setNameDraft,
-    canSaveName,
+    canSaveName: canSaveName && canRenameProject,
     renameError,
     isSavingName,
     handleProjectRename,
     deleteError,
     isDeleteConfirming,
     isDeletingProject,
+    leaveError,
+    isLeaveConfirming,
+    isLeavingProject,
+    memberActionError,
+    pendingMemberRemovalUserId,
     handleDeleteProject,
+    handleLeaveProject,
+    handleRemoveProjectMember,
   };
 }

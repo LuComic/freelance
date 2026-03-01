@@ -9,6 +9,7 @@ import {
   getOrderedProjectPages,
   requireProjectBySlug,
 } from "../lib/projectRecords";
+import { buildUserDisplayName } from "../connections/model";
 
 type ProjectSummary = {
   id: Doc<"projects">["_id"];
@@ -97,9 +98,12 @@ export const listCurrentUserProjects = query({
         .query("projectMembers")
         .withIndex("by_user", (query) => query.eq("userId", userId))
         .collect();
+      const visibleProjectIds = new Set(user.projectIds ?? []);
 
       const activeMemberships = memberships.filter(
-        (membership) => membership.status === "active",
+        (membership) =>
+          membership.status === "active" &&
+          visibleProjectIds.has(membership.projectId),
       );
       const projects = await Promise.all(
         activeMemberships.map((membership) => ctx.db.get(membership.projectId)),
@@ -170,6 +174,10 @@ export const getProjectRootBySlug = query({
       const project = await resolveProjectByReference(ctx, args);
       await requireProjectMember(ctx, project._id, userId);
       const pages = await getOrderedProjectPages(ctx, project);
+      const owner = await ctx.db.get(project.ownerId);
+      const ownerName = owner
+        ? buildUserDisplayName(owner)
+        : String(project.ownerId);
 
       return {
         project: {
@@ -177,6 +185,10 @@ export const getProjectRootBySlug = query({
           slug: project.slug,
           name: project.name,
           description: project.description ?? null,
+          owner: {
+            id: project.ownerId,
+            name: ownerName,
+          },
         },
         pages: pages.map((page) => ({
           id: page._id,

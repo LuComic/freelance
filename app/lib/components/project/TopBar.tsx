@@ -26,7 +26,8 @@ import { SaveTemplateModal } from "./SaveTemplateModal";
 import { useSearchBar } from "../searchbar/SearchBarContext";
 
 export const TopBar = () => {
-  const { isEditing, isLive, setIsEditing, setIsLive } = useEditMode();
+  const { isEditing, isLive, modeLock, setIsEditing, setIsLive } =
+    useEditMode();
   const pageDocument = useOptionalPageDocument();
   const { openTaggedSearch } = useSearchBar();
   const isConfig = !isEditing && !isLive;
@@ -43,7 +44,9 @@ export const TopBar = () => {
     pathname.includes("privacy") ||
     pathname.includes("cookies") ||
     pathname === "/projects" ||
-    !pageDocument?.isActivePage;
+    !pageDocument?.isActivePage ||
+    pageDocument?.viewerRole === "client" ||
+    modeLock === "live";
 
   const startTitleEdit = () => {
     setTitleDraft(pageTitle);

@@ -27,7 +27,16 @@ export const Connections = ({ connections }: ConnectionsProps) => {
         items={connections?.friends ?? []}
         type="friends"
       />
-      <ConnectionItem title="Collaborations" items={[]} type="collabs" />
+      <ConnectionItem
+        title="Collaborations"
+        items={connections?.collaborators ?? []}
+        type="collabs"
+      />
+      <ConnectionItem
+        title="Invites"
+        items={connections?.invites ?? []}
+        type="invites"
+      />
       <ConnectionItem
         title="Sent requests"
         items={connections?.sentRequests ?? []}

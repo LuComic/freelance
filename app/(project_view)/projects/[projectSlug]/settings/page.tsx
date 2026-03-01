@@ -5,13 +5,19 @@ import { ProjectDangerSection } from "@/app/lib/components/project/settings/Proj
 import { ProjectEmailListSection } from "@/app/lib/components/project/settings/ProjectEmailListSection";
 import { ProjectGeneralSection } from "@/app/lib/components/project/settings/ProjectGeneralSection";
 import { useProjectSettingsController } from "@/app/lib/components/project/settings/useProjectSettingsController";
+import { useSearchBar } from "@/app/lib/components/searchbar/SearchBarContext";
 
 export default function SettingsPage() {
   const params = useParams<{ projectSlug: string }>();
   const projectSlug = params.projectSlug;
+  const { openTaggedSearch } = useSearchBar();
   const {
     projectData,
+    projectMembers,
     currentProjectName,
+    canManageMembers,
+    canDeleteProject,
+    canLeaveProject,
     nameDraft,
     setNameDraft,
     canSaveName,
@@ -21,8 +27,26 @@ export default function SettingsPage() {
     deleteError,
     isDeleteConfirming,
     isDeletingProject,
+    leaveError,
+    isLeaveConfirming,
+    isLeavingProject,
+    memberActionError,
+    pendingMemberRemovalUserId,
     handleDeleteProject,
+    handleLeaveProject,
+    handleRemoveProjectMember,
   } = useProjectSettingsController(projectSlug);
+  const project = projectData?.project ?? null;
+  const clients =
+    projectMembers?.clients.map((member) => ({
+      userId: member.userId,
+      name: member.name,
+    })) ?? [];
+  const coCreators =
+    projectMembers?.coCreators.map((member) => ({
+      userId: member.userId,
+      name: member.name,
+    })) ?? [];
 
   return (
     <>
@@ -32,6 +56,9 @@ export default function SettingsPage() {
       <p className="text-(--gray-page)">
         Manage project details, collaborators, and platform settings for this
         workspace.
+      </p>
+      <p className="text-(--gray-page)">
+        Owner: {projectData?.project.owner.name ?? "Loading..."}
       </p>
 
       <div className="flex flex-col items-start justify-start w-full">
@@ -50,24 +77,60 @@ export default function SettingsPage() {
           title="Clients"
           currentLabel="Current clients"
           manageLabel="Manage clients"
-          placeholder="Add a client email..."
-          initialValues={["alice@client.co", "brand-team@client.co"]}
+          members={clients}
+          canManage={canManageMembers}
+          pendingRemovalUserId={pendingMemberRemovalUserId}
+          error={memberActionError}
+          onRemove={(userId) => void handleRemoveProjectMember(userId)}
+          onManage={() => {
+            if (!project) {
+              return;
+            }
+
+            openTaggedSearch("people", {
+              projectId: project.id,
+              projectName: project.name,
+              role: "client",
+              expandInviteSection: false,
+            });
+          }}
           shaded
         />
         <ProjectEmailListSection
           title="Co-creators"
           currentLabel="Current co-creators"
           manageLabel="Manage co-creators"
-          placeholder="Add a co-creator email..."
-          initialValues={["marco@studio.co", "sara@studio.co"]}
+          members={coCreators}
+          canManage={canManageMembers}
+          pendingRemovalUserId={pendingMemberRemovalUserId}
+          error={memberActionError}
+          onRemove={(userId) => void handleRemoveProjectMember(userId)}
+          onManage={() => {
+            if (!project) {
+              return;
+            }
+
+            openTaggedSearch("people", {
+              projectId: project.id,
+              projectName: project.name,
+              role: "coCreator",
+              expandInviteSection: false,
+            });
+          }}
         />
         <ProjectDangerSection
           isLoading={projectData === undefined}
           isUnavailable={projectData === null}
+          canDeleteProject={canDeleteProject}
+          canLeaveProject={canLeaveProject}
           isDeletingProject={isDeletingProject}
           isDeleteConfirming={isDeleteConfirming}
+          isLeavingProject={isLeavingProject}
+          isLeaveConfirming={isLeaveConfirming}
           deleteError={deleteError}
+          leaveError={leaveError}
           onDelete={handleDeleteProject}
+          onLeave={handleLeaveProject}
         />
       </div>
     </>

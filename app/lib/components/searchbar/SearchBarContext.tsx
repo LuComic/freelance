@@ -1,16 +1,33 @@
 "use client";
 
+import type { Id } from "@/convex/_generated/dataModel";
 import { createContext, useContext, useMemo, useState } from "react";
 import type { ReactNode } from "react";
+import type { SearchPerson } from "./SearchBarData";
 
 export type SearchTag = "people" | "template";
+export type InviteRole = "client" | "coCreator";
+export type PersonInviteDefaults = {
+  projectId?: Id<"projects">;
+  projectName?: string;
+  role?: InviteRole;
+  expandInviteSection?: boolean;
+};
 
 type SearchBarContextValue = {
   isOpen: boolean;
   activeTag: SearchTag | null;
+  personModalPerson: SearchPerson | null;
+  personModalInviteDefaults: PersonInviteDefaults | null;
+  searchInviteDefaults: PersonInviteDefaults | null;
   openSearch: () => void;
-  openTaggedSearch: (tag: SearchTag) => void;
+  openTaggedSearch: (tag: SearchTag, inviteDefaults?: PersonInviteDefaults) => void;
+  openPersonModal: (
+    person: SearchPerson,
+    inviteDefaults?: PersonInviteDefaults,
+  ) => void;
   closeSearch: () => void;
+  closePersonModal: () => void;
   clearTag: () => void;
 };
 
@@ -23,23 +40,58 @@ export const SearchBarProvider = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTag, setActiveTag] = useState<SearchTag | null>(null);
+  const [personModalPerson, setPersonModalPerson] = useState<SearchPerson | null>(
+    null,
+  );
+  const [personModalInviteDefaults, setPersonModalInviteDefaults] =
+    useState<PersonInviteDefaults | null>(null);
+  const [searchInviteDefaults, setSearchInviteDefaults] =
+    useState<PersonInviteDefaults | null>(null);
 
   const value = useMemo(
     () => ({
       isOpen,
       activeTag,
-      openSearch: () => setIsOpen(true),
-      openTaggedSearch: (tag: SearchTag) => {
-        setActiveTag(tag);
+      personModalPerson,
+      personModalInviteDefaults,
+      searchInviteDefaults,
+      openSearch: () => {
+        setSearchInviteDefaults(null);
         setIsOpen(true);
+      },
+      openTaggedSearch: (tag: SearchTag, inviteDefaults?: PersonInviteDefaults) => {
+        setActiveTag(tag);
+        setSearchInviteDefaults(tag === "people" ? inviteDefaults ?? null : null);
+        setIsOpen(true);
+      },
+      openPersonModal: (
+        person: SearchPerson,
+        inviteDefaults?: PersonInviteDefaults,
+      ) => {
+        setPersonModalPerson(person);
+        setPersonModalInviteDefaults(inviteDefaults ?? null);
       },
       closeSearch: () => {
         setIsOpen(false);
         setActiveTag(null);
+        setSearchInviteDefaults(null);
       },
-      clearTag: () => setActiveTag(null),
+      closePersonModal: () => {
+        setPersonModalPerson(null);
+        setPersonModalInviteDefaults(null);
+      },
+      clearTag: () => {
+        setActiveTag(null);
+        setSearchInviteDefaults(null);
+      },
     }),
-    [activeTag, isOpen],
+    [
+      activeTag,
+      isOpen,
+      personModalInviteDefaults,
+      personModalPerson,
+      searchInviteDefaults,
+    ],
   );
 
   return (

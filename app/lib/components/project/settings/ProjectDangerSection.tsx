@@ -6,19 +6,31 @@ import { useState } from "react";
 type ProjectDangerSectionProps = {
   isLoading: boolean;
   isUnavailable: boolean;
+  canDeleteProject: boolean;
+  canLeaveProject: boolean;
   isDeletingProject: boolean;
   isDeleteConfirming: boolean;
+  isLeavingProject: boolean;
+  isLeaveConfirming: boolean;
   deleteError: string | null;
+  leaveError: string | null;
   onDelete: () => Promise<void>;
+  onLeave: () => Promise<void>;
 };
 
 export function ProjectDangerSection({
   isLoading,
   isUnavailable,
+  canDeleteProject,
+  canLeaveProject,
   isDeletingProject,
   isDeleteConfirming,
+  isLeavingProject,
+  isLeaveConfirming,
   deleteError,
+  leaveError,
   onDelete,
+  onLeave,
 }: ProjectDangerSectionProps) {
   const [open, setOpen] = useState(false);
 
@@ -41,9 +53,11 @@ export function ProjectDangerSection({
           <p className="text-(--gray-page)">Delete project</p>
           <button
             type="button"
-            className="w-max rounded-md border px-2 py-1 border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20"
+            className="w-max rounded-md border px-2 py-1 border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-(--declined-bg)/10"
             onClick={() => void onDelete()}
-            disabled={isLoading || isUnavailable || isDeletingProject}
+            disabled={
+              isLoading || isUnavailable || isDeletingProject || !canDeleteProject
+            }
           >
             {isDeletingProject
               ? "Deleting..."
@@ -53,6 +67,26 @@ export function ProjectDangerSection({
           </button>
           {deleteError ? (
             <p className="text-sm text-(--declined-border)">{deleteError}</p>
+          ) : null}
+          {canLeaveProject ? (
+            <>
+              <p className="text-(--gray-page)">Leave project</p>
+              <button
+                type="button"
+                className="w-max rounded-md border px-2 py-1 border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-(--declined-bg)/10"
+                onClick={() => void onLeave()}
+                disabled={isLoading || isUnavailable || isLeavingProject}
+              >
+                {isLeavingProject
+                  ? "Leaving..."
+                  : isLeaveConfirming
+                    ? "Are you sure?"
+                    : "Leave project"}
+              </button>
+              {leaveError ? (
+                <p className="text-sm text-(--declined-border)">{leaveError}</p>
+              ) : null}
+            </>
           ) : null}
         </div>
       ) : null}

@@ -8,26 +8,31 @@ import {
   getOtherUserId,
   toConnectionUserListItem,
 } from "./model";
+import { listHistoricalCollaborators } from "../projects/members";
+import { listIncomingPendingProjectInvitesForSidebar } from "../projects/invites";
 
 export const listSidebarConnections = query({
   args: {},
   handler: async (ctx) => {
     try {
-      const { userId } = await requireCurrentAuth(ctx);
-      const [requestedConnections, receivedConnections] = await Promise.all([
-        ctx.db
-          .query("connections")
-          .withIndex("by_requester", (query) =>
-            query.eq("requesterUserId", userId),
-          )
-          .collect(),
-        ctx.db
-          .query("connections")
-          .withIndex("by_receiver", (query) =>
-            query.eq("receiverUserId", userId),
-          )
-          .collect(),
-      ]);
+      const { userId, user } = await requireCurrentAuth(ctx);
+      const [requestedConnections, receivedConnections, collaborators, invites] =
+        await Promise.all([
+          ctx.db
+            .query("connections")
+            .withIndex("by_requester", (query) =>
+              query.eq("requesterUserId", userId),
+            )
+            .collect(),
+          ctx.db
+            .query("connections")
+            .withIndex("by_receiver", (query) =>
+              query.eq("receiverUserId", userId),
+            )
+            .collect(),
+          listHistoricalCollaborators(ctx, userId),
+          listIncomingPendingProjectInvitesForSidebar(ctx, userId, user.email),
+        ]);
       const uniqueConnections = new Map(
         [...requestedConnections, ...receivedConnections].map((connection) => [
           connection._id,
@@ -45,6 +50,10 @@ export const listSidebarConnections = query({
           .filter((user): user is NonNullable<typeof user> => user !== null)
           .map((user) => [user._id, user]),
       );
+      const relationshipByUserId = new Map<
+        string,
+        "none" | "friend" | "sent" | "received" | "blockedByMe" | "blockedByThem"
+      >();
       const friends = [];
       const sentRequests = [];
       const receivedRequests = [];
@@ -59,6 +68,7 @@ export const listSidebarConnections = query({
         const listItem = toConnectionUserListItem(otherUser);
 
         if (connection.status === "accepted") {
+          relationshipByUserId.set(String(otherUser._id), "friend");
           friends.push(listItem);
           continue;
         }
@@ -67,6 +77,7 @@ export const listSidebarConnections = query({
           connection.status === "pending" &&
           connection.requesterUserId === userId
         ) {
+          relationshipByUserId.set(String(otherUser._id), "sent");
           sentRequests.push(listItem);
           continue;
         }
@@ -75,6 +86,7 @@ export const listSidebarConnections = query({
           connection.status === "pending" &&
           connection.receiverUserId === userId
         ) {
+          relationshipByUserId.set(String(otherUser._id), "received");
           receivedRequests.push(listItem);
           continue;
         }
@@ -83,12 +95,24 @@ export const listSidebarConnections = query({
           connection.status === "blocked" &&
           connection.blockedByUserId === userId
         ) {
+          relationshipByUserId.set(String(otherUser._id), "blockedByMe");
           blocked.push(listItem);
+          continue;
+        }
+
+        if (connection.status === "blocked") {
+          relationshipByUserId.set(String(otherUser._id), "blockedByThem");
         }
       }
 
       return {
         friends: friends.sort(compareConnectionUserListItems),
+        collaborators: collaborators.map((collaborator) => ({
+          ...collaborator,
+          relationship:
+            relationshipByUserId.get(String(collaborator.userId)) ?? "none",
+        })),
+        invites,
         sentRequests: sentRequests.sort(compareConnectionUserListItems),
         receivedRequests: receivedRequests.sort(compareConnectionUserListItems),
         blocked: blocked.sort(compareConnectionUserListItems),
@@ -101,6 +125,8 @@ export const listSidebarConnections = query({
       ) {
         return {
           friends: [],
+          collaborators: [],
+          invites: [],
           sentRequests: [],
           receivedRequests: [],
           blocked: [],

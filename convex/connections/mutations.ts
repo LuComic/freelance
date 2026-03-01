@@ -201,6 +201,42 @@ export const removeFriend = mutation({
   },
 });
 
+export const forgetCollaborator = mutation({
+  args: {
+    targetUserId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const { userId } = await requireCurrentAuth(ctx);
+    await requireTargetUser(ctx, userId, args.targetUserId);
+    const now = Date.now();
+    const connection = await getConnectionByPairKey(ctx, userId, args.targetUserId);
+
+    if (!connection) {
+      await ctx.db.insert("connections", {
+        requesterUserId: userId,
+        receiverUserId: args.targetUserId,
+        pairKey: buildPairKey(userId, args.targetUserId),
+        status: "removed",
+        hiddenByUserIds: [userId],
+        actedByUserId: userId,
+        createdAt: now,
+        updatedAt: now,
+      });
+      return;
+    }
+
+    const hiddenByUserIds = Array.from(
+      new Set([...(connection.hiddenByUserIds ?? []), userId]),
+    );
+
+    await ctx.db.patch(connection._id, {
+      hiddenByUserIds,
+      actedByUserId: userId,
+      updatedAt: now,
+    });
+  },
+});
+
 export const blockUser = mutation({
   args: {
     targetUserId: v.id("users"),

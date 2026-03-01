@@ -23,6 +23,8 @@ type PendingComponentInsert = {
   nonce: number;
 };
 
+type ModeLock = "live" | null;
+
 type EditModeContextValue = {
   isEditing: boolean;
   setIsEditing: (value: boolean) => void;
@@ -30,6 +32,8 @@ type EditModeContextValue = {
   isLive: boolean;
   setIsLive: (value: boolean) => void;
   toggleLive: () => void;
+  modeLock: ModeLock;
+  setModeLock: (value: ModeLock) => void;
   pendingComponentInsert: PendingComponentInsert | null;
   requestComponentInsert: (command: InsertableComponentCommand) => void;
   clearPendingComponentInsert: () => void;
@@ -42,30 +46,57 @@ const EditModeContext = createContext<EditModeContextValue | undefined>(
 );
 
 export function EditModeProvider({ children }: { children: React.ReactNode }) {
-  const [isEditing, rawSetIsEditing] = useState(true);
-  const [isLive, rawSetIsLive] = useState(false);
+  const [rawIsEditing, rawSetIsEditing] = useState(true);
+  const [rawIsLive, rawSetIsLive] = useState(false);
+  const [modeLock, setModeLock] = useState<ModeLock>(null);
   const [pendingComponentInsert, setPendingComponentInsert] =
     useState<PendingComponentInsert | null>(null);
   const [componentLibraryOpenRequestNonce, setComponentLibraryOpenRequestNonce] =
     useState(0);
   const insertNonceRef = useRef(0);
   const componentLibraryOpenNonceRef = useRef(0);
+  const isEditing = modeLock === "live" ? false : rawIsEditing;
+  const isLive = modeLock === "live" ? true : rawIsLive;
 
-  const setIsEditing = useCallback((value: boolean) => {
-    rawSetIsEditing(value);
-    if (value) {
-      rawSetIsLive(false);
-    }
-  }, []);
+  const setIsEditing = useCallback(
+    (value: boolean) => {
+      if (modeLock === "live") {
+        if (!value) {
+          rawSetIsEditing(false);
+        }
+        return;
+      }
 
-  const setIsLive = useCallback((value: boolean) => {
-    rawSetIsLive(value);
-    if (value) {
-      rawSetIsEditing(false);
-    }
-  }, []);
+      rawSetIsEditing(value);
+      if (value) {
+        rawSetIsLive(false);
+      }
+    },
+    [modeLock],
+  );
+
+  const setIsLive = useCallback(
+    (value: boolean) => {
+      if (modeLock === "live") {
+        if (value) {
+          rawSetIsLive(true);
+        }
+        return;
+      }
+
+      rawSetIsLive(value);
+      if (value) {
+        rawSetIsEditing(false);
+      }
+    },
+    [modeLock],
+  );
 
   const toggleEditing = useCallback(() => {
+    if (modeLock === "live") {
+      return;
+    }
+
     rawSetIsEditing((prev) => {
       const next = !prev;
       if (next) {
@@ -73,9 +104,13 @@ export function EditModeProvider({ children }: { children: React.ReactNode }) {
       }
       return next;
     });
-  }, []);
+  }, [modeLock]);
 
   const toggleLive = useCallback(() => {
+    if (modeLock === "live") {
+      return;
+    }
+
     rawSetIsLive((prev) => {
       const next = !prev;
       if (next) {
@@ -83,7 +118,7 @@ export function EditModeProvider({ children }: { children: React.ReactNode }) {
       }
       return next;
     });
-  }, []);
+  }, [modeLock]);
 
   const value = useMemo(
     () => ({
@@ -93,8 +128,14 @@ export function EditModeProvider({ children }: { children: React.ReactNode }) {
       isLive,
       setIsLive,
       toggleLive,
+      modeLock,
+      setModeLock,
       pendingComponentInsert,
       requestComponentInsert: (command: InsertableComponentCommand) => {
+        if (modeLock === "live") {
+          return;
+        }
+
         insertNonceRef.current += 1;
         setPendingComponentInsert({
           command,
@@ -104,6 +145,10 @@ export function EditModeProvider({ children }: { children: React.ReactNode }) {
       clearPendingComponentInsert: () => setPendingComponentInsert(null),
       componentLibraryOpenRequestNonce,
       requestOpenComponentLibrary: () => {
+        if (modeLock === "live") {
+          return;
+        }
+
         componentLibraryOpenNonceRef.current += 1;
         setComponentLibraryOpenRequestNonce(componentLibraryOpenNonceRef.current);
       },
@@ -112,6 +157,7 @@ export function EditModeProvider({ children }: { children: React.ReactNode }) {
       componentLibraryOpenRequestNonce,
       isEditing,
       isLive,
+      modeLock,
       pendingComponentInsert,
       setIsEditing,
       setIsLive,

@@ -7,7 +7,6 @@ import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
   startTransition,
-  useCallback,
   useDeferredValue,
   useEffect,
   useRef,
@@ -47,9 +46,6 @@ export const SearchBar = () => {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [selectedPerson, setSelectedPerson] = useState<SearchPerson | null>(
-    null,
-  );
   const [selectedTemplate, setSelectedTemplate] = useState<SearchTemplate | null>(
     null,
   );
@@ -62,12 +58,18 @@ export const SearchBar = () => {
     SearchPageResult[] | undefined
   >(undefined);
   const selectedItemRef = useRef<HTMLButtonElement>(null);
-  const { isOpen, activeTag, openSearch, closeSearch, clearTag } =
-    useSearchBar();
-  const clearSelectedOverlays = useCallback(() => {
-    setSelectedPerson(null);
-    setSelectedTemplate(null);
-  }, []);
+  const {
+    isOpen,
+    activeTag,
+    personModalInviteDefaults,
+    personModalPerson,
+    searchInviteDefaults,
+    openSearch,
+    openPersonModal,
+    closeSearch,
+    closePersonModal,
+    clearTag,
+  } = useSearchBar();
   const deferredSearchQuery = useDeferredValue(
     activeTag === null ? searchQuery : "",
   );
@@ -175,13 +177,13 @@ export const SearchBar = () => {
           title: person.name,
           subtitle: person.email ?? undefined,
           onSelect: () => {
-            setSelectedPerson(person);
+            openPersonModal(person, searchInviteDefaults ?? undefined);
             closeSearch();
             setSearchQuery("");
             setSelectedIndex(0);
           },
-          }))
-        : activeTag === "template"
+        }))
+      : activeTag === "template"
         ? filteredTemplates.map((template) => ({
             key: template.name,
             title: template.name,
@@ -212,7 +214,6 @@ export const SearchBar = () => {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Check for Cmd+K (Mac) or Ctrl+K (Windows/Linux)
       if ((e.metaKey || e.ctrlKey) && e.key === "p") {
         e.preventDefault();
         if (isOpen) {
@@ -225,14 +226,12 @@ export const SearchBar = () => {
 
       if (!isOpen) return;
 
-      // Close on Escape
       if (e.key === "Escape") {
         closeSearch();
         setSearchQuery("");
         setSelectedIndex(0);
       }
 
-      // Navigate with arrow keys
       if (e.key === "ArrowDown") {
         e.preventDefault();
         setSelectedIndex((prev) =>
@@ -245,7 +244,6 @@ export const SearchBar = () => {
         setSelectedIndex((prev) => (prev > 0 ? prev - 1 : prev));
       }
 
-      // Enter to select
       if (e.key === "Enter" && searchItems.length > 0) {
         e.preventDefault();
         searchItems[selectedSearchItemIndex]?.onSelect();
@@ -256,7 +254,6 @@ export const SearchBar = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [closeSearch, isOpen, openSearch, searchItems, selectedSearchItemIndex]);
 
-  // Keep selected item in view when navigating with arrow keys
   useEffect(() => {
     if (searchItems.length === 0) return;
     selectedItemRef.current?.scrollIntoView({
@@ -279,121 +276,131 @@ export const SearchBar = () => {
           : normalizedSearchQuery.length === 0
             ? "No pages yet"
             : "No pages found";
-
-  if (!isOpen) {
-    return (
-      <>
-        <PersonModal
-          person={selectedPerson}
-          open={selectedPerson !== null}
-          onOpenChange={(open) => {
-            if (!open) clearSelectedOverlays();
-          }}
-        />
-        <TemplateModal
-          template={selectedTemplate}
-          open={selectedTemplate !== null}
-          onOpenChange={(open) => {
-            if (!open) clearSelectedOverlays();
-          }}
-        />
-      </>
-    );
-  }
+  const personModalKey = personModalPerson
+    ? [
+        personModalPerson.userId,
+        personModalInviteDefaults?.projectId ?? "",
+        personModalInviteDefaults?.role ?? "",
+        personModalInviteDefaults?.expandInviteSection ? "expanded" : "collapsed",
+      ].join(":")
+    : "person-modal";
 
   return (
-    <div
-      className="fixed inset-0 z-30 flex items-start justify-center pt-[10vh] bg-black/60"
-      onClick={() => {
-        closeSearch();
-        setSearchQuery("");
-        setSelectedIndex(0);
-      }}
-    >
-      <div
-        className="w-full max-w-2xl bg-(--darkest) rounded-xl overflow-hidden border border-(--gray)"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Search Input */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-(--darkest-hover)">
-          <Search size={20} color="var(--gray)" />
-          {activeTag ? (
-            <span className="rounded-md border border-(--vibrant) bg-(--vibrant)/10 px-2 h-full text-sm">
-              {activeTag}
-            </span>
-          ) : null}
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setSelectedIndex(0);
-            }}
-            onKeyDown={(e) => {
-              if (
-                e.key === "Backspace" &&
-                searchQuery.length === 0 &&
-                activeTag
-              ) {
-                e.preventDefault();
-                clearTag();
-              }
-            }}
-            placeholder={
-              activeTag === "people"
-                ? "Search for users..."
-                : activeTag === "template"
-                  ? "Search templates..."
-                  : "Search pages across projects..."
+    <>
+      {personModalPerson ? (
+        <PersonModal
+          key={personModalKey}
+          person={personModalPerson}
+          inviteDefaults={personModalInviteDefaults}
+          open={true}
+          onOpenChange={(open) => {
+            if (!open) {
+              closePersonModal();
             }
-            className="flex-1 bg-transparent text-(--light) text-base outline-none placeholder:text-(--gray)"
-            autoFocus
-          />
-          <KbdGroup>
-            <Kbd className="bg-(--gray) text-(--light)">Ctrl + K</Kbd>
-          </KbdGroup>
-        </div>
-
-        {/* File List */}
-        <div className="flex flex-col gap-1 w-full max-h-96 overflow-y-auto p-2">
-          {searchItems.length > 0 ? (
-            searchItems.map((item, index) => (
-              <SearchBarItem
-                key={item.key}
-                ref={index === selectedSearchItemIndex ? selectedItemRef : null}
-                title={item.title}
-                subtitle={item.subtitle}
-                badge={item.badge}
-                isSelected={index === selectedSearchItemIndex}
-                onClick={item.onSelect}
+          }}
+        />
+      ) : null}
+      <TemplateModal
+        template={selectedTemplate}
+        open={selectedTemplate !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedTemplate(null);
+          }
+        }}
+      />
+      {isOpen ? (
+        <div
+          className="fixed inset-0 z-30 flex items-start justify-center pt-[10vh] bg-black/60"
+          onClick={() => {
+            closeSearch();
+            setSearchQuery("");
+            setSelectedIndex(0);
+          }}
+        >
+          <div
+            className="w-full max-w-2xl bg-(--darkest) rounded-xl overflow-hidden border border-(--gray)"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-(--darkest-hover)">
+              <Search size={20} color="var(--gray)" />
+              {activeTag ? (
+                <span className="rounded-md border border-(--vibrant) bg-(--vibrant)/10 px-2 h-full text-sm">
+                  {activeTag}
+                </span>
+              ) : null}
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setSelectedIndex(0);
+                }}
+                onKeyDown={(e) => {
+                  if (
+                    e.key === "Backspace" &&
+                    searchQuery.length === 0 &&
+                    activeTag
+                  ) {
+                    e.preventDefault();
+                    clearTag();
+                  }
+                }}
+                placeholder={
+                  activeTag === "people"
+                    ? "Search for users..."
+                    : activeTag === "template"
+                      ? "Search templates..."
+                      : "Search pages across projects..."
+                }
+                className="flex-1 bg-transparent text-(--light) text-base outline-none placeholder:text-(--gray)"
+                autoFocus
               />
-            ))
-          ) : (
-            <div className="px-4 py-8 text-center text-(--gray)">
-              {emptyMessage}
+              <KbdGroup>
+                <Kbd className="bg-(--gray) text-(--light)">Ctrl + K</Kbd>
+              </KbdGroup>
             </div>
-          )}
-        </div>
 
-        {/* Footer with keyboard shortcuts */}
-        <div className="px-4 py-3 border-t border-(--darkest-hover) flex items-center gap-6 text-sm text-(--gray)">
-          <div className="flex items-center gap-2">
-            <Kbd className="bg-(--gray) text-(--light)">esc</Kbd>
-            <span>close</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <KbdGroup>
-              <Kbd className="bg-(--gray) text-(--light)">↓</Kbd>
-              <Kbd className="bg-(--gray) text-(--light)">↑</Kbd>
-            </KbdGroup>
-            <span>navigate</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Kbd className="bg-(--gray) text-(--light)">↵</Kbd>
-            <span>open</span>
+            <div className="flex flex-col gap-1 w-full max-h-96 overflow-y-auto p-2">
+              {searchItems.length > 0 ? (
+                searchItems.map((item, index) => (
+                  <SearchBarItem
+                    key={item.key}
+                    ref={index === selectedSearchItemIndex ? selectedItemRef : null}
+                    title={item.title}
+                    subtitle={item.subtitle}
+                    badge={item.badge}
+                    isSelected={index === selectedSearchItemIndex}
+                    onClick={item.onSelect}
+                  />
+                ))
+              ) : (
+                <div className="px-4 py-8 text-center text-(--gray)">
+                  {emptyMessage}
+                </div>
+              )}
+            </div>
+
+            <div className="px-4 py-3 border-t border-(--darkest-hover) flex items-center gap-6 text-sm text-(--gray)">
+              <div className="flex items-center gap-2">
+                <Kbd className="bg-(--gray) text-(--light)">esc</Kbd>
+                <span>close</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <KbdGroup>
+                  <Kbd className="bg-(--gray) text-(--light)">↓</Kbd>
+                  <Kbd className="bg-(--gray) text-(--light)">↑</Kbd>
+                </KbdGroup>
+                <span>navigate</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Kbd className="bg-(--gray) text-(--light)">↵</Kbd>
+                <span>open</span>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      ) : null}
+    </>
   );
 };

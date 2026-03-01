@@ -39,7 +39,7 @@ export const getPageEditorBySlugs = query({
     try {
       const { userId } = await requireCurrentAuth(ctx);
       const project = await resolveProjectByReference(ctx, args);
-      await requireProjectMember(ctx, project._id, userId);
+      const viewerMembership = await requireProjectMember(ctx, project._id, userId);
       const pageById = args.pageId ? await ctx.db.get(args.pageId) : null;
       const page =
         pageById &&
@@ -63,6 +63,7 @@ export const getPageEditorBySlugs = query({
           createdAt: page.createdAt,
           updatedAt: page.updatedAt,
         },
+        viewerRole: viewerMembership.role,
         document,
       };
     } catch (error) {

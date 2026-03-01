@@ -208,45 +208,13 @@ export const PAGE_COMPONENT_TOKEN_REGEX =
   /\[\[([A-Za-z][A-Za-z0-9]*):(cmp_[A-Za-z0-9_-]+)\]\]/g;
 export const LEGACY_COMPONENT_TAG_REGEX = /<([A-Za-z][A-Za-z0-9]*)\s*\/>/g;
 
-const DEFAULT_SELECT_OPTIONS: PageOption[] = [
-  { id: 1, label: "Starter" },
-  { id: 2, label: "Growth" },
-];
+const DEFAULT_SELECT_OPTIONS: PageOption[] = [];
 
-const DEFAULT_RADIO_OPTIONS: PageOption[] = [
-  { id: 1, label: "Required" },
-  { id: 2, label: "Nice to have" },
-];
+const DEFAULT_RADIO_OPTIONS: PageOption[] = [];
 
-const DEFAULT_FEEDBACK_ITEMS: FeedbackItem[] = [
-  {
-    feature: "Please add an About page",
-    status: "accepted",
-    tags: ["required"],
-    reason:
-      "Yeah sure, added it right now. Let me know if you want any changes there",
-  },
-  {
-    feature: "Turn the selector in X page into a slider",
-    status: "pending",
-    tags: ["nice to have"],
-  },
-];
+const DEFAULT_FEEDBACK_ITEMS: FeedbackItem[] = [];
 
-const DEFAULT_KANBAN_ITEMS: KanbanItem[] = [
-  {
-    id: 1,
-    feature: "Please add an About page",
-    status: "Todo",
-    tags: ["required"],
-  },
-  {
-    id: 2,
-    feature: "Turn the selector in X page into a slider",
-    status: "In Progress",
-    tags: ["nice to have"],
-  },
-];
+const DEFAULT_KANBAN_ITEMS: KanbanItem[] = [];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -414,9 +382,8 @@ export function createDefaultComponentInstance(
         id,
         type,
         config: {
-          title: "Which package tier works for you?",
-          description:
-            "Pick one or more options from this select-style field. It supports multiple choices.",
+          title: "",
+          description: "",
           options: [...DEFAULT_SELECT_OPTIONS],
         },
       };
@@ -425,9 +392,8 @@ export function createDefaultComponentInstance(
         id,
         type,
         config: {
-          title: "What should be prioritized first?",
-          description:
-            "Pick one option. This simulates how a client can cast one vote in a radio-style field.",
+          title: "",
+          description: "",
           options: [...DEFAULT_RADIO_OPTIONS],
         },
       };
@@ -436,7 +402,7 @@ export function createDefaultComponentInstance(
         id,
         type,
         config: {
-          tags: ["required", "nice to have"],
+          tags: [],
         },
       };
     case "Kanban":
@@ -444,7 +410,7 @@ export function createDefaultComponentInstance(
         id,
         type,
         config: {
-          tags: ["required", "nice to have"],
+          tags: [],
         },
       };
     case "MainHeadline":
@@ -816,6 +782,40 @@ export function normalizePageDocument(
   return {
     version: 1,
     editorText: configDocument.editorText,
+    components: nextComponents,
+  };
+}
+
+export function mergePageLiveStateDocument(
+  baseDocument: PageDocumentV1,
+  value: unknown,
+): PageDocumentV1 {
+  const nextComponents: Record<string, PageComponentDocument> = {};
+  const rawComponents =
+    isRecord(value) && isRecord(value.components) ? value.components : {};
+
+  for (const [id, component] of Object.entries(baseDocument.components)) {
+    const rawComponent = rawComponents[id];
+
+    if (
+      !isRecord(rawComponent) ||
+      rawComponent.type !== component.type ||
+      !isRecord(rawComponent.state)
+    ) {
+      nextComponents[id] = component;
+      continue;
+    }
+
+    const liveState = normalizeLiveState(component.type, rawComponent);
+    nextComponents[id] = {
+      ...component,
+      state: liveState.state,
+    } as PageComponentDocument;
+  }
+
+  return {
+    version: 1,
+    editorText: baseDocument.editorText,
     components: nextComponents,
   };
 }

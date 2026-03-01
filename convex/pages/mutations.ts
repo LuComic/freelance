@@ -10,9 +10,11 @@ import { getOrderedProjectPages } from "../lib/projectRecords";
 import { uniqueSlugFromLabel } from "../lib/slugs";
 import {
   assertPageDocumentV1,
+  mergePageLiveStateDocument,
 } from "../../lib/pageDocument";
 import {
   createInitialPage,
+  parsePageDocument,
   serializePageDocument,
 } from "./content";
 
@@ -166,6 +168,48 @@ export const savePage = mutation({
       pageId: page._id,
       slug: nextSlug,
       title: trimmedTitle,
+    };
+  },
+});
+
+export const savePageLiveState = mutation({
+  args: {
+    pageId: v.id("pages"),
+    document: v.any(),
+  },
+  handler: async (ctx, args) => {
+    const { userId } = await requireCurrentAuth(ctx);
+    const page = await requirePageAccess(ctx, args.pageId, userId);
+
+    try {
+      assertPageDocumentV1(args.document);
+    } catch (error) {
+      throw invalidState(
+        error instanceof Error ? error.message : "Page document is invalid.",
+      );
+    }
+
+    const project = await ctx.db.get(page.projectId);
+    if (!project || project.isArchived) {
+      throw notFound(`Project ${page.projectId} was not found.`);
+    }
+
+    const currentDocument = parsePageDocument(page.contentJson);
+    const nextDocument = mergePageLiveStateDocument(
+      currentDocument,
+      args.document,
+    );
+    const now = Date.now();
+
+    await ctx.db.patch(page._id, {
+      contentJson: serializePageDocument(nextDocument),
+      updatedAt: now,
+      updatedByUserId: userId,
+    });
+
+    return {
+      pageId: page._id,
+      document: nextDocument,
     };
   },
 });

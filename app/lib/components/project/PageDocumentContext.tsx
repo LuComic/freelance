@@ -1,6 +1,7 @@
 "use client";
 
 import { api } from "@/convex/_generated/api";
+import type { Doc } from "@/convex/_generated/dataModel";
 import {
   createComponentInstanceId,
   createComponentToken,
@@ -28,6 +29,7 @@ import { resolveComponentTypeFromCommand } from "../page_components/testing_edit
 
 type SaveStatus = "idle" | "saving" | "error";
 type DeleteStatus = "idle" | "deleting" | "error";
+type ViewerProjectRole = Doc<"projectMembers">["role"];
 
 type ActivePageState = {
   project: {
@@ -54,6 +56,7 @@ type PageDocumentContextValue = {
   deleteError: string | null;
   hasUnsavedChanges: boolean;
   activePage: ActivePageState | null;
+  viewerRole: ViewerProjectRole | null;
   document: PageDocumentV1 | null;
   setPageTitle: (title: string) => void;
   updateEditorText: (value: string) => void;
@@ -165,11 +168,12 @@ export function PageDocumentProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const { isLive } = useEditMode();
+  const { isLive, setModeLock } = useEditMode();
   const pathname = usePathname();
   const router = useRouter();
   const route = getPageRoute(pathname);
   const [activePage, setActivePage] = useState<ActivePageState | null>(null);
+  const [viewerRole, setViewerRole] = useState<ViewerProjectRole | null>(null);
   const [document, setDocument] = useState<PageDocumentV1 | null>(null);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -218,6 +222,7 @@ export function PageDocumentProvider({
   const pageData = useQuery(api.pages.queries.getPageEditorBySlugs, pageQueryArgs);
   const projects = useQuery(api.projects.queries.listCurrentUserProjects);
   const savePage = useMutation(api.pages.mutations.savePage);
+  const savePageLiveState = useMutation(api.pages.mutations.savePageLiveState);
   const createPage = useMutation(api.pages.mutations.createPage);
   const deletePageMutation = useMutation(api.pages.mutations.deletePage);
 
@@ -259,6 +264,7 @@ export function PageDocumentProvider({
           setPendingRoutePageId(null);
           setSavedTitleSnapshot(null);
           setSavedDocumentSnapshot(null);
+          setViewerRole(null);
         });
         lastHydratedPageKeyRef.current = null;
       }
@@ -278,6 +284,7 @@ export function PageDocumentProvider({
         setPendingRoutePageId(null);
         setSavedTitleSnapshot(null);
         setSavedDocumentSnapshot(null);
+        setViewerRole(null);
 
         if (!pendingDeleteRedirectPath) {
           router.replace("/projects");
@@ -318,6 +325,7 @@ export function PageDocumentProvider({
       setDeleteError(null);
       setSavedTitleSnapshot(pageData.page.title);
       setSavedDocumentSnapshot(serverDocumentSnapshot);
+      setViewerRole(pageData.viewerRole);
     });
   }, [
     activePage,
@@ -328,6 +336,22 @@ export function PageDocumentProvider({
     router,
     route,
   ]);
+
+  useEffect(() => {
+    if (route === null || pageData === null) {
+      setModeLock(null);
+      return;
+    }
+
+    if (pageData?.viewerRole === "client") {
+      setModeLock("live");
+      return;
+    }
+
+    if (pageData) {
+      setModeLock(null);
+    }
+  }, [pageData, route, setModeLock]);
 
   useEffect(() => {
     if (
@@ -530,8 +554,9 @@ export function PageDocumentProvider({
 
   const persistDocument = useCallback(
     async (currentPage: ActivePageState, currentDocument: PageDocumentV1) => {
+      const isClientViewer = viewerRole === "client";
       const trimmedTitle = currentPage.page.title.trim();
-      if (!trimmedTitle) {
+      if (!isClientViewer && !trimmedTitle) {
         setSaveError("Page title cannot be empty.");
         setSaveStatus("error");
         return;
@@ -541,6 +566,20 @@ export function PageDocumentProvider({
       setSaveError(null);
 
       try {
+        if (isClientViewer) {
+          const result = await savePageLiveState({
+            pageId: currentPage.page.id as never,
+            document: currentDocument,
+          });
+
+          documentRef.current = result.document;
+          setDocument(result.document);
+          setSavedTitleSnapshot(currentPage.page.title);
+          setSavedDocumentSnapshot(JSON.stringify(result.document));
+          setSaveStatus("idle");
+          return;
+        }
+
         const result = await savePage({
           pageId: currentPage.page.id as never,
           title: trimmedTitle,
@@ -580,7 +619,7 @@ export function PageDocumentProvider({
         setSaveStatus("error");
       }
     },
-    [route, router, savePage],
+    [route, router, savePage, savePageLiveState, viewerRole],
   );
 
   const saveDocument = useCallback(async () => {
@@ -734,6 +773,7 @@ export function PageDocumentProvider({
       deleteError,
       hasUnsavedChanges,
       activePage,
+      viewerRole,
       document,
       setPageTitle,
       updateEditorText,
@@ -766,6 +806,7 @@ export function PageDocumentProvider({
       updateComponentConfig,
       updateComponentLiveState,
       updateEditorText,
+      viewerRole,
     ],
   );
 

@@ -208,3 +208,58 @@ export const deleteProject = mutation({
     }
   },
 });
+
+export const leaveProject = mutation({
+  args: {
+    projectId: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    const { userId, user } = await requireCurrentAuth(ctx);
+    const project = await ctx.db.get(args.projectId);
+
+    if (!project || project.isArchived) {
+      throw notFound(`Project ${args.projectId} was not found.`);
+    }
+
+    const membership = await requireProjectMember(ctx, project._id, userId);
+
+    if (membership.role === "owner") {
+      throw invalidState(
+        "Project owners cannot leave their own project. Delete the project instead.",
+      );
+    }
+
+    const now = Date.now();
+
+    await ctx.db.patch(membership._id, {
+      status: "removed",
+      updatedAt: now,
+    });
+
+    const nextProjectIds = user.projectIds?.filter(
+      (projectId) => projectId !== project._id,
+    );
+    const patch: Partial<Doc<"users">> = {};
+
+    if (
+      user.projectIds &&
+      nextProjectIds &&
+      nextProjectIds.length !== user.projectIds.length
+    ) {
+      patch.projectIds = nextProjectIds.length > 0 ? nextProjectIds : undefined;
+    }
+
+    if (user.lastOpenedProjectId === project._id) {
+      patch.lastOpenedProjectId = undefined;
+    }
+
+    if (Object.keys(patch).length > 0) {
+      await ctx.db.patch(user._id, patch);
+    }
+
+    return {
+      projectId: project._id,
+      status: "left" as const,
+    };
+  },
+});
