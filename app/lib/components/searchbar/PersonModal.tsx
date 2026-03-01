@@ -4,7 +4,7 @@ import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { useCallback, useEffect, useState } from "react";
 import type { SearchPerson } from "./SearchBarData";
-import { X } from "lucide-react";
+import { ChevronRight, X } from "lucide-react";
 import { useConnectionActions } from "../connections/useConnectionActions";
 import type { ConnectionAction } from "../connections/types";
 import {
@@ -53,6 +53,7 @@ export const PersonModal = ({
     (typeof INVITE_ROLE_OPTIONS)[number]["value"] | ""
   >("client");
   const [inviteMessage, setInviteMessage] = useState<string | null>(null);
+  const [showInviteDropdown, setShowInviteDropdown] = useState(false);
 
   const handleAction = async (action: ConnectionAction) => {
     if (!person) {
@@ -85,6 +86,12 @@ export const PersonModal = ({
     clearError();
   }, [clearError, open, person?.userId]);
 
+  useEffect(() => {
+    if (!open) {
+      setShowInviteDropdown(false);
+    }
+  }, [open, person?.userId]);
+
   if (!open || !person || !visiblePerson) return null;
 
   return (
@@ -116,81 +123,93 @@ export const PersonModal = ({
           <p className="text-(--gray-page)">{visiblePerson.bio}</p>
         ) : null}
         <div className="w-full border-t border-(--gray) py-3 flex flex-col gap-2">
-          <p className="text-(--gray-page)">Invite to project</p>
-          <div className="w-full flex flex-col gap-2">
-            {/* Eventually this should list projects where the current user is the owner or a co-creator. */}
-            <Select
-              value={selectedProjectId}
-              onValueChange={setSelectedProjectId}
-            >
-              <SelectTrigger className="w-full bg-(--qutie-dark) border-(--gray)">
-                <SelectValue placeholder="Select project" />
-              </SelectTrigger>
-              <SelectContent className="bg-(--quite-dark) border-none text-(--gray-page)">
-                <SelectGroup className="bg-(--quite-dark)">
-                  {MOCK_INVITEABLE_PROJECTS.map((project) => (
-                    <SelectItem
-                      key={project.id}
-                      value={project.id}
-                      className="data-highlighted:bg-(--darkest-hover) data-highlighted:text-(--light)"
+          <button
+            type="button"
+            className="font-medium flex items-center justify-start gap-2 w-max"
+            onClick={() => setShowInviteDropdown((prev) => !prev)}
+          >
+            Invite to project
+            <ChevronRight
+              size={18}
+              className={showInviteDropdown ? "rotate-90" : ""}
+            />
+          </button>
+          {showInviteDropdown ? (
+            <div className="w-full flex flex-col gap-2">
+              {/* Eventually this should list projects where the current user is the owner or a co-creator. */}
+              <Select
+                value={selectedProjectId}
+                onValueChange={setSelectedProjectId}
+              >
+                <SelectTrigger className="w-full bg-(--qutie-dark) border-(--gray)">
+                  <SelectValue placeholder="Select project" />
+                </SelectTrigger>
+                <SelectContent className="bg-(--quite-dark) border-none text-(--gray-page)">
+                  <SelectGroup className="bg-(--quite-dark)">
+                    {MOCK_INVITEABLE_PROJECTS.map((project) => (
+                      <SelectItem
+                        key={project.id}
+                        value={project.id}
+                        className="data-highlighted:bg-(--darkest-hover) data-highlighted:text-(--light)"
+                      >
+                        {project.name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+
+              <div className="w-full flex items-center gap-4">
+                {INVITE_ROLE_OPTIONS.map((role) => {
+                  const selected = selectedRole === role.value;
+
+                  return (
+                    <button
+                      key={role.value}
+                      type="button"
+                      className="flex items-center gap-2 justify-start"
+                      onClick={() => setSelectedRole(role.value)}
                     >
-                      {project.name}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+                      <span className="h-5 flex items-center p-1 justify-center w-auto aspect-square rounded-full bg-(--dim)">
+                        {selected ? (
+                          <span className="bg-(--vibrant) aspect-square h-full rounded-full" />
+                        ) : null}
+                      </span>
+                      <span>{role.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
 
-            <div className="w-full flex items-center gap-4">
-              {INVITE_ROLE_OPTIONS.map((role) => {
-                const selected = selectedRole === role.value;
+              <button
+                type="button"
+                className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-(--vibrant)"
+                disabled={!selectedProjectId || !selectedRole}
+                onClick={() => {
+                  const selectedProject = MOCK_INVITEABLE_PROJECTS.find(
+                    (project) => project.id === selectedProjectId,
+                  );
+                  const roleLabel = INVITE_ROLE_OPTIONS.find(
+                    (role) => role.value === selectedRole,
+                  )?.label;
 
-                return (
-                  <button
-                    key={role.value}
-                    type="button"
-                    className="flex items-center gap-2 justify-start"
-                    onClick={() => setSelectedRole(role.value)}
-                  >
-                    <span className="h-5 flex items-center p-1 justify-center w-auto aspect-square rounded-full bg-(--dim)">
-                      {selected ? (
-                        <span className="bg-(--vibrant) aspect-square h-full rounded-full" />
-                      ) : null}
-                    </span>
-                    <span>{role.label}</span>
-                  </button>
-                );
-              })}
+                  if (!selectedProject || !roleLabel) {
+                    return;
+                  }
+
+                  setInviteMessage(
+                    `Invite mock ready: ${visiblePerson.name} -> ${selectedProject.name} as ${roleLabel}.`,
+                  );
+                }}
+              >
+                Invite
+              </button>
+
+              {inviteMessage ? (
+                <p className="text-sm text-(--gray-page)">{inviteMessage}</p>
+              ) : null}
             </div>
-
-            <button
-              type="button"
-              className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-(--vibrant)"
-              disabled={!selectedProjectId || !selectedRole}
-              onClick={() => {
-                const selectedProject = MOCK_INVITEABLE_PROJECTS.find(
-                  (project) => project.id === selectedProjectId,
-                );
-                const roleLabel = INVITE_ROLE_OPTIONS.find(
-                  (role) => role.value === selectedRole,
-                )?.label;
-
-                if (!selectedProject || !roleLabel) {
-                  return;
-                }
-
-                setInviteMessage(
-                  `Invite mock ready: ${visiblePerson.name} -> ${selectedProject.name} as ${roleLabel}.`,
-                );
-              }}
-            >
-              Invite
-            </button>
-
-            {inviteMessage ? (
-              <p className="text-sm text-(--gray-page)">{inviteMessage}</p>
-            ) : null}
-          </div>
+          ) : null}
         </div>
         <div className="w-full flex flex-col gap-2">
           {relationship === undefined ? (
