@@ -16,29 +16,39 @@ type ProjectSummary = {
   name: string;
   description: string | null;
   pageCount: number;
+  createdAt: number;
   pages: Array<{
     id: Doc<"pages">["_id"];
     slug: string;
     title: string;
   }>;
-  updatedAt: number;
 };
 
 function compareProjects(
-  lastOpenedProjectId: string | undefined,
-  left: Pick<ProjectSummary, "id" | "updatedAt">,
-  right: Pick<ProjectSummary, "id" | "updatedAt">,
+  projectOrder: Map<string, number>,
+  left: Pick<ProjectSummary, "id" | "createdAt" | "name">,
+  right: Pick<ProjectSummary, "id" | "createdAt" | "name">,
 ) {
-  if (lastOpenedProjectId) {
-    if (left.id === lastOpenedProjectId && right.id !== lastOpenedProjectId) {
-      return -1;
-    }
-    if (right.id === lastOpenedProjectId && left.id !== lastOpenedProjectId) {
-      return 1;
-    }
+  const leftOrder = projectOrder.get(left.id);
+  const rightOrder = projectOrder.get(right.id);
+
+  if (leftOrder !== undefined && rightOrder !== undefined) {
+    return leftOrder - rightOrder;
   }
 
-  return right.updatedAt - left.updatedAt;
+  if (leftOrder !== undefined) {
+    return -1;
+  }
+
+  if (rightOrder !== undefined) {
+    return 1;
+  }
+
+  if (left.createdAt !== right.createdAt) {
+    return left.createdAt - right.createdAt;
+  }
+
+  return left.name.localeCompare(right.name);
 }
 
 async function toProjectSummary(
@@ -52,12 +62,12 @@ async function toProjectSummary(
     name: project.name,
     description: project.description ?? null,
     pageCount: pages.length,
+    createdAt: project.createdAt,
     pages: pages.map((page) => ({
       id: page._id,
       slug: page.slug,
       title: page.title,
     })),
-    updatedAt: project.updatedAt,
   };
 }
 
@@ -100,11 +110,12 @@ export const listCurrentUserProjects = query({
         .filter((project) => project.isArchived !== true)
         .map((project) => toProjectSummary(ctx, project)),
     );
+    const projectOrder = new Map(
+      (user.projectIds ?? []).map((projectId, index) => [projectId, index]),
+    );
 
     return summaries
-      .sort((left, right) =>
-        compareProjects(user.lastOpenedProjectId, left, right),
-      )
+      .sort((left, right) => compareProjects(projectOrder, left, right))
       .map((summary) => ({
         id: summary.id,
         slug: summary.slug,

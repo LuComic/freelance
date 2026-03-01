@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { useMutation } from "convex/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -32,35 +32,27 @@ interface SidebarItemProps {
       title: string;
     }>;
   };
-  currentProjectSlug?: string | null;
   currentPageSlug?: string | null;
+  isExpanded: boolean;
+  onToggleExpanded: () => void;
 }
 
 export const FileItem = ({
   project,
-  currentProjectSlug,
   currentPageSlug,
+  isExpanded,
+  onToggleExpanded,
 }: SidebarItemProps) => {
   const router = useRouter();
   const createPage = useMutation(api.pages.mutations.createPage);
   const projectBasePath = "/projects/" + project.slug;
-  const isActiveProject = currentProjectSlug === project.slug;
-  const [itemExpanded, setItemExpanded] = useState(isActiveProject);
   const [isCreatingPage, setIsCreatingPage] = useState(false);
-
-  useEffect(() => {
-    if (isActiveProject) {
-      setItemExpanded(true);
-    }
-  }, [isActiveProject]);
 
   return (
     <>
-      <div
-        className="rounded-lg p-1 px-1.5 gap-2 hover:bg-(--darkest-hover) w-full text-(--gray) flex items-center justify-start md:text-base text-sm"
-      >
-        <button onClick={() => setItemExpanded((prev) => !prev)}>
-          <ChevronRight className={`${itemExpanded ? "rotate-90" : ""}`} />
+      <div className="rounded-lg p-1 px-1.5 gap-2 hover:bg-(--darkest-hover) w-full text-(--gray) flex items-center justify-start md:text-base text-sm">
+        <button onClick={onToggleExpanded}>
+          <ChevronRight className={`${isExpanded ? "rotate-90" : ""}`} />
         </button>
         <Link href={projectBasePath} className="w-full">
           {project.name.length > 20 ? project.name.slice(0, 20) : project.name}
@@ -116,7 +108,7 @@ export const FileItem = ({
         </button>
       </div>
 
-      {itemExpanded && (
+      {isExpanded && (
         <>
           {project.pages.map((page) => (
             <Link

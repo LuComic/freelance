@@ -46,7 +46,7 @@ export default function Page() {
             {projects.map((project) => (
               <div
                 key={project.id}
-                className="w-full p-4 border-b last:border-b-0 border-(--gray) flex flex-col gap-1"
+                className="w-full p-3 border-b last:border-b-0 border-(--gray) flex flex-col gap-1"
               >
                 <Link
                   href={

@@ -183,7 +183,7 @@ export const TopBar = () => {
       </button>
       <div className="flex flex-col items-start gap-1">
         <button
-          className="text-sm gap-1 flex items-center justify-center p-1 @[64rem]:px-2 @[64rem]:py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) hover:bg-(--gray)/20 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+          className={`text-sm gap-1 flex items-center justify-center p-1 @[64rem]:px-2 @[64rem]:py-0.5 rounded-md border  disabled:cursor-not-allowed disabled:hover:bg-transparent ${isDeleteConfirming ? "border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20 text-(--light)" : "border-(--gray-page) text-(--gray-page) hover:bg-(--gray)/20"}`}
           onClick={() => void handleDeletePage()}
           disabled={pageDocument?.deleteStatus === "deleting"}
         >

@@ -23,6 +23,10 @@ export function useProjectSettingsController(projectSlug: string) {
   const [isDeletingProject, setIsDeletingProject] = useState(false);
   const lastRouteCorrectionKeyRef = useRef<string | null>(null);
 
+  const redirectToProjectsIndex = () => {
+    window.location.replace("/projects");
+  };
+
   const canUseProjectIdFallback =
     projectIdSnapshot !== null &&
     (resolvedProjectSlugSnapshot === projectSlug ||
@@ -53,8 +57,7 @@ export function useProjectSettingsController(projectSlug: string) {
   useEffect(() => {
     if (projectData === null) {
       queueMicrotask(() => {
-        router.replace("/projects");
-        router.refresh();
+        redirectToProjectsIndex();
       });
       return;
     }
@@ -182,8 +185,7 @@ export function useProjectSettingsController(projectSlug: string) {
       await deleteProject({
         projectId: currentProjectId as never,
       });
-      router.replace("/projects");
-      router.refresh();
+      redirectToProjectsIndex();
     } catch (error) {
       setDeleteError(
         error instanceof Error ? error.message : "Could not delete project.",

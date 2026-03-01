@@ -6,13 +6,15 @@ import {
   type EditorComponentCommand,
 } from "./componentRegistry";
 
-const SLASH_ACTION_COMMANDS = ["lib"] as const;
+const SLASH_ACTION_COMMANDS = ["lib", "template"] as const;
 const ALL_COMPLETABLE_SLASH_COMMANDS = [
   ...PRIMARY_INSERTABLE_COMMANDS,
   ...SLASH_ACTION_COMMANDS,
 ] as const;
 
-type SlashAction = "open-component-library";
+type SlashAction =
+  | { type: "open-component-library" }
+  | { type: "open-tagged-search"; tag: "template" };
 
 function getTokenRangeAtCursor(value: string, cursor: number) {
   let start = cursor;
@@ -115,7 +117,11 @@ export function getSlashCompletionSuffix(value: string, cursor: number) {
 function resolveSlashAction(token: string): SlashAction | null {
   const command = token.slice(1).toLowerCase();
   if (command === "lib") {
-    return "open-component-library";
+    return { type: "open-component-library" };
+  }
+
+  if (command === "template") {
+    return { type: "open-tagged-search", tag: "template" };
   }
 
   return null;

@@ -60,7 +60,7 @@ export const TemplateModal = ({
           <p className="text-(--gray-page)">{template.templateType} template</p>
         </div>
 
-        <div className="w-full p-2 flex flex-col gap-2">
+        <div className="w-full flex flex-col gap-2">
           {template.templateType === "page" ? (
             <div className="w-full flex flex-col gap-2">
               <p className="font-medium">{template.page.title}</p>

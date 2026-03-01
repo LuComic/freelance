@@ -7,6 +7,7 @@ import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
   startTransition,
+  useCallback,
   useDeferredValue,
   useEffect,
   useRef,
@@ -59,6 +60,10 @@ export const SearchBar = () => {
   const selectedItemRef = useRef<HTMLButtonElement>(null);
   const { isOpen, activeTag, openSearch, closeSearch, clearTag } =
     useSearchBar();
+  const clearSelectedOverlays = useCallback(() => {
+    setSelectedPerson(null);
+    setSelectedTemplate(null);
+  }, []);
   const deferredSearchQuery = useDeferredValue(
     activeTag === null ? searchQuery : "",
   );
@@ -227,14 +232,14 @@ export const SearchBar = () => {
           person={selectedPerson}
           open={selectedPerson !== null}
           onOpenChange={(open) => {
-            if (!open) setSelectedPerson(null);
+            if (!open) clearSelectedOverlays();
           }}
         />
         <TemplateModal
           template={selectedTemplate}
           open={selectedTemplate !== null}
           onOpenChange={(open) => {
-            if (!open) setSelectedTemplate(null);
+            if (!open) clearSelectedOverlays();
           }}
         />
       </>
@@ -334,20 +339,6 @@ export const SearchBar = () => {
           </div>
         </div>
       </div>
-      <PersonModal
-        person={selectedPerson}
-        open={selectedPerson !== null}
-        onOpenChange={(open) => {
-          if (!open) setSelectedPerson(null);
-        }}
-      />
-      <TemplateModal
-        template={selectedTemplate}
-        open={selectedTemplate !== null}
-        onOpenChange={(open) => {
-          if (!open) setSelectedTemplate(null);
-        }}
-      />
     </div>
   );
 };

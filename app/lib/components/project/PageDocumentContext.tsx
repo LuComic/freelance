@@ -88,6 +88,11 @@ type ActivePageDocumentContextValue = PageDocumentContextValue & {
 
 const PageDocumentContext = createContext<PageDocumentContextValue | null>(null);
 
+type ProjectPageSummary = {
+  id: string;
+  slug: string;
+};
+
 function getPageRoute(pathname: string) {
   const segments = pathname.split("/").filter(Boolean);
   if (segments[0] !== "projects" || segments.length < 3) {
@@ -109,6 +114,50 @@ function getPageRoute(pathname: string) {
     projectSlug: segments[1],
     pageSlug,
   };
+}
+
+function getProjectPagePath(projectSlug: string, pageSlug: string) {
+  return `/projects/${projectSlug}/${pageSlug}`;
+}
+
+function resolveDeleteRedirectPath(args: {
+  currentPageId: string;
+  projectSlug: string;
+  projectPages: ProjectPageSummary[];
+  visitHistoryPageIds: string[];
+}) {
+  const { currentPageId, projectSlug, projectPages, visitHistoryPageIds } = args;
+  const remainingPages = projectPages.filter((page) => page.id !== currentPageId);
+
+  if (remainingPages.length === 0) {
+    return "/projects";
+  }
+
+  for (let index = visitHistoryPageIds.length - 1; index >= 0; index -= 1) {
+    const candidatePageId = visitHistoryPageIds[index];
+    const candidatePage = remainingPages.find((page) => page.id === candidatePageId);
+
+    if (candidatePage) {
+      return getProjectPagePath(projectSlug, candidatePage.slug);
+    }
+  }
+
+  const currentPageIndex = projectPages.findIndex((page) => page.id === currentPageId);
+  const previousSibling =
+    currentPageIndex > 0 ? projectPages[currentPageIndex - 1] : null;
+
+  if (previousSibling && previousSibling.id !== currentPageId) {
+    return getProjectPagePath(projectSlug, previousSibling.slug);
+  }
+
+  const nextSibling =
+    currentPageIndex >= 0 ? projectPages[currentPageIndex + 1] : null;
+
+  if (nextSibling && nextSibling.id !== currentPageId) {
+    return getProjectPagePath(projectSlug, nextSibling.slug);
+  }
+
+  return getProjectPagePath(projectSlug, remainingPages[0].slug);
 }
 
 export function PageDocumentProvider({
@@ -138,6 +187,8 @@ export function PageDocumentProvider({
   const lastHydratedPageKeyRef = useRef<string | null>(null);
   const lastRouteCorrectionKeyRef = useRef<string | null>(null);
   const activePageRef = useRef<ActivePageState | null>(null);
+  const projectVisitHistoryRef = useRef<Map<string, string[]>>(new Map());
+  const pendingDeleteRedirectPathRef = useRef<string | null>(null);
   const documentRef = useRef<PageDocumentV1 | null>(null);
   const currentDocumentSnapshot = document ? JSON.stringify(document) : null;
   const hasUnsavedChanges =
@@ -165,6 +216,7 @@ export function PageDocumentProvider({
           pageId: canUseActivePageFallback ? (activePage?.page.id as never) : undefined,
         };
   const pageData = useQuery(api.pages.queries.getPageEditorBySlugs, pageQueryArgs);
+  const projects = useQuery(api.projects.queries.listCurrentUserProjects);
   const savePage = useMutation(api.pages.mutations.savePage);
   const createPage = useMutation(api.pages.mutations.createPage);
   const deletePageMutation = useMutation(api.pages.mutations.deletePage);
@@ -174,12 +226,28 @@ export function PageDocumentProvider({
   }, [activePage]);
 
   useEffect(() => {
+    if (!activePage) {
+      return;
+    }
+
+    const projectHistory =
+      projectVisitHistoryRef.current.get(activePage.project.id) ?? [];
+    const nextProjectHistory = [
+      ...projectHistory.filter((pageId) => pageId !== activePage.page.id),
+      activePage.page.id,
+    ];
+
+    projectVisitHistoryRef.current.set(activePage.project.id, nextProjectHistory);
+  }, [activePage]);
+
+  useEffect(() => {
     documentRef.current = document;
   }, [document]);
 
   useEffect(() => {
     if (!route || pageData === undefined) {
       if (!route) {
+        pendingDeleteRedirectPathRef.current = null;
         queueMicrotask(() => {
           setActivePage(null);
           setDocument(null);
@@ -199,6 +267,7 @@ export function PageDocumentProvider({
 
     if (pageData === null) {
       queueMicrotask(() => {
+        const pendingDeleteRedirectPath = pendingDeleteRedirectPathRef.current;
         setActivePage(null);
         setDocument(null);
         setSaveStatus("idle");
@@ -209,8 +278,10 @@ export function PageDocumentProvider({
         setPendingRoutePageId(null);
         setSavedTitleSnapshot(null);
         setSavedDocumentSnapshot(null);
-        router.replace("/projects");
-        router.refresh();
+
+        if (!pendingDeleteRedirectPath) {
+          router.replace("/projects");
+        }
       });
       lastHydratedPageKeyRef.current = null;
       return;
@@ -235,6 +306,7 @@ export function PageDocumentProvider({
 
     lastHydratedPageKeyRef.current = nextPageKey;
     queueMicrotask(() => {
+      pendingDeleteRedirectPathRef.current = null;
       setActivePage({
         project: pageData.project,
         page: pageData.page,
@@ -609,18 +681,36 @@ export function PageDocumentProvider({
     setDeleteError(null);
 
     try {
+      const currentProject = projects?.find(
+        (project) => project.id === currentPage.project.id,
+      );
+      const fallbackPath = resolveDeleteRedirectPath({
+        currentPageId: currentPage.page.id,
+        projectSlug: currentPage.project.slug,
+        projectPages: currentProject?.pages ?? [],
+        visitHistoryPageIds:
+          projectVisitHistoryRef.current.get(currentPage.project.id) ?? [],
+      });
+      pendingDeleteRedirectPathRef.current = fallbackPath;
+
       await deletePageMutation({
         pageId: currentPage.page.id as never,
       });
-      router.replace("/projects");
-      router.refresh();
+      projectVisitHistoryRef.current.set(
+        currentPage.project.id,
+        (projectVisitHistoryRef.current.get(currentPage.project.id) ?? []).filter(
+          (pageId) => pageId !== currentPage.page.id,
+        ),
+      );
+      router.replace(fallbackPath);
     } catch (error) {
+      pendingDeleteRedirectPathRef.current = null;
       setDeleteError(
         error instanceof Error ? error.message : "Could not delete page.",
       );
       setDeleteStatus("error");
     }
-  }, [deletePageMutation, router]);
+  }, [deletePageMutation, projects, router]);
 
   useEffect(() => {
     if (!isLive || !hasUnsavedChanges || saveStatus === "saving") {

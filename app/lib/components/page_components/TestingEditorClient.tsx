@@ -6,6 +6,7 @@ import {
   type InsertableComponentCommand,
 } from "@/app/lib/components/project/EditModeContext";
 import { useOptionalPageDocument } from "@/app/lib/components/project/PageDocumentContext";
+import { useSearchBar } from "@/app/lib/components/searchbar/SearchBarContext";
 import { getCaretCoordinates } from "@/app/lib/components/page_components/testing_editor/caret";
 import {
   completeSlashCommand,
@@ -26,6 +27,7 @@ export default function TestingEditorClient() {
     clearPendingComponentInsert,
     requestOpenComponentLibrary,
   } = useEditMode();
+  const { openTaggedSearch } = useSearchBar();
   const pageDocument = useOptionalPageDocument();
   const [activeLine, setActiveLine] = useState(1);
   const [scrollTop, setScrollTop] = useState(0);
@@ -110,10 +112,10 @@ export default function TestingEditorClient() {
       ? textarea.selectionStart
       : lastCursorRef.current;
     const insertion = pageDocument.insertComponentAtRange({
-        command: pendingComponentInsert.command,
-        value: content,
-        start: cursorPosition,
-      });
+      command: pendingComponentInsert.command,
+      value: content,
+      start: cursorPosition,
+    });
     if (!insertion) {
       clearPendingComponentInsert();
       return;
@@ -175,35 +177,18 @@ export default function TestingEditorClient() {
               const nextValue = event.target.value;
               const cursorPosition = event.target.selectionStart;
               lastCursorRef.current = cursorPosition;
-              const slashAction = consumeSlashActionCommand(
-                nextValue,
-                cursorPosition,
-              );
-
-              if (slashAction) {
-                if (slashAction.action === "open-component-library") {
-                  requestOpenComponentLibrary();
-                }
-                updateEditorText(slashAction.nextValue);
-                setActiveLine(
-                  getActiveLineFromCursor(
-                    slashAction.nextValue,
-                    slashAction.nextCursor,
-                  ),
-                );
-                setCaretPosition(slashAction.nextCursor);
-                return;
-              }
 
               const slashRange = getSlashCommandTokenRange(
                 nextValue,
                 cursorPosition,
               );
-              const command = slashRange?.token
-                .slice(1)
-                .toLowerCase() as InsertableComponentCommand | undefined;
+              const command = slashRange?.token.slice(1).toLowerCase() as
+                | InsertableComponentCommand
+                | undefined;
               const replacement =
-                slashRange && command && resolveComponentTypeFromCommand(command)
+                slashRange &&
+                command &&
+                resolveComponentTypeFromCommand(command)
                   ? insertComponentAtRange({
                       command,
                       value: nextValue,
@@ -230,15 +215,40 @@ export default function TestingEditorClient() {
             onKeyDown={(event) => {
               if (event.key === "Enter") {
                 const textarea = event.currentTarget;
+                const slashAction = consumeSlashActionCommand(
+                  textarea.value,
+                  textarea.selectionStart,
+                );
+                if (slashAction) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  if (slashAction.action.type === "open-component-library") {
+                    requestOpenComponentLibrary();
+                  } else if (slashAction.action.type === "open-tagged-search") {
+                    openTaggedSearch(slashAction.action.tag);
+                  }
+                  updateEditorText(slashAction.nextValue);
+                  setActiveLine(
+                    getActiveLineFromCursor(
+                      slashAction.nextValue,
+                      slashAction.nextCursor,
+                    ),
+                  );
+                  setCaretPosition(slashAction.nextCursor);
+                  return;
+                }
+
                 const slashRange = getSlashCommandTokenRange(
                   textarea.value,
                   textarea.selectionStart,
                 );
-                const command = slashRange?.token
-                  .slice(1)
-                  .toLowerCase() as InsertableComponentCommand | undefined;
+                const command = slashRange?.token.slice(1).toLowerCase() as
+                  | InsertableComponentCommand
+                  | undefined;
                 const replacement =
-                  slashRange && command && resolveComponentTypeFromCommand(command)
+                  slashRange &&
+                  command &&
+                  resolveComponentTypeFromCommand(command)
                     ? insertComponentAtRange({
                         command,
                         value: textarea.value,
