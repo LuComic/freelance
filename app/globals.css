@@ -160,4 +160,15 @@
     background: var(--quite-dark);
     color: var(--light);
   }
+
+  .notification:after {
+    content: "";
+    position: absolute;
+    right: 7px;
+    top: 5px;
+    width: 8px;
+    height: 8px;
+    border-radius: 100vh;
+    background-color: var(--vibrant);
+  }
 }

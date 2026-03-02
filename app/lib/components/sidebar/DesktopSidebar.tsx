@@ -105,9 +105,12 @@ export const DesktopSidebar = ({
           {activeTab === "settings" ? <SidebarSettings /> : null}
           <div className="mt-auto w-full h-max flex items-center">
             <SidebarUserInfo profile={userProfile} />
-            <button className="ml-auto p-1 flex items-center justify-center aspect-square rounded-lg h-full hover:bg-(--darkest-hover)">
+            <Link
+              className="ml-auto p-1 flex items-center justify-center aspect-square rounded-lg h-full hover:bg-(--darkest-hover) notification relative"
+              href="/notifications"
+            >
               <Bell size={20} />
-            </button>
+            </Link>
             <LogOutButton sidebar={true} />
           </div>
         </nav>
