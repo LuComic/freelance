@@ -8,6 +8,10 @@ import {
   invalidState,
   notFound,
 } from "../lib/errors";
+import {
+  buildNotificationActorSnapshot,
+  createNotification,
+} from "../notifications/model";
 import { buildPairKey, getConnectionByPairKey } from "./model";
 
 async function requireTargetUser(
@@ -41,7 +45,7 @@ export const sendFriendRequest = mutation({
     targetUserId: v.id("users"),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireCurrentAuth(ctx);
+    const { userId, user } = await requireCurrentAuth(ctx);
     await requireTargetUser(ctx, userId, args.targetUserId);
     const now = Date.now();
     const connection = await getConnectionByPairKey(ctx, userId, args.targetUserId);
@@ -55,6 +59,13 @@ export const sendFriendRequest = mutation({
         actedByUserId: userId,
         createdAt: now,
         updatedAt: now,
+      });
+      await createNotification(ctx, {
+        userId: args.targetUserId,
+        type: "friendRequestReceived",
+        ...buildNotificationActorSnapshot(user),
+        connectionUserId: userId,
+        sidebarTarget: "got",
       });
       return;
     }
@@ -86,6 +97,14 @@ export const sendFriendRequest = mutation({
       actedByUserId: userId,
       updatedAt: now,
     });
+
+    await createNotification(ctx, {
+      userId: args.targetUserId,
+      type: "friendRequestReceived",
+      ...buildNotificationActorSnapshot(user),
+      connectionUserId: userId,
+      sidebarTarget: "got",
+    });
   },
 });
 
@@ -94,7 +113,7 @@ export const acceptFriendRequest = mutation({
     targetUserId: v.id("users"),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireCurrentAuth(ctx);
+    const { userId, user } = await requireCurrentAuth(ctx);
     await requireTargetUser(ctx, userId, args.targetUserId);
     const connection = await getConnectionByPairKey(ctx, userId, args.targetUserId);
 
@@ -113,6 +132,14 @@ export const acceptFriendRequest = mutation({
       blockedByUserId: undefined,
       actedByUserId: userId,
       updatedAt: Date.now(),
+    });
+
+    await createNotification(ctx, {
+      userId: connection.requesterUserId,
+      type: "friendRequestAccepted",
+      ...buildNotificationActorSnapshot(user),
+      connectionUserId: userId,
+      sidebarTarget: "friends",
     });
   },
 });

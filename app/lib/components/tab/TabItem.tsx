@@ -1,8 +1,8 @@
 import { X } from "lucide-react";
 
 interface TabItemProps {
-  pageTitle: string;
-  projectName: string;
+  title: string;
+  contextLabel: string;
   isActive: boolean;
   onSelect: () => void;
   onClose: () => void;
@@ -13,8 +13,8 @@ function truncateLabel(value: string, maxLength = 8) {
 }
 
 export const TabItem = ({
-  pageTitle,
-  projectName,
+  title,
+  contextLabel,
   isActive,
   onSelect,
   onClose,
@@ -34,10 +34,10 @@ export const TabItem = ({
       >
         <span className="flex min-w-0 items-center gap-2 text-sm">
           <span className="truncate text-(--light)">
-            {truncateLabel(pageTitle)}
+            {truncateLabel(title)}
           </span>
           <span className="truncate text-(--gray-page)">
-            {truncateLabel(projectName)}
+            {truncateLabel(contextLabel)}
           </span>
         </span>
       </button>

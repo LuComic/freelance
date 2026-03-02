@@ -10,6 +10,7 @@ import { TopBar } from "../lib/components/project/TopBar";
 import { EditModeProvider } from "../lib/components/project/EditModeContext";
 import { PageDocumentProvider } from "../lib/components/project/PageDocumentContext";
 import { SearchBarProvider } from "../lib/components/searchbar/SearchBarContext";
+import { SidebarControllerProvider } from "../lib/components/sidebar/SidebarControllerContext";
 
 export const metadata: Metadata = {
   title: "Cliff",
@@ -40,19 +41,21 @@ export default async function ProjectViewLayout({
     >
       <SearchBarProvider>
         <SearchBar />
-        <Sidebar initialSidebarOpen={initialSidebarOpen} />
-        <EditModeProvider>
-          <PageDocumentProvider>
-            <div className="flex-1 min-w-0 flex flex-col items-start justify-start">
-              <Tab initialTabsState={initialTabsState} />
-              <TopBar />
-              <div className="@container w-full px-4 md:pt-6 pt-4 pb-8 flex flex-col items-start justify-start gap-4">
-                {children}
+        <SidebarControllerProvider>
+          <Sidebar initialSidebarOpen={initialSidebarOpen} />
+          <EditModeProvider>
+            <PageDocumentProvider>
+              <div className="flex-1 min-w-0 flex flex-col items-start justify-start">
+                <Tab initialTabsState={initialTabsState} />
+                <TopBar />
+                <div className="@container w-full px-4 md:pt-6 pt-4 pb-8 flex flex-col items-start justify-start gap-4">
+                  {children}
+                </div>
               </div>
-            </div>
-          </PageDocumentProvider>
-          <Chat initialChatOpen={initialChatOpen} />
-        </EditModeProvider>
+            </PageDocumentProvider>
+            <Chat initialChatOpen={initialChatOpen} />
+          </EditModeProvider>
+        </SidebarControllerProvider>
       </SearchBarProvider>
     </div>
   );

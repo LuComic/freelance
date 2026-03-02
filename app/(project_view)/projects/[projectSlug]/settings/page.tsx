@@ -16,6 +16,7 @@ export default function SettingsPage() {
     projectMembers,
     currentProjectName,
     canManageMembers,
+    canRemoveMembers,
     canDeleteProject,
     canLeaveProject,
     nameDraft,
@@ -79,6 +80,7 @@ export default function SettingsPage() {
           manageLabel="Manage clients"
           members={clients}
           canManage={canManageMembers}
+          canRemove={canRemoveMembers}
           pendingRemovalUserId={pendingMemberRemovalUserId}
           error={memberActionError}
           onRemove={(userId) => void handleRemoveProjectMember(userId)}
@@ -102,6 +104,7 @@ export default function SettingsPage() {
           manageLabel="Manage co-creators"
           members={coCreators}
           canManage={canManageMembers}
+          canRemove={canRemoveMembers}
           pendingRemovalUserId={pendingMemberRemovalUserId}
           error={memberActionError}
           onRemove={(userId) => void handleRemoveProjectMember(userId)}

@@ -16,6 +16,7 @@ const schema = defineSchema({
     phoneVerificationTime: v.optional(v.float64()),
     projectIds: v.optional(v.array(v.id("projects"))),
     lastOpenedProjectId: v.optional(v.id("projects")),
+    notificationsLastSeenAt: v.optional(v.number()),
   })
     .index("email", ["email"])
     .index("phone", ["phone"])
@@ -124,6 +125,50 @@ const schema = defineSchema({
     .index("by_email", ["email"])
     .index("by_project_email", ["projectId", "email"])
     .index("by_project_status", ["projectId", "status"]),
+
+  notifications: defineTable({
+    userId: v.id("users"),
+    type: v.union(
+      v.literal("projectInviteReceived"),
+      v.literal("friendRequestReceived"),
+      v.literal("friendRequestAccepted"),
+      v.literal("clientStateChanged"),
+    ),
+    isRead: v.boolean(),
+    readAt: v.optional(v.number()),
+    actorUserId: v.id("users"),
+    projectId: v.optional(v.id("projects")),
+    projectSlugSnapshot: v.optional(v.string()),
+    projectNameSnapshot: v.optional(v.string()),
+    pageId: v.optional(v.id("pages")),
+    pageTitleSnapshot: v.optional(v.string()),
+    inviteId: v.optional(v.id("projectInvites")),
+    connectionUserId: v.optional(v.id("users")),
+    actorNameSnapshot: v.string(),
+    actorImageSnapshot: v.optional(v.string()),
+    sidebarTarget: v.optional(
+      v.union(
+        v.literal("invites"),
+        v.literal("got"),
+        v.literal("friends"),
+      ),
+    ),
+    componentInstanceId: v.optional(v.string()),
+    componentType: v.optional(
+      v.union(
+        v.literal("Select"),
+        v.literal("Radio"),
+        v.literal("Feedback"),
+        v.literal("Kanban"),
+      ),
+    ),
+    componentLabelSnapshot: v.optional(v.string()),
+    changedComponentCount: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_read", ["userId", "isRead"]),
 
   pages: defineTable({
     projectId: v.id("projects"),

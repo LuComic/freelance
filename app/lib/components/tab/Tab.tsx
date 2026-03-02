@@ -9,20 +9,16 @@ import { usePathname, useRouter } from "next/navigation";
 import { TabItem } from "./TabItem";
 import {
   EMPTY_TABS_STATE,
-  getNextRecentTabPageId,
+  getNextRecentTabId,
   reconcileTabsWithProjects,
-  removeTabByPageId,
+  removeTabById,
+  resolveTabForRoute,
   resolveTabPath,
   serializeTabsCookie,
   type StoredTab,
   type StoredTabsState,
-  type TabProjectSummary,
-  upsertTabFromActivePage,
+  upsertTab,
 } from "./tabState";
-
-type ResolvedTab = StoredTab & {
-  path: string;
-};
 
 type TabProps = {
   initialTabsState: StoredTabsState;
@@ -37,65 +33,34 @@ export const Tab = ({ initialTabsState }: TabProps) => {
     initialTabsState ?? EMPTY_TABS_STATE,
   );
   const [isClosingLastTab, setIsClosingLastTab] = useState(false);
-  const activePageId = pageDocument?.activePage?.page.id ?? null;
-  const resolvedTabs = useMemo<ResolvedTab[]>(() => {
-    if (projects === undefined) {
-      return tabsState.tabs.map((tab) => ({
-        ...tab,
-        path: resolveTabPath(tab),
-      }));
-    }
-
-    const projectsById = new Map<string, TabProjectSummary>(
-      projects.map((project) => [project.id, project] as const),
-    );
-
-    return tabsState.tabs.flatMap((tab) => {
-      const project = projectsById.get(tab.projectId);
-
-      if (!project) {
-        return [];
-      }
-
-      const page = project.pages.find(
-        (candidatePage) => candidatePage.id === tab.pageId,
-      );
-
-      if (!page) {
-        return [];
-      }
-
-      return [
-        {
-          ...tab,
-          projectSlug: project.slug,
-          projectName: project.name,
-          pageSlug: page.slug,
-          pageTitle: page.title,
-          path: `/projects/${project.slug}/${page.slug}`,
-        },
-      ];
-    });
-  }, [projects, tabsState.tabs]);
-  const resolvedTabsByPageId = useMemo(
+  const activeTab = useMemo(
     () =>
-      new Map<string, ResolvedTab>(
-        resolvedTabs.map((tab) => [tab.pageId, tab] as const),
+      resolveTabForRoute({
+        pathname,
+        projects: projects ?? undefined,
+        activePage: pageDocument?.activePage ?? null,
+      }),
+    [pageDocument?.activePage, pathname, projects],
+  );
+  const activeTabId = activeTab?.tabId ?? null;
+  const resolvedTabs = tabsState.tabs;
+  const resolvedTabsById = useMemo(
+    () =>
+      new Map<string, StoredTab>(
+        resolvedTabs.map((tab) => [tab.tabId, tab] as const),
       ),
     [resolvedTabs],
   );
 
   useEffect(() => {
-    const activePage = pageDocument?.activePage;
-
-    if (!activePage) {
+    if (!activeTab) {
       return;
     }
 
     queueMicrotask(() => {
-      setTabsState((prev) => upsertTabFromActivePage(prev, activePage));
+      setTabsState((prev) => upsertTab(prev, activeTab));
     });
-  }, [pageDocument?.activePage]);
+  }, [activeTab]);
 
   useEffect(() => {
     if (projects === undefined) {
@@ -129,22 +94,22 @@ export const Tab = ({ initialTabsState }: TabProps) => {
   }, [isClosingLastTab, pathname]);
 
   const openTab = (tab: StoredTab) => {
-    if (tab.pageId === activePageId) {
+    if (tab.tabId === activeTabId) {
       return;
     }
 
-    const resolvedTab = resolvedTabsByPageId.get(tab.pageId);
+    const resolvedTab = resolvedTabsById.get(tab.tabId);
 
     if (projects !== undefined && !resolvedTab) {
-      setTabsState((prev) => removeTabByPageId(prev, tab.pageId));
+      setTabsState((prev) => removeTabById(prev, tab.tabId));
       return;
     }
 
     router.push((resolvedTab ?? { path: resolveTabPath(tab) }).path);
   };
 
-  const closeTab = (pageId: string) => {
-    let nextState = removeTabByPageId(tabsState, pageId);
+  const closeTab = (tabId: string) => {
+    let nextState = removeTabById(tabsState, tabId);
 
     if (nextState.tabs.length === 0) {
       setIsClosingLastTab(true);
@@ -153,25 +118,23 @@ export const Tab = ({ initialTabsState }: TabProps) => {
       return;
     }
 
-    if (pageId !== activePageId) {
+    if (tabId !== activeTabId) {
       setTabsState(nextState);
       return;
     }
 
-    let nextRecentPageId = getNextRecentTabPageId(nextState);
+    let nextRecentTabId = getNextRecentTabId(nextState);
 
-    while (nextRecentPageId) {
-      const nextTab = nextState.tabs.find(
-        (tab) => tab.pageId === nextRecentPageId,
-      );
+    while (nextRecentTabId) {
+      const nextTab = nextState.tabs.find((tab) => tab.tabId === nextRecentTabId);
 
       if (!nextTab) {
-        nextState = removeTabByPageId(nextState, nextRecentPageId);
-        nextRecentPageId = getNextRecentTabPageId(nextState);
+        nextState = removeTabById(nextState, nextRecentTabId);
+        nextRecentTabId = getNextRecentTabId(nextState);
         continue;
       }
 
-      const resolvedTab = resolvedTabsByPageId.get(nextRecentPageId);
+      const resolvedTab = resolvedTabsById.get(nextRecentTabId);
       const nextPath =
         resolvedTab?.path ??
         (projects === undefined ? resolveTabPath(nextTab) : null);
@@ -182,8 +145,8 @@ export const Tab = ({ initialTabsState }: TabProps) => {
         return;
       }
 
-      nextState = removeTabByPageId(nextState, nextRecentPageId);
-      nextRecentPageId = getNextRecentTabPageId(nextState);
+      nextState = removeTabById(nextState, nextRecentTabId);
+      nextRecentTabId = getNextRecentTabId(nextState);
     }
 
     setTabsState(nextState);
@@ -196,12 +159,12 @@ export const Tab = ({ initialTabsState }: TabProps) => {
         <>
           {resolvedTabs.map((tab) => (
             <TabItem
-              key={tab.pageId}
-              pageTitle={tab.pageTitle}
-              projectName={tab.projectName}
-              isActive={tab.pageId === activePageId}
+              key={tab.tabId}
+              title={tab.title}
+              contextLabel={tab.contextLabel}
+              isActive={tab.tabId === activeTabId}
               onSelect={() => openTab(tab)}
-              onClose={() => closeTab(tab.pageId)}
+              onClose={() => closeTab(tab.tabId)}
             />
           ))}
         </>

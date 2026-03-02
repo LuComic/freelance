@@ -1,6 +1,7 @@
 import { ConnectionItem } from "./ConnectionItem";
 import { useSearchBar } from "../searchbar/SearchBarContext";
 import type { SidebarConnectionsData } from "../connections/types";
+import { useSidebarController } from "./SidebarControllerContext";
 
 type ConnectionsProps = {
   connections: SidebarConnectionsData | undefined;
@@ -8,6 +9,7 @@ type ConnectionsProps = {
 
 export const Connections = ({ connections }: ConnectionsProps) => {
   const { openTaggedSearch } = useSearchBar();
+  const { requestedConnectionsSection, requestVersion } = useSidebarController();
 
   return (
     <div className="flex flex-col gap-1 items-start justify-start w-full flex-1 min-h-0 overflow-y-auto">
@@ -26,6 +28,9 @@ export const Connections = ({ connections }: ConnectionsProps) => {
         title="Friends"
         items={connections?.friends ?? []}
         type="friends"
+        requestedOpenToken={
+          requestedConnectionsSection === "friends" ? requestVersion : 0
+        }
       />
       <ConnectionItem
         title="Collaborations"
@@ -36,6 +41,9 @@ export const Connections = ({ connections }: ConnectionsProps) => {
         title="Invites"
         items={connections?.invites ?? []}
         type="invites"
+        requestedOpenToken={
+          requestedConnectionsSection === "invites" ? requestVersion : 0
+        }
       />
       <ConnectionItem
         title="Sent requests"
@@ -46,6 +54,9 @@ export const Connections = ({ connections }: ConnectionsProps) => {
         title="Received requests"
         items={connections?.receivedRequests ?? []}
         type="got"
+        requestedOpenToken={
+          requestedConnectionsSection === "got" ? requestVersion : 0
+        }
       />
       <ConnectionItem
         title="Blocked"

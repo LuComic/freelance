@@ -18,6 +18,7 @@ import { CreateProjectModal } from "@/app/lib/components/project/CreateProjectMo
 import Link from "next/link";
 import { LogOutButton } from "../LogOutButton";
 import { SidebarUserInfo, type SidebarUserProfile } from "./SidebarUserInfo";
+import { useSidebarController } from "./SidebarControllerContext";
 
 export const MobileSidebar = ({
   userProfile,
@@ -25,20 +26,39 @@ export const MobileSidebar = ({
   userProfile: SidebarUserProfile;
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [handledRequestVersion, setHandledRequestVersion] = useState(0);
   const [activeTab, setActiveTab] = useState<"files" | "friends" | "settings">(
     "files",
   );
   const connections = useQuery(api.connections.queries.listSidebarConnections);
+  const hasUnreadNotifications = useQuery(
+    api.notifications.queries.hasUnreadNotifications,
+  );
+  const { requestedConnectionsSection, requestVersion } = useSidebarController();
+  const hasPendingConnectionsRequest =
+    requestedConnectionsSection !== null && requestVersion > handledRequestVersion;
+  const resolvedSidebarOpen = hasPendingConnectionsRequest ? true : sidebarOpen;
+  const resolvedActiveTab = hasPendingConnectionsRequest ? "friends" : activeTab;
+
+  const acknowledgeConnectionsRequest = () => {
+    if (requestVersion > handledRequestVersion) {
+      setHandledRequestVersion(requestVersion);
+    }
+  };
+
   return (
     <div className="block md:hidden">
-      {sidebarOpen ? (
+      {resolvedSidebarOpen ? (
         <nav className="w-[363px] h-dvh max-h-dvh bg-(--darkest) border-r border-(--gray) flex flex-col items-start justify-start p-2 gap-4 fixed z-30 top-0 left-0 overflow-hidden">
           <div className="flex items-center justify-between w-full">
             <Link href="/projects" className="text-(--gray) text-xl">
               Empty Canvas
             </Link>
             <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
+              onClick={() => {
+                acknowledgeConnectionsRequest();
+                setSidebarOpen(false);
+              }}
               className=" p-1 rounded-lg hover:bg-(--darkest-hover)"
             >
               <PanelLeftClose size={22} />
@@ -48,46 +68,57 @@ export const MobileSidebar = ({
           <div className="flex items-center justify-around p-1 rounded-lg bg-(--dim) w-full gap-1">
             <button
               className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                activeTab === "files"
+                resolvedActiveTab === "files"
                   ? "bg-(--quite-dark) text-(--vibrant)"
                   : ""
               }`}
-              onClick={() => setActiveTab("files")}
+              onClick={() => {
+                acknowledgeConnectionsRequest();
+                setActiveTab("files");
+              }}
             >
               <Folder size={20} className="mx-auto" />
             </button>
             <button
               className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                activeTab === "friends"
+                resolvedActiveTab === "friends"
                   ? "bg-(--quite-dark) text-(--vibrant)"
                   : ""
               }`}
-              onClick={() => setActiveTab("friends")}
+              onClick={() => {
+                acknowledgeConnectionsRequest();
+                setActiveTab("friends");
+              }}
             >
               <Users size={20} className="mx-auto" />
             </button>
             <button
               className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                activeTab === "settings"
+                resolvedActiveTab === "settings"
                   ? "bg-(--quite-dark) text-(--vibrant)"
                   : ""
               }`}
-              onClick={() => setActiveTab("settings")}
+              onClick={() => {
+                acknowledgeConnectionsRequest();
+                setActiveTab("settings");
+              }}
             >
               <Settings size={20} className="mx-auto" />
             </button>
             <CreateProjectModal />
           </div>
 
-          {activeTab === "files" ? <Files /> : null}
-          {activeTab === "friends" ? (
+          {resolvedActiveTab === "files" ? <Files /> : null}
+          {resolvedActiveTab === "friends" ? (
             <Connections connections={connections} />
           ) : null}
-          {activeTab === "settings" ? <SidebarSettings /> : null}
+          {resolvedActiveTab === "settings" ? <SidebarSettings /> : null}
           <div className="mt-auto w-full h-max flex items-center">
             <SidebarUserInfo profile={userProfile} />
             <Link
-              className="ml-auto p-1 flex items-center justify-center aspect-square rounded-lg h-full hover:bg-(--darkest-hover) "
+              className={`ml-auto p-1 flex items-center justify-center aspect-square rounded-lg h-full hover:bg-(--darkest-hover) ${
+                hasUnreadNotifications ? "notification relative" : ""
+              }`}
               href="/notifications"
             >
               <Bell size={20} />
@@ -97,7 +128,10 @@ export const MobileSidebar = ({
         </nav>
       ) : (
         <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
+          onClick={() => {
+            acknowledgeConnectionsRequest();
+            setSidebarOpen(true);
+          }}
           className="bg-(--darkest) z-30 p-1.5 rounded-lg hover:bg-(--darkest-hover) fixed bottom-2 left-2"
         >
           <PanelLeftOpen size={24} />

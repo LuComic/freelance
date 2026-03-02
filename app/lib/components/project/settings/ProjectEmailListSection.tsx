@@ -19,6 +19,7 @@ type ProjectEmailListSectionProps = {
   pendingRemovalUserId?: Id<"users"> | null;
   error?: string | null;
   canManage?: boolean;
+  canRemove?: boolean;
   shaded?: boolean;
 };
 
@@ -32,6 +33,7 @@ export function ProjectEmailListSection({
   pendingRemovalUserId = null,
   error = null,
   canManage = true,
+  canRemove = true,
   shaded = false,
 }: ProjectEmailListSectionProps) {
   const [open, setOpen] = useState(false);
@@ -64,8 +66,8 @@ export function ProjectEmailListSection({
                 {member.name}
                 <button
                   type="button"
-                  disabled={!canManage || pendingRemovalUserId === member.userId}
-                  className="hover:bg-(--gray)/20 p-1 rounded-sm"
+                  disabled={!canRemove || pendingRemovalUserId === member.userId}
+                  className="hover:bg-(--gray)/20 p-1 rounded-sm disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                   onClick={() => onRemove(member.userId)}
                 >
                   <Trash size={16} />

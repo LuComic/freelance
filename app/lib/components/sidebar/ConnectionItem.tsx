@@ -33,12 +33,14 @@ type UserConnectionItemProps = {
   title: string;
   items: ConnectionPerson[];
   type: "friends" | "collabs" | "sent" | "got" | "blocked";
+  requestedOpenToken?: number;
 };
 
 type InviteConnectionItemProps = {
   title: string;
   items: SidebarProjectInvite[];
   type: "invites";
+  requestedOpenToken?: number;
 };
 
 type ConnectionItemProps = UserConnectionItemProps | InviteConnectionItemProps;
@@ -115,8 +117,14 @@ function formatInviteRole(role: SidebarProjectInvite["role"]) {
   return role === "coCreator" ? "co-creator" : "client";
 }
 
-export const ConnectionItem = ({ title, items, type }: ConnectionItemProps) => {
+export const ConnectionItem = ({
+  title,
+  items,
+  type,
+  requestedOpenToken = 0,
+}: ConnectionItemProps) => {
   const [itemExpanded, setItemExpanded] = useState(false);
+  const [handledOpenToken, setHandledOpenToken] = useState(0);
   const {
     runConnectionAction,
     pendingAction: pendingConnectionAction,
@@ -130,7 +138,9 @@ export const ConnectionItem = ({ title, items, type }: ConnectionItemProps) => {
     clearError: clearInviteError,
   } = useProjectInviteActions();
   const { openPersonModal } = useSearchBar();
-  const isExpanded = itemExpanded && items.length > 0;
+  const hasExternalOpenRequest =
+    items.length > 0 && requestedOpenToken > handledOpenToken;
+  const isExpanded = (itemExpanded || hasExternalOpenRequest) && items.length > 0;
 
   const handleAction = async (
     action: ConnectionAction,
@@ -416,9 +426,15 @@ export const ConnectionItem = ({ title, items, type }: ConnectionItemProps) => {
     <>
       <button
         className="rounded-lg p-1 px-1.5 gap-2 hover:bg-(--darkest-hover) w-full text-(--gray) flex items-center justify-start  md:text-base text-sm"
-        onClick={() =>
-          setItemExpanded((previous) => (items.length > 0 ? !previous : false))
-        }
+        onClick={() => {
+          if (requestedOpenToken > handledOpenToken) {
+            setHandledOpenToken(requestedOpenToken);
+          }
+
+          setItemExpanded((previous) =>
+            items.length > 0 ? !(previous || hasExternalOpenRequest) : false,
+          );
+        }}
       >
         <ChevronRight className={`${isExpanded ? "rotate-90" : ""}`} />
         {title} ({items.length})

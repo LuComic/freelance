@@ -13,6 +13,10 @@ import {
 } from "../lib/errors";
 import { requireProjectEditor } from "../lib/permissions";
 import { projectInviteRoleValidator } from "../lib/validators";
+import {
+  buildNotificationActorSnapshot,
+  createNotification,
+} from "../notifications/model";
 
 type InviteableProject = Pick<Doc<"projects">, "_id" | "slug" | "name" | "createdAt">;
 type InviteCtx = QueryCtx | MutationCtx;
@@ -243,7 +247,7 @@ export const inviteUserToProject = mutation({
     role: projectInviteRoleValidator,
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireCurrentAuth(ctx);
+    const { userId, user } = await requireCurrentAuth(ctx);
 
     if (args.targetUserId === userId) {
       throw invalidState("You can't invite yourself to a project.");
@@ -310,8 +314,19 @@ export const inviteUserToProject = mutation({
         email: targetEmail,
         updatedAt: now,
       });
+
+      await createNotification(ctx, {
+        userId: args.targetUserId,
+        type: "projectInviteReceived",
+        ...buildNotificationActorSnapshot(user),
+        projectId: project._id,
+        projectSlugSnapshot: project.slug,
+        projectNameSnapshot: project.name,
+        inviteId: reopenableInvite._id,
+        sidebarTarget: "invites",
+      });
     } else {
-      await ctx.db.insert("projectInvites", {
+      const inviteId = await ctx.db.insert("projectInvites", {
         projectId: project._id,
         invitedByUserId: userId,
         invitedUserId: args.targetUserId,
@@ -320,6 +335,17 @@ export const inviteUserToProject = mutation({
         status: "pending",
         createdAt: now,
         updatedAt: now,
+      });
+
+      await createNotification(ctx, {
+        userId: args.targetUserId,
+        type: "projectInviteReceived",
+        ...buildNotificationActorSnapshot(user),
+        projectId: project._id,
+        projectSlugSnapshot: project.slug,
+        projectNameSnapshot: project.name,
+        inviteId,
+        sidebarTarget: "invites",
       });
     }
 

@@ -152,6 +152,7 @@ export function useProjectSettingsController(projectSlug: string) {
   const canManageMembers =
     projectMembers?.viewerRole === "owner" ||
     projectMembers?.viewerRole === "coCreator";
+  const canRemoveMembers = projectMembers?.viewerRole === "owner";
   const canDeleteProject = projectMembers?.viewerRole === "owner";
   const canLeaveProject =
     projectMembers !== undefined &&
@@ -288,6 +289,7 @@ export function useProjectSettingsController(projectSlug: string) {
     projectMembers,
     currentProjectName,
     canManageMembers,
+    canRemoveMembers,
     canDeleteProject,
     canLeaveProject,
     nameDraft,

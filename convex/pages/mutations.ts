@@ -4,8 +4,14 @@ import { requireCurrentAuth } from "../lib/auth";
 import { invalidState, notFound } from "../lib/errors";
 import {
   requirePageAccess,
+  requireProjectMember,
   requireProjectEditor,
 } from "../lib/permissions";
+import {
+  buildNotificationActorSnapshot,
+  createNotification,
+  getChangedLiveStateComponents,
+} from "../notifications/model";
 import { getOrderedProjectPages } from "../lib/projectRecords";
 import { uniqueSlugFromLabel } from "../lib/slugs";
 import {
@@ -178,8 +184,9 @@ export const savePageLiveState = mutation({
     document: v.any(),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireCurrentAuth(ctx);
+    const { userId, user } = await requireCurrentAuth(ctx);
     const page = await requirePageAccess(ctx, args.pageId, userId);
+    const membership = await requireProjectMember(ctx, page.projectId, userId);
 
     try {
       assertPageDocumentV1(args.document);
@@ -199,6 +206,10 @@ export const savePageLiveState = mutation({
       currentDocument,
       args.document,
     );
+    const changedComponents = getChangedLiveStateComponents(
+      currentDocument,
+      nextDocument,
+    );
     const now = Date.now();
 
     await ctx.db.patch(page._id, {
@@ -206,6 +217,39 @@ export const savePageLiveState = mutation({
       updatedAt: now,
       updatedByUserId: userId,
     });
+
+    if (membership.role === "client" && changedComponents.length > 0) {
+      const projectMembers = await ctx.db
+        .query("projectMembers")
+        .withIndex("by_project", (query) => query.eq("projectId", page.projectId))
+        .collect();
+      const recipients = projectMembers.filter(
+        (projectMember) =>
+          projectMember.status === "active" &&
+          projectMember.userId !== userId &&
+          (projectMember.role === "owner" || projectMember.role === "coCreator"),
+      );
+      const [firstChangedComponent] = changedComponents;
+
+      await Promise.all(
+        recipients.map((recipient) =>
+          createNotification(ctx, {
+            userId: recipient.userId,
+            type: "clientStateChanged",
+            ...buildNotificationActorSnapshot(user),
+            projectId: project._id,
+            projectSlugSnapshot: project.slug,
+            projectNameSnapshot: project.name,
+            pageId: page._id,
+            pageTitleSnapshot: page.title,
+            componentInstanceId: firstChangedComponent.instanceId,
+            componentType: firstChangedComponent.type,
+            componentLabelSnapshot: firstChangedComponent.label,
+            changedComponentCount: changedComponents.length,
+          }),
+        ),
+      );
+    }
 
     return {
       pageId: page._id,
