@@ -12,6 +12,7 @@ import {
   createNotification,
   getChangedLiveStateComponents,
 } from "../notifications/model";
+import { getAnalyticsActivityChanges } from "../pageRuntime/analytics";
 import { getOrderedProjectPages } from "../lib/projectRecords";
 import { uniqueSlugFromLabel } from "../lib/slugs";
 import {
@@ -181,12 +182,18 @@ export const savePage = mutation({
 export const savePageLiveState = mutation({
   args: {
     pageId: v.id("pages"),
+    title: v.string(),
     document: v.any(),
   },
   handler: async (ctx, args) => {
     const { userId, user } = await requireCurrentAuth(ctx);
     const page = await requirePageAccess(ctx, args.pageId, userId);
     const membership = await requireProjectMember(ctx, page.projectId, userId);
+    const trimmedTitle = args.title.trim();
+
+    if (!trimmedTitle) {
+      throw invalidState("Page title cannot be empty.");
+    }
 
     try {
       assertPageDocumentV1(args.document);
@@ -201,6 +208,22 @@ export const savePageLiveState = mutation({
       throw notFound(`Project ${page.projectId} was not found.`);
     }
 
+    const shouldRenamePage = trimmedTitle !== page.title;
+    let nextSlug = page.slug;
+
+    if (shouldRenamePage) {
+      await requireProjectEditor(ctx, page.projectId, userId);
+
+      const siblingPages = await getOrderedProjectPages(ctx, project);
+      nextSlug = uniqueSlugFromLabel(
+        trimmedTitle,
+        siblingPages
+          .filter((siblingPage) => siblingPage._id !== page._id)
+          .map((siblingPage) => siblingPage.slug),
+        "untitled-page",
+      );
+    }
+
     const currentDocument = parsePageDocument(page.contentJson);
     const nextDocument = mergePageLiveStateDocument(
       currentDocument,
@@ -210,15 +233,121 @@ export const savePageLiveState = mutation({
       currentDocument,
       nextDocument,
     );
+    const analyticsActivityChanges = getAnalyticsActivityChanges(
+      currentDocument,
+      nextDocument,
+    );
+    type AnalyticsActivityChange = (typeof analyticsActivityChanges)[number];
     const now = Date.now();
 
     await ctx.db.patch(page._id, {
+      title: trimmedTitle,
+      slug: nextSlug,
       contentJson: serializePageDocument(nextDocument),
       updatedAt: now,
       updatedByUserId: userId,
     });
 
-    if (membership.role === "client" && changedComponents.length > 0) {
+    if (analyticsActivityChanges.length > 0) {
+      const actorSnapshot = buildNotificationActorSnapshot(user);
+      const activityChangeGroups = new Map<
+        string,
+        {
+          componentInstanceId: string;
+          componentType: AnalyticsActivityChange["componentType"];
+          componentLabelSnapshot: string;
+          changes: AnalyticsActivityChange[];
+        }
+      >();
+      const orderedActivityGroups: Array<{
+        componentInstanceId: string;
+        componentType: AnalyticsActivityChange["componentType"];
+        componentLabelSnapshot: string;
+        changes: AnalyticsActivityChange[];
+      }> = [];
+
+      for (const change of analyticsActivityChanges) {
+        const groupKey = `${change.componentInstanceId}:${change.componentType}:${change.componentLabelSnapshot}`;
+        let group = activityChangeGroups.get(groupKey);
+
+        if (!group) {
+          group = {
+            componentInstanceId: change.componentInstanceId,
+            componentType: change.componentType,
+            componentLabelSnapshot: change.componentLabelSnapshot,
+            changes: [],
+          };
+          activityChangeGroups.set(groupKey, group);
+          orderedActivityGroups.push(group);
+        }
+
+        group.changes.push(change);
+      }
+
+      const activityWrites = orderedActivityGroups.flatMap((group, groupIndex) => {
+        const groupCreatedAt = now + groupIndex;
+        const activityGroupId = `${page._id}:${actorSnapshot.actorUserId}:${group.componentInstanceId}:${groupCreatedAt}`;
+
+        return group.changes.map((change, entryOrder) =>
+          ctx.db.insert("projectActivity", {
+            projectId: project._id,
+            pageId: page._id,
+            pageTitleSnapshot: trimmedTitle,
+            actorUserId: actorSnapshot.actorUserId,
+            actorNameSnapshot: actorSnapshot.actorNameSnapshot,
+            actorImageSnapshot: actorSnapshot.actorImageSnapshot ?? undefined,
+            activityGroupId,
+            entryOrder,
+            componentInstanceId: change.componentInstanceId,
+            componentType: change.componentType,
+            componentLabelSnapshot: change.componentLabelSnapshot,
+            oldValue: change.oldValue,
+            newValue: change.newValue,
+            createdAt: groupCreatedAt,
+            updatedAt: groupCreatedAt,
+          }),
+        );
+      });
+      let notificationWrites: ReturnType<typeof createNotification>[] = [];
+
+      if (membership.role === "client" && changedComponents.length > 0) {
+        const projectMembers = await ctx.db
+          .query("projectMembers")
+          .withIndex("by_project", (query) => query.eq("projectId", page.projectId))
+          .collect();
+        const recipients = projectMembers.filter(
+          (projectMember) =>
+            projectMember.status === "active" &&
+            projectMember.userId !== userId &&
+            (projectMember.role === "owner" ||
+              projectMember.role === "coCreator"),
+        );
+        const [firstChangedComponent] = changedComponents;
+
+        notificationWrites = recipients.map((recipient) =>
+          createNotification(ctx, {
+            userId: recipient.userId,
+            type: "clientStateChanged",
+            ...actorSnapshot,
+            projectId: project._id,
+            projectSlugSnapshot: project.slug,
+            projectNameSnapshot: project.name,
+            pageId: page._id,
+            pageTitleSnapshot: trimmedTitle,
+            componentInstanceId: firstChangedComponent.instanceId,
+            componentType: firstChangedComponent.type,
+            componentLabelSnapshot: firstChangedComponent.label,
+            changedComponentCount: changedComponents.length,
+          }),
+        );
+      }
+
+      await Promise.all([
+        ...notificationWrites,
+        ...activityWrites,
+      ]);
+    } else if (membership.role === "client" && changedComponents.length > 0) {
+      const actorSnapshot = buildNotificationActorSnapshot(user);
       const projectMembers = await ctx.db
         .query("projectMembers")
         .withIndex("by_project", (query) => query.eq("projectId", page.projectId))
@@ -236,12 +365,12 @@ export const savePageLiveState = mutation({
           createNotification(ctx, {
             userId: recipient.userId,
             type: "clientStateChanged",
-            ...buildNotificationActorSnapshot(user),
+            ...actorSnapshot,
             projectId: project._id,
             projectSlugSnapshot: project.slug,
             projectNameSnapshot: project.name,
             pageId: page._id,
-            pageTitleSnapshot: page.title,
+            pageTitleSnapshot: trimmedTitle,
             componentInstanceId: firstChangedComponent.instanceId,
             componentType: firstChangedComponent.type,
             componentLabelSnapshot: firstChangedComponent.label,
@@ -253,6 +382,8 @@ export const savePageLiveState = mutation({
 
     return {
       pageId: page._id,
+      title: trimmedTitle,
+      slug: nextSlug,
       document: nextDocument,
     };
   },

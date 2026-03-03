@@ -28,16 +28,23 @@ export const Files = () => {
     scopeProjectSlug: currentProjectSlug,
     expandedProjectSlugs: currentProjectSlug ? [currentProjectSlug] : [],
   });
-  const expandedProjectSlugs =
+  const scopedExpandedProjectSlugs =
     expansionState.scopeProjectSlug === currentProjectSlug
       ? expansionState.expandedProjectSlugs
       : currentProjectSlug
         ? [currentProjectSlug]
         : [];
+  const expandedProjectSlugs = Array.from(
+    new Set(
+      currentPageSlug && currentProjectSlug
+        ? [...scopedExpandedProjectSlugs, currentProjectSlug]
+        : scopedExpandedProjectSlugs,
+    ),
+  );
 
   const toggleProjectExpanded = (projectSlug: string) => {
     setExpansionState((prev) => {
-      const scopedExpandedProjectSlugs =
+      const nextScopedExpandedProjectSlugs =
         prev.scopeProjectSlug === currentProjectSlug
           ? prev.expandedProjectSlugs
           : currentProjectSlug
@@ -46,9 +53,9 @@ export const Files = () => {
 
       return {
         scopeProjectSlug: currentProjectSlug,
-        expandedProjectSlugs: scopedExpandedProjectSlugs.includes(projectSlug)
-          ? scopedExpandedProjectSlugs.filter((slug) => slug !== projectSlug)
-          : [...scopedExpandedProjectSlugs, projectSlug],
+        expandedProjectSlugs: nextScopedExpandedProjectSlugs.includes(projectSlug)
+          ? nextScopedExpandedProjectSlugs.filter((slug) => slug !== projectSlug)
+          : [...nextScopedExpandedProjectSlugs, projectSlug],
       };
     });
   };

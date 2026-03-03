@@ -181,6 +181,16 @@ export const deleteProject = mutation({
       await ctx.db.delete(invite._id);
     }
 
+    const activity = await ctx.db
+      .query("projectActivity")
+      .withIndex("by_project_created", (query) =>
+        query.eq("projectId", project._id),
+      )
+      .collect();
+    for (const entry of activity) {
+      await ctx.db.delete(entry._id);
+    }
+
     await ctx.db.delete(project._id);
 
     const users = await ctx.db.query("users").collect();

@@ -123,6 +123,27 @@ function getProjectPagePath(projectSlug: string, pageSlug: string) {
   return `/projects/${projectSlug}/${pageSlug}`;
 }
 
+function canReuseActivePageForRoute(args: {
+  route: ReturnType<typeof getPageRoute>;
+  activePage: ActivePageState | null;
+  pendingRouteProjectId: string | null;
+  pendingRoutePageId: string | null;
+}) {
+  const { route, activePage, pendingRouteProjectId, pendingRoutePageId } = args;
+
+  if (!route || !activePage) {
+    return false;
+  }
+
+  return (
+    (activePage.project.slug === route.projectSlug &&
+      activePage.page.slug === route.pageSlug) ||
+    (pendingRouteProjectId !== null &&
+      activePage.project.id === pendingRouteProjectId) ||
+    (pendingRoutePageId !== null && activePage.page.id === pendingRoutePageId)
+  );
+}
+
 function resolveDeleteRedirectPath(args: {
   currentPageId: string;
   projectSlug: string;
@@ -200,14 +221,12 @@ export function PageDocumentProvider({
     document !== null &&
     (activePage.page.title !== savedTitleSnapshot ||
       currentDocumentSnapshot !== savedDocumentSnapshot);
-  const canUseActivePageFallback =
-    route !== null &&
-    activePage !== null &&
-    ((activePage.project.slug === route.projectSlug &&
-      activePage.page.slug === route.pageSlug) ||
-      (pendingRouteProjectId !== null &&
-        activePage.project.id === pendingRouteProjectId) ||
-      (pendingRoutePageId !== null && activePage.page.id === pendingRoutePageId));
+  const canUseActivePageFallback = canReuseActivePageForRoute({
+    route,
+    activePage,
+    pendingRouteProjectId,
+    pendingRoutePageId,
+  });
   const pageQueryArgs =
     route === null
       ? "skip"
@@ -248,6 +267,29 @@ export function PageDocumentProvider({
   useEffect(() => {
     documentRef.current = document;
   }, [document]);
+
+  useEffect(() => {
+    if (route === null || pageData !== undefined || canUseActivePageFallback) {
+      return;
+    }
+
+    queueMicrotask(() => {
+      pendingDeleteRedirectPathRef.current = null;
+      setActivePage(null);
+      setDocument(null);
+      setSaveStatus("idle");
+      setSaveError(null);
+      setDeleteStatus("idle");
+      setDeleteError(null);
+      setPendingRouteProjectId(null);
+      setPendingRoutePageId(null);
+      setSavedTitleSnapshot(null);
+      setSavedDocumentSnapshot(null);
+      setViewerRole(null);
+    });
+    lastHydratedPageKeyRef.current = null;
+    lastRouteCorrectionKeyRef.current = null;
+  }, [canUseActivePageFallback, pageData, route]);
 
   useEffect(() => {
     if (!route || pageData === undefined) {
@@ -343,6 +385,13 @@ export function PageDocumentProvider({
       return;
     }
 
+    if (pageData === undefined) {
+      if (!canUseActivePageFallback) {
+        setModeLock(null);
+      }
+      return;
+    }
+
     if (pageData?.viewerRole === "client") {
       setModeLock("live");
       return;
@@ -351,7 +400,7 @@ export function PageDocumentProvider({
     if (pageData) {
       setModeLock(null);
     }
-  }, [pageData, route, setModeLock]);
+  }, [canUseActivePageFallback, pageData, route, setModeLock]);
 
   useEffect(() => {
     if (
@@ -554,9 +603,9 @@ export function PageDocumentProvider({
 
   const persistDocument = useCallback(
     async (currentPage: ActivePageState, currentDocument: PageDocumentV1) => {
-      const isClientViewer = viewerRole === "client";
+      const shouldSaveLiveState = isLive;
       const trimmedTitle = currentPage.page.title.trim();
-      if (!isClientViewer && !trimmedTitle) {
+      if (!shouldSaveLiveState && !trimmedTitle) {
         setSaveError("Page title cannot be empty.");
         setSaveStatus("error");
         return;
@@ -566,15 +615,38 @@ export function PageDocumentProvider({
       setSaveError(null);
 
       try {
-        if (isClientViewer) {
+        if (shouldSaveLiveState) {
           const result = await savePageLiveState({
             pageId: currentPage.page.id as never,
+            title: trimmedTitle,
             document: currentDocument,
           });
 
           documentRef.current = result.document;
           setDocument(result.document);
-          setSavedTitleSnapshot(currentPage.page.title);
+          const nextPage: ActivePageState = {
+            ...currentPage,
+            page: {
+              ...currentPage.page,
+              title: result.title,
+              slug: result.slug,
+            },
+          };
+
+          activePageRef.current = nextPage;
+          setActivePage(nextPage);
+
+          if (
+            route &&
+            (result.slug !== route.pageSlug ||
+              nextPage.project.slug !== route.projectSlug)
+          ) {
+            setPendingRouteProjectId(nextPage.project.id);
+            setPendingRoutePageId(result.pageId);
+            router.replace(`/projects/${nextPage.project.slug}/${result.slug}`);
+          }
+
+          setSavedTitleSnapshot(result.title);
           setSavedDocumentSnapshot(JSON.stringify(result.document));
           setSaveStatus("idle");
           return;
@@ -619,7 +691,7 @@ export function PageDocumentProvider({
         setSaveStatus("error");
       }
     },
-    [route, router, savePage, savePageLiveState, viewerRole],
+    [isLive, route, router, savePage, savePageLiveState],
   );
 
   const saveDocument = useCallback(async () => {

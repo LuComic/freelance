@@ -39,11 +39,15 @@ export const DesktopSidebar = ({
   const hasUnreadNotifications = useQuery(
     api.notifications.queries.hasUnreadNotifications,
   );
-  const { requestedConnectionsSection, requestVersion } = useSidebarController();
+  const { requestedConnectionsSection, requestVersion } =
+    useSidebarController();
   const hasPendingConnectionsRequest =
-    requestedConnectionsSection !== null && requestVersion > handledRequestVersion;
+    requestedConnectionsSection !== null &&
+    requestVersion > handledRequestVersion;
   const resolvedSidebarOpen = hasPendingConnectionsRequest ? true : sidebarOpen;
-  const resolvedActiveTab = hasPendingConnectionsRequest ? "friends" : activeTab;
+  const resolvedActiveTab = hasPendingConnectionsRequest
+    ? "friends"
+    : activeTab;
 
   const acknowledgeConnectionsRequest = () => {
     if (requestVersion > handledRequestVersion) {
@@ -144,7 +148,7 @@ export const DesktopSidebar = ({
           </div>
         </nav>
       ) : (
-        <nav className="w-[50px] h-full min-h-screen bg-(--darkest) border-r border-(--gray) flex flex-col items-center justify-start p-2 gap-4">
+        <nav className="w-[50px] h-full min-h-dvh bg-(--darkest) border-r border-(--gray) flex flex-col items-center justify-start p-2 gap-4">
           <button
             onClick={() => {
               acknowledgeConnectionsRequest();

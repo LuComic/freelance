@@ -37,6 +37,7 @@ export default function SettingsPage() {
     handleLeaveProject,
     handleRemoveProjectMember,
   } = useProjectSettingsController(projectSlug);
+
   const project = projectData?.project ?? null;
   const clients =
     projectMembers?.clients.map((member) => ({
@@ -52,7 +53,9 @@ export default function SettingsPage() {
   return (
     <>
       <div className="w-full border-b border-(--gray) pb-2 flex flex-col gap-2">
-        <p className="@[40rem]:text-3xl text-xl font-medium">Project Settings</p>
+        <p className="@[40rem]:text-3xl text-xl font-medium">
+          Project Settings
+        </p>
       </div>
       <p className="text-(--gray-page)">
         Manage project details, collaborators, and platform settings for this

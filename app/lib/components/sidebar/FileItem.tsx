@@ -55,7 +55,9 @@ export const FileItem = ({
           <ChevronRight className={`${isExpanded ? "rotate-90" : ""}`} />
         </button>
         <Link href={projectBasePath} className="w-full">
-          {project.name.length > 20 ? project.name.slice(0, 20) : project.name}
+          {project.name.length > 20
+            ? project.name.slice(0, 20) + "..."
+            : project.name}
         </Link>
         <Menubar className="ml-auto h-auto bg-transparent border-none shadow-none p-0">
           <MenubarMenu>
@@ -121,7 +123,11 @@ export const FileItem = ({
               href={projectBasePath + "/" + page.slug}
             >
               <File size={18} />
-              <span>{page.title}</span>
+              <span>
+                {page.title.length > 20
+                  ? page.title.slice(0, 20) + "..."
+                  : page.title}
+              </span>
             </Link>
           ))}
         </>

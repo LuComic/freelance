@@ -66,7 +66,9 @@ export function ProjectEmailListSection({
                 {member.name}
                 <button
                   type="button"
-                  disabled={!canRemove || pendingRemovalUserId === member.userId}
+                  disabled={
+                    !canRemove || pendingRemovalUserId === member.userId
+                  }
                   className="hover:bg-(--gray)/20 p-1 rounded-sm disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                   onClick={() => onRemove(member.userId)}
                 >
@@ -84,7 +86,9 @@ export function ProjectEmailListSection({
           >
             {manageLabel}
           </button>
-          {error ? <p className="text-sm text-(--declined-border)">{error}</p> : null}
+          {error ? (
+            <p className="text-sm text-(--declined-border)">{error}</p>
+          ) : null}
         </div>
       ) : null}
     </div>

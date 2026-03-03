@@ -319,34 +319,19 @@ export const CreateProjectModal = ({
                           </button>
                         </div>
                       ))}
-
-                      <div className="w-full flex flex-col gap-2">
-                        <input
-                          type="text"
-                          placeholder="Add a client email..."
-                          className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
-                          value={newClient}
-                          onChange={(event) => setNewClient(event.target.value)}
-                          onKeyDown={(event) => {
-                            if (event.key === "Enter" && newClient.trim()) {
-                              setClients((prev) => [newClient.trim(), ...prev]);
-                              setNewClient("");
-                            }
-                          }}
-                        />
-                        <button
-                          type="button"
-                          className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
-                          onClick={() => {
-                            if (!newClient.trim()) return;
-                            setClients((prev) => [newClient.trim(), ...prev]);
-                            setNewClient("");
-                          }}
-                        >
-                          Add
-                        </button>
-                      </div>
                     </div>
+
+                    <button
+                      type="button"
+                      className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
+                      onClick={() => {
+                        if (!newClient.trim()) return;
+                        setClients((prev) => [newClient.trim(), ...prev]);
+                        setNewClient("");
+                      }}
+                    >
+                      Manage clients
+                    </button>
 
                     <div className="w-full h-px bg-(--gray)" />
 
@@ -373,22 +358,6 @@ export const CreateProjectModal = ({
                       ))}
                     </div>
 
-                    <input
-                      type="text"
-                      placeholder="Add a co-creator email..."
-                      className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
-                      value={newCoCreator}
-                      onChange={(event) => setNewCoCreator(event.target.value)}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter" && newCoCreator.trim()) {
-                          setCoCreators((prev) => [
-                            newCoCreator.trim(),
-                            ...prev,
-                          ]);
-                          setNewCoCreator("");
-                        }
-                      }}
-                    />
                     <button
                       type="button"
                       className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
@@ -398,7 +367,7 @@ export const CreateProjectModal = ({
                         setNewCoCreator("");
                       }}
                     >
-                      Add
+                      Manage co-creators
                     </button>
                   </div>
                 ) : null}

@@ -170,6 +170,29 @@ const schema = defineSchema({
     .index("by_user", ["userId"])
     .index("by_user_read", ["userId", "isRead"]),
 
+  projectActivity: defineTable({
+    projectId: v.id("projects"),
+    pageId: v.id("pages"),
+    pageTitleSnapshot: v.string(),
+    actorUserId: v.id("users"),
+    actorNameSnapshot: v.string(),
+    actorImageSnapshot: v.optional(v.string()),
+    activityGroupId: v.optional(v.string()),
+    entryOrder: v.optional(v.number()),
+    componentInstanceId: v.string(),
+    componentType: v.union(
+      v.literal("Select"),
+      v.literal("Radio"),
+      v.literal("Feedback"),
+      v.literal("Kanban"),
+    ),
+    componentLabelSnapshot: v.string(),
+    oldValue: v.optional(v.string()),
+    newValue: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_project_created", ["projectId", "createdAt"]),
+
   pages: defineTable({
     projectId: v.id("projects"),
     title: v.string(),
