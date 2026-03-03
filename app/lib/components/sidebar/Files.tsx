@@ -53,8 +53,12 @@ export const Files = () => {
 
       return {
         scopeProjectSlug: currentProjectSlug,
-        expandedProjectSlugs: nextScopedExpandedProjectSlugs.includes(projectSlug)
-          ? nextScopedExpandedProjectSlugs.filter((slug) => slug !== projectSlug)
+        expandedProjectSlugs: nextScopedExpandedProjectSlugs.includes(
+          projectSlug,
+        )
+          ? nextScopedExpandedProjectSlugs.filter(
+              (slug) => slug !== projectSlug,
+            )
           : [...nextScopedExpandedProjectSlugs, projectSlug],
       };
     });
@@ -62,7 +66,11 @@ export const Files = () => {
 
   return (
     <div className="flex flex-col gap-1 items-start justify-start w-full flex-1 min-h-0 overflow-y-auto">
-      <p className="md:text-xl text-lg font-medium">{projectTitle}</p>
+      <p className="md:text-xl text-lg font-medium">
+        {projectTitle.length > 30
+          ? projectTitle.slice(0, 30) + "..."
+          : projectTitle}
+      </p>
       {projects === undefined ? (
         <p className="text-sm text-(--gray-page)">Loading projects...</p>
       ) : projects.length > 0 ? (

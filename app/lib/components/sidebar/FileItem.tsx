@@ -26,6 +26,7 @@ interface SidebarItemProps {
     id: string;
     slug: string;
     name: string;
+    viewerRole: "owner" | "coCreator" | "client";
     pages: Array<{
       id: string;
       slug: string;
@@ -47,6 +48,8 @@ export const FileItem = ({
   const createPage = useMutation(api.pages.mutations.createPage);
   const projectBasePath = "/projects/" + project.slug;
   const [isCreatingPage, setIsCreatingPage] = useState(false);
+  const isCreatePageDisabled =
+    isCreatingPage || project.viewerRole === "client";
 
   return (
     <>
@@ -61,7 +64,7 @@ export const FileItem = ({
         </Link>
         <Menubar className="ml-auto h-auto bg-transparent border-none shadow-none p-0">
           <MenubarMenu>
-            <MenubarTrigger className=" data-highlighted:bg-transparent data-[state=open]:bg-transparent data-highlighted:text-(--light) data-[state=open]:text-(--light) py-0">
+            <MenubarTrigger className="data-highlighted:bg-transparent data-[state=open]:bg-transparent data-highlighted:text-(--gray) data-[state=open]:text-(--gray) py-0">
               <EllipsisVertical size={20} />
             </MenubarTrigger>
             <MenubarContent className="bg-(--quite-dark) border border-(--gray) text-(--light) transition-none!">
@@ -89,9 +92,11 @@ export const FileItem = ({
           </MenubarMenu>
         </Menubar>
         <button
-          disabled={isCreatingPage}
+          type="button"
+          disabled={isCreatePageDisabled}
+          className="disabled:cursor-not-allowed"
           onClick={async () => {
-            if (isCreatingPage) {
+            if (isCreatePageDisabled) {
               return;
             }
 

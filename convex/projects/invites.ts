@@ -31,6 +31,8 @@ type PendingSidebarProjectInvite = {
   invitedByName: string;
   image: string | null;
 };
+type ProjectInviteTargetProject = Pick<Doc<"projects">, "_id" | "slug" | "name">;
+type ProjectInviteActor = Pick<Doc<"users">, "_id" | "name" | "email" | "image">;
 
 const REOPENABLE_INVITE_STATUSES = new Set<
   Doc<"projectInvites">["status"]
@@ -121,6 +123,118 @@ async function listMatchingProjectInvites(
 
     return normalizeEmail(invite.email) === normalizedTargetEmail;
   });
+}
+
+export async function upsertProjectInviteForUser(
+  ctx: MutationCtx,
+  args: {
+    project: ProjectInviteTargetProject;
+    invitedByUserId: Id<"users">;
+    invitedByUser: ProjectInviteActor;
+    targetUserId: Id<"users">;
+    role: Doc<"projectInvites">["role"];
+  },
+) {
+  if (args.targetUserId === args.invitedByUserId) {
+    throw invalidState("You can't invite yourself to a project.");
+  }
+
+  const targetUser = await ctx.db.get(args.targetUserId);
+
+  if (!targetUser) {
+    throw notFound(`User ${args.targetUserId} was not found.`);
+  }
+
+  const targetEmail = normalizeEmail(targetUser.email);
+
+  if (!targetEmail) {
+    throw invalidState(
+      "This account cannot receive a project invite because it has no email address yet.",
+    );
+  }
+
+  const existingMembership = await ctx.db
+    .query("projectMembers")
+    .withIndex("by_project_user", (query) =>
+      query
+        .eq("projectId", args.project._id)
+        .eq("userId", args.targetUserId),
+    )
+    .unique();
+
+  if (existingMembership?.status === "active") {
+    throw invalidState("This user is already a member of this project.");
+  }
+
+  const matchingInvites = await listMatchingProjectInvites(
+    ctx,
+    args.project._id,
+    args.targetUserId,
+    targetEmail,
+  );
+  const pendingInvite = matchingInvites.find(
+    (invite) => invite.status === "pending",
+  );
+
+  if (pendingInvite) {
+    throw invalidState("This user already has a pending invite for this project.");
+  }
+
+  const reopenableInvite = matchingInvites
+    .filter((invite) => REOPENABLE_INVITE_STATUSES.has(invite.status))
+    .sort(compareInvitesByRecency)[0];
+  const now = Date.now();
+
+  if (reopenableInvite) {
+    await ctx.db.patch(reopenableInvite._id, {
+      role: args.role,
+      status: "pending",
+      invitedByUserId: args.invitedByUserId,
+      invitedUserId: args.targetUserId,
+      email: targetEmail,
+      updatedAt: now,
+    });
+
+    await createNotification(ctx, {
+      userId: args.targetUserId,
+      type: "projectInviteReceived",
+      ...buildNotificationActorSnapshot(args.invitedByUser),
+      projectId: args.project._id,
+      projectSlugSnapshot: args.project.slug,
+      projectNameSnapshot: args.project.name,
+      inviteId: reopenableInvite._id,
+      sidebarTarget: "invites",
+    });
+  } else {
+    const inviteId = await ctx.db.insert("projectInvites", {
+      projectId: args.project._id,
+      invitedByUserId: args.invitedByUserId,
+      invitedUserId: args.targetUserId,
+      email: targetEmail,
+      role: args.role,
+      status: "pending",
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    await createNotification(ctx, {
+      userId: args.targetUserId,
+      type: "projectInviteReceived",
+      ...buildNotificationActorSnapshot(args.invitedByUser),
+      projectId: args.project._id,
+      projectSlugSnapshot: args.project.slug,
+      projectNameSnapshot: args.project.name,
+      inviteId,
+      sidebarTarget: "invites",
+    });
+  }
+
+  return {
+    projectId: args.project._id,
+    targetUserId: args.targetUserId,
+    role: args.role,
+    status: "pending" as const,
+  };
 }
 
 async function requireProjectInviteRecipient(
@@ -249,10 +363,6 @@ export const inviteUserToProject = mutation({
   handler: async (ctx, args) => {
     const { userId, user } = await requireCurrentAuth(ctx);
 
-    if (args.targetUserId === userId) {
-      throw invalidState("You can't invite yourself to a project.");
-    }
-
     const [project, targetUser] = await Promise.all([
       ctx.db.get(args.projectId),
       ctx.db.get(args.targetUserId),
@@ -267,94 +377,13 @@ export const inviteUserToProject = mutation({
     }
 
     await requireProjectEditor(ctx, project._id, userId);
-    const targetEmail = normalizeEmail(targetUser.email);
-
-    if (!targetEmail) {
-      throw invalidState(
-        "This account cannot receive a project invite because it has no email address yet.",
-      );
-    }
-
-    const existingMembership = await ctx.db
-      .query("projectMembers")
-      .withIndex("by_project_user", (query) =>
-        query.eq("projectId", project._id).eq("userId", args.targetUserId),
-      )
-      .unique();
-
-    if (existingMembership?.status === "active") {
-      throw invalidState("This user is already a member of this project.");
-    }
-
-    const matchingInvites = await listMatchingProjectInvites(
-      ctx,
-      project._id,
-      args.targetUserId,
-      targetEmail,
-    );
-    const pendingInvite = matchingInvites.find(
-      (invite) => invite.status === "pending",
-    );
-
-    if (pendingInvite) {
-      throw invalidState("This user already has a pending invite for this project.");
-    }
-
-    const reopenableInvite = matchingInvites
-      .filter((invite) => REOPENABLE_INVITE_STATUSES.has(invite.status))
-      .sort(compareInvitesByRecency)[0];
-    const now = Date.now();
-
-    if (reopenableInvite) {
-      await ctx.db.patch(reopenableInvite._id, {
-        role: args.role,
-        status: "pending",
-        invitedByUserId: userId,
-        invitedUserId: args.targetUserId,
-        email: targetEmail,
-        updatedAt: now,
-      });
-
-      await createNotification(ctx, {
-        userId: args.targetUserId,
-        type: "projectInviteReceived",
-        ...buildNotificationActorSnapshot(user),
-        projectId: project._id,
-        projectSlugSnapshot: project.slug,
-        projectNameSnapshot: project.name,
-        inviteId: reopenableInvite._id,
-        sidebarTarget: "invites",
-      });
-    } else {
-      const inviteId = await ctx.db.insert("projectInvites", {
-        projectId: project._id,
-        invitedByUserId: userId,
-        invitedUserId: args.targetUserId,
-        email: targetEmail,
-        role: args.role,
-        status: "pending",
-        createdAt: now,
-        updatedAt: now,
-      });
-
-      await createNotification(ctx, {
-        userId: args.targetUserId,
-        type: "projectInviteReceived",
-        ...buildNotificationActorSnapshot(user),
-        projectId: project._id,
-        projectSlugSnapshot: project.slug,
-        projectNameSnapshot: project.name,
-        inviteId,
-        sidebarTarget: "invites",
-      });
-    }
-
-    return {
-      projectId: project._id,
+    return upsertProjectInviteForUser(ctx, {
+      project,
+      invitedByUserId: userId,
+      invitedByUser: user,
       targetUserId: args.targetUserId,
       role: args.role,
-      status: "pending" as const,
-    };
+    });
   },
 });
 

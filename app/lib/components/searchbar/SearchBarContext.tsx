@@ -7,6 +7,7 @@ import type { SearchPerson } from "./SearchBarData";
 
 export type SearchTag = "people" | "template";
 export type InviteRole = "client" | "coCreator";
+export type SearchPersonSelectHandler = (person: SearchPerson) => void;
 export type PersonInviteDefaults = {
   projectId?: Id<"projects">;
   projectName?: string;
@@ -20,8 +21,13 @@ type SearchBarContextValue = {
   personModalPerson: SearchPerson | null;
   personModalInviteDefaults: PersonInviteDefaults | null;
   searchInviteDefaults: PersonInviteDefaults | null;
+  peopleSearchSelectHandler: SearchPersonSelectHandler | null;
   openSearch: () => void;
-  openTaggedSearch: (tag: SearchTag, inviteDefaults?: PersonInviteDefaults) => void;
+  openTaggedSearch: (
+    tag: SearchTag,
+    inviteDefaults?: PersonInviteDefaults,
+    selectHandler?: SearchPersonSelectHandler,
+  ) => void;
   openPersonModal: (
     person: SearchPerson,
     inviteDefaults?: PersonInviteDefaults,
@@ -47,6 +53,8 @@ export const SearchBarProvider = ({
     useState<PersonInviteDefaults | null>(null);
   const [searchInviteDefaults, setSearchInviteDefaults] =
     useState<PersonInviteDefaults | null>(null);
+  const [peopleSearchSelectHandler, setPeopleSearchSelectHandler] =
+    useState<SearchPersonSelectHandler | null>(null);
 
   const value = useMemo(
     () => ({
@@ -55,13 +63,22 @@ export const SearchBarProvider = ({
       personModalPerson,
       personModalInviteDefaults,
       searchInviteDefaults,
+      peopleSearchSelectHandler,
       openSearch: () => {
         setSearchInviteDefaults(null);
+        setPeopleSearchSelectHandler(null);
         setIsOpen(true);
       },
-      openTaggedSearch: (tag: SearchTag, inviteDefaults?: PersonInviteDefaults) => {
+      openTaggedSearch: (
+        tag: SearchTag,
+        inviteDefaults?: PersonInviteDefaults,
+        selectHandler?: SearchPersonSelectHandler,
+      ) => {
         setActiveTag(tag);
         setSearchInviteDefaults(tag === "people" ? inviteDefaults ?? null : null);
+        setPeopleSearchSelectHandler(() =>
+          tag === "people" ? selectHandler ?? null : null,
+        );
         setIsOpen(true);
       },
       openPersonModal: (
@@ -75,6 +92,7 @@ export const SearchBarProvider = ({
         setIsOpen(false);
         setActiveTag(null);
         setSearchInviteDefaults(null);
+        setPeopleSearchSelectHandler(null);
       },
       closePersonModal: () => {
         setPersonModalPerson(null);
@@ -83,11 +101,13 @@ export const SearchBarProvider = ({
       clearTag: () => {
         setActiveTag(null);
         setSearchInviteDefaults(null);
+        setPeopleSearchSelectHandler(null);
       },
     }),
     [
       activeTag,
       isOpen,
+      peopleSearchSelectHandler,
       personModalInviteDefaults,
       personModalPerson,
       searchInviteDefaults,

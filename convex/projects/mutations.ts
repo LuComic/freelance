@@ -8,7 +8,9 @@ import {
   requireProjectEditor,
   requireProjectMember,
 } from "../lib/permissions";
+import { upsertProjectInviteForUser } from "./invites";
 import { uniqueSlugFromLabel } from "../lib/slugs";
+import { projectInviteRoleValidator } from "../lib/validators";
 import {
   createInitialPageConfig,
   serializePageConfigDocument,
@@ -18,12 +20,27 @@ export const createProject = mutation({
   args: {
     name: v.string(),
     description: v.optional(v.string()),
+    members: v.optional(
+      v.array(
+        v.object({
+          userId: v.id("users"),
+          role: projectInviteRoleValidator,
+        }),
+      ),
+    ),
   },
   handler: async (ctx, args) => {
     const { userId, user } = await requireCurrentAuth(ctx);
     const now = Date.now();
     const trimmedName = args.name.trim();
     const trimmedDescription = args.description?.trim() || undefined;
+    const additionalMembers = Array.from(
+      new Map(
+        (args.members ?? [])
+          .filter((member) => member.userId !== userId)
+          .map((member) => [member.userId, member]),
+      ).values(),
+    );
 
     if (!trimmedName) {
       throw invalidState("Project name cannot be empty.");
@@ -60,6 +77,20 @@ export const createProject = mutation({
       createdAt: now,
       updatedAt: now,
     });
+
+    for (const member of additionalMembers) {
+      await upsertProjectInviteForUser(ctx, {
+        project: {
+          _id: projectId,
+          slug: projectSlug,
+          name: trimmedName,
+        },
+        invitedByUserId: userId,
+        invitedByUser: user,
+        targetUserId: member.userId,
+        role: member.role,
+      });
+    }
 
     const initialPageTitle = "Page 1";
     const initialPageSlug = "page-1";

@@ -46,9 +46,8 @@ export const SearchBar = () => {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [selectedTemplate, setSelectedTemplate] = useState<SearchTemplate | null>(
-    null,
-  );
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<SearchTemplate | null>(null);
   const [debouncedPeopleQuery, setDebouncedPeopleQuery] = useState("");
   const [resolvedPeopleSearchState, setResolvedPeopleSearchState] = useState<{
     query: string;
@@ -63,6 +62,7 @@ export const SearchBar = () => {
     activeTag,
     personModalInviteDefaults,
     personModalPerson,
+    peopleSearchSelectHandler,
     searchInviteDefaults,
     openSearch,
     openPersonModal,
@@ -177,7 +177,11 @@ export const SearchBar = () => {
           title: person.name,
           subtitle: person.email ?? undefined,
           onSelect: () => {
-            openPersonModal(person, searchInviteDefaults ?? undefined);
+            if (peopleSearchSelectHandler) {
+              peopleSearchSelectHandler(person);
+            } else {
+              openPersonModal(person, searchInviteDefaults ?? undefined);
+            }
             closeSearch();
             setSearchQuery("");
             setSelectedIndex(0);
@@ -281,7 +285,9 @@ export const SearchBar = () => {
         personModalPerson.userId,
         personModalInviteDefaults?.projectId ?? "",
         personModalInviteDefaults?.role ?? "",
-        personModalInviteDefaults?.expandInviteSection ? "expanded" : "collapsed",
+        personModalInviteDefaults?.expandInviteSection
+          ? "expanded"
+          : "collapsed",
       ].join(":")
     : "person-modal";
 
@@ -311,7 +317,7 @@ export const SearchBar = () => {
       />
       {isOpen ? (
         <div
-          className="fixed inset-0 z-30 flex items-start justify-center pt-[10vh] bg-black/60"
+          className="fixed inset-0 z-40 flex items-start justify-center pt-[10vh] bg-black/60"
           onClick={() => {
             closeSearch();
             setSearchQuery("");
@@ -366,7 +372,9 @@ export const SearchBar = () => {
                 searchItems.map((item, index) => (
                   <SearchBarItem
                     key={item.key}
-                    ref={index === selectedSearchItemIndex ? selectedItemRef : null}
+                    ref={
+                      index === selectedSearchItemIndex ? selectedItemRef : null
+                    }
                     title={item.title}
                     subtitle={item.subtitle}
                     badge={item.badge}

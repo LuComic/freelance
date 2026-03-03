@@ -5,6 +5,8 @@ import { ChevronRight, Plus, Search, Trash } from "lucide-react";
 import { useMutation } from "convex/react";
 import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import type { SearchPerson } from "../searchbar/SearchBarData";
+import { useSearchBar } from "../searchbar/SearchBarContext";
 
 const TEMPLATE = {
   name: "website freelance",
@@ -33,6 +35,7 @@ export const CreateProjectModal = ({
   buttonClassName,
 }: CreateProjectModalProps) => {
   const router = useRouter();
+  const { openTaggedSearch } = useSearchBar();
   const createProject = useMutation(api.projects.mutations.createProject);
   const [open, setOpen] = useState(false);
   const [projectName, setProjectName] = useState("");
@@ -45,21 +48,37 @@ export const CreateProjectModal = ({
   const [pageDropdowns, setPageDropdowns] = useState<boolean[]>(
     TEMPLATE.pages.map(() => false),
   );
-  const [clients, setClients] = useState<string[]>([
-    "alice@client.co",
-    "brand-team@client.co",
-  ]);
-  const [coCreators, setCoCreators] = useState<string[]>([
-    "marco@studio.co",
-    "sara@studio.co",
-  ]);
-  const [newClient, setNewClient] = useState("");
-  const [newCoCreator, setNewCoCreator] = useState("");
+  const [clients, setClients] = useState<SearchPerson[]>([]);
+  const [coCreators, setCoCreators] = useState<SearchPerson[]>([]);
 
   const templateFound =
     templateSearch.trim() === "" ||
     TEMPLATE.name.includes(templateSearch.trim().toLowerCase()) ||
     TEMPLATE.author.includes(templateSearch.trim().toLowerCase());
+
+  const getPersonLabel = (person: SearchPerson) => person.name;
+
+  const addPersonToRole =
+    (role: "client" | "coCreator") => (person: SearchPerson) => {
+      if (role === "client") {
+        setClients((prev) => [
+          person,
+          ...prev.filter((value) => value.userId !== person.userId),
+        ]);
+        setCoCreators((prev) =>
+          prev.filter((value) => value.userId !== person.userId),
+        );
+        return;
+      }
+
+      setCoCreators((prev) => [
+        person,
+        ...prev.filter((value) => value.userId !== person.userId),
+      ]);
+      setClients((prev) =>
+        prev.filter((value) => value.userId !== person.userId),
+      );
+    };
 
   const closeModal = () => {
     setOpen(false);
@@ -95,13 +114,26 @@ export const CreateProjectModal = ({
     setError(null);
 
     try {
+      const members = [
+        ...clients.map((client) => ({
+          userId: client.userId,
+          role: "client" as const,
+        })),
+        ...coCreators.map((coCreator) => ({
+          userId: coCreator.userId,
+          role: "coCreator" as const,
+        })),
+      ];
       const result = await createProject({
         name: projectName,
         description: projectDescription || undefined,
+        members: members.length > 0 ? members : undefined,
       });
       closeModal();
       setProjectName("");
       setProjectDescription("");
+      setClients([]);
+      setCoCreators([]);
       router.push(`/projects/${result.projectSlug}/${result.initialPageSlug}`);
     } catch (submissionError) {
       setError(
@@ -302,16 +334,18 @@ export const CreateProjectModal = ({
                     <div className="flex items-center justify-start gap-2 w-full flex-wrap">
                       {clients.map((client) => (
                         <div
-                          key={client}
+                          key={client.userId}
                           className="pl-1.5 pr-0.5 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) flex items-center gap-1"
                         >
-                          {client}
+                          {getPersonLabel(client)}
                           <button
                             type="button"
                             className="hover:bg-(--gray)/20 p-1 rounded-sm"
                             onClick={() =>
                               setClients((prev) =>
-                                prev.filter((value) => value !== client),
+                                prev.filter(
+                                  (value) => value.userId !== client.userId,
+                                ),
                               )
                             }
                           >
@@ -324,31 +358,38 @@ export const CreateProjectModal = ({
                     <button
                       type="button"
                       className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
-                      onClick={() => {
-                        if (!newClient.trim()) return;
-                        setClients((prev) => [newClient.trim(), ...prev]);
-                        setNewClient("");
-                      }}
+                      onClick={() =>
+                        openTaggedSearch(
+                          "people",
+                          {
+                            role: "client",
+                            expandInviteSection: false,
+                          },
+                          addPersonToRole("client"),
+                        )
+                      }
                     >
                       Manage clients
                     </button>
 
-                    <div className="w-full h-px bg-(--gray)" />
+                    <div className="w-full h-px bg-(--gray) mt-3" />
 
                     <p className="text-(--gray-page)">Current co-creators</p>
                     <div className="flex items-center justify-start gap-2 w-full flex-wrap">
                       {coCreators.map((coCreator) => (
                         <div
-                          key={coCreator}
+                          key={coCreator.userId}
                           className="pl-1.5 pr-0.5 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) flex items-center gap-1"
                         >
-                          {coCreator}
+                          {getPersonLabel(coCreator)}
                           <button
                             type="button"
                             className="hover:bg-(--gray)/20 p-1 rounded-sm"
                             onClick={() =>
                               setCoCreators((prev) =>
-                                prev.filter((value) => value !== coCreator),
+                                prev.filter(
+                                  (value) => value.userId !== coCreator.userId,
+                                ),
                               )
                             }
                           >
@@ -361,11 +402,16 @@ export const CreateProjectModal = ({
                     <button
                       type="button"
                       className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
-                      onClick={() => {
-                        if (!newCoCreator.trim()) return;
-                        setCoCreators((prev) => [newCoCreator.trim(), ...prev]);
-                        setNewCoCreator("");
-                      }}
+                      onClick={() =>
+                        openTaggedSearch(
+                          "people",
+                          {
+                            role: "coCreator",
+                            expandInviteSection: false,
+                          },
+                          addPersonToRole("coCreator"),
+                        )
+                      }
                     >
                       Manage co-creators
                     </button>

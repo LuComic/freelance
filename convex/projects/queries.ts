@@ -15,6 +15,7 @@ type ProjectSummary = {
   id: Doc<"projects">["_id"];
   slug: string;
   name: string;
+  viewerRole: Doc<"projectMembers">["role"];
   description: string | null;
   pageCount: number;
   createdAt: number;
@@ -55,12 +56,14 @@ function compareProjects(
 async function toProjectSummary(
   ctx: QueryCtx,
   project: Doc<"projects">,
+  viewerRole: Doc<"projectMembers">["role"],
 ): Promise<ProjectSummary> {
   const pages = await getOrderedProjectPages(ctx, project);
   return {
     id: project._id,
     slug: project.slug,
     name: project.name,
+    viewerRole,
     description: project.description ?? null,
     pageCount: pages.length,
     createdAt: project.createdAt,
@@ -110,10 +113,15 @@ export const listCurrentUserProjects = query({
       );
 
       const summaries = await Promise.all(
-        projects
-          .filter((project): project is NonNullable<typeof project> => project !== null)
-          .filter((project) => project.isArchived !== true)
-          .map((project) => toProjectSummary(ctx, project)),
+        activeMemberships.flatMap((membership, index) => {
+          const project = projects[index];
+
+          if (!project || project.isArchived === true) {
+            return [];
+          }
+
+          return [toProjectSummary(ctx, project, membership.role)];
+        }),
       );
       const projectOrder = new Map(
         (user.projectIds ?? []).map((projectId, index) => [projectId, index]),
@@ -125,6 +133,7 @@ export const listCurrentUserProjects = query({
           id: summary.id,
           slug: summary.slug,
           name: summary.name,
+          viewerRole: summary.viewerRole,
           description: summary.description,
           pageCount: summary.pageCount,
           pages: summary.pages,
@@ -150,8 +159,8 @@ export const getProjectSidebarBySlug = query({
   handler: async (ctx, args) => {
     const { userId } = await requireCurrentAuth(ctx);
     const project = await requireProjectBySlug(ctx, args.projectSlug);
-    await requireProjectMember(ctx, project._id, userId);
-    const summary = await toProjectSummary(ctx, project);
+    const membership = await requireProjectMember(ctx, project._id, userId);
+    const summary = await toProjectSummary(ctx, project, membership.role);
     return {
       id: summary.id,
       slug: summary.slug,
