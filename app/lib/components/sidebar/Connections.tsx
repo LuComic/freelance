@@ -9,7 +9,8 @@ type ConnectionsProps = {
 
 export const Connections = ({ connections }: ConnectionsProps) => {
   const { openTaggedSearch } = useSearchBar();
-  const { requestedConnectionsSection, requestVersion } = useSidebarController();
+  const { requestedConnectionsSection, requestVersion } =
+    useSidebarController();
 
   return (
     <div className="flex flex-col gap-1 items-start justify-start w-full flex-1 min-h-0 overflow-y-auto">
@@ -22,7 +23,10 @@ export const Connections = ({ connections }: ConnectionsProps) => {
         Find people
       </button>
       {connections === undefined ? (
-        <p className="text-sm text-(--gray-page)">Loading connections...</p>
+        <>
+          <div className="bg-(--gray)/60 w-full mt-2 h-[22px] rounded-md animate-pulse"></div>
+          <div className="bg-(--gray)/60 w-2/3 mt-2 h-[22px] rounded-md animate-pulse"></div>
+        </>
       ) : null}
       <ConnectionItem
         title="Friends"

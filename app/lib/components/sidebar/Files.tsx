@@ -72,7 +72,10 @@ export const Files = () => {
           : projectTitle}
       </p>
       {projects === undefined ? (
-        <p className="text-sm text-(--gray-page)">Loading projects...</p>
+        <>
+          <div className="bg-(--gray)/60 w-full mt-2 h-[22px] rounded-md animate-pulse"></div>
+          <div className="bg-(--gray)/60 w-2/3 mt-2 h-[22px] rounded-md animate-pulse"></div>
+        </>
       ) : projects.length > 0 ? (
         projects.map((project) => (
           <FileItem
