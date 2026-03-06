@@ -3,6 +3,7 @@ import type { Doc } from "../_generated/dataModel";
 import { query } from "../_generated/server";
 import { getConnectionByPairKey, toConnectionUserListItem } from "../connections/model";
 import { requireCurrentAuth } from "../lib/auth";
+import { assertNonAnonymousUser, isAnonymousUser } from "../lib/guests";
 import { APP_ERROR_CODES, ConvexDomainError } from "../lib/errors";
 import { getOrderedProjectPages } from "../lib/projectRecords";
 
@@ -227,7 +228,8 @@ export const searchPeople = query({
   },
   handler: async (ctx, args) => {
     try {
-      const { userId } = await requireCurrentAuth(ctx);
+      const { userId, user } = await requireCurrentAuth(ctx);
+      assertNonAnonymousUser(user, "Guest accounts can't search for people.");
       const normalizedQuery = normalizeSearchQuery(args.query);
 
       if (normalizedQuery.length < 2) {
@@ -244,7 +246,7 @@ export const searchPeople = query({
       const visibleResults = [];
 
       for (const result of searchResults) {
-        if (result._id === userId) {
+        if (result._id === userId || isAnonymousUser(result)) {
           continue;
         }
 

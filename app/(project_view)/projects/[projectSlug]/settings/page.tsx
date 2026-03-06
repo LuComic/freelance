@@ -14,6 +14,11 @@ export default function SettingsPage() {
   const {
     projectData,
     projectMembers,
+    joinCode,
+    canRegenerateJoinCode,
+    joinCodeError,
+    isJoinCodeLoading,
+    isRegeneratingJoinCode,
     currentProjectName,
     canManageMembers,
     canRemoveMembers,
@@ -36,6 +41,7 @@ export default function SettingsPage() {
     handleDeleteProject,
     handleLeaveProject,
     handleRemoveProjectMember,
+    handleRegenerateJoinCode,
   } = useProjectSettingsController(projectSlug);
 
   const project = projectData?.project ?? null;
@@ -82,11 +88,16 @@ export default function SettingsPage() {
           currentLabel="Current clients"
           manageLabel="Manage clients"
           members={clients}
+          joinCode={isJoinCodeLoading ? null : joinCode}
+          canCopyJoinCode={!isJoinCodeLoading}
+          canRegenerateJoinCode={canRegenerateJoinCode}
+          isRegeneratingJoinCode={isRegeneratingJoinCode}
           canManage={canManageMembers}
           canRemove={canRemoveMembers}
           pendingRemovalUserId={pendingMemberRemovalUserId}
-          error={memberActionError}
+          error={joinCodeError ?? memberActionError}
           onRemove={(userId) => void handleRemoveProjectMember(userId)}
+          onRegenerateJoinCode={() => void handleRegenerateJoinCode()}
           onManage={() => {
             if (!project) {
               return;

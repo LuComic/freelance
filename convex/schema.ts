@@ -97,6 +97,7 @@ const schema = defineSchema({
     ),
     status: v.union(v.literal("active"), v.literal("removed")),
     addedByUserId: v.optional(v.id("users")),
+    formerName: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -104,6 +105,21 @@ const schema = defineSchema({
     .index("by_user", ["userId"])
     .index("by_project_user", ["projectId", "userId"])
     .index("by_project_role", ["projectId", "role"]),
+
+  guestProjectUpgrades: defineTable({
+    token: v.string(),
+    guestUserId: v.id("users"),
+    projectId: v.id("projects"),
+    preferredPath: v.string(),
+    formerName: v.string(),
+    expiresAt: v.number(),
+    consumedAt: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_token", ["token"])
+    .index("by_guest_user", ["guestUserId"])
+    .index("by_project", ["projectId"]),
 
   projectInvites: defineTable({
     projectId: v.id("projects"),

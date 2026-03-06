@@ -1,5 +1,11 @@
-import { convexAuth } from "@convex-dev/auth/server";
+import {
+  convexAuth,
+  createAccount,
+  getAuthUserId,
+} from "@convex-dev/auth/server";
+import { ConvexCredentials } from "@convex-dev/auth/providers/ConvexCredentials";
 import Google from "@auth/core/providers/google";
+import { api, internal } from "./_generated/api";
 import type { Doc } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
 import { buildUserSearchText } from "./users/model";
@@ -27,6 +33,66 @@ function getOptionalBoolean(value: unknown) {
   return typeof value === "boolean" ? value : undefined;
 }
 
+const projectGuest = ConvexCredentials({
+  id: "projectGuest",
+  authorize: async (credentials, ctx) => {
+    const currentUserId = await getAuthUserId(ctx);
+
+    if (currentUserId !== null) {
+      throw new Error("Join via code is only available while signed out.");
+    }
+
+    const joinCode = normalizeOptionalString(credentials.joinCode);
+    const name = normalizeOptionalString(credentials.name);
+
+    if (!joinCode) {
+      throw new Error("Enter a valid project code.");
+    }
+
+    if (!name) {
+      throw new Error("Enter your name.");
+    }
+
+    const joinTarget = await ctx.runQuery(api.projects.join.validateJoinCode, {
+      joinCode,
+    });
+
+    if (!joinTarget) {
+      throw new Error("That project code is not valid.");
+    }
+
+    const { user } = await createAccount(ctx, {
+      provider: "projectGuest",
+      account: {
+        id: crypto.randomUUID(),
+      },
+      profile: {
+        isAnonymous: true,
+        name,
+      },
+    });
+
+    try {
+      await ctx.runMutation(
+        internal.projects.join.createGuestMembershipFromJoin,
+        {
+          userId: user._id,
+          joinCode: joinTarget.joinCode,
+        },
+      );
+    } catch (error) {
+      await ctx.runMutation(internal.projects.join.deleteGuestAfterFailedJoin, {
+        guestUserId: user._id,
+      });
+      throw error;
+    }
+
+    return {
+      userId: user._id,
+    };
+  },
+});
+
 async function uniqueUserWithVerifiedEmail(ctx: MutationCtx, email: string) {
   const users = await ctx.db
     .query("users")
@@ -52,6 +118,8 @@ function buildUserData(
   options: {
     emailVerified: boolean;
     existingUser?: Doc<"users"> | null;
+    providerId: string;
+    providerType: string;
     phoneVerified: boolean;
   },
 ) {
@@ -62,8 +130,15 @@ function buildUserData(
     normalizeOptionalString(profile.phone) ?? options.existingUser?.phone;
   const nextImage =
     normalizeOptionalString(profile.image) ?? options.existingUser?.image;
+  const shouldConvertAnonymousUser =
+    options.existingUser?.isAnonymous === true &&
+    !(
+      options.providerType === "credentials" &&
+      options.providerId === "projectGuest"
+    );
   const nextIsAnonymous =
-    getOptionalBoolean(profile.isAnonymous) ?? options.existingUser?.isAnonymous;
+    getOptionalBoolean(profile.isAnonymous) ??
+    (shouldConvertAnonymousUser ? false : options.existingUser?.isAnonymous);
   const nextBio = options.existingUser?.bio;
 
   const userData: Partial<Doc<"users">> = {
@@ -106,7 +181,7 @@ function buildUserData(
 }
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
-  providers: [Google],
+  providers: [Google, projectGuest],
   callbacks: {
     async createOrUpdateUser(ctx, args) {
       const profile = args.profile as AuthProfile;
@@ -158,6 +233,8 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
       const userData = buildUserData(profile, {
         emailVerified,
         existingUser,
+        providerId: args.provider.id,
+        providerType: args.provider.type,
         phoneVerified,
       });
 

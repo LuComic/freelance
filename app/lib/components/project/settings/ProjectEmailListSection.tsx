@@ -14,10 +14,15 @@ type ProjectEmailListSectionProps = {
   currentLabel: string;
   manageLabel: string;
   members: ProjectMemberListItem[];
+  joinCode?: string | null;
   onRemove: (userId: Id<"users">) => void;
   onManage: () => void;
+  onRegenerateJoinCode?: () => void;
   pendingRemovalUserId?: Id<"users"> | null;
   error?: string | null;
+  canCopyJoinCode?: boolean;
+  canRegenerateJoinCode?: boolean;
+  isRegeneratingJoinCode?: boolean;
   canManage?: boolean;
   canRemove?: boolean;
   shaded?: boolean;
@@ -28,16 +33,22 @@ export function ProjectEmailListSection({
   currentLabel,
   manageLabel,
   members,
+  joinCode = null,
   onRemove,
   onManage,
+  onRegenerateJoinCode,
   pendingRemovalUserId = null,
   error = null,
+  canCopyJoinCode = false,
+  canRegenerateJoinCode = false,
+  isRegeneratingJoinCode = false,
   canManage = true,
   canRemove = true,
   shaded = false,
 }: ProjectEmailListSectionProps) {
   const [open, setOpen] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
+  const [hoverCode, setHoverCode] = useState(false);
 
   return (
     <div
@@ -62,20 +73,37 @@ export function ProjectEmailListSection({
             <div className="flex items-center justify-start gap-2 h-auto">
               <p className="text-(--gray-page)">Join code (click to copy):</p>
               <button
+                type="button"
+                disabled={!joinCode || !canCopyJoinCode}
                 className="font-medium"
                 onClick={async () => {
-                  await navigator.clipboard.writeText("copied_code");
+                  if (!joinCode || !canCopyJoinCode) {
+                    return;
+                  }
+
+                  await navigator.clipboard.writeText(joinCode);
                   setCodeCopied(true);
                   setTimeout(() => {
                     setCodeCopied(false);
-                  }, 1000);
+                  }, 1500);
                 }}
+                onMouseEnter={() => setHoverCode(true)}
+                onMouseLeave={() => setHoverCode(false)}
               >
                 <span className="italic">
-                  {codeCopied ? "Copied" : "*****"}
+                  {codeCopied
+                    ? "Copied"
+                    : hoverCode
+                      ? (joinCode ?? "Loading...")
+                      : "******"}
                 </span>
               </button>
-              <button className="p-1 rounded-md hover:bg-(--gray-page)/20">
+              <button
+                type="button"
+                disabled={!canRegenerateJoinCode || isRegeneratingJoinCode}
+                className="p-1 rounded-md hover:bg-(--gray-page)/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                onClick={() => onRegenerateJoinCode?.()}
+              >
                 <Dices size={18} />
               </button>
             </div>

@@ -8,11 +8,11 @@ import {
   requireProjectEditor,
 } from "../lib/permissions";
 import {
-  buildNotificationActorSnapshot,
   createNotification,
   getChangedLiveStateComponents,
 } from "../notifications/model";
 import { getAnalyticsActivityChanges } from "../pageRuntime/analytics";
+import { buildProjectMemberDisplayName } from "../projects/model";
 import { getOrderedProjectPages } from "../lib/projectRecords";
 import { uniqueSlugFromLabel } from "../lib/slugs";
 import {
@@ -24,6 +24,19 @@ import {
   parsePageDocument,
   serializePageDocument,
 } from "./content";
+
+function buildProjectActorSnapshot(
+  user: Parameters<typeof buildProjectMemberDisplayName>[0] & {
+    image?: string | null;
+  },
+  membership: Parameters<typeof buildProjectMemberDisplayName>[1],
+) {
+  return {
+    actorUserId: user._id,
+    actorNameSnapshot: buildProjectMemberDisplayName(user, membership),
+    actorImageSnapshot: user.image ?? null,
+  };
+}
 
 export const createPage = mutation({
   args: {
@@ -249,7 +262,7 @@ export const savePageLiveState = mutation({
     });
 
     if (analyticsActivityChanges.length > 0) {
-      const actorSnapshot = buildNotificationActorSnapshot(user);
+      const actorSnapshot = buildProjectActorSnapshot(user, membership);
       const activityChangeGroups = new Map<
         string,
         {
@@ -347,7 +360,7 @@ export const savePageLiveState = mutation({
         ...activityWrites,
       ]);
     } else if (membership.role === "client" && changedComponents.length > 0) {
-      const actorSnapshot = buildNotificationActorSnapshot(user);
+      const actorSnapshot = buildProjectActorSnapshot(user, membership);
       const projectMembers = await ctx.db
         .query("projectMembers")
         .withIndex("by_project", (query) => query.eq("projectId", page.projectId))

@@ -11,6 +11,7 @@ export function SettingsSections() {
   const section = searchParams.get("section");
   const {
     isProfileLoading,
+    isAnonymous,
     currentName,
     currentBio,
     currentEmail,
@@ -37,6 +38,7 @@ export function SettingsSections() {
       <AccountSettingsSection
         activeSection={section}
         isProfileLoading={isProfileLoading}
+        isAnonymous={isAnonymous}
         currentName={currentName}
         currentBio={currentBio}
         currentEmail={currentEmail}

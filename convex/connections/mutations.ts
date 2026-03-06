@@ -3,6 +3,7 @@ import type { Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
 import { mutation } from "../_generated/server";
 import { requireCurrentAuth } from "../lib/auth";
+import { assertNonAnonymousUser, isAnonymousUser } from "../lib/guests";
 import {
   duplicateConnection,
   invalidState,
@@ -28,6 +29,10 @@ async function requireTargetUser(
     throw notFound(`User ${targetUserId} was not found.`);
   }
 
+  if (isAnonymousUser(targetUser)) {
+    throw invalidState("Guest accounts can't be used in connection actions.");
+  }
+
   return targetUser;
 }
 
@@ -46,6 +51,7 @@ export const sendFriendRequest = mutation({
   },
   handler: async (ctx, args) => {
     const { userId, user } = await requireCurrentAuth(ctx);
+    assertNonAnonymousUser(user, "Guest accounts can't send friend requests.");
     await requireTargetUser(ctx, userId, args.targetUserId);
     const now = Date.now();
     const connection = await getConnectionByPairKey(ctx, userId, args.targetUserId);
@@ -114,6 +120,7 @@ export const acceptFriendRequest = mutation({
   },
   handler: async (ctx, args) => {
     const { userId, user } = await requireCurrentAuth(ctx);
+    assertNonAnonymousUser(user, "Guest accounts can't accept friend requests.");
     await requireTargetUser(ctx, userId, args.targetUserId);
     const connection = await getConnectionByPairKey(ctx, userId, args.targetUserId);
 
@@ -149,7 +156,8 @@ export const declineFriendRequest = mutation({
     targetUserId: v.id("users"),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireCurrentAuth(ctx);
+    const { userId, user } = await requireCurrentAuth(ctx);
+    assertNonAnonymousUser(user, "Guest accounts can't decline friend requests.");
     await requireTargetUser(ctx, userId, args.targetUserId);
     const connection = await getConnectionByPairKey(ctx, userId, args.targetUserId);
 
@@ -177,7 +185,8 @@ export const cancelFriendRequest = mutation({
     targetUserId: v.id("users"),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireCurrentAuth(ctx);
+    const { userId, user } = await requireCurrentAuth(ctx);
+    assertNonAnonymousUser(user, "Guest accounts can't cancel friend requests.");
     await requireTargetUser(ctx, userId, args.targetUserId);
     const connection = await getConnectionByPairKey(ctx, userId, args.targetUserId);
 
@@ -205,7 +214,8 @@ export const removeFriend = mutation({
     targetUserId: v.id("users"),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireCurrentAuth(ctx);
+    const { userId, user } = await requireCurrentAuth(ctx);
+    assertNonAnonymousUser(user, "Guest accounts can't remove friends.");
     await requireTargetUser(ctx, userId, args.targetUserId);
     const connection = await getConnectionByPairKey(ctx, userId, args.targetUserId);
 
@@ -233,7 +243,8 @@ export const forgetCollaborator = mutation({
     targetUserId: v.id("users"),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireCurrentAuth(ctx);
+    const { userId, user } = await requireCurrentAuth(ctx);
+    assertNonAnonymousUser(user, "Guest accounts can't manage collaborators.");
     await requireTargetUser(ctx, userId, args.targetUserId);
     const now = Date.now();
     const connection = await getConnectionByPairKey(ctx, userId, args.targetUserId);
@@ -269,7 +280,8 @@ export const blockUser = mutation({
     targetUserId: v.id("users"),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireCurrentAuth(ctx);
+    const { userId, user } = await requireCurrentAuth(ctx);
+    assertNonAnonymousUser(user, "Guest accounts can't block users.");
     await requireTargetUser(ctx, userId, args.targetUserId);
     const now = Date.now();
     const connection = await getConnectionByPairKey(ctx, userId, args.targetUserId);
@@ -311,7 +323,8 @@ export const unblockUser = mutation({
     targetUserId: v.id("users"),
   },
   handler: async (ctx, args) => {
-    const { userId } = await requireCurrentAuth(ctx);
+    const { userId, user } = await requireCurrentAuth(ctx);
+    assertNonAnonymousUser(user, "Guest accounts can't unblock users.");
     await requireTargetUser(ctx, userId, args.targetUserId);
     const connection = await getConnectionByPairKey(ctx, userId, args.targetUserId);
 

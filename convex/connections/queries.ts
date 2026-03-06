@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { query } from "../_generated/server";
 import { requireCurrentAuth } from "../lib/auth";
+import { isAnonymousUser } from "../lib/guests";
 import { APP_ERROR_CODES, ConvexDomainError, notFound } from "../lib/errors";
 import {
   compareConnectionUserListItems,
@@ -16,6 +17,18 @@ export const listSidebarConnections = query({
   handler: async (ctx) => {
     try {
       const { userId, user } = await requireCurrentAuth(ctx);
+
+      if (isAnonymousUser(user)) {
+        return {
+          friends: [],
+          collaborators: [],
+          invites: [],
+          sentRequests: [],
+          receivedRequests: [],
+          blocked: [],
+        };
+      }
+
       const [
         requestedConnections,
         receivedConnections,
@@ -156,8 +169,14 @@ export const getRelationshipWithUser = query({
       const { userId } = await requireCurrentAuth(ctx);
       const targetUser = await ctx.db.get(args.targetUserId);
 
-      if (!targetUser) {
+      if (!targetUser || isAnonymousUser(targetUser)) {
         throw notFound(`User ${args.targetUserId} was not found.`);
+      }
+
+      const currentUser = await ctx.db.get(userId);
+
+      if (!currentUser || isAnonymousUser(currentUser)) {
+        return null;
       }
 
       const connection = await getConnectionByPairKey(

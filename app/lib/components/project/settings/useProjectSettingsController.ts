@@ -30,6 +30,11 @@ export function useProjectSettingsController(projectSlug: string) {
     Id<"users"> | null
   >(null);
   const lastRouteCorrectionKeyRef = useRef<string | null>(null);
+  const ensuredJoinCodeProjectIdRef = useRef<string | null>(null);
+  const [joinCodeSnapshot, setJoinCodeSnapshot] = useState<string | null>(null);
+  const [joinCodeError, setJoinCodeError] = useState<string | null>(null);
+  const [isEnsuringJoinCode, setIsEnsuringJoinCode] = useState(false);
+  const [isRegeneratingJoinCode, setIsRegeneratingJoinCode] = useState(false);
 
   const redirectToProjectsIndex = () => {
     window.location.replace("/projects");
@@ -54,6 +59,10 @@ export function useProjectSettingsController(projectSlug: string) {
   const deleteProject = useMutation(api.projects.mutations.deleteProject);
   const leaveProject = useMutation(api.projects.mutations.leaveProject);
   const removeProjectMember = useMutation(api.projects.members.removeProjectMember);
+  const ensureProjectJoinCode = useMutation(api.projects.join.ensureProjectJoinCode);
+  const regenerateProjectJoinCode = useMutation(
+    api.projects.join.regenerateProjectJoinCode,
+  );
   const currentProjectName = projectData?.project.name ?? "";
   const isNameDirty =
     savedNameSnapshot !== null && nameDraft.trim() !== savedNameSnapshot;
@@ -138,15 +147,22 @@ export function useProjectSettingsController(projectSlug: string) {
     queueMicrotask(() => {
       setMemberActionError(null);
       setPendingMemberRemovalUserId(null);
+      setJoinCodeError(null);
+      setJoinCodeSnapshot(null);
+      ensuredJoinCodeProjectIdRef.current = null;
     });
   }, [projectData?.project.id]);
 
   const currentProjectId = useMemo(
-    () => projectData?.project.id ?? projectIdSnapshot,
-    [projectData?.project.id, projectIdSnapshot],
+    () => (projectData === null ? null : (projectData?.project.id ?? projectIdSnapshot)),
+    [projectData, projectIdSnapshot],
   );
   const projectMembers = useQuery(
     api.projects.members.getProjectMembers,
+    currentProjectId ? { projectId: currentProjectId as never } : "skip",
+  );
+  const projectJoinCode = useQuery(
+    api.projects.join.getProjectJoinCode,
     currentProjectId ? { projectId: currentProjectId as never } : "skip",
   );
   const canManageMembers =
@@ -161,6 +177,55 @@ export function useProjectSettingsController(projectSlug: string) {
   const canRenameProject =
     projectMembers?.viewerRole === "owner" ||
     projectMembers?.viewerRole === "coCreator";
+
+  useEffect(() => {
+    if (!currentProjectId || projectJoinCode === undefined) {
+      return;
+    }
+
+    if (projectJoinCode === null) {
+      queueMicrotask(() => {
+        setJoinCodeSnapshot(null);
+        setJoinCodeError(null);
+      });
+      ensuredJoinCodeProjectIdRef.current = null;
+      return;
+    }
+
+    if (projectJoinCode.joinCode) {
+      queueMicrotask(() => {
+        setJoinCodeSnapshot(projectJoinCode.joinCode);
+        setJoinCodeError(null);
+      });
+      ensuredJoinCodeProjectIdRef.current = null;
+      return;
+    }
+
+    if (ensuredJoinCodeProjectIdRef.current === currentProjectId) {
+      return;
+    }
+
+    ensuredJoinCodeProjectIdRef.current = currentProjectId;
+    setIsEnsuringJoinCode(true);
+    setJoinCodeError(null);
+
+    void ensureProjectJoinCode({
+      projectId: currentProjectId as never,
+    })
+      .then((result) => {
+        setJoinCodeSnapshot(result.joinCode);
+      })
+      .catch((error) => {
+        setJoinCodeError(
+          error instanceof Error
+            ? error.message
+            : "Could not load the join code.",
+        );
+      })
+      .finally(() => {
+        setIsEnsuringJoinCode(false);
+      });
+  }, [currentProjectId, ensureProjectJoinCode, projectJoinCode]);
 
   const handleProjectRename = async () => {
     if (!currentProjectId || isSavingName || !canRenameProject) {
@@ -284,9 +349,42 @@ export function useProjectSettingsController(projectSlug: string) {
     }
   };
 
+  const handleRegenerateJoinCode = async () => {
+    if (
+      !currentProjectId ||
+      isRegeneratingJoinCode ||
+      !projectJoinCode?.canRegenerate
+    ) {
+      return;
+    }
+
+    setJoinCodeError(null);
+    setIsRegeneratingJoinCode(true);
+
+    try {
+      const result = await regenerateProjectJoinCode({
+        projectId: currentProjectId as never,
+      });
+      setJoinCodeSnapshot(result.joinCode);
+    } catch (error) {
+      setJoinCodeError(
+        error instanceof Error
+          ? error.message
+          : "Could not regenerate the join code.",
+      );
+    } finally {
+      setIsRegeneratingJoinCode(false);
+    }
+  };
+
   return {
     projectData,
     projectMembers,
+    joinCode: projectJoinCode?.joinCode ?? joinCodeSnapshot,
+    canRegenerateJoinCode: projectJoinCode?.canRegenerate ?? false,
+    joinCodeError,
+    isJoinCodeLoading: projectJoinCode === undefined || isEnsuringJoinCode,
+    isRegeneratingJoinCode,
     currentProjectName,
     canManageMembers,
     canRemoveMembers,
@@ -309,5 +407,6 @@ export function useProjectSettingsController(projectSlug: string) {
     handleDeleteProject,
     handleLeaveProject,
     handleRemoveProjectMember,
+    handleRegenerateJoinCode,
   };
 }

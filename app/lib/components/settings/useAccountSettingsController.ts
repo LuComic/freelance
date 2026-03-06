@@ -23,6 +23,7 @@ export function useAccountSettingsController() {
 
   const isProfileReady = profile !== undefined && profile !== null;
   const isProfileLoading = profile === undefined;
+  const isAnonymous = profile?.isAnonymous === true;
   const currentName = profile?.name ?? "";
   const currentBio = profile?.bio ?? "";
   const currentEmail = profile?.email ?? "";
@@ -40,12 +41,16 @@ export function useAccountSettingsController() {
 
   const canSaveName =
     !isProfileLoading &&
+    !isAnonymous &&
     !isSavingName &&
     nameDraft.trim().length > 0 &&
     nameDraft.trim() !== currentName;
 
   const canSaveBio =
-    !isProfileLoading && !isSavingBio && bioDraft.trim() !== currentBio;
+    !isProfileLoading &&
+    !isAnonymous &&
+    !isSavingBio &&
+    bioDraft.trim() !== currentBio;
 
   const handleNameSave = async () => {
     if (!canSaveName) {
@@ -116,6 +121,7 @@ export function useAccountSettingsController() {
 
   return {
     isProfileLoading,
+    isAnonymous,
     currentName,
     currentBio,
     currentEmail,

@@ -9,6 +9,7 @@ export type CurrentProfile = {
   email: string | null;
   bio: string | null;
   image: string | null;
+  isAnonymous: boolean;
 };
 
 function toCurrentProfile(user: Doc<"users">): CurrentProfile {
@@ -18,6 +19,7 @@ function toCurrentProfile(user: Doc<"users">): CurrentProfile {
     email: user.email ?? null,
     bio: user.bio ?? null,
     image: user.image ?? null,
+    isAnonymous: user.isAnonymous === true,
   };
 }
 

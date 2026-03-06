@@ -9,6 +9,7 @@ import {
   type ConnectionUserListItem,
 } from "../connections/model";
 import { requireCurrentAuth } from "../lib/auth";
+import { deleteGuestUser, isAnonymousUser } from "../lib/guests";
 import {
   APP_ERROR_CODES,
   ConvexDomainError,
@@ -16,6 +17,7 @@ import {
   notFound,
 } from "../lib/errors";
 import { requireProjectEditor, requireProjectMember } from "../lib/permissions";
+import { buildProjectMemberDisplayName } from "./model";
 
 type ProjectCtx = QueryCtx | MutationCtx;
 
@@ -109,7 +111,10 @@ async function getSortedMemberItemsByRole(
       continue;
     }
 
-    const item = toConnectionUserListItem(user);
+    const item = {
+      ...toConnectionUserListItem(user),
+      name: buildProjectMemberDisplayName(user, membership),
+    };
 
     if (membership.role === "client") {
       clients.push(item);
@@ -131,6 +136,12 @@ export async function listHistoricalCollaborators(
   ctx: ProjectCtx,
   currentUserId: Id<"users">,
 ) {
+  const currentUser = await ctx.db.get(currentUserId);
+
+  if (!currentUser || isAnonymousUser(currentUser)) {
+    return [];
+  }
+
   const currentMemberships = await ctx.db
     .query("projectMembers")
     .withIndex("by_user", (query) => query.eq("userId", currentUserId))
@@ -181,7 +192,12 @@ export async function listHistoricalCollaborators(
   );
 
   return collaborators
-    .filter((user): user is NonNullable<typeof user> => user !== null)
+    .filter(
+      (
+        user,
+      ): user is NonNullable<typeof user> =>
+        user !== null && user.isAnonymous !== true,
+    )
     .map((user) => toConnectionUserListItem(user))
     .sort(compareConnectionUserListItems);
 }
@@ -260,6 +276,14 @@ export const removeProjectMember = mutation({
 
     if (targetMembership.role === "owner") {
       throw invalidState("The project owner cannot be removed.");
+    }
+
+    if (isAnonymousUser(targetUser)) {
+      await deleteGuestUser(ctx, targetUser._id);
+      return {
+        projectId: project._id,
+        targetUserId: args.targetUserId,
+      };
     }
 
     const now = Date.now();

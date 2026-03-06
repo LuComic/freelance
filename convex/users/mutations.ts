@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import type { Doc } from "../_generated/dataModel";
 import { internalMutation, mutation } from "../_generated/server";
 import { requireCurrentAuth } from "../lib/auth";
+import { deleteGuestUser, isAnonymousUser } from "../lib/guests";
 import { invalidState } from "../lib/errors";
 import { buildUserSearchText } from "./model";
 
@@ -76,6 +77,7 @@ export const deleteAccount = mutation({
   args: {},
   handler: async (ctx) => {
     const { userId } = await requireCurrentAuth(ctx);
+    const guestUserIds = new Set<Doc<"users">["_id"]>();
 
     const ownedProjects = await ctx.db
       .query("projects")
@@ -97,6 +99,13 @@ export const deleteAccount = mutation({
         .query("projectMembers")
         .withIndex("by_project", (query) => query.eq("projectId", project._id))
         .collect();
+      for (const member of members) {
+        const memberUser = await ctx.db.get(member.userId);
+
+        if (memberUser && memberUser._id !== userId && isAnonymousUser(memberUser)) {
+          guestUserIds.add(memberUser._id);
+        }
+      }
       for (const member of members) {
         await ctx.db.delete(member._id);
       }
@@ -136,6 +145,13 @@ export const deleteAccount = mutation({
         deletedProjectIds.has(invite.projectId)
       ) {
         await ctx.db.delete(invite._id);
+      }
+    }
+
+    const guestProjectUpgrades = await ctx.db.query("guestProjectUpgrades").collect();
+    for (const guestProjectUpgrade of guestProjectUpgrades) {
+      if (guestProjectUpgrade.guestUserId === userId) {
+        await ctx.db.delete(guestProjectUpgrade._id);
       }
     }
 
@@ -227,6 +243,10 @@ export const deleteAccount = mutation({
       if (Object.keys(patch).length > 0) {
         await ctx.db.patch(user._id, patch);
       }
+    }
+
+    for (const guestUserId of guestUserIds) {
+      await deleteGuestUser(ctx, guestUserId);
     }
 
     await ctx.db.delete(userId);

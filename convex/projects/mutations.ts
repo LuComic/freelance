@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import type { Doc } from "../_generated/dataModel";
 import { mutation } from "../_generated/server";
 import { requireCurrentAuth } from "../lib/auth";
+import { assertNonAnonymousUser, deleteGuestUser, isAnonymousUser } from "../lib/guests";
 import { invalidState, notFound } from "../lib/errors";
 import {
   assertProjectRole,
@@ -15,6 +16,7 @@ import {
   createInitialPageConfig,
   serializePageConfigDocument,
 } from "../pages/content";
+import { generateUniqueJoinCode } from "./model";
 
 export const createProject = mutation({
   args: {
@@ -31,6 +33,7 @@ export const createProject = mutation({
   },
   handler: async (ctx, args) => {
     const { userId, user } = await requireCurrentAuth(ctx);
+    assertNonAnonymousUser(user, "Guest accounts can't create projects.");
     const now = Date.now();
     const trimmedName = args.name.trim();
     const trimmedDescription = args.description?.trim() || undefined;
@@ -52,6 +55,7 @@ export const createProject = mutation({
       existingProjects.map((project) => project.slug),
       "untitled-project",
     );
+    const joinCode = await generateUniqueJoinCode(ctx);
 
     const initialContentJson = serializePageConfigDocument(
       createInitialPageConfig(),
@@ -64,6 +68,7 @@ export const createProject = mutation({
       name: trimmedName,
       description: trimmedDescription,
       pageIds: [],
+      joinCode,
       createdAt: now,
       updatedAt: now,
     });
@@ -200,8 +205,26 @@ export const deleteProject = mutation({
       .query("projectMembers")
       .withIndex("by_project", (query) => query.eq("projectId", project._id))
       .collect();
+    const guestUserIds = new Set<Doc<"users">["_id"]>();
+
+    for (const member of members) {
+      const memberUser = await ctx.db.get(member.userId);
+
+      if (isAnonymousUser(memberUser)) {
+        guestUserIds.add(member.userId);
+      }
+    }
+
     for (const member of members) {
       await ctx.db.delete(member._id);
+    }
+
+    const guestUpgrades = await ctx.db
+      .query("guestProjectUpgrades")
+      .withIndex("by_project", (query) => query.eq("projectId", project._id))
+      .collect();
+    for (const guestUpgrade of guestUpgrades) {
+      await ctx.db.delete(guestUpgrade._id);
     }
 
     const invites = await ctx.db
@@ -247,6 +270,10 @@ export const deleteProject = mutation({
         await ctx.db.patch(user._id, patch);
       }
     }
+
+    for (const guestUserId of guestUserIds) {
+      await deleteGuestUser(ctx, guestUserId);
+    }
   },
 });
 
@@ -268,6 +295,14 @@ export const leaveProject = mutation({
       throw invalidState(
         "Project owners cannot leave their own project. Delete the project instead.",
       );
+    }
+
+    if (isAnonymousUser(user)) {
+      await deleteGuestUser(ctx, userId);
+      return {
+        projectId: project._id,
+        status: "left" as const,
+      };
     }
 
     const now = Date.now();

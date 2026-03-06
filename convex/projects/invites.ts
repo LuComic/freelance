@@ -4,6 +4,7 @@ import { mutation, query } from "../_generated/server";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
 import { buildUserDisplayName } from "../connections/model";
 import { requireCurrentAuth } from "../lib/auth";
+import { assertNonAnonymousUser } from "../lib/guests";
 import {
   APP_ERROR_CODES,
   ConvexDomainError,
@@ -313,6 +314,7 @@ export const listInviteableProjects = query({
   handler: async (ctx) => {
     try {
       const { userId, user } = await requireCurrentAuth(ctx);
+      assertNonAnonymousUser(user, "Guest accounts can't invite people to projects.");
       const memberships = await ctx.db
         .query("projectMembers")
         .withIndex("by_user", (query) => query.eq("userId", userId))
@@ -362,6 +364,7 @@ export const inviteUserToProject = mutation({
   },
   handler: async (ctx, args) => {
     const { userId, user } = await requireCurrentAuth(ctx);
+    assertNonAnonymousUser(user, "Guest accounts can't invite people to projects.");
 
     const [project, targetUser] = await Promise.all([
       ctx.db.get(args.projectId),
@@ -393,6 +396,7 @@ export const acceptProjectInvite = mutation({
   },
   handler: async (ctx, args) => {
     const { userId, user } = await requireCurrentAuth(ctx);
+    assertNonAnonymousUser(user, "Guest accounts can't accept project invites.");
     const invite = await requireProjectInviteRecipient(
       ctx,
       args.inviteId,
@@ -468,6 +472,7 @@ export const declineProjectInvite = mutation({
   },
   handler: async (ctx, args) => {
     const { userId, user } = await requireCurrentAuth(ctx);
+    assertNonAnonymousUser(user, "Guest accounts can't decline project invites.");
     const invite = await requireProjectInviteRecipient(
       ctx,
       args.inviteId,

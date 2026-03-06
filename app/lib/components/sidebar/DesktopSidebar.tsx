@@ -31,6 +31,7 @@ export const DesktopSidebar = ({
   initialOpen,
   userProfile,
 }: DesktopSidebarProps) => {
+  const isAnonymous = userProfile?.isAnonymous === true;
   const [sidebarOpen, setSidebarOpen] = useState(initialOpen ?? true);
   const [handledRequestVersion, setHandledRequestVersion] = useState(0);
   const [activeTab, setActiveTab] = useState<"files" | "friends" | "settings">(
@@ -43,12 +44,17 @@ export const DesktopSidebar = ({
   const { requestedConnectionsSection, requestVersion } =
     useSidebarController();
   const hasPendingConnectionsRequest =
+    !isAnonymous &&
     requestedConnectionsSection !== null &&
     requestVersion > handledRequestVersion;
   const resolvedSidebarOpen = hasPendingConnectionsRequest ? true : sidebarOpen;
-  const resolvedActiveTab = hasPendingConnectionsRequest
-    ? "friends"
-    : activeTab;
+  const resolvedActiveTab = isAnonymous
+    ? activeTab === "friends"
+      ? "files"
+      : activeTab
+    : hasPendingConnectionsRequest
+      ? "friends"
+      : activeTab;
 
   const acknowledgeConnectionsRequest = () => {
     if (requestVersion > handledRequestVersion) {
@@ -107,19 +113,21 @@ export const DesktopSidebar = ({
             >
               <Folder size={20} className="mx-auto" />
             </button>
-            <button
-              className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                resolvedActiveTab === "friends"
-                  ? "bg-(--quite-dark) text-(--vibrant)"
-                  : ""
-              }`}
-              onClick={() => {
-                acknowledgeConnectionsRequest();
-                setActiveTab("friends");
-              }}
-            >
-              <Users size={20} className="mx-auto" />
-            </button>
+            {!isAnonymous ? (
+              <button
+                className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
+                  resolvedActiveTab === "friends"
+                    ? "bg-(--quite-dark) text-(--vibrant)"
+                    : ""
+                }`}
+                onClick={() => {
+                  acknowledgeConnectionsRequest();
+                  setActiveTab("friends");
+                }}
+              >
+                <Users size={20} className="mx-auto" />
+              </button>
+            ) : null}
             <button
               className={`p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
                 resolvedActiveTab === "settings"
@@ -133,10 +141,10 @@ export const DesktopSidebar = ({
             >
               <Settings size={20} className="mx-auto" />
             </button>
-            <CreateProjectModal />
+            {!isAnonymous ? <CreateProjectModal /> : null}
           </div>
           {resolvedActiveTab === "files" ? <Files /> : null}
-          {resolvedActiveTab === "friends" ? (
+          {!isAnonymous && resolvedActiveTab === "friends" ? (
             <Connections connections={connections} />
           ) : null}
           {resolvedActiveTab === "settings" ? <SidebarSettings /> : null}
@@ -176,20 +184,22 @@ export const DesktopSidebar = ({
             >
               <Folder size={20} className="mx-auto" />
             </button>
-            <button
-              className={`h-full  p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                resolvedActiveTab === "friends"
-                  ? "bg-(--quite-dark) text-(--vibrant)"
-                  : ""
-              }`}
-              onClick={() => {
-                acknowledgeConnectionsRequest();
-                setActiveTab("friends");
-                setSidebarOpen(true);
-              }}
-            >
-              <Users size={20} className="mx-auto" />
-            </button>
+            {!isAnonymous ? (
+              <button
+                className={`h-full  p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
+                  resolvedActiveTab === "friends"
+                    ? "bg-(--quite-dark) text-(--vibrant)"
+                    : ""
+                }`}
+                onClick={() => {
+                  acknowledgeConnectionsRequest();
+                  setActiveTab("friends");
+                  setSidebarOpen(true);
+                }}
+              >
+                <Users size={20} className="mx-auto" />
+              </button>
+            ) : null}
             <button
               className={`h-full  p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
                 resolvedActiveTab === "settings"
@@ -204,7 +214,7 @@ export const DesktopSidebar = ({
             >
               <Settings size={20} className="mx-auto" />
             </button>
-            <CreateProjectModal />
+            {!isAnonymous ? <CreateProjectModal /> : null}
           </div>
           <div className="flex flex-col gap-2 items-center justify-center mt-auto w-full">
             <SidebarUserInfo profile={userProfile} compact={true} />
