@@ -69,7 +69,10 @@ export const FileItem = ({
             </MenubarTrigger>
             <MenubarContent className="bg-(--quite-dark) border border-(--gray) text-(--light) transition-none!">
               <MenubarGroup>
-                <MenubarItem className="hover:bg-(--darkest-hover)! hover:text-(--light)!">
+                <MenubarItem
+                  asChild
+                  className="hover:bg-(--darkest-hover)! hover:text-(--light)!"
+                >
                   <Link
                     href={projectBasePath + "/settings"}
                     className="flex items-center justify-start gap-2"
@@ -78,7 +81,10 @@ export const FileItem = ({
                     Settings
                   </Link>
                 </MenubarItem>
-                <MenubarItem className="hover:bg-(--darkest-hover)! hover:text-(--light)! ">
+                <MenubarItem
+                  asChild
+                  className="hover:bg-(--darkest-hover)! hover:text-(--light)! "
+                >
                   <Link
                     href={projectBasePath + "/analytics"}
                     className="flex items-center justify-start gap-2"
