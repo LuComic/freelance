@@ -126,7 +126,9 @@ export const Tab = ({ initialTabsState }: TabProps) => {
     let nextRecentTabId = getNextRecentTabId(nextState);
 
     while (nextRecentTabId) {
-      const nextTab = nextState.tabs.find((tab) => tab.tabId === nextRecentTabId);
+      const nextTab = nextState.tabs.find(
+        (tab) => tab.tabId === nextRecentTabId,
+      );
 
       if (!nextTab) {
         nextState = removeTabById(nextState, nextRecentTabId);
@@ -154,7 +156,7 @@ export const Tab = ({ initialTabsState }: TabProps) => {
   };
 
   return (
-    <div className="hidden bg-(--darkest) max-w-full w-full items-center justify-start overflow-x-auto border-b border-(--gray) md:flex">
+    <div className="hidden bg-(--darkest) max-w-full w-full items-center justify-start overflow-x-auto border-b border-(--gray) md:flex overscroll-y-none">
       {resolvedTabs.length > 0 ? (
         <>
           {resolvedTabs.map((tab) => (

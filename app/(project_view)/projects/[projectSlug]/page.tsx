@@ -10,10 +10,11 @@ export default function ProjectPage() {
   const params = useParams<{ projectSlug: string }>();
   const router = useRouter();
   const projectSlug = params.projectSlug;
-  const [projectIdSnapshot, setProjectIdSnapshot] = useState<string | null>(null);
-  const [resolvedProjectSlugSnapshot, setResolvedProjectSlugSnapshot] = useState<
-    string | null
-  >(null);
+  const [projectIdSnapshot, setProjectIdSnapshot] = useState<string | null>(
+    null,
+  );
+  const [resolvedProjectSlugSnapshot, setResolvedProjectSlugSnapshot] =
+    useState<string | null>(null);
   const [pendingRouteProjectId, setPendingRouteProjectId] = useState<
     string | null
   >(null);

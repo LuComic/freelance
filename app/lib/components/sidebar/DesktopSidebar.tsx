@@ -20,6 +20,7 @@ import Link from "next/link";
 import { LogOutButton } from "../LogOutButton";
 import { SidebarUserInfo, type SidebarUserProfile } from "./SidebarUserInfo";
 import { useSidebarController } from "./SidebarControllerContext";
+import { Authenticated } from "convex/react";
 
 type DesktopSidebarProps = {
   initialOpen?: boolean;
@@ -141,10 +142,12 @@ export const DesktopSidebar = ({
           {resolvedActiveTab === "settings" ? <SidebarSettings /> : null}
           <div className="mt-auto w-full h-max flex items-center">
             <SidebarUserInfo profile={userProfile} />
-            <Link className={notificationClassName} href="/notifications">
-              <Bell size={20} />
-            </Link>
-            <LogOutButton sidebar={true} />
+            <Authenticated>
+              <Link className={notificationClassName} href="/notifications">
+                <Bell size={20} />
+              </Link>
+              <LogOutButton sidebar={true} />
+            </Authenticated>
           </div>
         </nav>
       ) : (
@@ -205,14 +208,16 @@ export const DesktopSidebar = ({
           </div>
           <div className="flex flex-col gap-2 items-center justify-center mt-auto w-full">
             <SidebarUserInfo profile={userProfile} compact={true} />
-            <Link
-              className={`aspect-square p-1 rounded-lg hover:bg-(--darkest-hover) w-full ${
-                hasUnreadNotifications ? "notification relative" : ""
-              }`}
-              href="/notifications"
-            >
-              <Bell size={20} className="mx-auto" />
-            </Link>
+            <Authenticated>
+              <Link
+                className={`aspect-square p-1 rounded-lg hover:bg-(--darkest-hover) w-full ${
+                  hasUnreadNotifications ? "notification relative" : ""
+                }`}
+                href="/notifications"
+              >
+                <Bell size={20} className="mx-auto" />
+              </Link>
+            </Authenticated>
           </div>
         </nav>
       )}

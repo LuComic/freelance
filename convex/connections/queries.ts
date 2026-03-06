@@ -16,23 +16,27 @@ export const listSidebarConnections = query({
   handler: async (ctx) => {
     try {
       const { userId, user } = await requireCurrentAuth(ctx);
-      const [requestedConnections, receivedConnections, collaborators, invites] =
-        await Promise.all([
-          ctx.db
-            .query("connections")
-            .withIndex("by_requester", (query) =>
-              query.eq("requesterUserId", userId),
-            )
-            .collect(),
-          ctx.db
-            .query("connections")
-            .withIndex("by_receiver", (query) =>
-              query.eq("receiverUserId", userId),
-            )
-            .collect(),
-          listHistoricalCollaborators(ctx, userId),
-          listIncomingPendingProjectInvitesForSidebar(ctx, userId, user.email),
-        ]);
+      const [
+        requestedConnections,
+        receivedConnections,
+        collaborators,
+        invites,
+      ] = await Promise.all([
+        ctx.db
+          .query("connections")
+          .withIndex("by_requester", (query) =>
+            query.eq("requesterUserId", userId),
+          )
+          .collect(),
+        ctx.db
+          .query("connections")
+          .withIndex("by_receiver", (query) =>
+            query.eq("receiverUserId", userId),
+          )
+          .collect(),
+        listHistoricalCollaborators(ctx, userId),
+        listIncomingPendingProjectInvitesForSidebar(ctx, userId, user.email),
+      ]);
       const uniqueConnections = new Map(
         [...requestedConnections, ...receivedConnections].map((connection) => [
           connection._id,
@@ -52,7 +56,12 @@ export const listSidebarConnections = query({
       );
       const relationshipByUserId = new Map<
         string,
-        "none" | "friend" | "sent" | "received" | "blockedByMe" | "blockedByThem"
+        | "none"
+        | "friend"
+        | "sent"
+        | "received"
+        | "blockedByMe"
+        | "blockedByThem"
       >();
       const friends = [];
       const sentRequests = [];

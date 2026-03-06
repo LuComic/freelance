@@ -52,11 +52,11 @@ export const listNotifications = query({
           const projectSlug =
             project && project.isArchived !== true
               ? project.slug
-              : notification.projectSlugSnapshot ?? null;
+              : (notification.projectSlugSnapshot ?? null);
           const projectName =
             project && project.isArchived !== true
               ? project.name
-              : notification.projectNameSnapshot ?? null;
+              : (notification.projectNameSnapshot ?? null);
 
           if (notification.type === "clientStateChanged") {
             return {

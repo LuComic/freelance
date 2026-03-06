@@ -28,7 +28,7 @@ export default function Page() {
             className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
           />
           <button className="ml-2 rounded-md bg-(--vibrant) px-2 py-1 hover:bg-(--vibrant-hover)">
-            Join
+            Next
           </button>
         </form>
       </div>

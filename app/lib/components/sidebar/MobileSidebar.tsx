@@ -19,6 +19,7 @@ import Link from "next/link";
 import { LogOutButton } from "../LogOutButton";
 import { SidebarUserInfo, type SidebarUserProfile } from "./SidebarUserInfo";
 import { useSidebarController } from "./SidebarControllerContext";
+import { Authenticated } from "convex/react";
 
 export const MobileSidebar = ({
   userProfile,
@@ -34,11 +35,15 @@ export const MobileSidebar = ({
   const hasUnreadNotifications = useQuery(
     api.notifications.queries.hasUnreadNotifications,
   );
-  const { requestedConnectionsSection, requestVersion } = useSidebarController();
+  const { requestedConnectionsSection, requestVersion } =
+    useSidebarController();
   const hasPendingConnectionsRequest =
-    requestedConnectionsSection !== null && requestVersion > handledRequestVersion;
+    requestedConnectionsSection !== null &&
+    requestVersion > handledRequestVersion;
   const resolvedSidebarOpen = hasPendingConnectionsRequest ? true : sidebarOpen;
-  const resolvedActiveTab = hasPendingConnectionsRequest ? "friends" : activeTab;
+  const resolvedActiveTab = hasPendingConnectionsRequest
+    ? "friends"
+    : activeTab;
 
   const acknowledgeConnectionsRequest = () => {
     if (requestVersion > handledRequestVersion) {
@@ -115,15 +120,17 @@ export const MobileSidebar = ({
           {resolvedActiveTab === "settings" ? <SidebarSettings /> : null}
           <div className="mt-auto w-full h-max flex items-center">
             <SidebarUserInfo profile={userProfile} />
-            <Link
-              className={`ml-auto p-1 flex items-center justify-center aspect-square rounded-lg h-full hover:bg-(--darkest-hover) ${
-                hasUnreadNotifications ? "notification relative" : ""
-              }`}
-              href="/notifications"
-            >
-              <Bell size={20} />
-            </Link>
-            <LogOutButton sidebar={true} />
+            <Authenticated>
+              <Link
+                className={`ml-auto p-1 flex items-center justify-center aspect-square rounded-lg h-full hover:bg-(--darkest-hover) ${
+                  hasUnreadNotifications ? "notification relative" : ""
+                }`}
+                href="/notifications"
+              >
+                <Bell size={20} />
+              </Link>
+              <LogOutButton sidebar={true} />
+            </Authenticated>
           </div>
         </nav>
       ) : (

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { Authenticated, Unauthenticated, AuthLoading } from "convex/react";
 
 export type SidebarUserProfile =
   | undefined
@@ -137,28 +138,44 @@ export const SidebarUserInfo = ({
 
   if (compact) {
     return (
-      <Link
-        className={`${sharedClassName} p-1 w-full flex items-center justify-center`}
-        href="/settings?section=account"
-        aria-label={displayName}
-        title={displayName}
-      >
-        <Avatar profile={profile} compact={true} />
-      </Link>
+      <Authenticated>
+        <Link
+          className={`${sharedClassName} p-1 w-full flex items-center justify-center`}
+          href="/settings?section=account"
+          aria-label={displayName}
+          title={displayName}
+        >
+          <Avatar profile={profile} compact={true} />
+        </Link>
+      </Authenticated>
     );
   }
 
   return (
-    <Link
-      className={`${sharedClassName} w-max gap-2 flex items-center justify-start py-1 pl-2 pr-3`}
-      href="/settings?section=account"
-    >
-      <Avatar profile={profile} />
-      <span className="font-light text-base">
-        {displayName.length > 20
-          ? displayName.slice(0, 20) + "..."
-          : displayName}
-      </span>
-    </Link>
+    <>
+      <Unauthenticated>
+        <button className="rounded-md bg-(--vibrant) px-2 py-1 hover:bg-(--vibrant-hover)">
+          Create an account
+        </button>
+      </Unauthenticated>
+      <AuthLoading>
+        <button className="rounded-md bg-(--vibrant) px-2 py-1 hover:bg-(--vibrant-hover)">
+          Create an account
+        </button>
+      </AuthLoading>
+      <Authenticated>
+        <Link
+          className={`${sharedClassName} w-max gap-2 flex items-center justify-start py-1 pl-2 pr-3`}
+          href="/settings?section=account"
+        >
+          <Avatar profile={profile} />
+          <span className="font-light text-base">
+            {displayName.length > 20
+              ? displayName.slice(0, 20) + "..."
+              : displayName}
+          </span>
+        </Link>
+      </Authenticated>
+    </>
   );
 };
