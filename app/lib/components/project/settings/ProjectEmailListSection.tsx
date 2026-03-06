@@ -1,7 +1,7 @@
 "use client";
 
 import type { Id } from "@/convex/_generated/dataModel";
-import { ChevronRight, Trash } from "lucide-react";
+import { ChevronRight, Dices, Trash } from "lucide-react";
 import { useState } from "react";
 
 type ProjectMemberListItem = {
@@ -37,6 +37,7 @@ export function ProjectEmailListSection({
   shaded = false,
 }: ProjectEmailListSectionProps) {
   const [open, setOpen] = useState(false);
+  const [codeCopied, setCodeCopied] = useState(false);
 
   return (
     <div
@@ -57,6 +58,28 @@ export function ProjectEmailListSection({
       {open ? (
         <div className="pl-7 flex flex-col gap-2 pb-2">
           <p className="text-(--gray-page)">{currentLabel}</p>
+          {title === "Clients" && (
+            <div className="flex items-center justify-start gap-2 h-auto">
+              <p className="text-(--gray-page)">Join code (click to copy):</p>
+              <button
+                className="font-medium"
+                onClick={async () => {
+                  await navigator.clipboard.writeText("copied_code");
+                  setCodeCopied(true);
+                  setTimeout(() => {
+                    setCodeCopied(false);
+                  }, 1000);
+                }}
+              >
+                <span className="italic">
+                  {codeCopied ? "Copied" : "*****"}
+                </span>
+              </button>
+              <button className="p-1 rounded-md hover:bg-(--gray-page)/20">
+                <Dices size={18} />
+              </button>
+            </div>
+          )}
           <div className="flex items-center justify-start gap-2 w-full flex-wrap">
             {members.map((member) => (
               <div

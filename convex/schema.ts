@@ -147,11 +147,7 @@ const schema = defineSchema({
     actorNameSnapshot: v.string(),
     actorImageSnapshot: v.optional(v.string()),
     sidebarTarget: v.optional(
-      v.union(
-        v.literal("invites"),
-        v.literal("got"),
-        v.literal("friends"),
-      ),
+      v.union(v.literal("invites"), v.literal("got"), v.literal("friends")),
     ),
     componentInstanceId: v.optional(v.string()),
     componentType: v.optional(

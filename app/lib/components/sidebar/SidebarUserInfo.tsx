@@ -154,14 +154,15 @@ export const SidebarUserInfo = ({
   return (
     <>
       <Unauthenticated>
-        <button className="rounded-md bg-(--vibrant) px-2 py-1 hover:bg-(--vibrant-hover)">
+        <Link
+          className="rounded-md bg-(--vibrant) px-2 py-1 hover:bg-(--vibrant-hover)"
+          href="/"
+        >
           Create an account
-        </button>
+        </Link>
       </Unauthenticated>
       <AuthLoading>
-        <button className="rounded-md bg-(--vibrant) px-2 py-1 hover:bg-(--vibrant-hover)">
-          Create an account
-        </button>
+        <div className="bg-(--gray)/60 w-full mt-2 h-[34px] rounded-md animate-pulse"></div>
       </AuthLoading>
       <Authenticated>
         <Link
