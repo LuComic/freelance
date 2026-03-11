@@ -5,11 +5,7 @@ import { useEditMode } from "@/app/lib/components/project/EditModeContext";
 import { FeedbackCreator } from "./FeedbackCreator";
 import { FeedbackClient } from "./FeedbackClient";
 
-export const Feedback = ({
-  instanceId,
-}: {
-  instanceId: string;
-}) => {
+export const Feedback = ({ instanceId }: { instanceId: string }) => {
   const { isLive } = useEditMode();
   const {
     component,
@@ -17,8 +13,7 @@ export const Feedback = ({
     updateConfig,
     updateLiveState,
     commitLiveState,
-  } =
-    usePageComponentState(instanceId, "Feedback");
+  } = usePageComponentState(instanceId, "Feedback");
 
   return (
     <div className="w-full flex flex-col gap-2">

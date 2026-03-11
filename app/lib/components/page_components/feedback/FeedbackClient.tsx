@@ -123,7 +123,9 @@ export const FeedbackClient = ({
   const pendingCount = liveState.items.filter(
     (item) => item.status === "pending" && !item.dismissed,
   ).length;
-  const dismissedCount = liveState.items.filter((item) => item.dismissed).length;
+  const dismissedCount = liveState.items.filter(
+    (item) => item.dismissed,
+  ).length;
 
   return (
     <>

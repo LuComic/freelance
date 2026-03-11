@@ -2,7 +2,10 @@
 
 import type { KanbanItem } from "@/lib/pageDocument";
 
-type KanbanBoardItem = Pick<KanbanItem, "id" | "feature" | "status" | "dismissed">;
+type KanbanBoardItem = Pick<
+  KanbanItem,
+  "id" | "feature" | "status" | "dismissed"
+>;
 
 function getTableRows(items: KanbanBoardItem[]) {
   const todos = items.filter((item) => item.status === "Todo");
@@ -18,11 +21,7 @@ function getTableRows(items: KanbanBoardItem[]) {
   return rows;
 }
 
-export const KanbanBoard = ({
-  items,
-}: {
-  items: KanbanBoardItem[];
-}) => {
+export const KanbanBoard = ({ items }: { items: KanbanBoardItem[] }) => {
   const tableRows = getTableRows(items);
 
   return (

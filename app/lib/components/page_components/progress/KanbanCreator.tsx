@@ -187,7 +187,7 @@ export const KanbanCreator = ({
                 setNewTaskStatus(value as KanbanItem["status"])
               }
             >
-              <SelectTrigger className="w-full @[40rem]:w-52 bg-(--darkest) border-(--gray-page) ">
+              <SelectTrigger className="w-full @[40rem]:w-52 bg-(--darkest) border-(--gray-page)">
                 <SelectValue placeholder="Set the status" />
               </SelectTrigger>
               <SelectContent className="bg-(--darkest) border-none text-(--gray-page)">
