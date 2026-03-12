@@ -71,7 +71,7 @@ export function TestingComponent({
           className={`flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border ${filter !== "day" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
           onClick={() => setFilter("day")}
         >
-          1 Day
+          Today
         </button>
         <button
           className={`flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border ${filter !== "week" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
