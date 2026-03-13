@@ -154,38 +154,42 @@ export function TestingComponent({
           <>
             <input
               type="text"
-              placeholder="I'd like this feature added..."
+              placeholder="Creating the MVP..."
               className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
             />
 
-            <p>Pick the date(s)</p>
-            <DatePicker />
+            <div className="flex flex-col gap-1">
+              <p className="font-medium">Pick the date(s)</p>
+              <DatePicker />
+            </div>
 
-            <p>Color</p>
-            <Select>
-              <SelectTrigger className="w-full @[40rem]:w-52 bg-(--darkest) border-(--gray-page)">
-                <SelectValue placeholder="Set the status" />
-              </SelectTrigger>
-              <SelectContent className="bg-(--darkest) border-none text-(--gray-page)">
-                <SelectGroup className="bg-(--darkest)">
-                  {CONSTANT_COLOR_SELECTION.map((color) => (
-                    <SelectItem
-                      key={color}
-                      value={color}
-                      className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) "
-                    >
-                      {color !== "none" ? (
-                        <div
-                          className="h-auto aspect-square w-4 rounded-full"
-                          style={{ backgroundColor: "var(--" + color + ")" }}
-                        ></div>
-                      ) : null}
-                      {color}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+            <div className="flex flex-col gap-1">
+              <p className="font-medium">Color</p>
+              <Select>
+                <SelectTrigger className="w-full @[40rem]:w-52 bg-(--darkest) border-(--gray-page)">
+                  <SelectValue placeholder="Set the status" />
+                </SelectTrigger>
+                <SelectContent className="bg-(--darkest) border-none text-(--gray-page)">
+                  <SelectGroup className="bg-(--darkest)">
+                    {CONSTANT_COLOR_SELECTION.map((color) => (
+                      <SelectItem
+                        key={color}
+                        value={color}
+                        className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) "
+                      >
+                        {color !== "none" ? (
+                          <div
+                            className="h-auto aspect-square w-4 rounded-full"
+                            style={{ backgroundColor: "var(--" + color + ")" }}
+                          ></div>
+                        ) : null}
+                        {color}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
 
             <button className="w-max rounded-md py-1 px-2 bg-(--vibrant) hover:bg-(--vibrant-hover) ">
               Submit

@@ -172,7 +172,7 @@ export const TopBar = () => {
       ) : (
         <p
           onClick={startTitleEdit}
-          className="cursor-text px-2 py-1 rounded-md hover:bg-(--gray)/20"
+          className="cursor-text px-2 py-1 rounded-md hover:bg-(--gray)/20 overflow-x-hidden text-nowrap"
         >
           {pageTitle}
         </p>
