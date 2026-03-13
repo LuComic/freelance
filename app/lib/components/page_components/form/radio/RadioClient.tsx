@@ -20,7 +20,6 @@ export const RadioClient = ({
   liveState,
   onChangeLiveState,
 }: RadioClientProps) => {
-
   return (
     <>
       <p className="@[40rem]:text-xl text-lg font-medium">{config.title}</p>

@@ -39,6 +39,17 @@
   --declined-bg: #fda4af;
 
   --red: #e11d48;
+  --red-bg: #fda4af;
+  --green: #15803d;
+  --green-bg: #86efac;
+  --yellow: #ca8a04;
+  --yellow-bg: #fef08a;
+  --pink: #ec4899;
+  --pink-bg: #f9a8d4;
+  --purple: #d946ef;
+  --purple-bg: #f0abfc;
+  --cyan: #0891b2;
+  --cyan-bg: #a5f3fc;
 
   --radius: 0.625rem;
   --background: oklch(1 0 0);

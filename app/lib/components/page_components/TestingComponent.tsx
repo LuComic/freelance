@@ -1,32 +1,133 @@
 "use client";
 
 import { useOptionalPageDocument } from "@/app/lib/components/project/PageDocumentContext";
-import { CalendarPlus, ChevronLeft, ChevronRight } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { DatePicker } from "./DatePicker";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type TestingComponentProps = {
   instanceId?: string;
   mockText?: string;
 };
 
+const CONSTANT_COLOR_SELECTION = [
+  "none",
+  "red",
+  "green",
+  "yellow",
+  "pink",
+  "purple",
+  "cyan",
+];
+
+const DAY_HOURS = [
+  "00:00",
+  "01:00",
+  "02:00",
+  "03:00",
+  "04:00",
+  "05:00",
+  "06:00",
+  "07:00",
+  "08:00",
+  "09:00",
+  "10:00",
+  "11:00",
+  "12:00",
+  "13:00",
+  "14:00",
+  "15:00",
+  "16:00",
+  "17:00",
+  "18:00",
+  "19:00",
+  "20:00",
+  "21:00",
+  "22:00",
+  "23:00",
+];
+
 export function TestingComponent({
   instanceId,
   mockText = "TestingComponent mock data",
 }: TestingComponentProps) {
   const pageDocument = useOptionalPageDocument();
-  const component =
-    instanceId && pageDocument
-      ? pageDocument.document?.components[instanceId]
-      : null;
-  const text =
-    component?.type === "TestingComponent"
-      ? component.config.mockText
-      : mockText;
 
   const [filter, setFilter] = useState("day");
   const [adding, setAdding] = useState(false);
-  const currentTime = "14:20";
+  const [currentTimeOffset, setCurrentTimeOffset] = useState(0);
+  const dayContainerRef = useRef<HTMLDivElement | null>(null);
+  const hourRowRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const [currentTime, setCurrentTime] = useState(() => {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    return `${hours}:${minutes}`;
+  });
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+      setCurrentTime(`${hours}:${minutes}`);
+    };
+
+    const intervalId = setInterval(updateTime, 60 * 1000);
+    return () => clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
+    if (filter !== "day") return;
+
+    const updateCurrentTimeOffset = () => {
+      const container = dayContainerRef.current;
+
+      if (!container || hourRowRefs.current.length === 0) {
+        setCurrentTimeOffset(0);
+        return;
+      }
+
+      const [hours, minutes] = currentTime.split(":");
+      const hourIndex = Number(hours);
+      const minuteValue = Number(minutes);
+      const previousHoursHeight = hourRowRefs.current
+        .slice(0, hourIndex)
+        .reduce((sum, row) => sum + (row?.offsetHeight ?? 0), 0);
+      const currentHourHeight =
+        hourRowRefs.current[hourIndex]?.offsetHeight ?? 0;
+
+      setCurrentTimeOffset(
+        previousHoursHeight + (currentHourHeight * minuteValue) / 60,
+      );
+    };
+
+    updateCurrentTimeOffset();
+
+    const resizeObserver = new ResizeObserver(updateCurrentTimeOffset);
+    if (dayContainerRef.current) {
+      resizeObserver.observe(dayContainerRef.current);
+    }
+
+    hourRowRefs.current.forEach((row) => {
+      if (row) resizeObserver.observe(row);
+    });
+
+    window.addEventListener("resize", updateCurrentTimeOffset);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateCurrentTimeOffset);
+    };
+  }, [currentTime, filter]);
 
   const getTimePercent = () => {
     const [hours, minutes] = currentTime.split(":");
@@ -59,6 +160,32 @@ export function TestingComponent({
 
             <p>Pick the date(s)</p>
             <DatePicker />
+
+            <p>Color</p>
+            <Select>
+              <SelectTrigger className="w-full @[40rem]:w-52 bg-(--darkest) border-(--gray-page)">
+                <SelectValue placeholder="Set the status" />
+              </SelectTrigger>
+              <SelectContent className="bg-(--darkest) border-none text-(--gray-page)">
+                <SelectGroup className="bg-(--darkest)">
+                  {CONSTANT_COLOR_SELECTION.map((color) => (
+                    <SelectItem
+                      key={color}
+                      value={color}
+                      className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) "
+                    >
+                      {color !== "none" ? (
+                        <div
+                          className="h-auto aspect-square w-4 rounded-full"
+                          style={{ backgroundColor: "var(--" + color + ")" }}
+                        ></div>
+                      ) : null}
+                      {color}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
 
             <button className="w-max rounded-md py-1 px-2 bg-(--vibrant) hover:bg-(--vibrant-hover) ">
               Submit
@@ -97,10 +224,19 @@ export function TestingComponent({
         }`}
       >
         {filter === "day" ? (
-          <div key="day" className="w-full h-full flex flex-col relative">
+          <div
+            ref={dayContainerRef}
+            key="day"
+            className="w-full h-full flex flex-col relative"
+          >
             <div
               className="absolute left-0 w-full h-px bg-(--vibrant) text-(--vibrant) flex items-end justify-end"
-              style={{ top: `${getTimePercent()}%` }}
+              style={{
+                top:
+                  currentTimeOffset > 0
+                    ? `${currentTimeOffset}px`
+                    : `${getTimePercent()}%`,
+              }}
             >
               <span
                 className={`p-1 bg-(--darkest) rounded-sm absolute ${Number(currentTime.split(":")[0]) < 1 ? "top-1" : "-top-9"}`}
@@ -108,39 +244,58 @@ export function TestingComponent({
                 {currentTime}
               </span>
             </div>
-            {[
-              "00:00",
-              "01:00",
-              "02:00",
-              "03:00",
-              "04:00",
-              "05:00",
-              "06:00",
-              "07:00",
-              "08:00",
-              "09:00",
-              "10:00",
-              "11:00",
-              "12:00",
-              "13:00",
-              "14:00",
-              "15:00",
-              "16:00",
-              "17:00",
-              "18:00",
-              "19:00",
-              "20:00",
-              "21:00",
-              "22:00",
-              "23:00",
-            ].map((time, i) => (
+            {DAY_HOURS.map((time, i) => (
               <div
                 key={time}
+                ref={(element) => {
+                  hourRowRefs.current[i] = element;
+                }}
                 className="w-full not-last:border-b border-(--gray) px-3 flex items-center justify-start"
               >
-                <span className="text-(--gray-page) text-sm text-left w-14 border-r pr-3 py-2 border-(--gray)">
+                <span className="h-full text-(--gray-page) text-sm text-left min-w-14 w-14 border-r pr-3 py-2 border-(--gray)">
                   {time}
                 </span>
+                <div className="p-2">
+                  {i === 10 ? (
+                    <div className="w-full rounded-sm border border-(--gray) bg-(--gray)/10 flex flex-col gap-1 py-1 px-2">
+                      <p className="font-medium text-sm text-left">
+                        <span className="text-(--gray-page) mr-2">10:30 -</span>
+                        Do something like that
+                      </p>
+                      <p className="text-left text-sm text-(--gray-page)">
+                        Lorem ipsum dolor sit, amet consectetur adipisicing
+                        elit. Animi vero aliquid odio dolores nihil illum
+                        repellendus ea necessitatibus suscipit, recusandae nisi
+                        debitis alias sequi assumenda accusamus illo consequatur
+                        ad modi officiis ducimus dolorem minus commodi
+                        laudantium! Vel magni facilis numquam, nulla cumque iure
+                        porro qui assumenda voluptatum? Beatae iure numquam
+                        dolorem fuga non architecto consequuntur voluptates
+                        incidunt adipisci facere itaque minus ex, magni
+                        dignissimos expedita, a cupiditate cum distinctio velit
+                        similique neque quas sapiente. Mollitia neque
+                        praesentium ipsum fugiat, soluta iusto veritatis
+                        perspiciatis dignissimos, pariatur hic quod aliquam rem
+                        quos nam velit asperiores ab nostrum id. Quod ad hic
+                        unde a nemo animi facere nisi culpa sint, eveniet enim
+                        odit, molestias provident delectus. Vero hic
+                        exercitationem suscipit soluta dignissimos officia! Ut
+                        repellat architecto suscipit quia iure beatae quam
+                        voluptas vitae esse itaque mollitia ad ducimus atque
+                        iste quisquam aut ullam dolorum deserunt vero, sed
+                        eveniet labore quas officiis laborum. Maxime sequi
+                        veritatis consequatur dolor nesciunt exercitationem,
+                        minima cumque. Eos, necessitatibus accusantium! Minima
+                        doloremque voluptatem nemo! Repudiandae ullam sed non
+                        maiores consectetur quam, obcaecati doloremque, corrupti
+                        repellat ex recusandae voluptatibus dignissimos
+                        molestias adipisci quidem consequatur. Minima ullam sed
+                        autem inventore maxime, est aliquam corporis. Veniam
+                        pariatur facilis placeat esse vitae nesciunt.
+                      </p>
+                    </div>
+                  ) : null}
+                </div>
               </div>
             ))}
           </div>
@@ -148,7 +303,7 @@ export function TestingComponent({
           <>
             {[...Array(7)].map((day, i) => (
               <div
-                key={day + Math.random().toString()}
+                key={`week-day-${i}`}
                 className="not-last:border-r border-(--gray) w-full h-full aspect-square p-2 flex flex-col gap-1"
               >
                 <span
@@ -176,9 +331,9 @@ export function TestingComponent({
             <>
               {[...Array(28)].map((day, i) => (
                 <div
-                  key={day + Math.random().toString()}
+                  key={`month-day-${i}`}
                   className={`w-full min-h-40 aspect-square ${i === 22 ? "pr-0" : i === 23 ? "pl-0" : i === 13 ? "pr-0" : i === 14 && "pl-0"} p-2 flex flex-col gap-1 ${
-                    day % 7 !== 6 ? "border-r border-(--gray)" : ""
+                    i % 7 !== 6 ? "border-r border-(--gray)" : ""
                   } ${i < 21 ? "border-b border-(--gray)" : ""}`}
                 >
                   <span
@@ -186,9 +341,9 @@ export function TestingComponent({
                   >
                     {i + 1}
                   </span>
-                  {[2, 5, 10, 13, 14, 18, 22, 23, 28].includes(i) && (
+                  {[2, 5, 10, 13, 14, 18, 22, 23, 27].includes(i) && (
                     <div
-                      className={`w-full max-h-full h-full overflow-y-auto ${i === 22 ? "rounded-r-none" : i === 23 ? "rounded-l-none" : i === 13 ? "rounded-r-none" : i === 14 && "rounded-l-none"} rounded-sm ${i === 22 ? "border-r-0" : i === 23 ? "border-l-0" : i === 13 ? "border-r-0" : i === 14 && "border-l-0"} border border-(--gray) bg-(--gray)/10 flex flex-col gap-1 py-1 px-2`}
+                      className={`w-full max-h-full h-full overflow-y-auto ${i === 22 ? "rounded-r-none" : i === 23 ? "rounded-l-none" : i === 13 ? "rounded-r-none" : i === 14 && "rounded-l-none"} rounded-sm ${i === 22 ? "border-r-0" : i === 23 ? "border-l-0" : i === 13 ? "border-r-0" : i === 14 && "border-l-0"} border ${i === 5 ? "border-(--cyan) bg-(--cyan-bg)/10" : i === 13 ? "border-(--red) bg-(--red-bg)/10" : i === 14 ? "border-(--red) bg-(--red-bg)/10" : i === 27 ? "border-(--purple) bg-(--purple-bg)/10" : "border-(--gray) bg-(--gray)/10"}  flex flex-col gap-1 py-1 px-2`}
                     >
                       <p className="font-medium text-sm text-left">
                         Do something like that
