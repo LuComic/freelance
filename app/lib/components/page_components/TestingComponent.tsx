@@ -61,7 +61,8 @@ export function TestingComponent({
 }: TestingComponentProps) {
   const pageDocument = useOptionalPageDocument();
 
-  const [filter, setFilter] = useState("day");
+  const [filter, setFilter] = useState("month");
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [adding, setAdding] = useState(false);
   const [currentTimeOffset, setCurrentTimeOffset] = useState(0);
   const dayContainerRef = useRef<HTMLDivElement | null>(null);
@@ -136,6 +137,17 @@ export function TestingComponent({
     return Math.round((currentTimeNumber / MINUTES_IN_DAY) * 100);
   };
 
+  const toggleFilter = (filt: string) => {
+    setFilter(filt);
+    setSelectedDay(null);
+  };
+
+  useEffect(() => {
+    if (selectedDay) {
+      setFilter("");
+    }
+  }, [selectedDay]);
+
   return (
     <div className="w-full flex flex-col gap-2">
       <p className="@[40rem]:text-xl text-lg font-medium">Calendar</p>
@@ -200,34 +212,46 @@ export function TestingComponent({
       <div className="grid grid-cols-2 @[40rem]:flex items-center justify-between @[40rem]:justify-start w-full gap-2">
         <button
           className={`flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border ${filter !== "day" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
-          onClick={() => setFilter("day")}
+          onClick={() => toggleFilter("day")}
         >
           Today
         </button>
         <button
           className={`flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border ${filter !== "week" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
-          onClick={() => setFilter("week")}
+          onClick={() => toggleFilter("week")}
         >
           7 Week
         </button>
         <button
           className={`flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border ${filter !== "month" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
-          onClick={() => setFilter("month")}
+          onClick={() => toggleFilter("month")}
         >
           30 Month
         </button>
       </div>
 
+      {selectedDay ? (
+        <p className="@[40rem]:text-xl text-lg font-medium">
+          {/* This would show the selected day, together with the month's name*/}
+          {selectedDay.toString()}. March
+        </p>
+      ) : filter === "day" ? (
+        <p className="@[40rem]:text-xl text-lg font-medium">
+          {/* This would show which day of the month it is, together with the month's name*/}
+          Today, 15. March
+        </p>
+      ) : null}
+
       <div
         className={`h-full ${filter !== "day" ? "min-w-[900px] w-max" : "w-full"} min-h-40 max-w-full overflow-x-auto border rounded-md border-(--gray) grid ${
-          filter === "day"
+          filter === "day" || filter === ""
             ? "grid-cols-1 grid-rows-1"
             : filter === "week"
               ? "grid-cols-7 grid-rows-1"
               : "grid-cols-7 grid-rows-4 grid-flow-row"
         }`}
       >
-        {filter === "day" ? (
+        {filter === "day" || filter === "" ? (
           <div
             ref={dayContainerRef}
             key="day"
@@ -306,9 +330,10 @@ export function TestingComponent({
         ) : filter === "week" ? (
           <>
             {[...Array(7)].map((day, i) => (
-              <div
+              <button
                 key={`week-day-${i}`}
-                className="not-last:border-r border-(--gray) w-full h-full aspect-square p-2 flex flex-col gap-1"
+                className="not-last:border-r border-(--gray) w-full h-full aspect-square p-2 flex flex-col gap-1 hover:bg-(--gray)/5"
+                onClick={() => setSelectedDay(i + 1)}
               >
                 <span
                   className={`rounded-lg  p-[0.5px] aspect-square text-left w-max flex items-center justify-center ${i == 3 ? "bg-(--vibrant)/20" : "bg-(--gray)/10 text-(--gray-page)"} `}
@@ -327,18 +352,19 @@ export function TestingComponent({
                     </p>
                   </div>
                 )}
-              </div>
+              </button>
             ))}
           </>
         ) : (
           filter === "month" && (
             <>
               {[...Array(28)].map((day, i) => (
-                <div
+                <button
                   key={`month-day-${i}`}
                   className={`w-full min-h-40 aspect-square ${i === 22 ? "pr-0" : i === 23 ? "pl-0" : i === 13 ? "pr-0" : i === 14 && "pl-0"} p-2 flex flex-col gap-1 ${
                     i % 7 !== 6 ? "border-r border-(--gray)" : ""
-                  } ${i < 21 ? "border-b border-(--gray)" : ""}`}
+                  } ${i < 21 ? "border-b border-(--gray)" : ""} hover:bg-(--gray)/5`}
+                  onClick={() => setSelectedDay(i + 1)}
                 >
                   <span
                     className={`rounded-lg  p-[0.5px] aspect-square text-left w-max flex items-center justify-center ${i == 3 ? "bg-(--vibrant)/20" : "bg-(--gray)/10 text-(--gray-page)"} `}
@@ -359,7 +385,7 @@ export function TestingComponent({
                       </p>
                     </div>
                   )}
-                </div>
+                </button>
               ))}
             </>
           )
