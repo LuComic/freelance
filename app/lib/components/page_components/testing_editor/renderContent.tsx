@@ -12,6 +12,7 @@ import { Feedback } from "@/app/lib/components/page_components/feedback/Feedback
 import { Select } from "@/app/lib/components/page_components/form/select/Select";
 import { Radio } from "@/app/lib/components/page_components/form/radio/Radio";
 import { MainHeadline } from "@/app/lib/components/page_components/text/parts/MainHeadline";
+import { PageLink } from "@/app/lib/components/page_components/text/parts/PageLink";
 import { SectionHeader } from "@/app/lib/components/page_components/text/parts/SectionHeader";
 import { Subheader } from "@/app/lib/components/page_components/text/parts/Subheader";
 import { isPageComponentType, type PageComponentType } from "@/lib/pageDocument";
@@ -27,7 +28,7 @@ function RenderedComponentInstance({
 }) {
   switch (type) {
     case "TestingComponent":
-      return <TestingComponent instanceId={instanceId} />;
+      return <TestingComponent />;
     case "Kanban":
       return <Kanban instanceId={instanceId} />;
     case "Feedback":
@@ -42,6 +43,8 @@ function RenderedComponentInstance({
       return <SectionHeader instanceId={instanceId} />;
     case "Subheader":
       return <Subheader instanceId={instanceId} />;
+    case "PageLink":
+      return <PageLink instanceId={instanceId} />;
   }
 }
 

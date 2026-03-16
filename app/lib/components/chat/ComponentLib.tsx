@@ -59,6 +59,13 @@ const COMPS: {
     tag: "text",
     insertCommand: "subheader",
   },
+  {
+    name: "Page Link",
+    desc: "Link to another page in the current project. Command: /pagelink",
+    previewSrc: "/component-previews/text-h3.svg",
+    tag: "text",
+    insertCommand: "pagelink",
+  },
 ];
 
 type ComponentLibProps = {

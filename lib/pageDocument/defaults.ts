@@ -7,6 +7,8 @@ import type {
   KanbanComponentInstance,
   MainHeadlineComponentInstance,
   MainHeadlineComponentLiveState,
+  PageLinkComponentInstance,
+  PageLinkComponentLiveState,
   PageComponentDocument,
   PageComponentDocumentByType,
   PageComponentInstance,
@@ -72,6 +74,10 @@ export function createDefaultComponentInstance(
   type: "Subheader",
   id: string,
 ): SubheaderComponentInstance;
+export function createDefaultComponentInstance(
+  type: "PageLink",
+  id: string,
+): PageLinkComponentInstance;
 export function createDefaultComponentInstance(
   type: PageComponentType,
   id: string,
@@ -139,6 +145,15 @@ export function createDefaultComponentInstance(
         type,
         config: { text: "Subheader" },
       };
+    case "PageLink":
+      return {
+        id,
+        type,
+        config: {
+          text: "",
+          targetPageId: null,
+        },
+      };
   }
 }
 
@@ -167,6 +182,9 @@ export function createDefaultLiveState(
 export function createDefaultLiveState(
   type: "Subheader",
 ): SubheaderComponentLiveState;
+export function createDefaultLiveState(
+  type: "PageLink",
+): PageLinkComponentLiveState;
 export function createDefaultLiveState(
   type: PageComponentType,
 ): PageComponentLiveState {
@@ -199,6 +217,7 @@ export function createDefaultLiveState(
     case "MainHeadline":
     case "SectionHeader":
     case "Subheader":
+    case "PageLink":
       return {
         type,
         state: {},

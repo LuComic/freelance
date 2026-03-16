@@ -16,7 +16,8 @@ export type InsertableComponentCommand =
   | "radio"
   | "mainheadline"
   | "sectionheader"
-  | "subheader";
+  | "subheader"
+  | "pagelink";
 
 type PendingComponentInsert = {
   command: InsertableComponentCommand;

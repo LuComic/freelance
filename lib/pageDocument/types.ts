@@ -13,6 +13,7 @@ export const PAGE_COMPONENT_TYPES = [
   "MainHeadline",
   "SectionHeader",
   "Subheader",
+  "PageLink",
 ] as const;
 
 export type PageComponentType = (typeof PAGE_COMPONENT_TYPES)[number];
@@ -98,6 +99,15 @@ export type SubheaderComponentInstance = {
   };
 };
 
+export type PageLinkComponentInstance = {
+  id: string;
+  type: "PageLink";
+  config: {
+    text: string;
+    targetPageId: string | null;
+  };
+};
+
 export type TestingComponentInstance = {
   id: string;
   type: "TestingComponent";
@@ -114,7 +124,8 @@ export type PageComponentInstance =
   | KanbanComponentInstance
   | MainHeadlineComponentInstance
   | SectionHeaderComponentInstance
-  | SubheaderComponentInstance;
+  | SubheaderComponentInstance
+  | PageLinkComponentInstance;
 
 export type SelectComponentLiveState = {
   type: "Select";
@@ -159,6 +170,11 @@ export type SubheaderComponentLiveState = {
   state: Record<string, never>;
 };
 
+export type PageLinkComponentLiveState = {
+  type: "PageLink";
+  state: Record<string, never>;
+};
+
 export type TestingComponentLiveState = {
   type: "TestingComponent";
   state: Record<string, never>;
@@ -172,7 +188,8 @@ export type PageComponentLiveState =
   | KanbanComponentLiveState
   | MainHeadlineComponentLiveState
   | SectionHeaderComponentLiveState
-  | SubheaderComponentLiveState;
+  | SubheaderComponentLiveState
+  | PageLinkComponentLiveState;
 
 export type PageComponentInstanceMap = {
   TestingComponent: TestingComponentInstance;
@@ -183,6 +200,7 @@ export type PageComponentInstanceMap = {
   MainHeadline: MainHeadlineComponentInstance;
   SectionHeader: SectionHeaderComponentInstance;
   Subheader: SubheaderComponentInstance;
+  PageLink: PageLinkComponentInstance;
 };
 
 export type PageComponentLiveStateMap = {
@@ -194,6 +212,7 @@ export type PageComponentLiveStateMap = {
   MainHeadline: MainHeadlineComponentLiveState;
   SectionHeader: SectionHeaderComponentLiveState;
   Subheader: SubheaderComponentLiveState;
+  PageLink: PageLinkComponentLiveState;
 };
 
 export type PageComponentInstanceByType<T extends PageComponentType> =

@@ -146,20 +146,23 @@ export const SelectCreator = ({
         )}
       </div>
 
-      <div className="w-full flex flex-col gap-2">
-        <p className="font-medium">{config.title}</p>
-        <p className="text-(--gray-page)">{config.description}</p>
-        <div className="w-full flex items-center justify-start gap-2">
-          {config.options.map((option) => (
-            <div
-              key={option.id}
-              className="rounded-md border border-(--gray-page) text-(--gray-page) w-max px-2 py-1.5"
-            >
-              {option.label}
-            </div>
-          ))}
+      {config.title || config.description || config.options.length > 0 ? (
+        <div className="w-full flex flex-col gap-2">
+          <p className="font-medium">{config.title}</p>
+          <p className="text-(--gray-page)">{config.description}</p>
+          <div className="w-full flex items-center justify-start gap-2">
+            {config.options.map((option) => (
+              <div
+                key={option.id}
+                className="rounded-md border border-(--gray-page) text-(--gray-page) w-max px-2 py-1.5"
+              >
+                {option.label}
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      ) : null}
+      <div className="h-px w-full border-dashed border border-(--gray)"></div>
     </>
   );
 };

@@ -398,6 +398,7 @@ export const KanbanCreator = ({
           </div>
         </div>
       )}
+      <div className="h-px w-full border-dashed border border-(--gray)"></div>
     </>
   );
 };

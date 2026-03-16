@@ -11,6 +11,7 @@ import {
   type FeedbackItem,
   type KanbanItem,
   type MainHeadlineComponentInstance,
+  type PageLinkComponentInstance,
   type PageComponentDocument,
   type PageComponentInstance,
   type PageComponentLiveState,
@@ -257,6 +258,31 @@ function normalizeComponentInstance(
         },
       };
     }
+    case "PageLink": {
+      const fallback = createDefaultComponentInstance(
+        "PageLink",
+        id,
+      ) as PageLinkComponentInstance;
+      if (!isRecord(value) || value.type !== type || !isRecord(value.config)) {
+        return fallback;
+      }
+
+      return {
+        id,
+        type,
+        config: {
+          text:
+            typeof value.config.text === "string"
+              ? value.config.text
+              : fallback.config.text,
+          targetPageId:
+            typeof value.config.targetPageId === "string" ||
+            value.config.targetPageId === null
+              ? value.config.targetPageId
+              : fallback.config.targetPageId,
+        },
+      };
+    }
   }
 }
 
@@ -336,7 +362,8 @@ function normalizeLiveState(
     }
     case "MainHeadline":
     case "SectionHeader":
-    case "Subheader": {
+    case "Subheader":
+    case "PageLink": {
       const fallback = createDefaultLiveState(type);
       if (!isRecord(value) || value.type !== type || !isRecord(value.state)) {
         return fallback;

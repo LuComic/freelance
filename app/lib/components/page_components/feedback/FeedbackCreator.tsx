@@ -120,7 +120,9 @@ export const FeedbackCreator = ({
   const declinedCount = liveState.items.filter(
     (item) => item.status === "declined" && !item.dismissed,
   ).length;
-  const dismissedCount = liveState.items.filter((item) => item.dismissed).length;
+  const dismissedCount = liveState.items.filter(
+    (item) => item.dismissed,
+  ).length;
 
   const changeFilter = (
     newFilter: "accepted" | "declined" | "pending" | "dismissed",
@@ -249,90 +251,98 @@ export const FeedbackCreator = ({
         </button>
       </div>
       {layout === "grid" ? (
-        <div
-          className={`w-full flex flex-col @[40rem]:grid ${visibleData.length === 1 ? "grid-cols-[repeat(auto-fit,minmax(280px,500px))]" : "grid-cols-[repeat(auto-fit,minmax(280px,1fr))]"}  gap-2`}
-        >
-          {visibleData.map((feature) => (
-            <div
-              key={feature.feature}
-              className={`rounded-md border px-2 gap-1 justify-between py-1.5 w-full min-w-0 flex flex-col min-h-0 ${
-                feature.status === "pending"
-                  ? "border-(--gray) bg-(--gray)/10"
-                  : feature.status === "accepted"
-                    ? "border-(--accepted-border) bg-(--accepted-bg)/10"
-                    : feature.status === "declined" &&
-                      "border-(--declined-border) bg-(--declined-bg)/10"
-              }
+        visibleData.length > 0 ? (
+          <div
+            className={`w-full flex flex-col @[40rem]:grid ${visibleData.length === 1 ? "grid-cols-[repeat(auto-fit,minmax(280px,500px))]" : "grid-cols-[repeat(auto-fit,minmax(280px,1fr))]"}  gap-2`}
+          >
+            {visibleData.map((feature) => (
+              <div
+                key={feature.feature}
+                className={`rounded-md border px-2 gap-1 justify-between py-1.5 w-full min-w-0 flex flex-col min-h-0 ${
+                  feature.status === "pending"
+                    ? "border-(--gray) bg-(--gray)/10"
+                    : feature.status === "accepted"
+                      ? "border-(--accepted-border) bg-(--accepted-bg)/10"
+                      : feature.status === "declined" &&
+                        "border-(--declined-border) bg-(--declined-bg)/10"
+                }
                    `}
-            >
-              <span className="font-semibold">
-                <span className="rounded-sm font-normal text-(--gray-page)">
-                  {feature.tags.join(", ")} -{" "}
+              >
+                <span className="font-semibold">
+                  <span className="rounded-sm font-normal text-(--gray-page)">
+                    {feature.tags.join(", ")} -{" "}
+                  </span>
+                  {feature.feature}
                 </span>
-                {feature.feature}
-              </span>
-              {feature.status === "pending" && (
-                <span className="font-medium">Pending...</span>
-              )}
-              {feature.reason && (
-                <span className="font-medium">
-                  {feature.status === "accepted" ? "Accepted: " : "Declined: "}{" "}
-                  <span className="font-normal">{feature.reason}</span>
-                </span>
-              )}
-              <div className="w-full flex items-center gap-1">
-                {feature.status !== "pending" ? (
-                  <ReviewModal
-                    action={
-                      feature.status === "accepted" ? "decline" : "accept"
-                    }
-                    feature={feature}
-                    onSubmit={(reason) =>
-                      updateFeatureReview(
-                        feature.feature,
-                        feature.status === "accepted" ? "decline" : "accept",
-                        reason,
-                      )
-                    }
-                  />
-                ) : (
-                  <>
-                    <ReviewModal
-                      action="accept"
-                      feature={feature}
-                      onSubmit={(reason) =>
-                        updateFeatureReview(feature.feature, "accept", reason)
-                      }
-                    />
-                    <ReviewModal
-                      action="decline"
-                      feature={feature}
-                      onSubmit={(reason) =>
-                        updateFeatureReview(feature.feature, "decline", reason)
-                      }
-                    />
-                  </>
+                {feature.status === "pending" && (
+                  <span className="font-medium">Pending...</span>
                 )}
-                <button
-                  className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm  w-full border border-(--gray)  hover:bg-(--gray)/20"
-                  onClick={() => handleDismissing(feature.feature)}
-                >
-                  {feature.dismissed && feature.dismissed === true ? (
-                    <>
-                      <TimerReset size={16} />
-                      Restore
-                    </>
+                {feature.reason && (
+                  <span className="font-medium">
+                    {feature.status === "accepted"
+                      ? "Accepted: "
+                      : "Declined: "}{" "}
+                    <span className="font-normal">{feature.reason}</span>
+                  </span>
+                )}
+                <div className="w-full flex items-center gap-1">
+                  {feature.status !== "pending" ? (
+                    <ReviewModal
+                      action={
+                        feature.status === "accepted" ? "decline" : "accept"
+                      }
+                      feature={feature}
+                      onSubmit={(reason) =>
+                        updateFeatureReview(
+                          feature.feature,
+                          feature.status === "accepted" ? "decline" : "accept",
+                          reason,
+                        )
+                      }
+                    />
                   ) : (
                     <>
-                      <X size={16} />
-                      Dismiss
+                      <ReviewModal
+                        action="accept"
+                        feature={feature}
+                        onSubmit={(reason) =>
+                          updateFeatureReview(feature.feature, "accept", reason)
+                        }
+                      />
+                      <ReviewModal
+                        action="decline"
+                        feature={feature}
+                        onSubmit={(reason) =>
+                          updateFeatureReview(
+                            feature.feature,
+                            "decline",
+                            reason,
+                          )
+                        }
+                      />
                     </>
                   )}
-                </button>
+                  <button
+                    className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm  w-full border border-(--gray)  hover:bg-(--gray)/20"
+                    onClick={() => handleDismissing(feature.feature)}
+                  >
+                    {feature.dismissed && feature.dismissed === true ? (
+                      <>
+                        <TimerReset size={16} />
+                        Restore
+                      </>
+                    ) : (
+                      <>
+                        <X size={16} />
+                        Dismiss
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : null
       ) : (
         <div className="w-full max-w-full min-w-0 overflow-x-auto border rounded-md border-(--gray)">
           <div className="min-w-[900px] flex flex-col">
@@ -428,6 +438,7 @@ export const FeedbackCreator = ({
           </div>
         </div>
       )}
+      <div className="h-px w-full border-dashed border border-(--gray)"></div>
     </>
   );
 };

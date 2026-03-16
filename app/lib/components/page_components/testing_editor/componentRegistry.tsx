@@ -6,6 +6,7 @@ import { Feedback } from "@/app/lib/components/page_components/feedback/Feedback
 import { Select } from "@/app/lib/components/page_components/form/select/Select";
 import { Radio } from "@/app/lib/components/page_components/form/radio/Radio";
 import { MainHeadline } from "@/app/lib/components/page_components/text/parts/MainHeadline";
+import { PageLink } from "@/app/lib/components/page_components/text/parts/PageLink";
 import { SectionHeader } from "@/app/lib/components/page_components/text/parts/SectionHeader";
 import { Subheader } from "@/app/lib/components/page_components/text/parts/Subheader";
 
@@ -30,6 +31,7 @@ export const COMPONENT_REGISTRY = [
     commands: ["sectionheader", "h2"],
   },
   { tag: "Subheader", Component: Subheader, commands: ["subheader", "h3"] },
+  { tag: "PageLink", Component: PageLink, commands: ["pagelink"] },
 ] as const;
 
 export const PRIMARY_INSERTABLE_COMMANDS = COMPONENT_REGISTRY.map(

@@ -1,0 +1,88 @@
+"use client";
+
+import type { PageComponentInstanceByType } from "@/lib/pageDocument";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { ProjectPageOption } from "./PageLink";
+
+type PageLinkCreatorProps = {
+  config: PageComponentInstanceByType<"PageLink">["config"];
+  pages: ProjectPageOption[];
+  isLoadingPages: boolean;
+  onChangeConfig: (
+    updater: (
+      config: PageComponentInstanceByType<"PageLink">["config"],
+    ) => PageComponentInstanceByType<"PageLink">["config"],
+  ) => void;
+};
+
+export const PageLinkCreator = ({
+  config,
+  pages,
+  isLoadingPages,
+  onChangeConfig,
+}: PageLinkCreatorProps) => {
+  const selectedTargetPageId = pages.some(
+    (page) => page.id === config.targetPageId,
+  )
+    ? (config.targetPageId ?? undefined)
+    : undefined;
+  const selectPlaceholder = isLoadingPages
+    ? "Loading pages..."
+    : pages.length === 0
+      ? "No pages available"
+      : "Select a page";
+
+  return (
+    <>
+      <p className="@[40rem]:text-xl text-lg font-medium">Current Progress</p>
+      <input
+        type="text"
+        value={config.text}
+        onChange={(event) =>
+          onChangeConfig((currentConfig) => ({
+            ...currentConfig,
+            text: event.target.value,
+          }))
+        }
+        placeholder="Link text..."
+        className="w-full rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
+      />
+
+      <Select
+        value={selectedTargetPageId}
+        onValueChange={(value) =>
+          onChangeConfig((currentConfig) => ({
+            ...currentConfig,
+            targetPageId: value,
+          }))
+        }
+        disabled={isLoadingPages || pages.length === 0}
+      >
+        <SelectTrigger className="w-full @[40rem]:w-52 bg-(--darkest) border-(--gray-page)">
+          <SelectValue placeholder={selectPlaceholder} />
+        </SelectTrigger>
+        <SelectContent className="bg-(--darkest) border-none text-(--gray-page)">
+          <SelectGroup className="bg-(--darkest)">
+            {pages.map((page) => (
+              <SelectItem
+                key={page.id}
+                value={page.id}
+                className="data-highlighted:bg-(--dim) data-highlighted:text-(--light)"
+              >
+                {page.title}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+      <div className="h-px w-full border-dashed border border-(--gray)"></div>
+    </>
+  );
+};
