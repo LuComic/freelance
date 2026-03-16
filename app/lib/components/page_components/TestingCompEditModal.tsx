@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Check, X } from "lucide-react";
+import { DatePicker } from "./DatePicker";
 
 type TestingCompEditModalProps = {
   date: number;
@@ -51,7 +52,15 @@ export const TestingCompEditModal = ({
             {date}. date
           </span>
         </div>
+        <p className="text-(--gray-page)">Event name</p>
+        <input
+          type="text"
+          className="rounded-md bg-(--dim) px-2 py-1.5 outline-none w-full"
+          placeholder="Project name..."
+        />
 
+        <p className="text-(--gray-page)">Event date</p>
+        <DatePicker modal={true} />
         <div className="w-full flex items-center gap-1 mt-4">
           <button
             className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm w-full border border-(--gray) hover:bg-(--gray)/20"
@@ -60,7 +69,7 @@ export const TestingCompEditModal = ({
             <X size={16} />
             Cancel
           </button>
-          <button className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm w-full border border-(--accepted-border) hover:bg-(--accepted-bg)/10">
+          <button className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm w-full border border-(--vibrant) bg-(--vibrant)/10 hover:bg-(--vibrant)/20">
             <Check size={16} />
             Save
           </button>

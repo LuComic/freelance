@@ -397,7 +397,7 @@ export function TestingComponent() {
                       <div className="flex items-center justify-start gap-2">
                         <Menubar className="ml-auto h-auto bg-transparent border-none shadow-none p-0">
                           <MenubarMenu>
-                            <MenubarTrigger className="data-highlighted:bg-transparent data-[state=open]:bg-transparent data-highlighted:text-(--gray) data-[state=open]:text-(--gray) p-0">
+                            <MenubarTrigger className="data-highlighted:bg-transparent data-[state=open]:bg-transparent data-highlighted:text-(--light) data-[state=open]:text-(--light) p-0">
                               <EllipsisVertical size={15} />
                             </MenubarTrigger>
                             <MenubarContent className="bg-(--quite-dark) border border-(--gray) text-(--light) transition-none!">

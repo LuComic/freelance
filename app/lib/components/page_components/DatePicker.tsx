@@ -19,7 +19,7 @@ import { format } from "date-fns";
 import { CalendarIcon, Clock2Icon } from "lucide-react";
 import { type DateRange } from "react-day-picker";
 
-export const DatePicker = () => {
+export const DatePicker = ({ modal }: { modal?: boolean }) => {
   const [date, setDate] = React.useState<DateRange | undefined>();
 
   return (
@@ -46,10 +46,12 @@ export const DatePicker = () => {
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-auto p-0 border-0 bg-(--darkest)"
+        className={`w-auto p-0 border-0 ${modal ? "bg-(--dim)" : "bg-(--darkest)"}`}
         align="start"
       >
-        <Card className="w-auto p-0 gap-0 border-0 bg-(--darkest) rounded-md">
+        <Card
+          className={`w-auto p-0 gap-0 border-0 ${modal ? "bg-(--dim)" : "bg-(--darkest)"} rounded-md`}
+        >
           <CardContent className="p-0">
             <Calendar
               mode="range"
@@ -60,10 +62,12 @@ export const DatePicker = () => {
               classNames={{
                 // Today: subtle underline dot instead of background
                 today: "text-(--vibrant)",
-                button_previous:
-                  "bg-(--darkest)! text-(--light) hover:bg-(--quite-dark-hover)! hover:text-(--light) p-1 rounded-md",
-                button_next:
-                  "bg-(--darkest)! text-(--light) hover:bg-(--quite-dark-hover)! hover:text-(--light) p-1 rounded-md",
+                button_previous: modal
+                  ? "bg-(--dim)! text-(--light) hover:bg-(--quite-dark-hover)! hover:text-(--light) p-1 rounded-md"
+                  : "bg-(--darkest)! text-(--light) hover:bg-(--quite-dark-hover)! hover:text-(--light) p-1 rounded-md",
+                button_next: modal
+                  ? "bg-(--dim)! text-(--light) hover:bg-(--quite-dark-hover)! hover:text-(--light) p-1 rounded-md"
+                  : "bg-(--darkest)! text-(--light) hover:bg-(--quite-dark-hover)! hover:text-(--light) p-1 rounded-md",
 
                 // Bar segments — fix the rounded sides
                 range_start: "bg-(--vibrant) rounded-l-md",
@@ -84,7 +88,11 @@ export const DatePicker = () => {
               }}
             />
           </CardContent>
-          <CardFooter className="w-auto pb-3 px-3 gap-2 border-0 bg-(--darkest) text-(--light) rounded-md">
+          <CardFooter
+            className={`w-auto pb-3 px-3 gap-2 border-0 text-(--light) rounded-md ${
+              modal ? "bg-(--dim)" : "bg-(--darkest)"
+            }`}
+          >
             <FieldGroup className="gap-4">
               <Field className="gap-2">
                 <FieldLabel htmlFor="time-from">Start Time</FieldLabel>
