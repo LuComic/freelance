@@ -27,10 +27,15 @@ import {
 } from "@/components/ui/menubar";
 import { TestingCompEditModal } from "./TestingCompEditModal";
 
-type TestingComponentProps = {
-  instanceId?: string;
-  mockText?: string;
-};
+const WEEKDAYS = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
 
 const CONSTANT_COLOR_SELECTION = [
   "none",
@@ -262,6 +267,14 @@ export function TestingComponent() {
         </p>
       ) : null}
 
+      <div className="grid grid-cols-7 w-full">
+        {WEEKDAYS.map((day) => (
+          <span key={day} className="text-(--gray-page)">
+            {day}
+          </span>
+        ))}
+      </div>
+
       <div
         className={`h-full ${filter !== "day" ? "min-w-[900px] w-max" : "w-full"} min-h-40 max-w-full overflow-x-auto border rounded-md border-(--gray) grid ${
           filter === "day" || filter === ""
@@ -349,7 +362,12 @@ export function TestingComponent() {
           </div>
         ) : filter === "week" ? (
           <>
-            {[...Array(7)].map((_, i) => (
+            <div className="not-last:border-r align-middle justify-center border-(--gray) w-full h-full aspect-square grid grid-cols-6 gap-4">
+              {[...Array(6)].map((_, i) => (
+                <span key={i} className="w-full h-full bg-(--gray)/10"></span>
+              ))}
+            </div>
+            {[...Array(6)].map((_, i) => (
               <button
                 key={`week-day-${i}`}
                 className="not-last:border-r border-(--gray) w-full h-full aspect-square p-2 flex flex-col gap-1 hover:bg-(--gray)/5"
