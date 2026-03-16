@@ -140,7 +140,8 @@ export const ConnectionItem = ({
   const { openPersonModal } = useSearchBar();
   const hasExternalOpenRequest =
     items.length > 0 && requestedOpenToken > handledOpenToken;
-  const isExpanded = (itemExpanded || hasExternalOpenRequest) && items.length > 0;
+  const isExpanded =
+    (itemExpanded || hasExternalOpenRequest) && items.length > 0;
 
   const handleAction = async (
     action: ConnectionAction,

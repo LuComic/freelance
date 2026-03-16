@@ -1,7 +1,12 @@
 "use client";
 
-import { useOptionalPageDocument } from "@/app/lib/components/project/PageDocumentContext";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  EllipsisVertical,
+  Pencil,
+  Trash,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { DatePicker } from "./DatePicker";
 import {
@@ -12,6 +17,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Menubar,
+  MenubarContent,
+  MenubarGroup,
+  MenubarItem,
+  MenubarMenu,
+  MenubarTrigger,
+} from "@/components/ui/menubar";
+import { TestingCompEditModal } from "./TestingCompEditModal";
 
 type TestingComponentProps = {
   instanceId?: string;
@@ -55,14 +69,10 @@ const DAY_HOURS = [
   "23:00",
 ];
 
-export function TestingComponent({
-  instanceId,
-  mockText = "TestingComponent mock data",
-}: TestingComponentProps) {
-  const pageDocument = useOptionalPageDocument();
-
+export function TestingComponent() {
   const [filter, setFilter] = useState("month");
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const [editingDay, setEditingDay] = useState<number | null>(null);
   const [adding, setAdding] = useState(false);
   const [currentTimeOffset, setCurrentTimeOffset] = useState(0);
   const dayContainerRef = useRef<HTMLDivElement | null>(null);
@@ -150,6 +160,16 @@ export function TestingComponent({
 
   return (
     <div className="w-full flex flex-col gap-2">
+      <TestingCompEditModal
+        date={editingDay ?? 1}
+        open={editingDay !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditingDay(null);
+          }
+        }}
+      />
+
       <p className="@[40rem]:text-xl text-lg font-medium">Calendar</p>
       <p className="text-(--gray-page)">
         A calendar for scheduling different dates for clients and creators
@@ -329,7 +349,7 @@ export function TestingComponent({
           </div>
         ) : filter === "week" ? (
           <>
-            {[...Array(7)].map((day, i) => (
+            {[...Array(7)].map((_, i) => (
               <button
                 key={`week-day-${i}`}
                 className="not-last:border-r border-(--gray) w-full h-full aspect-square p-2 flex flex-col gap-1 hover:bg-(--gray)/5"
@@ -358,13 +378,12 @@ export function TestingComponent({
         ) : (
           filter === "month" && (
             <>
-              {[...Array(28)].map((day, i) => (
-                <button
+              {[...Array(28)].map((_, i) => (
+                <div
                   key={`month-day-${i}`}
                   className={`w-full min-h-40 aspect-square ${i === 22 ? "pr-0" : i === 23 ? "pl-0" : i === 13 ? "pr-0" : i === 14 && "pl-0"} p-2 flex flex-col gap-1 ${
                     i % 7 !== 6 ? "border-r border-(--gray)" : ""
                   } ${i < 21 ? "border-b border-(--gray)" : ""} hover:bg-(--gray)/5`}
-                  onClick={() => setSelectedDay(i + 1)}
                 >
                   <span
                     className={`rounded-lg  p-[0.5px] aspect-square text-left w-max flex items-center justify-center ${i == 3 ? "bg-(--vibrant)/20" : "bg-(--gray)/10 text-(--gray-page)"} `}
@@ -375,17 +394,51 @@ export function TestingComponent({
                     <div
                       className={`w-full max-h-full h-full overflow-y-auto ${i === 22 ? "rounded-r-none" : i === 23 ? "rounded-l-none" : i === 13 ? "rounded-r-none" : i === 14 && "rounded-l-none"} rounded-sm ${i === 22 ? "border-r-0" : i === 23 ? "border-l-0" : i === 13 ? "border-r-0" : i === 14 && "border-l-0"} border ${i === 5 ? "border-(--cyan) bg-(--cyan-bg)/10" : i === 13 ? "border-(--red) bg-(--red-bg)/10" : i === 14 ? "border-(--red) bg-(--red-bg)/10" : i === 27 ? "border-(--purple) bg-(--purple-bg)/10" : "border-(--gray) bg-(--gray)/10"}  flex flex-col gap-1 py-1 px-2`}
                     >
-                      <p className="font-medium text-sm text-left">
-                        Do something like that
-                      </p>
-                      <p className="text-left text-sm text-(--gray-page)">
+                      <div className="flex items-center justify-start gap-2">
+                        <Menubar className="ml-auto h-auto bg-transparent border-none shadow-none p-0">
+                          <MenubarMenu>
+                            <MenubarTrigger className="data-highlighted:bg-transparent data-[state=open]:bg-transparent data-highlighted:text-(--gray) data-[state=open]:text-(--gray) p-0">
+                              <EllipsisVertical size={15} />
+                            </MenubarTrigger>
+                            <MenubarContent className="bg-(--quite-dark) border border-(--gray) text-(--light) transition-none!">
+                              <MenubarGroup>
+                                <MenubarItem
+                                  className="hover:bg-(--darkest-hover)! hover:text-(--light)!"
+                                  onSelect={() => setEditingDay(i + 1)}
+                                >
+                                  <div className="flex items-center justify-start gap-2 w-full">
+                                    <Pencil />
+                                    Edit
+                                  </div>
+                                </MenubarItem>
+                                <MenubarItem
+                                  asChild
+                                  className="hover:bg-(--declined-bg)/5! hover:text-(--declined-border)! text-(--declined-border)"
+                                >
+                                  <button className="flex items-center justify-start gap-2 w-full">
+                                    <Trash color="var(--declined-border)" />
+                                    Delete
+                                  </button>
+                                </MenubarItem>
+                              </MenubarGroup>
+                            </MenubarContent>
+                          </MenubarMenu>
+                        </Menubar>
+                        <p className="font-medium text-sm text-left">
+                          Do something like that
+                        </p>
+                      </div>
+                      <button
+                        className="text-left text-sm text-(--gray-page)"
+                        onClick={() => setSelectedDay(i + 1)}
+                      >
                         Lorem ipsum dolor sit amet consectetur adipisicing elit.
                         Similique modi pariatur quae tempora vitae officiis ut
                         error mollitia aperiam hic.
-                      </p>
+                      </button>
                     </div>
                   )}
-                </button>
+                </div>
               ))}
             </>
           )
