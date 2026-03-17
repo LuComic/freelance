@@ -150,7 +150,7 @@ export function createDefaultComponentInstance(
         id,
         type,
         config: {
-          text: "",
+          text: "link to page",
           targetPageId: null,
         },
       };

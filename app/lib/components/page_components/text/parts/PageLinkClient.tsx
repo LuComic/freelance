@@ -17,14 +17,22 @@ export const PageLinkClient = ({
 }: PageLinkClientProps) => {
   const trimmedText = config.text.trim();
 
-  if (!trimmedText || !targetPage) {
+  if (!trimmedText) {
     return null;
+  }
+
+  if (!targetPage) {
+    return (
+      <span className="mb-1 w-max text-(--gray-page) underline underline-offset-4">
+        {trimmedText}
+      </span>
+    );
   }
 
   return (
     <Link
       href={`/projects/${projectSlug}/${targetPage.slug}`}
-      className="mb-1 w-max text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover)"
+      className="mb-1 w-max text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover) page-link-selected"
     >
       {trimmedText}
     </Link>
