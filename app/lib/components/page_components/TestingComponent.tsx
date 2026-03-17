@@ -229,7 +229,7 @@ export function TestingComponent() {
             </div>
 
             <button className="w-max rounded-md py-1 px-2 bg-(--vibrant) hover:bg-(--vibrant-hover) ">
-              Submit
+              Create event
             </button>
           </>
         )}
@@ -319,10 +319,39 @@ export function TestingComponent() {
                 <div className="p-2">
                   {i === 10 ? (
                     <div className="w-full rounded-sm border border-(--gray) bg-(--gray)/10 flex flex-col gap-1 py-1 px-2">
-                      <p className="font-medium text-sm text-left">
-                        <span className="text-(--gray-page) mr-2">10:30 -</span>
-                        Do something like that
-                      </p>
+                      <div className="flex gap-2 w-full items-center justify-start font-medium text-sm text-left">
+                        <span className="text-(--gray-page)">10:30 -</span>
+                        <span>Do something like that</span>
+                        <Menubar className="h-auto bg-transparent border-none shadow-none p-0">
+                          <MenubarMenu>
+                            <MenubarTrigger className="data-highlighted:bg-transparent data-[state=open]:bg-transparent data-highlighted:text-(--light) data-[state=open]:text-(--light) p-0">
+                              <EllipsisVertical size={15} />
+                            </MenubarTrigger>
+                            <MenubarContent className="bg-(--quite-dark) border border-(--gray) text-(--light) transition-none!">
+                              <MenubarGroup>
+                                <MenubarItem
+                                  className="hover:bg-(--darkest-hover)! hover:text-(--light)!"
+                                  onSelect={() => setEditingDay(i + 1)}
+                                >
+                                  <div className="flex items-center justify-start gap-2 w-full">
+                                    <Pencil />
+                                    Edit
+                                  </div>
+                                </MenubarItem>
+                                <MenubarItem
+                                  asChild
+                                  className="hover:bg-(--declined-bg)/5! hover:text-(--declined-border)! text-(--declined-border)"
+                                >
+                                  <button className="flex items-center justify-start gap-2 w-full">
+                                    <Trash color="var(--declined-border)" />
+                                    Delete
+                                  </button>
+                                </MenubarItem>
+                              </MenubarGroup>
+                            </MenubarContent>
+                          </MenubarMenu>
+                        </Menubar>
+                      </div>
                       <p className="text-left text-sm text-(--gray-page)">
                         Lorem ipsum dolor sit, amet consectetur adipisicing
                         elit. Animi vero aliquid odio dolores nihil illum
