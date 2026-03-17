@@ -9,7 +9,6 @@ import type {
 
 type SelectCreatorProps = {
   config: PageComponentInstanceByType<"Select">["config"];
-  liveState: PageComponentLiveStateByType<"Select">["state"];
   onChangeConfig: (
     updater: (
       config: PageComponentInstanceByType<"Select">["config"],
@@ -24,7 +23,6 @@ type SelectCreatorProps = {
 
 export const SelectCreator = ({
   config,
-  liveState,
   onChangeConfig,
   onChangeLiveState,
 }: SelectCreatorProps) => {

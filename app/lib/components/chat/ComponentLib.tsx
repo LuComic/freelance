@@ -11,6 +11,13 @@ const COMPS: {
   insertCommand: InsertableComponentCommand;
 }[] = [
   {
+    name: "Calendar",
+    desc: "Schedule and share project events in a calendar. Commands: /calendar, /testing",
+    previewSrc: "/component-previews/calendar.svg",
+    tag: "input",
+    insertCommand: "calendar",
+  },
+  {
     name: "Kanban",
     desc: "Display the progress as a Kanban table. Command: /kanban",
     previewSrc: "/component-previews/kanban.svg",

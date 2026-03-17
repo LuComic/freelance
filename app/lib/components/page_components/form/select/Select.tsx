@@ -25,7 +25,6 @@ export const Select = ({
       ) : (
         <SelectCreator
           config={component.config}
-          liveState={liveState.state}
           onChangeConfig={updateConfig}
           onChangeLiveState={updateLiveState}
         />

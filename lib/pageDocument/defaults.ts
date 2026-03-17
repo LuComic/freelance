@@ -1,4 +1,7 @@
 import type {
+  CalendarComponentInstance,
+  CalendarComponentLiveState,
+  CalendarEvent,
   FeedbackComponentLiveState,
   FeedbackComponentInstance,
   FeedbackItem,
@@ -25,12 +28,11 @@ import type {
   SelectComponentLiveState,
   SubheaderComponentInstance,
   SubheaderComponentLiveState,
-  TestingComponentInstance,
-  TestingComponentLiveState,
 } from "./types";
 
 const DEFAULT_SELECT_OPTIONS: PageOption[] = [];
 const DEFAULT_RADIO_OPTIONS: PageOption[] = [];
+const DEFAULT_CALENDAR_EVENTS: CalendarEvent[] = [];
 const DEFAULT_FEEDBACK_ITEMS: FeedbackItem[] = [];
 const DEFAULT_KANBAN_ITEMS: KanbanItem[] = [];
 
@@ -43,13 +45,13 @@ export function createDefaultComponentInstance<T extends PageComponentType>(
   id: string,
 ): PageComponentInstanceByType<T>;
 export function createDefaultComponentInstance(
-  type: "TestingComponent",
-  id: string,
-): TestingComponentInstance;
-export function createDefaultComponentInstance(
   type: "Select",
   id: string,
 ): SelectComponentInstance;
+export function createDefaultComponentInstance(
+  type: "Calendar",
+  id: string,
+): CalendarComponentInstance;
 export function createDefaultComponentInstance(
   type: "Radio",
   id: string,
@@ -83,13 +85,11 @@ export function createDefaultComponentInstance(
   id: string,
 ): PageComponentInstance {
   switch (type) {
-    case "TestingComponent":
+    case "Calendar":
       return {
         id,
         type,
-        config: {
-          mockText: "TestingComponent mock data",
-        },
+        config: {},
       };
     case "Select":
       return {
@@ -164,15 +164,15 @@ export function createDefaultLiveState<T extends PageComponentType>(
   type: T,
 ): PageComponentLiveStateByType<T>;
 export function createDefaultLiveState(
-  type: "TestingComponent",
-): TestingComponentLiveState;
-export function createDefaultLiveState(type: "Radio"): RadioComponentLiveState;
-export function createDefaultLiveState(
   type: "Feedback",
 ): FeedbackComponentLiveState;
 export function createDefaultLiveState(
   type: "Kanban",
 ): KanbanComponentLiveState;
+export function createDefaultLiveState(
+  type: "Calendar",
+): CalendarComponentLiveState;
+export function createDefaultLiveState(type: "Radio"): RadioComponentLiveState;
 export function createDefaultLiveState(
   type: "MainHeadline",
 ): MainHeadlineComponentLiveState;
@@ -189,10 +189,10 @@ export function createDefaultLiveState(
   type: PageComponentType,
 ): PageComponentLiveState {
   switch (type) {
-    case "TestingComponent":
+    case "Calendar":
       return {
         type,
-        state: {},
+        state: { events: [...DEFAULT_CALENDAR_EVENTS] },
       };
     case "Select":
       return {

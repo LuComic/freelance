@@ -5,7 +5,7 @@ Write your page content here.
 This testing page now supports a full-page editing mode.`;
 
 export const PAGE_COMPONENT_TYPES = [
-  "TestingComponent",
+  "Calendar",
   "Select",
   "Radio",
   "Feedback",
@@ -18,9 +18,49 @@ export const PAGE_COMPONENT_TYPES = [
 
 export type PageComponentType = (typeof PAGE_COMPONENT_TYPES)[number];
 
+export const LEGACY_PAGE_COMPONENT_TYPE_ALIASES = {
+  TestingComponent: "Calendar",
+} as const;
+
+export type LegacyPageComponentType =
+  keyof typeof LEGACY_PAGE_COMPONENT_TYPE_ALIASES;
+
+export type StoredPageComponentType =
+  | PageComponentType
+  | LegacyPageComponentType;
+
+export function resolveStoredPageComponentType(
+  value: string,
+): PageComponentType | null {
+  if (value in LEGACY_PAGE_COMPONENT_TYPE_ALIASES) {
+    return LEGACY_PAGE_COMPONENT_TYPE_ALIASES[
+      value as LegacyPageComponentType
+    ];
+  }
+
+  return isPageComponentType(value) ? value : null;
+}
+
 export type PageOption = {
   id: number;
   label: string;
+};
+
+export type CalendarEventColor =
+  | "none"
+  | "red"
+  | "green"
+  | "yellow"
+  | "pink"
+  | "purple"
+  | "cyan";
+
+export type CalendarEvent = {
+  id: string;
+  title: string;
+  color: CalendarEventColor;
+  startAt: number;
+  endAt: number;
 };
 
 export type FeedbackItem = {
@@ -37,6 +77,12 @@ export type KanbanItem = {
   status: "Todo" | "In Progress" | "Done";
   tags: string[];
   dismissed?: boolean;
+};
+
+export type CalendarComponentInstance = {
+  id: string;
+  type: "Calendar";
+  config: Record<string, never>;
 };
 
 export type SelectComponentInstance = {
@@ -108,16 +154,8 @@ export type PageLinkComponentInstance = {
   };
 };
 
-export type TestingComponentInstance = {
-  id: string;
-  type: "TestingComponent";
-  config: {
-    mockText: string;
-  };
-};
-
 export type PageComponentInstance =
-  | TestingComponentInstance
+  | CalendarComponentInstance
   | SelectComponentInstance
   | RadioComponentInstance
   | FeedbackComponentInstance
@@ -155,6 +193,13 @@ export type KanbanComponentLiveState = {
   };
 };
 
+export type CalendarComponentLiveState = {
+  type: "Calendar";
+  state: {
+    events: CalendarEvent[];
+  };
+};
+
 export type MainHeadlineComponentLiveState = {
   type: "MainHeadline";
   state: Record<string, never>;
@@ -175,13 +220,8 @@ export type PageLinkComponentLiveState = {
   state: Record<string, never>;
 };
 
-export type TestingComponentLiveState = {
-  type: "TestingComponent";
-  state: Record<string, never>;
-};
-
 export type PageComponentLiveState =
-  | TestingComponentLiveState
+  | CalendarComponentLiveState
   | SelectComponentLiveState
   | RadioComponentLiveState
   | FeedbackComponentLiveState
@@ -192,7 +232,7 @@ export type PageComponentLiveState =
   | PageLinkComponentLiveState;
 
 export type PageComponentInstanceMap = {
-  TestingComponent: TestingComponentInstance;
+  Calendar: CalendarComponentInstance;
   Select: SelectComponentInstance;
   Radio: RadioComponentInstance;
   Feedback: FeedbackComponentInstance;
@@ -204,7 +244,7 @@ export type PageComponentInstanceMap = {
 };
 
 export type PageComponentLiveStateMap = {
-  TestingComponent: TestingComponentLiveState;
+  Calendar: CalendarComponentLiveState;
   Select: SelectComponentLiveState;
   Radio: RadioComponentLiveState;
   Feedback: FeedbackComponentLiveState;

@@ -1,13 +1,11 @@
 "use client";
 
 import * as React from "react";
+import { format } from "date-fns";
+import { CalendarIcon, Clock2Icon } from "lucide-react";
+import { type DateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Calendar as UiCalendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import {
@@ -15,12 +13,70 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { format } from "date-fns";
-import { CalendarIcon, Clock2Icon } from "lucide-react";
-import { type DateRange } from "react-day-picker";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
-export const DatePicker = ({ modal }: { modal?: boolean }) => {
-  const [date, setDate] = React.useState<DateRange | undefined>();
+type DatePickerProps = {
+  modal?: boolean;
+  value?: DateRange | undefined;
+  onValueChange?: (value: DateRange | undefined) => void;
+  startTime?: string;
+  endTime?: string;
+  onStartTimeChange?: (value: string) => void;
+  onEndTimeChange?: (value: string) => void;
+};
+
+export const DatePicker = ({
+  modal,
+  value,
+  onValueChange,
+  startTime,
+  endTime,
+  onStartTimeChange,
+  onEndTimeChange,
+}: DatePickerProps) => {
+  const [internalDate, setInternalDate] = React.useState<DateRange | undefined>();
+  const [internalStartTime, setInternalStartTime] = React.useState("10:30");
+  const [internalEndTime, setInternalEndTime] = React.useState("12:30");
+
+  const isDateControlled = value !== undefined || onValueChange !== undefined;
+  const isStartTimeControlled =
+    startTime !== undefined || onStartTimeChange !== undefined;
+  const isEndTimeControlled =
+    endTime !== undefined || onEndTimeChange !== undefined;
+
+  const selectedDate = isDateControlled ? value : internalDate;
+  const selectedStartTime = isStartTimeControlled
+    ? startTime ?? "10:30"
+    : internalStartTime;
+  const selectedEndTime = isEndTimeControlled ? endTime ?? "12:30" : internalEndTime;
+
+  const handleDateChange = (nextValue: DateRange | undefined) => {
+    if (!isDateControlled) {
+      setInternalDate(nextValue);
+    }
+
+    onValueChange?.(nextValue);
+  };
+
+  const handleStartTimeChange = (nextValue: string) => {
+    if (!isStartTimeControlled) {
+      setInternalStartTime(nextValue);
+    }
+
+    onStartTimeChange?.(nextValue);
+  };
+
+  const handleEndTimeChange = (nextValue: string) => {
+    if (!isEndTimeControlled) {
+      setInternalEndTime(nextValue);
+    }
+
+    onEndTimeChange?.(nextValue);
+  };
 
   return (
     <Popover>
@@ -31,14 +87,14 @@ export const DatePicker = ({ modal }: { modal?: boolean }) => {
           className="w-full @[40rem]:w-max bg-(--darkest) border-(--gray-page) font-normal hover:bg-(--darkest) hover:text-(--light)"
         >
           <CalendarIcon />
-          {date?.from ? (
-            date.to ? (
+          {selectedDate?.from ? (
+            selectedDate.to ? (
               <>
-                {format(date.from, "LLL dd, y")} -{" "}
-                {format(date.to, "LLL dd, y")}
+                {format(selectedDate.from, "LLL dd, y")} -{" "}
+                {format(selectedDate.to, "LLL dd, y")}
               </>
             ) : (
-              format(date.from, "LLL dd, y")
+              format(selectedDate.from, "LLL dd, y")
             )
           ) : (
             <span>Pick a date</span>
@@ -53,14 +109,13 @@ export const DatePicker = ({ modal }: { modal?: boolean }) => {
           className={`w-auto p-0 gap-0 border-0 ${modal ? "bg-(--dim)" : "bg-(--darkest)"} rounded-md`}
         >
           <CardContent className="p-0">
-            <Calendar
+            <UiCalendar
               mode="range"
-              defaultMonth={date?.from}
-              selected={date}
-              onSelect={setDate}
+              defaultMonth={selectedDate?.from}
+              selected={selectedDate}
+              onSelect={handleDateChange}
               className="[&_button[data-range-middle=true]]:bg-(--vibrant)/20 [&_button[data-range-middle=true]]:text-(--light) text-(--light)"
               classNames={{
-                // Today: subtle underline dot instead of background
                 today: "text-(--vibrant)",
                 button_previous: modal
                   ? "bg-(--dim)! text-(--light) hover:bg-(--quite-dark-hover)! hover:text-(--light) p-1 rounded-md"
@@ -68,22 +123,15 @@ export const DatePicker = ({ modal }: { modal?: boolean }) => {
                 button_next: modal
                   ? "bg-(--dim)! text-(--light) hover:bg-(--quite-dark-hover)! hover:text-(--light) p-1 rounded-md"
                   : "bg-(--darkest)! text-(--light) hover:bg-(--quite-dark-hover)! hover:text-(--light) p-1 rounded-md",
-
-                // Bar segments — fix the rounded sides
                 range_start: "bg-(--vibrant) rounded-l-md",
                 range_end: "bg-(--vibrant) rounded-r-md",
                 range_middle:
                   "aria-selected:bg-(--vibrant)/20! aria-selected:text-(--light) rounded-none",
-                // Hover on day cells
                 day: "[&>button]:hover:bg-(--gray-page)/20 [&>button]:hover:text-(--light) rounded-none",
-
-                // The button circle on top of the bar
                 day_button:
                   "rounded-md " +
                   "data-[range-start=true]:bg-(--vibrant)! data-[range-start=true]:text-(--light)! data-[range-start=true]:rounded-l-md data-[range-start=true]:rounded-r-none " +
                   "data-[range-end=true]:bg-(--vibrant)! data-[range-end=true]:text-(--light)! data-[range-end=true]:rounded-r-md data-[range-end=true]:rounded-l-none",
-
-                // Selected single day
                 selected: "bg-(--vibrant)! text-(--light)! rounded-md",
               }}
             />
@@ -100,8 +148,9 @@ export const DatePicker = ({ modal }: { modal?: boolean }) => {
                   <InputGroupInput
                     id="time-from"
                     type="time"
-                    step="1"
-                    defaultValue="10:30:00"
+                    step="60"
+                    value={selectedStartTime}
+                    onChange={(event) => handleStartTimeChange(event.target.value)}
                     className="appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none "
                   />
                   <InputGroupAddon>
@@ -115,8 +164,9 @@ export const DatePicker = ({ modal }: { modal?: boolean }) => {
                   <InputGroupInput
                     id="time-to"
                     type="time"
-                    step="1"
-                    defaultValue="12:30:00"
+                    step="60"
+                    value={selectedEndTime}
+                    onChange={(event) => handleEndTimeChange(event.target.value)}
                     className="appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none font-normal"
                   />
                   <InputGroupAddon>

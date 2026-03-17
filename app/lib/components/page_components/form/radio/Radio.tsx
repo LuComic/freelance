@@ -5,11 +5,7 @@ import { useEditMode } from "@/app/lib/components/project/EditModeContext";
 import { RadioCreator } from "./RadioCreator";
 import { RadioClient } from "./RadioClient";
 
-export const Radio = ({
-  instanceId,
-}: {
-  instanceId: string;
-}) => {
+export const Radio = ({ instanceId }: { instanceId: string }) => {
   const { isLive } = useEditMode();
   const { component, liveState, updateConfig, updateLiveState } =
     usePageComponentState(instanceId, "Radio");

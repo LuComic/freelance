@@ -5,9 +5,10 @@ import {
 import {
   createComponentToken,
   DEFAULT_PAGE_EDITOR_TEXT,
-  isPageComponentType,
   LEGACY_COMPONENT_TAG_REGEX,
   PAGE_COMPONENT_TOKEN_REGEX,
+  resolveStoredPageComponentType,
+  type CalendarEvent,
   type FeedbackItem,
   type KanbanItem,
   type MainHeadlineComponentInstance,
@@ -127,32 +128,100 @@ function normalizeKanbanItems(value: unknown) {
     .filter((item): item is NonNullable<typeof item> => item !== null);
 }
 
+function normalizeCalendarEvents(value: unknown) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((item) => {
+      if (!isRecord(item) || typeof item.title !== "string") {
+        return null;
+      }
+
+      const startAt =
+        typeof item.startAt === "number" && Number.isFinite(item.startAt)
+          ? item.startAt
+          : null;
+      const endAt =
+        typeof item.endAt === "number" && Number.isFinite(item.endAt)
+          ? item.endAt
+          : null;
+
+      if (startAt === null || endAt === null || endAt <= startAt) {
+        return null;
+      }
+
+      const color =
+        item.color === "none" ||
+        item.color === "red" ||
+        item.color === "green" ||
+        item.color === "yellow" ||
+        item.color === "pink" ||
+        item.color === "purple" ||
+        item.color === "cyan"
+          ? item.color
+          : "none";
+
+      const result: CalendarEvent = {
+        id:
+          typeof item.id === "string" && item.id.trim().length > 0
+            ? item.id
+            : crypto.randomUUID(),
+        title: item.title.trim(),
+        color,
+        startAt,
+        endAt,
+      };
+
+      if (!result.title) {
+        return null;
+      }
+
+      return result;
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
+}
+
+function matchesStoredComponentType(
+  value: unknown,
+  expectedType: PageComponentType,
+) {
+  return (
+    typeof value === "string" &&
+    resolveStoredPageComponentType(value) === expectedType
+  );
+}
+
 function normalizeComponentInstance(
   id: string,
   type: PageComponentType,
   value: unknown,
 ): PageComponentInstance {
   switch (type) {
-    case "TestingComponent": {
-      const fallback = createDefaultComponentInstance("TestingComponent", id);
-      if (!isRecord(value) || value.type !== type || !isRecord(value.config)) {
+    case "Calendar": {
+      const fallback = createDefaultComponentInstance("Calendar", id);
+      if (
+        !isRecord(value) ||
+        !matchesStoredComponentType(value.type, type) ||
+        !isRecord(value.config)
+      ) {
         return fallback;
       }
 
       return {
         id,
         type,
-        config: {
-          mockText:
-            typeof value.config.mockText === "string"
-              ? value.config.mockText
-              : fallback.config.mockText,
-        },
+        config: fallback.config,
       };
     }
     case "Select": {
       const fallback = createDefaultComponentInstance("Select", id);
-      if (!isRecord(value) || value.type !== type || !isRecord(value.config)) {
+      if (
+        !isRecord(value) ||
+        !matchesStoredComponentType(value.type, type) ||
+        !isRecord(value.config)
+      ) {
         return fallback;
       }
 
@@ -177,7 +246,11 @@ function normalizeComponentInstance(
     }
     case "Radio": {
       const fallback = createDefaultComponentInstance("Radio", id);
-      if (!isRecord(value) || value.type !== type || !isRecord(value.config)) {
+      if (
+        !isRecord(value) ||
+        !matchesStoredComponentType(value.type, type) ||
+        !isRecord(value.config)
+      ) {
         return fallback;
       }
 
@@ -202,7 +275,11 @@ function normalizeComponentInstance(
     }
     case "Feedback": {
       const fallback = createDefaultComponentInstance("Feedback", id);
-      if (!isRecord(value) || value.type !== type || !isRecord(value.config)) {
+      if (
+        !isRecord(value) ||
+        !matchesStoredComponentType(value.type, type) ||
+        !isRecord(value.config)
+      ) {
         return fallback;
       }
 
@@ -220,7 +297,11 @@ function normalizeComponentInstance(
     }
     case "Kanban": {
       const fallback = createDefaultComponentInstance("Kanban", id);
-      if (!isRecord(value) || value.type !== type || !isRecord(value.config)) {
+      if (
+        !isRecord(value) ||
+        !matchesStoredComponentType(value.type, type) ||
+        !isRecord(value.config)
+      ) {
         return fallback;
       }
 
@@ -243,7 +324,11 @@ function normalizeComponentInstance(
         | MainHeadlineComponentInstance
         | SectionHeaderComponentInstance
         | SubheaderComponentInstance;
-      if (!isRecord(value) || value.type !== type || !isRecord(value.config)) {
+      if (
+        !isRecord(value) ||
+        !matchesStoredComponentType(value.type, type) ||
+        !isRecord(value.config)
+      ) {
         return fallback;
       }
 
@@ -263,7 +348,11 @@ function normalizeComponentInstance(
         "PageLink",
         id,
       ) as PageLinkComponentInstance;
-      if (!isRecord(value) || value.type !== type || !isRecord(value.config)) {
+      if (
+        !isRecord(value) ||
+        !matchesStoredComponentType(value.type, type) ||
+        !isRecord(value.config)
+      ) {
         return fallback;
       }
 
@@ -291,17 +380,30 @@ function normalizeLiveState(
   value: unknown,
 ): PageComponentLiveState {
   switch (type) {
-    case "TestingComponent": {
-      const fallback = createDefaultLiveState("TestingComponent");
-      if (!isRecord(value) || value.type !== type || !isRecord(value.state)) {
+    case "Calendar": {
+      const fallback = createDefaultLiveState("Calendar");
+      if (
+        !isRecord(value) ||
+        !matchesStoredComponentType(value.type, type) ||
+        !isRecord(value.state)
+      ) {
         return fallback;
       }
 
-      return fallback;
+      return {
+        type,
+        state: {
+          events: normalizeCalendarEvents(value.state.events),
+        },
+      };
     }
     case "Select": {
       const fallback = createDefaultLiveState("Select");
-      if (!isRecord(value) || value.type !== type || !isRecord(value.state)) {
+      if (
+        !isRecord(value) ||
+        !matchesStoredComponentType(value.type, type) ||
+        !isRecord(value.state)
+      ) {
         return fallback;
       }
 
@@ -319,7 +421,11 @@ function normalizeLiveState(
     }
     case "Radio": {
       const fallback = createDefaultLiveState("Radio");
-      if (!isRecord(value) || value.type !== type || !isRecord(value.state)) {
+      if (
+        !isRecord(value) ||
+        !matchesStoredComponentType(value.type, type) ||
+        !isRecord(value.state)
+      ) {
         return fallback;
       }
 
@@ -336,7 +442,11 @@ function normalizeLiveState(
     }
     case "Feedback": {
       const fallback = createDefaultLiveState("Feedback");
-      if (!isRecord(value) || value.type !== type || !isRecord(value.state)) {
+      if (
+        !isRecord(value) ||
+        !matchesStoredComponentType(value.type, type) ||
+        !isRecord(value.state)
+      ) {
         return fallback;
       }
 
@@ -349,7 +459,11 @@ function normalizeLiveState(
     }
     case "Kanban": {
       const fallback = createDefaultLiveState("Kanban");
-      if (!isRecord(value) || value.type !== type || !isRecord(value.state)) {
+      if (
+        !isRecord(value) ||
+        !matchesStoredComponentType(value.type, type) ||
+        !isRecord(value.state)
+      ) {
         return fallback;
       }
 
@@ -365,7 +479,11 @@ function normalizeLiveState(
     case "Subheader":
     case "PageLink": {
       const fallback = createDefaultLiveState(type);
-      if (!isRecord(value) || value.type !== type || !isRecord(value.state)) {
+      if (
+        !isRecord(value) ||
+        !matchesStoredComponentType(value.type, type) ||
+        !isRecord(value.state)
+      ) {
         return fallback;
       }
 
@@ -400,17 +518,25 @@ export function normalizePageConfigDocument(value: unknown): PageDocumentV1 {
 
   let legacyCounter = 0;
   const migratedComponents: Record<string, PageComponentInstance> = {};
-  const editorText = rawEditorText.replace(
+  const legacyTagMigratedText = rawEditorText.replace(
     LEGACY_COMPONENT_TAG_REGEX,
     (match, tag: string) => {
-      if (!isPageComponentType(tag)) {
+      const type = resolveStoredPageComponentType(tag);
+      if (!type) {
         return match;
       }
 
       legacyCounter += 1;
       const id = createComponentInstanceId(legacyCounter);
-      migratedComponents[id] = createDefaultComponentInstance(tag, id);
-      return createComponentToken(tag, id);
+      migratedComponents[id] = createDefaultComponentInstance(type, id);
+      return createComponentToken(type, id);
+    },
+  );
+  const editorText = legacyTagMigratedText.replace(
+    PAGE_COMPONENT_TOKEN_REGEX,
+    (match, tag: string, id: string) => {
+      const type = resolveStoredPageComponentType(tag);
+      return type ? createComponentToken(type, id) : match;
     },
   );
 
@@ -419,9 +545,9 @@ export function normalizePageConfigDocument(value: unknown): PageDocumentV1 {
   };
 
   for (const match of editorText.matchAll(PAGE_COMPONENT_TOKEN_REGEX)) {
-    const type = match[1];
+    const type = resolveStoredPageComponentType(match[1]);
     const id = match[2];
-    if (!isPageComponentType(type)) {
+    if (!type) {
       continue;
     }
 
@@ -486,7 +612,7 @@ export function mergePageLiveStateDocument(
 
     if (
       !isRecord(rawComponent) ||
-      rawComponent.type !== component.type ||
+      !matchesStoredComponentType(rawComponent.type, component.type) ||
       !isRecord(rawComponent.state)
     ) {
       nextComponents[id] = component;

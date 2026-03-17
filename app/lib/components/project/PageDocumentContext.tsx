@@ -481,7 +481,7 @@ export function PageDocumentProvider({
         : prev,
     );
     setSaveError(null);
-  }, []);
+  }, [setActivePage, setSaveError]);
 
   const updateEditorText = useCallback((value: string) => {
     setDocument((prev) =>
@@ -493,7 +493,7 @@ export function PageDocumentProvider({
         : prev,
     );
     setSaveError(null);
-  }, []);
+  }, [setDocument, setSaveError]);
 
   const updateComponentConfig = useCallback(
     (
@@ -515,7 +515,7 @@ export function PageDocumentProvider({
       });
       setSaveError(null);
     },
-    [],
+    [setDocument, setSaveError],
   );
 
   const updateComponentLiveState = useCallback(
@@ -547,7 +547,7 @@ export function PageDocumentProvider({
       });
       setSaveError(null);
     },
-    [],
+    [setDocument, setSaveError],
   );
 
   const insertComponentAtRange = useCallback(
@@ -598,7 +598,7 @@ export function PageDocumentProvider({
         nextCursor: start + token.length,
       };
     },
-    [],
+    [setDocument, setSaveError],
   );
 
   const persistDocument = useCallback(
@@ -691,7 +691,21 @@ export function PageDocumentProvider({
         setSaveStatus("error");
       }
     },
-    [isLive, route, router, savePage, savePageLiveState],
+    [
+      isLive,
+      route,
+      router,
+      savePage,
+      savePageLiveState,
+      setActivePage,
+      setDocument,
+      setPendingRoutePageId,
+      setPendingRouteProjectId,
+      setSavedDocumentSnapshot,
+      setSavedTitleSnapshot,
+      setSaveError,
+      setSaveStatus,
+    ],
   );
 
   const saveDocument = useCallback(async () => {
@@ -730,7 +744,7 @@ export function PageDocumentProvider({
 
       await persistDocument(nextPage, currentDocument);
     },
-    [persistDocument],
+    [persistDocument, setActivePage, setSaveError],
   );
 
   const commitComponentLiveState = useCallback(
@@ -767,7 +781,7 @@ export function PageDocumentProvider({
 
       await persistDocument(currentPage, nextDocument);
     },
-    [persistDocument],
+    [persistDocument, setDocument, setSaveError],
   );
 
   const createPageAndOpen = useCallback(async () => {
@@ -821,7 +835,13 @@ export function PageDocumentProvider({
       );
       setDeleteStatus("error");
     }
-  }, [deletePageMutation, projects, router]);
+  }, [
+    deletePageMutation,
+    projects,
+    router,
+    setDeleteError,
+    setDeleteStatus,
+  ]);
 
   useEffect(() => {
     if (!isLive || !hasUnsavedChanges || saveStatus === "saving") {

@@ -6,7 +6,7 @@ import {
   COMPONENT_TOKEN_REGEX,
 } from "./constants";
 import { RENDERABLE_COMPONENTS } from "./componentRegistry";
-import { TestingComponent } from "@/app/lib/components/page_components/TestingComponent";
+import { Calendar } from "@/app/lib/components/page_components/calendar/Calendar";
 import { Kanban } from "@/app/lib/components/page_components/progress/Kanban";
 import { Feedback } from "@/app/lib/components/page_components/feedback/Feedback";
 import { Select } from "@/app/lib/components/page_components/form/select/Select";
@@ -27,8 +27,8 @@ function RenderedComponentInstance({
   instanceId: string;
 }) {
   switch (type) {
-    case "TestingComponent":
-      return <TestingComponent />;
+    case "Calendar":
+      return <Calendar instanceId={instanceId} />;
     case "Kanban":
       return <Kanban instanceId={instanceId} />;
     case "Feedback":

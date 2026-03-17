@@ -207,7 +207,8 @@ export default function Page() {
       </div>
       {validatedJoinTarget ? (
         <p className="text-(--gray-page)">
-          Joining '{validatedJoinTarget.projectName}' as a temporary client.
+          Joining &apos;{validatedJoinTarget.projectName}&apos; as a temporary
+          client.
         </p>
       ) : null}
       {isCompletingUpgrade ? (

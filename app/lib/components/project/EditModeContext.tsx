@@ -10,6 +10,7 @@ import {
 } from "react";
 
 export type InsertableComponentCommand =
+  | "calendar"
   | "kanban"
   | "feedback"
   | "select"

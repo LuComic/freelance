@@ -1,6 +1,6 @@
 "use client";
 
-import { TestingComponent } from "@/app/lib/components/page_components/TestingComponent";
+import { Calendar } from "@/app/lib/components/page_components/calendar/Calendar";
 import { Kanban } from "@/app/lib/components/page_components/progress/Kanban";
 import { Feedback } from "@/app/lib/components/page_components/feedback/Feedback";
 import { Select } from "@/app/lib/components/page_components/form/select/Select";
@@ -12,9 +12,9 @@ import { Subheader } from "@/app/lib/components/page_components/text/parts/Subhe
 
 export const COMPONENT_REGISTRY = [
   {
-    tag: "TestingComponent",
-    Component: TestingComponent,
-    commands: ["testing"],
+    tag: "Calendar",
+    Component: Calendar,
+    commands: ["calendar", "testing"],
   },
   { tag: "Kanban", Component: Kanban, commands: ["kanban"] },
   { tag: "Feedback", Component: Feedback, commands: ["feedback"] },
