@@ -1,79 +1,11 @@
 import { ComponentItem } from "./ComponentItem";
-import type { InsertableComponentCommand } from "@/app/lib/components/project/EditModeContext";
+import {
+  COMPONENT_LIBRARY_ITEMS,
+  type InsertableComponentCommand,
+} from "@/app/lib/components/page_components/componentCatalog";
+import type { PageComponentLibraryTag } from "@/lib/pageDocument/registeredDefinitions";
 
-export type ComponentTag = "progress" | "text" | "input";
-
-const COMPS: {
-  name: string;
-  desc: string;
-  previewSrc: string;
-  tag: ComponentTag;
-  insertCommand: InsertableComponentCommand;
-}[] = [
-  {
-    name: "Calendar",
-    desc: "Schedule and share project events in a calendar. Commands: /calendar, /testing",
-    previewSrc: "/component-previews/calendar.svg",
-    tag: "input",
-    insertCommand: "calendar",
-  },
-  {
-    name: "Kanban",
-    desc: "Display the progress as a Kanban table. Command: /kanban",
-    previewSrc: "/component-previews/kanban.svg",
-    tag: "progress",
-    insertCommand: "kanban",
-  },
-  {
-    name: "Recommend",
-    desc: "Client can give feedback or recommend things they'd like. Command: /feedback",
-    previewSrc: "/component-previews/recommend.svg",
-    tag: "input",
-    insertCommand: "feedback",
-  },
-  {
-    name: "Select",
-    desc: "Simple select component for multiple answers. Command: /select",
-    previewSrc: "/component-previews/select.svg",
-    tag: "input",
-    insertCommand: "select",
-  },
-  {
-    name: "Radio",
-    desc: "Simple radio element for a single answer. Command: /radio",
-    previewSrc: "/component-previews/radio.svg",
-    tag: "input",
-    insertCommand: "radio",
-  },
-  {
-    name: "Main Headline (H1)",
-    desc: "Large top-level headline text. Commands: /mainheadline, /h1",
-    previewSrc: "/component-previews/text-h1.svg",
-    tag: "text",
-    insertCommand: "mainheadline",
-  },
-  {
-    name: "Section Header (H2)",
-    desc: "Medium section heading text. Commands: /sectionheader, /h2",
-    previewSrc: "/component-previews/text-h2.svg",
-    tag: "text",
-    insertCommand: "sectionheader",
-  },
-  {
-    name: "Subheader (H3)",
-    desc: "Smaller heading for subsections. Commands: /subheader, /h3",
-    previewSrc: "/component-previews/text-h3.svg",
-    tag: "text",
-    insertCommand: "subheader",
-  },
-  {
-    name: "Page Link",
-    desc: "Link to another page in the current project. Command: /pagelink",
-    previewSrc: "/component-previews/text-h3.svg",
-    tag: "text",
-    insertCommand: "pagelink",
-  },
-];
+export type ComponentTag = PageComponentLibraryTag;
 
 type ComponentLibProps = {
   filterTag: "" | ComponentTag;
@@ -85,17 +17,19 @@ export const ComponentLib = ({
   onInsertComponent,
 }: ComponentLibProps) => {
   const visibleComps =
-    filterTag === "" ? COMPS : COMPS.filter((item) => item.tag === filterTag);
+    filterTag === ""
+      ? COMPONENT_LIBRARY_ITEMS
+      : COMPONENT_LIBRARY_ITEMS.filter((item) => item.tag === filterTag);
 
   return (
     <div className="flex flex-col gap-2 items-start justify-start w-full">
       <p className="md:text-xl text-lg font-medium">Browse Components</p>
       <div className="md:grid flex flex-col items-center justify-center grid-cols-2 w-full gap-2">
-        {visibleComps.map((item, index) => (
+        {visibleComps.map((item) => (
           <ComponentItem
-            key={index}
+            key={item.type}
             compName={item.name}
-            compDesc={item.desc}
+            compDesc={item.description}
             previewSrc={item.previewSrc}
             onClick={() => onInsertComponent(item.insertCommand)}
           />

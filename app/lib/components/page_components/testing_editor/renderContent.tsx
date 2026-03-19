@@ -1,18 +1,9 @@
 "use client";
 
-import { type ReactNode } from "react";
-import {
-  COMPONENT_TAG_REGEX,
-  COMPONENT_TOKEN_REGEX,
-} from "./constants";
-import { RENDERABLE_COMPONENTS } from "./componentRegistry";
-import { Calendar } from "@/app/lib/components/page_components/calendar/Calendar";
-import { Kanban } from "@/app/lib/components/page_components/progress/Kanban";
-import { Feedback } from "@/app/lib/components/page_components/feedback/Feedback";
-import { Select } from "@/app/lib/components/page_components/form/select/Select";
-import { Radio } from "@/app/lib/components/page_components/form/radio/Radio";
+import { type ComponentType, type ReactNode } from "react";
+import { COMPONENT_TAG_REGEX, COMPONENT_TOKEN_REGEX } from "./constants";
+import { getRenderablePageComponent } from "./componentRegistry";
 import { MainHeadline } from "@/app/lib/components/page_components/text/parts/MainHeadline";
-import { PageLink } from "@/app/lib/components/page_components/text/parts/PageLink";
 import { SectionHeader } from "@/app/lib/components/page_components/text/parts/SectionHeader";
 import { Subheader } from "@/app/lib/components/page_components/text/parts/Subheader";
 import { isPageComponentType, type PageComponentType } from "@/lib/pageDocument";
@@ -26,26 +17,13 @@ function RenderedComponentInstance({
   type: PageComponentType;
   instanceId: string;
 }) {
-  switch (type) {
-    case "Calendar":
-      return <Calendar instanceId={instanceId} />;
-    case "Kanban":
-      return <Kanban instanceId={instanceId} />;
-    case "Feedback":
-      return <Feedback instanceId={instanceId} />;
-    case "Select":
-      return <Select instanceId={instanceId} />;
-    case "Radio":
-      return <Radio instanceId={instanceId} />;
-    case "MainHeadline":
-      return <MainHeadline instanceId={instanceId} />;
-    case "SectionHeader":
-      return <SectionHeader instanceId={instanceId} />;
-    case "Subheader":
-      return <Subheader instanceId={instanceId} />;
-    case "PageLink":
-      return <PageLink instanceId={instanceId} />;
+  const componentMatch = getRenderablePageComponent(type);
+  if (!componentMatch) {
+    return null;
   }
+
+  const Component = componentMatch.Component;
+  return <Component instanceId={instanceId} />;
 }
 
 function renderPlainTextSegment(segment: string, keyStart: number) {
@@ -127,11 +105,9 @@ export function renderContentWithComponents(content: string) {
         );
       }
     } else if (isPageComponentType(tag)) {
-      const componentMatch = RENDERABLE_COMPONENTS.find(
-        (item) => item.tag === tag,
-      );
+      const componentMatch = getRenderablePageComponent(tag);
       if (componentMatch) {
-        const Component = componentMatch.Component as React.ComponentType;
+        const Component = componentMatch.Component as ComponentType;
         nodes.push(<Component key={`legacy-${key++}`} />);
       } else {
         nodes.push(

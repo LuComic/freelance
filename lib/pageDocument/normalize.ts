@@ -3,6 +3,11 @@ import {
   createDefaultLiveState,
 } from "./defaults";
 import {
+  getRegisteredPageComponentDefinition,
+  isRegisteredPageComponentType,
+  type RegisteredPageComponentType,
+} from "./registeredComponents";
+import {
   createComponentToken,
   DEFAULT_PAGE_EDITOR_TEXT,
   LEGACY_COMPONENT_TAG_REGEX,
@@ -15,7 +20,9 @@ import {
   type PageLinkComponentInstance,
   type PageComponentDocument,
   type PageComponentInstance,
+  type PageComponentInstanceByType,
   type PageComponentLiveState,
+  type PageComponentLiveStateByType,
   type PageComponentType,
   type PageDocumentV1,
   type PageOption,
@@ -193,11 +200,59 @@ function matchesStoredComponentType(
   );
 }
 
+function normalizeRegisteredComponentInstance<
+  T extends RegisteredPageComponentType,
+>(id: string, type: T, value: unknown): PageComponentInstanceByType<T> {
+  const registeredDefinition = getRegisteredPageComponentDefinition(type);
+
+  const fallback = createDefaultComponentInstance(type, id);
+
+  if (
+    !isRecord(value) ||
+    !matchesStoredComponentType(value.type, type) ||
+    !isRecord(value.config)
+  ) {
+    return fallback;
+  }
+
+  return {
+    id,
+    type,
+    config: registeredDefinition.normalizeConfig(value.config, fallback.config),
+  } as PageComponentInstanceByType<T>;
+}
+
+function normalizeRegisteredLiveState<T extends RegisteredPageComponentType>(
+  type: T,
+  value: unknown,
+): PageComponentLiveStateByType<T> {
+  const registeredDefinition = getRegisteredPageComponentDefinition(type);
+
+  const fallback = createDefaultLiveState(type);
+
+  if (
+    !isRecord(value) ||
+    !matchesStoredComponentType(value.type, type) ||
+    !isRecord(value.state)
+  ) {
+    return fallback;
+  }
+
+  return {
+    type,
+    state: registeredDefinition.normalizeState(value.state, fallback.state),
+  } as PageComponentLiveStateByType<T>;
+}
+
 function normalizeComponentInstance(
   id: string,
   type: PageComponentType,
   value: unknown,
 ): PageComponentInstance {
+  if (isRegisteredPageComponentType(type)) {
+    return normalizeRegisteredComponentInstance(id, type, value);
+  }
+
   switch (type) {
     case "Calendar": {
       const fallback = createDefaultComponentInstance("Calendar", id);
@@ -373,12 +428,18 @@ function normalizeComponentInstance(
       };
     }
   }
+
+  throw new Error(`Unsupported page component type: ${type}`);
 }
 
 function normalizeLiveState(
   type: PageComponentType,
   value: unknown,
 ): PageComponentLiveState {
+  if (isRegisteredPageComponentType(type)) {
+    return normalizeRegisteredLiveState(type, value);
+  }
+
   switch (type) {
     case "Calendar": {
       const fallback = createDefaultLiveState("Calendar");
@@ -490,6 +551,8 @@ function normalizeLiveState(
       return fallback;
     }
   }
+
+  throw new Error(`Unsupported page component type: ${type}`);
 }
 
 export function createInitialPageDocument(): PageDocumentV1 {

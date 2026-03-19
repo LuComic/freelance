@@ -1,10 +1,9 @@
-import type { InsertableComponentCommand } from "@/app/lib/components/project/EditModeContext";
-import { createComponentToken, type PageComponentType } from "@/lib/pageDocument";
+import type { InsertableComponentCommand } from "@/app/lib/components/page_components/componentCatalog";
 import {
-  INSERTABLE_COMPONENT_COMMANDS,
   PRIMARY_INSERTABLE_COMMANDS,
-  type EditorComponentCommand,
-} from "./componentRegistry";
+  resolveComponentTypeFromCommand as resolveComponentTypeFromCatalog,
+} from "@/app/lib/components/page_components/componentCatalog";
+import { createComponentToken, type PageComponentType } from "@/lib/pageDocument";
 
 const SLASH_ACTION_COMMANDS = ["lib", "template"] as const;
 const ALL_COMPLETABLE_SLASH_COMMANDS = [
@@ -40,15 +39,8 @@ export function getSlashCommandTokenRange(value: string, cursor: number) {
   return range.token.startsWith("/") ? range : null;
 }
 
-function resolveTagFromCommand(command: string) {
-  const match = INSERTABLE_COMPONENT_COMMANDS.find(
-    (item) => item.command === command,
-  );
-  return match?.tag;
-}
-
 export function resolveComponentTypeFromCommand(command: string) {
-  return resolveTagFromCommand(command) as PageComponentType | undefined;
+  return resolveComponentTypeFromCatalog(command) as PageComponentType | undefined;
 }
 
 export function getActiveLineFromCursor(value: string, cursor: number) {
@@ -155,7 +147,7 @@ export function replaceSlashCommandWithToken(
     return null;
   }
 
-  const command = token.slice(1).toLowerCase() as EditorComponentCommand;
+  const command = token.slice(1).toLowerCase() as InsertableComponentCommand;
   const componentType = resolveComponentTypeFromCommand(command);
   if (!componentType) {
     return null;

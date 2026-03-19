@@ -1,17 +1,8 @@
+import { getRegisteredPageComponentDefinition } from "./registeredComponents";
 import type {
-  CalendarComponentInstance,
-  CalendarComponentLiveState,
   CalendarEvent,
-  FeedbackComponentLiveState,
-  FeedbackComponentInstance,
   FeedbackItem,
   KanbanItem,
-  KanbanComponentLiveState,
-  KanbanComponentInstance,
-  MainHeadlineComponentInstance,
-  MainHeadlineComponentLiveState,
-  PageLinkComponentInstance,
-  PageLinkComponentLiveState,
   PageComponentDocument,
   PageComponentDocumentByType,
   PageComponentInstance,
@@ -19,15 +10,7 @@ import type {
   PageComponentLiveState,
   PageComponentLiveStateByType,
   PageComponentType,
-  RadioComponentInstance,
-  RadioComponentLiveState,
-  SectionHeaderComponentInstance,
-  SectionHeaderComponentLiveState,
   PageOption,
-  SelectComponentInstance,
-  SelectComponentLiveState,
-  SubheaderComponentInstance,
-  SubheaderComponentLiveState,
 } from "./types";
 
 const DEFAULT_SELECT_OPTIONS: PageOption[] = [];
@@ -36,54 +19,24 @@ const DEFAULT_CALENDAR_EVENTS: CalendarEvent[] = [];
 const DEFAULT_FEEDBACK_ITEMS: FeedbackItem[] = [];
 const DEFAULT_KANBAN_ITEMS: KanbanItem[] = [];
 
-export function createDefaultComponentInstance(
-  type: PageComponentType,
-  id: string,
-): PageComponentInstance;
 export function createDefaultComponentInstance<T extends PageComponentType>(
   type: T,
   id: string,
 ): PageComponentInstanceByType<T>;
 export function createDefaultComponentInstance(
-  type: "Select",
-  id: string,
-): SelectComponentInstance;
-export function createDefaultComponentInstance(
-  type: "Calendar",
-  id: string,
-): CalendarComponentInstance;
-export function createDefaultComponentInstance(
-  type: "Radio",
-  id: string,
-): RadioComponentInstance;
-export function createDefaultComponentInstance(
-  type: "Feedback",
-  id: string,
-): FeedbackComponentInstance;
-export function createDefaultComponentInstance(
-  type: "Kanban",
-  id: string,
-): KanbanComponentInstance;
-export function createDefaultComponentInstance(
-  type: "MainHeadline",
-  id: string,
-): MainHeadlineComponentInstance;
-export function createDefaultComponentInstance(
-  type: "SectionHeader",
-  id: string,
-): SectionHeaderComponentInstance;
-export function createDefaultComponentInstance(
-  type: "Subheader",
-  id: string,
-): SubheaderComponentInstance;
-export function createDefaultComponentInstance(
-  type: "PageLink",
-  id: string,
-): PageLinkComponentInstance;
-export function createDefaultComponentInstance(
   type: PageComponentType,
   id: string,
 ): PageComponentInstance {
+  const registeredDefinition = getRegisteredPageComponentDefinition(type);
+
+  if (registeredDefinition) {
+    return {
+      id,
+      type,
+      config: registeredDefinition.createDefaultConfig(),
+    } as PageComponentInstance;
+  }
+
   switch (type) {
     case "Calendar":
       return {
@@ -155,39 +108,25 @@ export function createDefaultComponentInstance(
         },
       };
   }
+
+  throw new Error(`Unsupported page component type: ${type}`);
 }
 
-export function createDefaultLiveState(
-  type: "Select",
-): SelectComponentLiveState;
 export function createDefaultLiveState<T extends PageComponentType>(
   type: T,
 ): PageComponentLiveStateByType<T>;
 export function createDefaultLiveState(
-  type: "Feedback",
-): FeedbackComponentLiveState;
-export function createDefaultLiveState(
-  type: "Kanban",
-): KanbanComponentLiveState;
-export function createDefaultLiveState(
-  type: "Calendar",
-): CalendarComponentLiveState;
-export function createDefaultLiveState(type: "Radio"): RadioComponentLiveState;
-export function createDefaultLiveState(
-  type: "MainHeadline",
-): MainHeadlineComponentLiveState;
-export function createDefaultLiveState(
-  type: "SectionHeader",
-): SectionHeaderComponentLiveState;
-export function createDefaultLiveState(
-  type: "Subheader",
-): SubheaderComponentLiveState;
-export function createDefaultLiveState(
-  type: "PageLink",
-): PageLinkComponentLiveState;
-export function createDefaultLiveState(
   type: PageComponentType,
 ): PageComponentLiveState {
+  const registeredDefinition = getRegisteredPageComponentDefinition(type);
+
+  if (registeredDefinition) {
+    return {
+      type,
+      state: registeredDefinition.createDefaultState(),
+    } as PageComponentLiveState;
+  }
+
   switch (type) {
     case "Calendar":
       return {
@@ -223,12 +162,10 @@ export function createDefaultLiveState(
         state: {},
       };
   }
+
+  throw new Error(`Unsupported page component type: ${type}`);
 }
 
-export function createDefaultComponentDocument(
-  type: PageComponentType,
-  id: string,
-): PageComponentDocument;
 export function createDefaultComponentDocument<T extends PageComponentType>(
   type: T,
   id: string,
@@ -239,6 +176,7 @@ export function createDefaultComponentDocument(
 ): PageComponentDocument {
   const instance = createDefaultComponentInstance(type, id);
   const liveState = createDefaultLiveState(type);
+
   return {
     ...instance,
     state: liveState.state,

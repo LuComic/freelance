@@ -1,10 +1,16 @@
+import {
+  REGISTERED_PAGE_COMPONENT_TYPES,
+  type RegisteredPageComponentConfigMap,
+  type RegisteredPageComponentStateMap,
+} from "./registeredComponents";
+
 export const DEFAULT_PAGE_EDITOR_TEXT = `Project brief
 
 Write your page content here.
 
 This testing page now supports a full-page editing mode.`;
 
-export const PAGE_COMPONENT_TYPES = [
+export const LEGACY_PAGE_COMPONENT_TYPES = [
   "Calendar",
   "Select",
   "Radio",
@@ -16,25 +22,33 @@ export const PAGE_COMPONENT_TYPES = [
   "PageLink",
 ] as const;
 
+export type LegacyPageComponentType =
+  (typeof LEGACY_PAGE_COMPONENT_TYPES)[number];
+
+export const PAGE_COMPONENT_TYPES = [
+  ...LEGACY_PAGE_COMPONENT_TYPES,
+  ...REGISTERED_PAGE_COMPONENT_TYPES,
+] as const;
+
 export type PageComponentType = (typeof PAGE_COMPONENT_TYPES)[number];
 
 export const LEGACY_PAGE_COMPONENT_TYPE_ALIASES = {
   TestingComponent: "Calendar",
 } as const;
 
-export type LegacyPageComponentType =
+export type StoredLegacyPageComponentType =
   keyof typeof LEGACY_PAGE_COMPONENT_TYPE_ALIASES;
 
 export type StoredPageComponentType =
   | PageComponentType
-  | LegacyPageComponentType;
+  | StoredLegacyPageComponentType;
 
 export function resolveStoredPageComponentType(
   value: string,
 ): PageComponentType | null {
   if (value in LEGACY_PAGE_COMPONENT_TYPE_ALIASES) {
     return LEGACY_PAGE_COMPONENT_TYPE_ALIASES[
-      value as LegacyPageComponentType
+      value as StoredLegacyPageComponentType
     ];
   }
 
@@ -154,17 +168,6 @@ export type PageLinkComponentInstance = {
   };
 };
 
-export type PageComponentInstance =
-  | CalendarComponentInstance
-  | SelectComponentInstance
-  | RadioComponentInstance
-  | FeedbackComponentInstance
-  | KanbanComponentInstance
-  | MainHeadlineComponentInstance
-  | SectionHeaderComponentInstance
-  | SubheaderComponentInstance
-  | PageLinkComponentInstance;
-
 export type SelectComponentLiveState = {
   type: "Select";
   state: {
@@ -220,18 +223,7 @@ export type PageLinkComponentLiveState = {
   state: Record<string, never>;
 };
 
-export type PageComponentLiveState =
-  | CalendarComponentLiveState
-  | SelectComponentLiveState
-  | RadioComponentLiveState
-  | FeedbackComponentLiveState
-  | KanbanComponentLiveState
-  | MainHeadlineComponentLiveState
-  | SectionHeaderComponentLiveState
-  | SubheaderComponentLiveState
-  | PageLinkComponentLiveState;
-
-export type PageComponentInstanceMap = {
+export type LegacyPageComponentInstanceMap = {
   Calendar: CalendarComponentInstance;
   Select: SelectComponentInstance;
   Radio: RadioComponentInstance;
@@ -243,7 +235,18 @@ export type PageComponentInstanceMap = {
   PageLink: PageLinkComponentInstance;
 };
 
-export type PageComponentLiveStateMap = {
+export type RegisteredPageComponentInstanceMap = {
+  [Type in keyof RegisteredPageComponentConfigMap]: {
+    id: string;
+    type: Type;
+    config: RegisteredPageComponentConfigMap[Type];
+  };
+};
+
+export type PageComponentInstanceMap = LegacyPageComponentInstanceMap &
+  RegisteredPageComponentInstanceMap;
+
+export type LegacyPageComponentLiveStateMap = {
   Calendar: CalendarComponentLiveState;
   Select: SelectComponentLiveState;
   Radio: RadioComponentLiveState;
@@ -254,6 +257,21 @@ export type PageComponentLiveStateMap = {
   Subheader: SubheaderComponentLiveState;
   PageLink: PageLinkComponentLiveState;
 };
+
+export type RegisteredPageComponentLiveStateMap = {
+  [Type in keyof RegisteredPageComponentStateMap]: {
+    type: Type;
+    state: RegisteredPageComponentStateMap[Type];
+  };
+};
+
+export type PageComponentLiveStateMap = LegacyPageComponentLiveStateMap &
+  RegisteredPageComponentLiveStateMap;
+
+export type PageComponentInstance = PageComponentInstanceMap[PageComponentType];
+
+export type PageComponentLiveState =
+  PageComponentLiveStateMap[PageComponentType];
 
 export type PageComponentInstanceByType<T extends PageComponentType> =
   PageComponentInstanceMap[T];

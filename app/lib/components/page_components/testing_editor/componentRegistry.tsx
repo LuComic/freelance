@@ -1,53 +1,40 @@
 "use client";
 
+import type { ComponentType } from "react";
+import type { PageComponentType } from "@/lib/pageDocument";
 import { Calendar } from "@/app/lib/components/page_components/calendar/Calendar";
-import { Kanban } from "@/app/lib/components/page_components/progress/Kanban";
 import { Feedback } from "@/app/lib/components/page_components/feedback/Feedback";
-import { Select } from "@/app/lib/components/page_components/form/select/Select";
 import { Radio } from "@/app/lib/components/page_components/form/radio/Radio";
+import { Select } from "@/app/lib/components/page_components/form/select/Select";
+import { Kanban } from "@/app/lib/components/page_components/progress/Kanban";
 import { MainHeadline } from "@/app/lib/components/page_components/text/parts/MainHeadline";
 import { PageLink } from "@/app/lib/components/page_components/text/parts/PageLink";
 import { SectionHeader } from "@/app/lib/components/page_components/text/parts/SectionHeader";
 import { Subheader } from "@/app/lib/components/page_components/text/parts/Subheader";
+import { REGISTERED_PAGE_COMPONENT_RENDERERS } from "@/app/lib/components/page_components/registeredComponentRenderers";
 
-export const COMPONENT_REGISTRY = [
-  {
-    tag: "Calendar",
-    Component: Calendar,
-    commands: ["calendar", "testing"],
-  },
-  { tag: "Kanban", Component: Kanban, commands: ["kanban"] },
-  { tag: "Feedback", Component: Feedback, commands: ["feedback"] },
-  { tag: "Select", Component: Select, commands: ["select"] },
-  { tag: "Radio", Component: Radio, commands: ["radio"] },
-  {
-    tag: "MainHeadline",
-    Component: MainHeadline,
-    commands: ["mainheadline", "h1"],
-  },
-  {
-    tag: "SectionHeader",
-    Component: SectionHeader,
-    commands: ["sectionheader", "h2"],
-  },
-  { tag: "Subheader", Component: Subheader, commands: ["subheader", "h3"] },
-  { tag: "PageLink", Component: PageLink, commands: ["pagelink"] },
-] as const;
+type RenderableComponentEntry = {
+  type: PageComponentType;
+  Component: ComponentType<{ instanceId: string }>;
+};
 
-export const PRIMARY_INSERTABLE_COMMANDS = COMPONENT_REGISTRY.map(
-  ({ commands }) => commands[0],
-);
+const LEGACY_RENDERABLE_COMPONENTS = [
+  { type: "Calendar", Component: Calendar },
+  { type: "Kanban", Component: Kanban },
+  { type: "Feedback", Component: Feedback },
+  { type: "Select", Component: Select },
+  { type: "Radio", Component: Radio },
+  { type: "MainHeadline", Component: MainHeadline },
+  { type: "SectionHeader", Component: SectionHeader },
+  { type: "Subheader", Component: Subheader },
+  { type: "PageLink", Component: PageLink },
+] as const satisfies readonly RenderableComponentEntry[];
 
-export const RENDERABLE_COMPONENTS = COMPONENT_REGISTRY.map(
-  ({ tag, Component }) => ({
-    tag,
-    Component,
-  }),
-);
+export const RENDERABLE_COMPONENTS = [
+  ...LEGACY_RENDERABLE_COMPONENTS,
+  ...REGISTERED_PAGE_COMPONENT_RENDERERS,
+] as const satisfies readonly RenderableComponentEntry[];
 
-export const INSERTABLE_COMPONENT_COMMANDS = COMPONENT_REGISTRY.flatMap(
-  ({ tag, commands }) => commands.map((command) => ({ command, tag })),
-);
-
-export type EditorComponentCommand =
-  (typeof INSERTABLE_COMPONENT_COMMANDS)[number]["command"];
+export function getRenderablePageComponent(type: PageComponentType) {
+  return RENDERABLE_COMPONENTS.find((component) => component.type === type) ?? null;
+}

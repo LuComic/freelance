@@ -1,5 +1,6 @@
 "use client";
 
+import type { InsertableComponentCommand } from "@/app/lib/components/page_components/componentCatalog";
 import {
   createContext,
   useCallback,
@@ -9,16 +10,7 @@ import {
   useState,
 } from "react";
 
-export type InsertableComponentCommand =
-  | "calendar"
-  | "kanban"
-  | "feedback"
-  | "select"
-  | "radio"
-  | "mainheadline"
-  | "sectionheader"
-  | "subheader"
-  | "pagelink";
+export type { InsertableComponentCommand } from "@/app/lib/components/page_components/componentCatalog";
 
 type PendingComponentInsert = {
   command: InsertableComponentCommand;
