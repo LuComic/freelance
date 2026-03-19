@@ -19,6 +19,27 @@
   }
 } */
 :root {
+  /*
+  --dim: #d0d0d0;
+  --darkest: #ececec;
+  --darkest-hover: #e1e1e1;
+  --quite-dark: #ffffff;
+  --quite-dark-hover: #f6f6f6;
+  --gray-page: #777676;
+  --gray: #3e3e3e;
+  --light: black;
+
+  --vibrant: #2879fc;
+  --vibrant-hover: #224dfb;
+
+  --pending-border: #b57c01;
+  --pending-bg: #e6d86a;
+  --accepted-border: #0f7233;
+  --accepted-bg: #61d88d;
+  --declined-border: #b61034;
+  --declined-bg: #fa808e; 
+  */
+
   --dim: #090909;
   --darkest: #111111;
   --darkest-hover: #212121;
