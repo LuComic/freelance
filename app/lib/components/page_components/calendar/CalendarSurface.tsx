@@ -230,20 +230,28 @@ export const CalendarSurface = ({
       ) : null}
 
       {viewMode !== "day" ? (
-        <div className="grid grid-cols-7 min-w-[900px] w-full">
+        <div className="grid grid-cols-7 w-full">
           {WEEKDAYS.map((day) => (
-            <span
-              key={day}
-              className="text-(--gray-page) @[40rem]:text-base text-sm"
-            >
-              {day}
-            </span>
+            <>
+              <span
+                key={day}
+                className="text-(--gray-page) @[40rem]:text-base text-sm hidden @[40rem]:inline"
+              >
+                {day}
+              </span>
+              <span
+                key={day + "id"}
+                className="text-(--gray-page) @[40rem]:text-base text-sm inline @[40rem]:hidden"
+              >
+                {day.slice(0, 3)}
+              </span>
+            </>
           ))}
         </div>
       ) : null}
 
       <div
-        className={`h-full ${viewMode !== "day" ? "min-w-[900px]" : ""} w-full min-h-40 max-w-full overflow-x-auto border rounded-md border-(--gray) grid ${
+        className={`h-full ${viewMode !== "day" ? "" : ""} w-full min-h-20 @[40rem]:min-h-40 max-w-full overflow-x-auto border rounded-md border-(--gray) grid ${
           viewMode === "day"
             ? "grid-cols-1 grid-rows-1"
             : viewMode === "week"
@@ -373,7 +381,7 @@ export const CalendarSurface = ({
                       }}
                     >
                       <span
-                        className={`rounded-md p-[0.5px] aspect-square text-left w-max flex items-center justify-center ${
+                        className={`rounded-md @[40rem]:text-base text-sm p-[0.5px] aspect-square text-left w-max flex items-center justify-center ${
                           isToday(date)
                             ? "bg-(--vibrant)/20"
                             : "bg-(--gray)/10 text-(--gray-page)"
@@ -428,7 +436,7 @@ export const CalendarSurface = ({
                   return (
                     <div
                       key={date.toISOString()}
-                      className={`w-full min-h-40 aspect-square p-2 flex flex-col gap-1 hover:bg-(--gray)/5 ${getMonthCellBorderClass(
+                      className={`w-full min-h-20 @[40rem]:min-h-40 aspect-square p-2 flex flex-col gap-1 hover:bg-(--gray)/5 ${getMonthCellBorderClass(
                         rowIndex,
                         cellIndex,
                         monthRows.length,
@@ -444,7 +452,7 @@ export const CalendarSurface = ({
                       }}
                     >
                       <span
-                        className={`rounded-md p-[0.5px] aspect-square text-left w-max flex items-center justify-center ${
+                        className={`rounded-md @[40rem]:text-base text-sm p-[0.5px] aspect-square text-left w-max flex items-center justify-center ${
                           isToday(date)
                             ? "bg-(--vibrant)/20"
                             : "bg-(--gray)/10 text-(--gray-page)"
@@ -474,7 +482,7 @@ export const CalendarSurface = ({
               ) : (
                 <div
                   key={`month-empty-${rowIndex}-${cellIndex}`}
-                  className={`w-full min-h-40 aspect-square p-2 ${getMonthCellBorderClass(
+                  className={`w-full min-h-20 @[40rem]:min-h-40 aspect-square p-2 ${getMonthCellBorderClass(
                     rowIndex,
                     cellIndex,
                     monthRows.length,
