@@ -206,6 +206,10 @@ function normalizeRegisteredComponentInstance<
   const registeredDefinition = getRegisteredPageComponentDefinition(type);
 
   const fallback = createDefaultComponentInstance(type, id);
+  const normalizeConfig = registeredDefinition.normalizeConfig as (
+    value: unknown,
+    fallback: PageComponentInstanceByType<T>["config"],
+  ) => PageComponentInstanceByType<T>["config"];
 
   if (
     !isRecord(value) ||
@@ -218,7 +222,7 @@ function normalizeRegisteredComponentInstance<
   return {
     id,
     type,
-    config: registeredDefinition.normalizeConfig(value.config, fallback.config),
+    config: normalizeConfig(value.config, fallback.config),
   } as PageComponentInstanceByType<T>;
 }
 
@@ -229,6 +233,10 @@ function normalizeRegisteredLiveState<T extends RegisteredPageComponentType>(
   const registeredDefinition = getRegisteredPageComponentDefinition(type);
 
   const fallback = createDefaultLiveState(type);
+  const normalizeState = registeredDefinition.normalizeState as (
+    value: unknown,
+    fallback: PageComponentLiveStateByType<T>["state"],
+  ) => PageComponentLiveStateByType<T>["state"];
 
   if (
     !isRecord(value) ||
@@ -240,7 +248,7 @@ function normalizeRegisteredLiveState<T extends RegisteredPageComponentType>(
 
   return {
     type,
-    state: registeredDefinition.normalizeState(value.state, fallback.state),
+    state: normalizeState(value.state, fallback.state),
   } as PageComponentLiveStateByType<T>;
 }
 

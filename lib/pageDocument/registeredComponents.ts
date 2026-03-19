@@ -1,7 +1,9 @@
 import { IdeaFormDefinition } from "./registered/IdeaForm.definition";
+import { IdeaBoardDefinition } from "./registered/IdeaBoard.definition";
 
 export const REGISTERED_PAGE_COMPONENT_DEFINITIONS = [
   IdeaFormDefinition,
+  IdeaBoardDefinition,
 ] as const;
 
 function collectDefinitionTypes<

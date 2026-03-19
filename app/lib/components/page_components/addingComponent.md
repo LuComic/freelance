@@ -5,8 +5,7 @@
 `type`
 
 - The component name used in the page document, for example `"IdeaForm"`.
-
-Example:
+  Example:
 
 ```ts
 type: "IdeaForm";
@@ -15,8 +14,7 @@ type: "IdeaForm";
 `commands`
 
 - The slash commands that insert the component.
-
-Example:
+  Example:
 
 ```ts
 commands: ["ideaform", "ideas"];
@@ -25,8 +23,7 @@ commands: ["ideaform", "ideas"];
 `createDefaultConfig`
 
 - The default creator/setup data (only creator sees that) for a new component.
-
-Example:
+  Example:
 
 ```ts
 createDefaultConfig: () => ({
@@ -37,8 +34,7 @@ createDefaultConfig: () => ({
 `createDefaultState`
 
 - The default live data (both client and creator see that) for a new component.
-
-Example:
+  Example:
 
 ```ts
 createDefaultState: () => ({
@@ -106,8 +102,7 @@ normalizeState: (value, fallback) => {
 `componentLibrary`
 
 - Controls how the component appears in the component picker.
-
-Example:
+  Example:
 
 ```ts
 componentLibrary: {
