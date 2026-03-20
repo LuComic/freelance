@@ -23,11 +23,22 @@ commands: ["ideaform", "ideas"];
 `createDefaultConfig`
 
 - The default creator/setup data (only creator sees that) for a new component.
+- Put booleans, titles, tags, permissions, and other setup choices here.
+- If the live/client UI should react to those choices, pass `component.config` into both your creator and client components.
   Example:
 
 ```ts
 createDefaultConfig: () => ({
   title: "",
+});
+```
+
+Example for `IdeaBoard`, because it stores client permissions in config:
+
+```ts
+createDefaultConfig: () => ({
+  canClientAdd: true,
+  canClientVote: true,
 });
 ```
 
@@ -47,6 +58,7 @@ createDefaultState: () => ({
 - Cleans or accepts loaded config from stored page JSON.
 - Must return a valid config object.
 - If your UI is the only writer, the simple pattern is enough.
+- If config fields matter to rendering or permissions, normalize the individual fields instead of blindly casting.
 
 Minimal pattern:
 
@@ -54,6 +66,29 @@ Minimal pattern:
 normalizeConfig: (value, fallback) => {
   if (typeof value === "object" && value !== null) {
     return value as typeof fallback;
+  }
+
+  return fallback;
+};
+```
+
+Safer example for boolean config like `IdeaBoard`:
+
+```ts
+normalizeConfig: (value, fallback) => {
+  if (typeof value === "object" && value !== null) {
+    const config = value as Partial<typeof fallback>;
+
+    return {
+      canClientAdd:
+        typeof config.canClientAdd === "boolean"
+          ? config.canClientAdd
+          : fallback.canClientAdd,
+      canClientVote:
+        typeof config.canClientVote === "boolean"
+          ? config.canClientVote
+          : fallback.canClientVote,
+    };
   }
 
   return fallback;
@@ -146,6 +181,34 @@ export const YourComponent = ({ instanceId }: { instanceId: string }) => {
       onChangeLiveState={updateLiveState}
     />
   );
+};
+```
+
+If your client view also depends on config, keep that prop there too:
+
+```tsx
+<YourComponentClient
+  config={component.config}
+  liveState={liveState.state}
+  onChangeLiveState={updateLiveState}
+/>
+```
+
+Common copy-paste trap:
+
+- `onChangeConfig` must use your new component type on both sides.
+- Do not leave another component name in the return type.
+
+Correct pattern:
+
+```ts
+type YourComponentCreatorProps = {
+  config: PageComponentInstanceByType<"YourComponent">["config"];
+  onChangeConfig: (
+    updater: (
+      config: PageComponentInstanceByType<"YourComponent">["config"],
+    ) => PageComponentInstanceByType<"YourComponent">["config"],
+  ) => void;
 };
 ```
 

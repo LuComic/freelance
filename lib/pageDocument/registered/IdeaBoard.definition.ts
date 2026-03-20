@@ -4,7 +4,8 @@ export const IdeaBoardDefinition = defineRegisteredPageComponentDefinition({
   type: "IdeaBoard",
   commands: ["ideaboard", "board"],
   createDefaultConfig: () => ({
-    canClientEdit: true,
+    canClientAdd: true,
+    canClientVote: true,
   }),
   createDefaultState: () => ({
     ideas: [] as Array<{
@@ -15,7 +16,18 @@ export const IdeaBoardDefinition = defineRegisteredPageComponentDefinition({
   }),
   normalizeConfig: (value, fallback) => {
     if (typeof value === "object" && value !== null) {
-      return value as typeof fallback;
+      const config = value as Partial<typeof fallback>;
+
+      return {
+        canClientAdd:
+          typeof config.canClientAdd === "boolean"
+            ? config.canClientAdd
+            : fallback.canClientAdd,
+        canClientVote:
+          typeof config.canClientVote === "boolean"
+            ? config.canClientVote
+            : fallback.canClientVote,
+      };
     }
 
     return fallback;

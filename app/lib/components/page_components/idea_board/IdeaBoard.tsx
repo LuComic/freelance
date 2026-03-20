@@ -7,18 +7,22 @@ import { IdeaBoradCreator } from "./IdeaBoradCreator";
 
 export const IdeaBoard = ({ instanceId }: { instanceId: string }) => {
   const { isLive } = useEditMode();
-  const { liveState, updateLiveState } = usePageComponentState(
-    instanceId,
-    "IdeaBoard",
-  );
+  const { liveState, updateLiveState, component, updateConfig } =
+    usePageComponentState(instanceId, "IdeaBoard");
 
   return (
     <div className="w-full flex flex-col gap-2">
       {isLive ? (
-        <IdeaBoardClient liveState={liveState.state} />
+        <IdeaBoardClient
+          config={component.config}
+          liveState={liveState.state}
+          onChangeLiveState={updateLiveState}
+        />
       ) : (
         <IdeaBoradCreator
+          config={component.config}
           liveState={liveState.state}
+          onChangeConfig={updateConfig}
           onChangeLiveState={updateLiveState}
         />
       )}

@@ -41,7 +41,10 @@ export const PageLinkCreator = ({
 
   return (
     <>
-      <p className="@[40rem]:text-xl text-lg font-medium">Current Progress</p>
+      <p className="@[40rem]:text-xl text-lg font-medium">Page link</p>
+      <p className="text-(--gray-page)">
+        Create special text that can link to other pages in your project
+      </p>
       <input
         type="text"
         value={config.text}
