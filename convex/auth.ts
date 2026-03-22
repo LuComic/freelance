@@ -97,7 +97,9 @@ async function uniqueUserWithVerifiedEmail(ctx: MutationCtx, email: string) {
   const users = await ctx.db
     .query("users")
     .withIndex("email", (query) => query.eq("email", email))
-    .filter((query) => query.neq(query.field("emailVerificationTime"), undefined))
+    .filter((query) =>
+      query.neq(query.field("emailVerificationTime"), undefined),
+    )
     .take(2);
 
   return users.length === 1 ? users[0] : null;
@@ -107,7 +109,9 @@ async function uniqueUserWithVerifiedPhone(ctx: MutationCtx, phone: string) {
   const users = await ctx.db
     .query("users")
     .withIndex("phone", (query) => query.eq("phone", phone))
-    .filter((query) => query.neq(query.field("phoneVerificationTime"), undefined))
+    .filter((query) =>
+      query.neq(query.field("phoneVerificationTime"), undefined),
+    )
     .take(2);
 
   return users.length === 1 ? users[0] : null;
@@ -123,7 +127,8 @@ function buildUserData(
     phoneVerified: boolean;
   },
 ) {
-  const nextName = options.existingUser?.name ?? normalizeOptionalString(profile.name);
+  const nextName =
+    options.existingUser?.name ?? normalizeOptionalString(profile.name);
   const nextEmail =
     normalizeOptionalString(profile.email) ?? options.existingUser?.email;
   const nextPhone =
@@ -210,11 +215,13 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
       if (userId === null) {
         const existingUserWithVerifiedEmailId =
           typeof profile.email === "string" && shouldLinkViaEmail
-            ? (await uniqueUserWithVerifiedEmail(ctx, profile.email))?._id ?? null
+            ? ((await uniqueUserWithVerifiedEmail(ctx, profile.email))?._id ??
+              null)
             : null;
         const existingUserWithVerifiedPhoneId =
           typeof profile.phone === "string" && shouldLinkViaPhone
-            ? (await uniqueUserWithVerifiedPhone(ctx, profile.phone))?._id ?? null
+            ? ((await uniqueUserWithVerifiedPhone(ctx, profile.phone))?._id ??
+              null)
             : null;
 
         if (

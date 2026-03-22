@@ -1,14 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import type { Id } from "@/convex/_generated/dataModel";
 import type {
   PageComponentInstanceByType,
   PageComponentLiveStateByType,
 } from "@/lib/pageDocument";
+import { useState } from "react";
 import { ChevronRight, Heart, List, Medal } from "lucide-react";
+import {
+  createIdea,
+  getIdeaVoteCount,
+  hasIdeaVoteFromUser,
+  toggleIdeaVote,
+} from "./ideaBoardVotes";
 
 type IdeaBoardClientProps = {
   config: PageComponentInstanceByType<"IdeaBoard">["config"];
+  currentUserId: Id<"users"> | null;
   liveState: PageComponentLiveStateByType<"IdeaBoard">["state"];
   onChangeLiveState: (
     updater: (
@@ -17,21 +25,9 @@ type IdeaBoardClientProps = {
   ) => void;
 };
 
-function createIdeaId() {
-  if (
-    typeof crypto !== "undefined" &&
-    typeof crypto.randomUUID === "function"
-  ) {
-    return crypto.randomUUID();
-  }
-
-  return `idea_${Date.now().toString(36)}_${Math.random()
-    .toString(36)
-    .slice(2, 8)}`;
-}
-
 export const IdeaBoardClient = ({
   config,
+  currentUserId,
   liveState,
   onChangeLiveState,
 }: IdeaBoardClientProps) => {
@@ -39,12 +35,10 @@ export const IdeaBoardClient = ({
   const [addingInput, setAddingInput] = useState("");
   const [filter, setFilter] = useState<"all" | "rankings">("all");
 
-  const visibleIdeas =
-    filter === "rankings"
-      ? [...liveState.ideas].sort((firstIdea, secondIdea) => {
-          return secondIdea.votes - firstIdea.votes;
-        })
-      : liveState.ideas;
+  const visibleIdeas = liveState.ideas;
+  const rankedIdeas = [...liveState.ideas].sort((firstIdea, secondIdea) => {
+    return getIdeaVoteCount(secondIdea) - getIdeaVoteCount(firstIdea);
+  });
 
   const handleNewIdea = () => {
     const nextIdea = addingInput.trim();
@@ -55,28 +49,21 @@ export const IdeaBoardClient = ({
 
     onChangeLiveState((currentState) => ({
       ...currentState,
-      ideas: [
-        ...currentState.ideas,
-        {
-          id: createIdeaId(),
-          idea: nextIdea,
-          votes: 0,
-        },
-      ],
+      ideas: [...currentState.ideas, createIdea(nextIdea, currentUserId)],
     }));
 
     setAddingInput("");
   };
 
   const handleVote = (ideaId: string) => {
-    if (!config.canClientVote) {
+    if (!config.canClientVote || currentUserId === null) {
       return;
     }
 
     onChangeLiveState((currentState) => ({
       ...currentState,
       ideas: currentState.ideas.map((idea) =>
-        idea.id === ideaId ? { ...idea, votes: idea.votes + 1 } : idea,
+        idea.id === ideaId ? toggleIdeaVote(idea, currentUserId) : idea,
       ),
     }));
   };
@@ -157,44 +144,93 @@ export const IdeaBoardClient = ({
 
       <div className="w-full max-w-full min-w-0 overflow-x-auto border rounded-md border-(--gray)">
         <div className="min-w-[900px] flex flex-col">
-          <div
-            className={`w-full text-(--gray-page) ${visibleIdeas.length > 0 ? "border-b" : ""} border-(--gray) text-left grid justify-between items-start grid-cols-8 bg-(--darkest)`}
-          >
-            <span className="border-r p-2 border-(--gray) h-full text-wrap">
-              Actions
-            </span>
-            <span className="p-2 border-r border-(--gray) h-full text-wrap">
-              Votes
-            </span>
-            <span className="p-2 col-span-6 border-(--gray) h-full text-wrap">
-              Idea
-            </span>
-          </div>
-          {visibleIdeas.map((idea, index) => (
-            <div
-              className={`w-full ${index !== visibleIdeas.length - 1 ? "border-b" : ""} border-(--gray) text-left grid justify-between items-start grid-cols-8 ${index % 2 !== 0 ? "bg-(--gray)/10" : ""}`}
-              key={idea.id}
-            >
-              <div className="flex py-2 border-r border-(--gray) h-full justify-around items-center gap-1 flex-wrap">
-                <button
-                  type="button"
-                  className="gap-1 flex items-center justify-center h-max px-1.5 py-0.5 rounded-sm disabled:cursor-not-allowed hover:bg-(--gray)/20"
-                  onClick={() => handleVote(idea.id)}
-                  disabled={!config.canClientVote}
-                >
-                  <Heart size={16} />
-                  Vote
-                </button>
+          {filter === "rankings" ? (
+            <>
+              <div
+                className={`w-full text-(--gray-page) ${rankedIdeas.length > 0 ? "border-b" : ""} border-(--gray) text-left grid justify-between items-start grid-cols-10 bg-(--darkest) h-[44px]`}
+              >
+                <span className="border-r p-2 border-(--gray) h-full text-wrap flex items-center justify-start">
+                  Rank
+                </span>
+                <span className="p-2 border-r border-(--gray) h-full text-wrap flex items-center justify-start">
+                  Votes
+                </span>
+                <span className="p-2 col-span-8 border-(--gray) h-full text-wrap flex items-center justify-start">
+                  Idea
+                </span>
               </div>
-              <span className="p-2 border-r border-(--gray) h-full flex items-center justify-start gap-2 text-wrap text-left capitalize">
-                <Heart size={16} />
-                {idea.votes}
-              </span>
-              <span className="text-wrap p-2 col-span-6 h-full text-left">
-                {idea.idea}
-              </span>
-            </div>
-          ))}
+              {rankedIdeas.map((idea, index) => (
+                <div
+                  className={`w-full ${index !== rankedIdeas.length - 1 ? "border-b" : ""} text-left grid justify-between items-start grid-cols-10 ${index === 0 ? "text-(--first-place)" : index === 1 ? "text-(--second-place)" : index === 2 ? "text-(--third-place)" : ""} border-(--gray) ${index % 2 !== 0 ? "bg-(--gray)/10" : ""} h-[44px]`}
+                  key={idea.id}
+                >
+                  <span className="p-2 border-r border-(--gray) h-full flex items-center justify-start gap-2 text-wrap">
+                    {index + 1}.
+                  </span>
+                  <span className="p-2 border-r border-(--gray) h-full flex items-center justify-start gap-2 text-wrap">
+                    <Heart size={16} />
+                    {getIdeaVoteCount(idea)}
+                  </span>
+                  <span className="text-wrap p-2 col-span-8 h-full text-left flex items-center justify-start">
+                    {idea.idea}
+                  </span>
+                </div>
+              ))}
+            </>
+          ) : (
+            <>
+              <div
+                className={`w-full text-(--gray-page) ${visibleIdeas.length > 0 ? "border-b" : ""} border-(--gray) text-left grid justify-between items-start grid-cols-8 bg-(--darkest) h-[44px]`}
+              >
+                <span className="border-r p-2 border-(--gray) h-full text-wrap flex items-center justify-start">
+                  Actions
+                </span>
+                <span className="p-2 border-r border-(--gray) h-full text-wrap flex items-center justify-start">
+                  Votes
+                </span>
+                <span className="p-2 col-span-6 border-(--gray) h-full text-wrap flex items-center justify-start">
+                  Idea
+                </span>
+              </div>
+              {visibleIdeas.map((idea, index) => (
+                <div
+                  className={`w-full ${index !== visibleIdeas.length - 1 ? "border-b" : ""} border-(--gray) text-left grid justify-between items-start grid-cols-8 ${index % 2 !== 0 ? "bg-(--gray)/10" : ""} h-[44px]`}
+                  key={idea.id}
+                >
+                  <div className="flex p-2 border-r border-(--gray) h-full justify-start items-center gap-1 flex-wrap">
+                    {(() => {
+                      const hasVoted = hasIdeaVoteFromUser(idea, currentUserId);
+
+                      return (
+                        <button
+                          type="button"
+                          className="gap-1 flex items-center justify-center h-max px-1.5 py-0.5 rounded-sm disabled:cursor-not-allowed hover:bg-(--gray)/20"
+                          onClick={() => handleVote(idea.id)}
+                          disabled={
+                            !config.canClientVote || currentUserId === null
+                          }
+                        >
+                          <Heart
+                            size={16}
+                            color={`${hasVoted ? "var(--vibrant)" : "var(--light)"}`}
+                            fill={`${hasVoted ? "var(--vibrant)" : "transparent"}`}
+                          />
+                          {hasVoted ? "Voted" : "Vote"}
+                        </button>
+                      );
+                    })()}
+                  </div>
+                  <span className="p-2 border-r border-(--gray) h-full flex items-center justify-start gap-2 text-wrap text-left capitalize">
+                    <Heart size={16} />
+                    {getIdeaVoteCount(idea)}
+                  </span>
+                  <span className="text-wrap p-2 col-span-6 h-full text-left flex items-center justify-start">
+                    {idea.idea}
+                  </span>
+                </div>
+              ))}
+            </>
+          )}
         </div>
       </div>
 

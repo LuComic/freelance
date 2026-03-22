@@ -314,15 +314,6 @@ export const ConnectionItem = ({
                             ),
                         )}
                       </>
-                    ) : collaboratorRelationship === "friend" ? (
-                      renderActionItem(
-                        "Remove friend",
-                        <UserMinus color="var(--declined-border)" />,
-                        "danger",
-                        false,
-                        pendingForUser,
-                        () => void handleAction("removeFriend", item.userId),
-                      )
                     ) : null}
                     {renderActionItem(
                       "Invite",
@@ -345,6 +336,15 @@ export const ConnectionItem = ({
                         void handleAction("forgetCollaborator", item.userId),
                     )}
                     <MenubarSeparator className="bg-(--gray)" />
+                    {collaboratorRelationship === "friend" &&
+                      renderActionItem(
+                        "Remove friend",
+                        <UserMinus color="var(--declined-border)" />,
+                        "danger",
+                        false,
+                        pendingForUser,
+                        () => void handleAction("removeFriend", item.userId),
+                      )}
                     {renderActionItem(
                       "Block",
                       <UserX color="var(--declined-border)" />,

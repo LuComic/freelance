@@ -1,7 +1,4 @@
-import {
-  getAuthSessionId,
-  getAuthUserId,
-} from "@convex-dev/auth/server";
+import { getAuthSessionId, getAuthUserId } from "@convex-dev/auth/server";
 import type { Doc, Id } from "../_generated/dataModel";
 import type { QueryCtx, MutationCtx } from "../_generated/server";
 import { notFound, unauthorized } from "./errors";
@@ -20,7 +17,9 @@ export async function requireCurrentUserId(ctx: AuthCtx): Promise<Id<"users">> {
   return userId;
 }
 
-export async function getCurrentUser(ctx: AuthCtx): Promise<Doc<"users"> | null> {
+export async function getCurrentUser(
+  ctx: AuthCtx,
+): Promise<Doc<"users"> | null> {
   const userId = await getCurrentUserId(ctx);
   if (!userId) {
     return null;
@@ -67,7 +66,9 @@ export async function requireCurrentSession(
   const sessionId = await requireCurrentSessionId(ctx);
   const session = await ctx.db.get(sessionId);
   if (!session) {
-    throw unauthorized("Your session is no longer valid. Please sign in again.");
+    throw unauthorized(
+      "Your session is no longer valid. Please sign in again.",
+    );
   }
   return session;
 }
@@ -97,7 +98,9 @@ export async function requireCurrentAuth(ctx: AuthCtx): Promise<{
   }
 
   if (!session) {
-    throw unauthorized("Your session is no longer valid. Please sign in again.");
+    throw unauthorized(
+      "Your session is no longer valid. Please sign in again.",
+    );
   }
 
   if (session.userId !== userId) {
