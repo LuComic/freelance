@@ -59,6 +59,10 @@ export type PageDocumentContextValue = {
     updater: (liveState: PageComponentLiveState) => PageComponentLiveState,
   ) => Promise<void>;
   saveDocument: () => Promise<void>;
+  applyPageTemplate: (args: {
+    templateId: string;
+    expectedUpdatedAt: number;
+  }) => Promise<void>;
   createPageAndOpen: () => Promise<void>;
   deletePage: () => Promise<void>;
 };

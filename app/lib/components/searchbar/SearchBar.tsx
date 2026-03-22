@@ -2,7 +2,11 @@
 
 import { api } from "@/convex/_generated/api";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
-import { useQuery } from "convex/react";
+import type {
+  PageTemplateBlueprintV1,
+  ProjectTemplateBlueprintV1,
+} from "@/lib/templateBlueprint";
+import { useConvex, useQuery } from "convex/react";
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
@@ -15,10 +19,10 @@ import {
 import { PersonModal } from "./PersonModal";
 import { SearchBarItem } from "./SearchBarItem";
 import { useSearchBar } from "./SearchBarContext";
-import {
-  PLACEHOLDER_TEMPLATES,
-  type SearchPerson,
-  type SearchTemplate,
+import type {
+  SearchPerson,
+  SearchTemplate,
+  SearchTemplateSummary,
 } from "./SearchBarData";
 import { TemplateModal } from "./TemplateModal";
 
@@ -43,6 +47,7 @@ type SearchPageResult = {
 };
 
 export const SearchBar = () => {
+  const convex = useConvex();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -56,6 +61,13 @@ export const SearchBar = () => {
   const [resolvedPageSearchResults, setResolvedPageSearchResults] = useState<
     SearchPageResult[] | undefined
   >(undefined);
+  const [resolvedTemplateSearchResults, setResolvedTemplateSearchResults] =
+    useState<SearchTemplateSummary[] | undefined>(undefined);
+  const [isLoadingTemplatePreview, setIsLoadingTemplatePreview] =
+    useState(false);
+  const [templateActionError, setTemplateActionError] = useState<string | null>(
+    null,
+  );
   const selectedItemRef = useRef<HTMLButtonElement>(null);
   const {
     isOpen,
@@ -64,6 +76,8 @@ export const SearchBar = () => {
     personModalPerson,
     peopleSearchSelectHandler,
     searchInviteDefaults,
+    templateSearchTypes,
+    templateSearchSelectHandler,
     openSearch,
     openPersonModal,
     closeSearch,
@@ -71,7 +85,7 @@ export const SearchBar = () => {
     clearTag,
   } = useSearchBar();
   const deferredSearchQuery = useDeferredValue(
-    activeTag === null ? searchQuery : "",
+    activeTag === "people" ? "" : searchQuery,
   );
   const normalizedSearchQuery = searchQuery.trim();
   const peopleSearchArgs =
@@ -88,6 +102,14 @@ export const SearchBar = () => {
           limit: 10,
         }
       : "skip";
+  const templateSearchArgs =
+    isOpen && activeTag === "template"
+      ? {
+          query: deferredSearchQuery.trim(),
+          limit: 10,
+          types: templateSearchTypes ?? undefined,
+        }
+      : "skip";
   const pageSearchResults = useQuery(
     api.search.queries.searchPagesAcrossProjects,
     pageSearchArgs,
@@ -96,10 +118,16 @@ export const SearchBar = () => {
     api.search.queries.searchPeople,
     peopleSearchArgs,
   );
-  const visiblePeopleSearchResults =
+  const templateSearchResults = useQuery(
+    api.templates.queries.searchVisibleTemplates,
+    templateSearchArgs,
+  );
+  const visiblePeopleSearchResults: SearchPerson[] =
     peopleSearchResults ?? resolvedPeopleSearchState?.results ?? [];
-  const visiblePageSearchResults =
+  const visiblePageSearchResults: SearchPageResult[] =
     pageSearchResults ?? resolvedPageSearchResults ?? [];
+  const visibleTemplateSearchResults: SearchTemplateSummary[] =
+    templateSearchResults ?? resolvedTemplateSearchResults ?? [];
   const isLoadingPeople =
     isOpen &&
     activeTag === "people" &&
@@ -112,6 +140,11 @@ export const SearchBar = () => {
     activeTag === null &&
     pageSearchResults === undefined &&
     visiblePageSearchResults.length === 0;
+  const isLoadingTemplates =
+    isOpen &&
+    activeTag === "template" &&
+    templateSearchResults === undefined &&
+    visibleTemplateSearchResults.length === 0;
 
   useEffect(() => {
     if (!isOpen || activeTag !== "people") {
@@ -162,17 +195,74 @@ export const SearchBar = () => {
     }
   }, [activeTag, isOpen, pageSearchResults]);
 
-  const filteredTemplates = PLACEHOLDER_TEMPLATES.filter((template) => {
-    const normalizedQuery = searchQuery.toLowerCase();
-    return (
-      template.name.toLowerCase().includes(normalizedQuery) ||
-      template.author.toLowerCase().includes(normalizedQuery)
-    );
-  });
+  useEffect(() => {
+    if (!isOpen || activeTag !== "template") {
+      startTransition(() => {
+        setResolvedTemplateSearchResults(undefined);
+        setTemplateActionError(null);
+      });
+      return;
+    }
+
+    if (templateSearchResults !== undefined) {
+      startTransition(() => {
+        setResolvedTemplateSearchResults(templateSearchResults);
+      });
+    }
+  }, [activeTag, isOpen, templateSearchResults]);
+
+  const handleTemplateSelect = async (template: SearchTemplateSummary) => {
+    setTemplateActionError(null);
+    setIsLoadingTemplatePreview(true);
+
+    try {
+      const preview = await convex.query(api.templates.content.getTemplatePreview, {
+        templateId: template.id,
+      });
+      const typedPreview: SearchTemplate =
+        preview.templateType === "page" && "page" in preview && preview.page
+          ? {
+              ...preview,
+              templateType: "page",
+              blueprint: preview.blueprint as PageTemplateBlueprintV1,
+              page: preview.page,
+            }
+          : preview.templateType === "project" &&
+              "pages" in preview &&
+              preview.pages
+            ? {
+                ...preview,
+                templateType: "project",
+                blueprint: preview.blueprint as ProjectTemplateBlueprintV1,
+                pages: preview.pages,
+              }
+            : (() => {
+                throw new Error("Template preview shape is invalid.");
+              })();
+
+      closeSearch();
+      setSearchQuery("");
+      setSelectedIndex(0);
+
+      if (templateSearchSelectHandler) {
+        templateSearchSelectHandler(typedPreview);
+      } else {
+        setSelectedTemplate(typedPreview);
+      }
+    } catch (error) {
+      setTemplateActionError(
+        error instanceof Error
+          ? error.message
+          : "Could not open this template.",
+      );
+    } finally {
+      setIsLoadingTemplatePreview(false);
+    }
+  };
 
   const searchItems: SearchItem[] =
     activeTag === "people"
-      ? visiblePeopleSearchResults.map((person) => ({
+      ? visiblePeopleSearchResults.map((person: SearchPerson) => ({
           key: String(person.userId),
           title: person.name,
           subtitle: person.email ?? undefined,
@@ -188,19 +278,16 @@ export const SearchBar = () => {
           },
         }))
       : activeTag === "template"
-        ? filteredTemplates.map((template) => ({
-            key: template.name,
+        ? visibleTemplateSearchResults.map((template: SearchTemplateSummary) => ({
+            key: String(template.id),
             title: template.name,
             subtitle: `by ${template.author}`,
             badge: `${template.templateType} template`,
             onSelect: () => {
-              setSelectedTemplate(template);
-              closeSearch();
-              setSearchQuery("");
-              setSelectedIndex(0);
+              void handleTemplateSelect(template);
             },
           }))
-        : visiblePageSearchResults.map((page) => ({
+        : visiblePageSearchResults.map((page: SearchPageResult) => ({
             key: `${page.projectId}:${page.pageId}`,
             title: page.pageTitle,
             subtitle: page.projectName,
@@ -274,7 +361,9 @@ export const SearchBar = () => {
           ? "Searching people..."
           : "No people found"
       : activeTag === "template"
-        ? "No templates found"
+        ? isLoadingTemplates
+          ? "Loading templates..."
+          : "No templates found"
         : isLoadingPages
           ? "Loading pages..."
           : normalizedSearchQuery.length === 0
@@ -341,6 +430,7 @@ export const SearchBar = () => {
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
                   setSelectedIndex(0);
+                  setTemplateActionError(null);
                 }}
                 onKeyDown={(e) => {
                   if (
@@ -389,6 +479,12 @@ export const SearchBar = () => {
               )}
             </div>
 
+            {templateActionError ? (
+              <div className="px-4 pb-3 text-sm text-(--declined-border)">
+                {templateActionError}
+              </div>
+            ) : null}
+
             <div className="px-4 py-3 border-t border-(--darkest-hover) flex items-center gap-6 text-sm text-(--gray)">
               <div className="flex items-center gap-2">
                 <Kbd className="bg-(--gray) text-(--light)">esc</Kbd>
@@ -403,7 +499,11 @@ export const SearchBar = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Kbd className="bg-(--gray) text-(--light)">↵</Kbd>
-                <span>open</span>
+                <span>
+                  {isLoadingTemplatePreview && activeTag === "template"
+                    ? "loading..."
+                    : "open"}
+                </span>
               </div>
             </div>
           </div>

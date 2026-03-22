@@ -39,6 +39,7 @@ import type * as projects_mutations from "../projects/mutations.js";
 import type * as projects_queries from "../projects/queries.js";
 import type * as search_queries from "../search/queries.js";
 import type * as templates_content from "../templates/content.js";
+import type * as templates_model from "../templates/model.js";
 import type * as templates_mutations from "../templates/mutations.js";
 import type * as templates_queries from "../templates/queries.js";
 import type * as users_model from "../users/model.js";
@@ -83,6 +84,7 @@ declare const fullApi: ApiFromModules<{
   "projects/queries": typeof projects_queries;
   "search/queries": typeof search_queries;
   "templates/content": typeof templates_content;
+  "templates/model": typeof templates_model;
   "templates/mutations": typeof templates_mutations;
   "templates/queries": typeof templates_queries;
   "users/model": typeof users_model;

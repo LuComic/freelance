@@ -38,10 +38,20 @@ import type {
   ActivePageState,
   DeleteStatus,
   PageDocumentContextValue,
+  ProjectPageSummary,
   SaveStatus,
   ViewerProjectRole,
 } from "./page_document_helpers/types";
 import { resolveComponentTypeFromCommand } from "../page_components/testing_editor/commands";
+
+type ProjectMemberListItem = {
+  userId: string;
+};
+
+type ListedProjectSummary = {
+  id: string;
+  pages: ProjectPageSummary[];
+};
 
 const PageDocumentContext = createContext<PageDocumentContextValue | null>(
   null,
@@ -119,13 +129,18 @@ export function PageDocumentProvider({
   const activeClientUserIds = useMemo(
     () =>
       new Set<string>(
-        activeProjectMembers?.clients.map((member) => String(member.userId)) ??
+        activeProjectMembers?.clients.map((member: ProjectMemberListItem) =>
+          String(member.userId),
+        ) ??
           [],
       ),
     [activeProjectMembers],
   );
   const savePage = useMutation(api.pages.mutations.savePage);
   const savePageLiveState = useMutation(api.pages.mutations.savePageLiveState);
+  const applyPageTemplateMutation = useMutation(
+    api.templates.mutations.applyPageTemplate,
+  );
   const createPage = useMutation(api.pages.mutations.createPage);
   const deletePageMutation = useMutation(api.pages.mutations.deletePage);
 
@@ -628,6 +643,81 @@ export function PageDocumentProvider({
     await persistDocument(currentPage, currentDocument);
   }, [persistDocument]);
 
+  const applyPageTemplate = useCallback(
+    async (args: {
+      templateId: string;
+      expectedUpdatedAt: number;
+    }) => {
+      const currentPage = activePageRef.current;
+      const currentDocument = documentRef.current;
+
+      if (!currentPage || !currentDocument) {
+        return;
+      }
+
+      setSaveStatus("saving");
+      setSaveError(null);
+
+      try {
+        const result = await applyPageTemplateMutation({
+          pageId: currentPage.page.id as never,
+          templateId: args.templateId as never,
+          expectedUpdatedAt: args.expectedUpdatedAt,
+          baseTitle: currentPage.page.title,
+          baseDocument: currentDocument,
+        });
+        const nextPage: ActivePageState = {
+          ...currentPage,
+          page: {
+            ...currentPage.page,
+            title: result.title,
+            slug: result.slug,
+          },
+        };
+
+        documentRef.current = result.document;
+        activePageRef.current = nextPage;
+        setDocument(result.document);
+        setActivePage(nextPage);
+
+        if (
+          route &&
+          (result.slug !== route.pageSlug ||
+            nextPage.project.slug !== route.projectSlug)
+        ) {
+          setPendingRouteProjectId(nextPage.project.id);
+          setPendingRoutePageId(result.pageId);
+          router.replace(`/projects/${nextPage.project.slug}/${result.slug}`);
+        }
+
+        setSavedTitleSnapshot(result.title);
+        setSavedDocumentSnapshot(JSON.stringify(result.document));
+        setSaveStatus("idle");
+      } catch (error) {
+        setSaveError(
+          error instanceof Error
+            ? error.message
+            : "Could not apply this page template.",
+        );
+        setSaveStatus("error");
+        throw error;
+      }
+    },
+    [
+      applyPageTemplateMutation,
+      route,
+      router,
+      setActivePage,
+      setDocument,
+      setPendingRoutePageId,
+      setPendingRouteProjectId,
+      setSavedDocumentSnapshot,
+      setSavedTitleSnapshot,
+      setSaveError,
+      setSaveStatus,
+    ],
+  );
+
   const commitPageTitle = useCallback(
     async (title: string) => {
       const currentPage = activePageRef.current;
@@ -720,7 +810,7 @@ export function PageDocumentProvider({
 
     try {
       const currentProject = projects?.find(
-        (project) => project.id === currentPage.project.id,
+        (project: ListedProjectSummary) => project.id === currentPage.project.id,
       );
       const fallbackPath = resolveDeleteRedirectPath({
         currentPageId: currentPage.page.id,
@@ -782,11 +872,13 @@ export function PageDocumentProvider({
       commitPageTitle,
       commitComponentLiveState,
       saveDocument,
+      applyPageTemplate,
       createPageAndOpen,
       deletePage,
     }),
     [
       activePage,
+      applyPageTemplate,
       createPageAndOpen,
       deleteError,
       deletePage,

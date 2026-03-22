@@ -24,7 +24,7 @@ export const RadioClient = ({
     <>
       <p className="@[40rem]:text-xl text-lg font-medium">{config.title}</p>
       <p className="text-(--gray-page)">{config.description}</p>
-      <div className="border-(--gray) border-t pt-2 w-full flex flex-col gap-2">
+      <div className="w-full flex flex-col gap-2">
         {config.options.map((option) => {
           const selected = liveState.selectedOptionId === option.id;
 

@@ -1,6 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { api } from "@/convex/_generated/api";
+import { useMutation, useQuery } from "convex/react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -9,44 +11,87 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  createPageTemplateBlueprint,
+  createProjectTemplateBlueprint,
+  getOrderedComponentTypes,
+} from "@/lib/templateBlueprint";
+import type { PageComponentType } from "@/lib/pageDocument";
 import { SavePageTemplate } from "./SavePageTemplate";
 import { SaveProjectTemplate } from "./SaveProjectTemplate";
 import type { TemplatePage } from "../searchbar/SearchBarData";
-
-const TEMPLATE_PAGE: TemplatePage = {
-  title: "Preferences",
-  description: "Get the basic client's preferences and info",
-  components: ["Select", "Select", "Radio"],
-};
-
-const TEMPLATE_PROJECT_PAGES: TemplatePage[] = [
-  TEMPLATE_PAGE,
-  {
-    title: "Suggestions",
-    description: "Collect client feedback and get feature suggestions",
-    components: ["Feedback"],
-  },
-];
+import { useOptionalPageDocument } from "./PageDocumentContext";
 
 type SaveTemplateModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
+type ProjectTemplateSourcePage = {
+  id: string;
+  title: string;
+  components: PageComponentType[];
+};
+
 export const SaveTemplateModal = ({
   open,
   onOpenChange,
 }: SaveTemplateModalProps) => {
-  const [templateName, setTemplateName] = useState(
-    "Freelance Website Template",
+  const pageDocument = useOptionalPageDocument();
+  const hasActivePage = Boolean(pageDocument?.activePage && pageDocument.document);
+  const activeProjectId = hasActivePage ? pageDocument!.activePage!.project.id : null;
+  const saveTemplate = useMutation(api.templates.mutations.saveTemplate);
+  const projectTemplateSource = useQuery(
+    api.templates.queries.getProjectTemplateSource,
+    open && hasActivePage
+      ? {
+          projectId: activeProjectId as never,
+        }
+      : "skip",
   );
-  const [templateDescription, setTemplateDescription] = useState(
-    "This template is used for freelancers",
-  );
+  const [templateName, setTemplateName] = useState("");
+  const [templateDescription, setTemplateDescription] = useState("");
   const [templateType, setTemplateType] = useState<"page" | "project">("page");
   const [visibility, setVisibility] = useState<"private" | "public">("private");
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const closeModal = useCallback(() => onOpenChange(false), [onOpenChange]);
+  const currentPagePreview = useMemo<TemplatePage | null>(
+    () =>
+      pageDocument?.activePage && pageDocument.document
+        ? {
+            title: pageDocument.activePage.page.title || "Current page",
+            description: "",
+            components: getOrderedComponentTypes(pageDocument.document),
+          }
+        : null,
+    [pageDocument],
+  );
+  const projectPagesPreview = useMemo<ProjectTemplateSourcePage[]>(() => {
+    if (!pageDocument?.activePage || !pageDocument.document) {
+      return [];
+    }
+
+    const activePageSummary = {
+      id: pageDocument.activePage.page.id,
+      title: pageDocument.activePage.page.title,
+      components: getOrderedComponentTypes(pageDocument.document),
+    };
+    const sourcePages =
+      (projectTemplateSource?.pages ?? []) as ProjectTemplateSourcePage[];
+
+    if (sourcePages.length === 0) {
+      return [activePageSummary];
+    }
+
+    return sourcePages.map((page: ProjectTemplateSourcePage) =>
+      page.id === activePageSummary.id ? activePageSummary : page,
+    );
+  }, [
+    pageDocument,
+    projectTemplateSource,
+  ]);
 
   useEffect(() => {
     if (!open) {
@@ -66,6 +111,51 @@ export const SaveTemplateModal = ({
     };
   }, [closeModal, open]);
 
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    setTemplateName("");
+    setTemplateDescription("");
+    setTemplateType("page");
+    setVisibility("private");
+    setError(null);
+    setIsSaving(false);
+  }, [open]);
+
+  const handleSave = async () => {
+    if (!templateName.trim() || isSaving || !pageDocument?.activePage || !pageDocument.document) {
+      return;
+    }
+
+    setError(null);
+    setIsSaving(true);
+
+    try {
+      const blueprint =
+        templateType === "page"
+          ? createPageTemplateBlueprint(pageDocument.document)
+          : createProjectTemplateBlueprint(projectPagesPreview);
+
+      await saveTemplate({
+        name: templateName,
+        description: templateDescription || undefined,
+        visibility,
+        blueprint,
+      });
+      closeModal();
+    } catch (saveError) {
+      setError(
+        saveError instanceof Error
+          ? saveError.message
+          : "Could not save this template.",
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   if (!open) return null;
 
   return (
@@ -81,7 +171,7 @@ export const SaveTemplateModal = ({
           <div className="flex flex-col gap-1">
             <p className="md:text-3xl text-xl font-medium">Save Template</p>
             <p className="text-(--gray-page)">
-              Save this page structure as a reusable template.
+              Save this structure as a reusable template.
             </p>
           </div>
         </div>
@@ -159,11 +249,29 @@ export const SaveTemplateModal = ({
 
         <div className="w-full flex flex-col gap-2">
           {templateType === "page" ? (
-            <SavePageTemplate page={TEMPLATE_PAGE} />
+            currentPagePreview ? (
+              <SavePageTemplate page={currentPagePreview} />
+            ) : (
+              <p className="text-(--gray-page)">
+                Open a project page to save a template.
+              </p>
+            )
+          ) : projectTemplateSource === undefined ? (
+            <p className="text-(--gray-page)">Loading project pages...</p>
           ) : (
-            <SaveProjectTemplate pages={TEMPLATE_PROJECT_PAGES} />
+            <SaveProjectTemplate
+              pages={projectPagesPreview.map((page: ProjectTemplateSourcePage) => ({
+                title: page.title,
+                description: "",
+                components: page.components,
+              }))}
+            />
           )}
         </div>
+
+        {error ? (
+          <p className="text-sm text-(--declined-border)">{error}</p>
+        ) : null}
 
         <div className="w-full flex items-center gap-1">
           <button
@@ -175,10 +283,16 @@ export const SaveTemplateModal = ({
           </button>
           <button
             type="button"
-            className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm w-full border border-(--vibrant) bg-(--vibrant)/10 hover:bg-(--vibrant)/20"
-            onClick={closeModal}
+            className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm w-full border border-(--vibrant) bg-(--vibrant)/10 hover:bg-(--vibrant)/20 disabled:cursor-not-allowed disabled:opacity-60"
+            onClick={() => void handleSave()}
+            disabled={
+              !hasActivePage ||
+              !templateName.trim() ||
+              isSaving ||
+              (templateType === "project" && projectTemplateSource === undefined)
+            }
           >
-            Save Template
+            {isSaving ? "Saving..." : "Save Template"}
           </button>
         </div>
       </div>

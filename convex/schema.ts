@@ -54,7 +54,8 @@ const schema = defineSchema({
     description: v.optional(v.string()),
     type: v.union(v.literal("project"), v.literal("page")),
     visibility: v.union(v.literal("private"), v.literal("public")),
-    contentStorageId: v.id("_storage"),
+    contentStorageId: v.optional(v.id("_storage")),
+    contentJson: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
     isArchived: v.optional(v.boolean()),
@@ -77,6 +78,7 @@ const schema = defineSchema({
     sourceTemplateId: v.optional(v.id("templates")),
     // Snapshot of template blueprint used at creation time.
     sourceTemplateContentStorageId: v.optional(v.id("_storage")),
+    sourceTemplateContentJson: v.optional(v.string()),
     isArchived: v.optional(v.boolean()),
     createdAt: v.number(),
     updatedAt: v.number(),

@@ -40,11 +40,11 @@ export default async function ProjectViewLayout({
       }}
     >
       <SearchBarProvider>
-        <SearchBar />
         <SidebarControllerProvider>
           <Sidebar initialSidebarOpen={initialSidebarOpen} />
           <EditModeProvider>
             <PageDocumentProvider>
+              <SearchBar />
               <div className="flex-1 min-w-0 flex flex-col items-start justify-start">
                 <Tab initialTabsState={initialTabsState} />
                 <TopBar />

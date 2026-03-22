@@ -5,25 +5,8 @@ import { ChevronRight, Plus, Search, Trash } from "lucide-react";
 import { useMutation } from "convex/react";
 import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import type { SearchPerson } from "../searchbar/SearchBarData";
+import type { SearchPerson, SearchTemplate } from "../searchbar/SearchBarData";
 import { useSearchBar } from "../searchbar/SearchBarContext";
-
-const TEMPLATE = {
-  name: "website freelance",
-  author: "ainurakk",
-  pages: [
-    {
-      title: "Preferences",
-      description: "Get the basic client's preferences and info",
-      components: ["Select", "Select", "Radio"],
-    },
-    {
-      title: "Suggestions",
-      description: "Collect client feedback and get feature suggestions",
-      components: ["Feedback"],
-    },
-  ],
-};
 
 type CreateProjectModalProps = {
   trigger?: ReactNode;
@@ -35,7 +18,7 @@ export const CreateProjectModal = ({
   buttonClassName,
 }: CreateProjectModalProps) => {
   const router = useRouter();
-  const { openTaggedSearch } = useSearchBar();
+  const { openTaggedSearch, openTemplateSearch } = useSearchBar();
   const createProject = useMutation(api.projects.mutations.createProject);
   const [open, setOpen] = useState(false);
   const [projectName, setProjectName] = useState("");
@@ -44,17 +27,13 @@ export const CreateProjectModal = ({
   const [error, setError] = useState<string | null>(null);
   const [templateSectionOpen, setTemplateSectionOpen] = useState(false);
   const [peopleSectionOpen, setPeopleSectionOpen] = useState(false);
-  const [templateSearch, setTemplateSearch] = useState("website freelance");
-  const [pageDropdowns, setPageDropdowns] = useState<boolean[]>(
-    TEMPLATE.pages.map(() => false),
-  );
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<SearchTemplate | null>(null);
+  const [pageDropdowns, setPageDropdowns] = useState<boolean[]>([]);
   const [clients, setClients] = useState<SearchPerson[]>([]);
   const [coCreators, setCoCreators] = useState<SearchPerson[]>([]);
-
-  const templateFound =
-    templateSearch.trim() === "" ||
-    TEMPLATE.name.includes(templateSearch.trim().toLowerCase()) ||
-    TEMPLATE.author.includes(templateSearch.trim().toLowerCase());
+  const selectedProjectTemplate =
+    selectedTemplate?.templateType === "project" ? selectedTemplate : null;
 
   const getPersonLabel = (person: SearchPerson) => person.name;
 
@@ -83,7 +62,13 @@ export const CreateProjectModal = ({
   const closeModal = () => {
     setOpen(false);
     setError(null);
+    setSelectedTemplate(null);
+    setPageDropdowns([]);
   };
+
+  useEffect(() => {
+    setPageDropdowns(selectedProjectTemplate?.pages.map(() => false) ?? []);
+  }, [selectedProjectTemplate]);
 
   useEffect(() => {
     if (!open) {
@@ -127,6 +112,12 @@ export const CreateProjectModal = ({
       const result = await createProject({
         name: projectName,
         description: projectDescription || undefined,
+        template: selectedProjectTemplate
+          ? {
+              templateId: selectedProjectTemplate.id,
+              expectedUpdatedAt: selectedProjectTemplate.updatedAt,
+            }
+          : undefined,
         members: members.length > 0 ? members : undefined,
       });
       closeModal();
@@ -218,85 +209,96 @@ export const CreateProjectModal = ({
 
                 {templateSectionOpen ? (
                   <div className="pl-7 flex flex-col gap-2 pb-2">
-                    <p className="text-(--gray-page)">
-                      Template selection UI is preserved here, but it does not
-                      affect creation yet.
-                    </p>
                     <p className="text-(--gray-page)">Search template</p>
                     <div className="w-full flex items-center gap-2">
                       <button
                         type="button"
                         className="w-max gap-2 rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) flex items-center justify-center"
+                        onClick={() =>
+                          openTemplateSearch({
+                            types: ["project"],
+                            selectHandler: (template) =>
+                              setSelectedTemplate(template),
+                          })
+                        }
                       >
                         <Search size={16} />
                         Search
                       </button>
                     </div>
 
-                    {templateFound ? (
+                    {selectedProjectTemplate ? (
                       <>
                         <div className="flex flex-wrap items-center gap-1 md:text-lg text-base">
-                          <p className="font-medium">{TEMPLATE.name}</p>
+                          <p className="font-medium">
+                            {selectedProjectTemplate.name}
+                          </p>
                           <span className="text-(--gray-page)">
-                            by {TEMPLATE.author}
+                            by {selectedProjectTemplate.author}
                           </span>
                         </div>
                         <p className="text-(--gray-page)">
-                          Creates {TEMPLATE.pages.length} pages
+                          Creates {selectedProjectTemplate.pages.length} pages
                         </p>
 
-                        <div className="w-full flex flex-col gap-1">
-                          {TEMPLATE.pages.map((page, pageIndex) => (
-                            <div
-                              key={page.title}
-                              className="w-full flex flex-col"
-                            >
-                              <button
-                                type="button"
-                                className="rounded-lg p-1 gap-2 hover:bg-(--darkest-hover) w-full text-(--gray) flex items-center justify-start"
-                                onClick={() =>
-                                  setPageDropdowns((prev) =>
-                                    prev.map((value, index) =>
-                                      index === pageIndex ? !value : value,
-                                    ),
-                                  )
-                                }
+                        <div className="w-full flex flex-col gap-2">
+                          {selectedProjectTemplate.pages.map(
+                            (page, pageIndex) => (
+                              <div
+                                key={`${page.title}-${pageIndex}`}
+                                className="w-full flex flex-col gap-2"
                               >
-                                <ChevronRight
-                                  size={18}
-                                  className={
-                                    pageDropdowns[pageIndex] ? "rotate-90" : ""
+                                <button
+                                  type="button"
+                                  className="rounded-lg p-1 gap-2 hover:bg-(--darkest-hover) w-full text-(--gray) flex items-center justify-start"
+                                  onClick={() =>
+                                    setPageDropdowns((prev) =>
+                                      prev.map((value, index) =>
+                                        index === pageIndex ? !value : value,
+                                      ),
+                                    )
                                   }
-                                />
-                                <span className="w-full text-left">
-                                  {page.title}
-                                </span>
-                              </button>
+                                >
+                                  <ChevronRight
+                                    size={18}
+                                    className={
+                                      pageDropdowns[pageIndex]
+                                        ? "rotate-90"
+                                        : ""
+                                    }
+                                  />
+                                  <span className="w-full text-left">
+                                    {page.title}
+                                  </span>
+                                </button>
 
-                              {pageDropdowns[pageIndex] ? (
-                                <div className="pl-8 flex flex-col gap-2 pt-1">
-                                  <p className="text-(--gray-page)">
-                                    {page.description}
-                                  </p>
-                                  <div className="flex items-center justify-start gap-2 w-full flex-wrap">
-                                    {page.components.map((componentName) => (
-                                      <div
-                                        key={`${page.title}-${componentName}`}
-                                        className="px-2 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page)"
-                                      >
-                                        {componentName}
-                                      </div>
-                                    ))}
+                                {pageDropdowns[pageIndex] ? (
+                                  <div className="pl-8 flex flex-col gap-2">
+                                    {page.description ? (
+                                      <p className="text-(--gray-page)">
+                                        {page.description}
+                                      </p>
+                                    ) : null}
+                                    <div className="flex items-center justify-start gap-2 w-full flex-wrap">
+                                      {page.components.map((componentName) => (
+                                        <div
+                                          key={`${page.title}-${componentName}`}
+                                          className="px-2 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page)"
+                                        >
+                                          {componentName}
+                                        </div>
+                                      ))}
+                                    </div>
                                   </div>
-                                </div>
-                              ) : null}
-                            </div>
-                          ))}
+                                ) : null}
+                              </div>
+                            ),
+                          )}
                         </div>
                       </>
                     ) : (
                       <p className="text-(--gray-page)">
-                        No template found for &quot;{templateSearch}&quot;.
+                        No template selected.
                       </p>
                     )}
                   </div>
@@ -319,8 +321,7 @@ export const CreateProjectModal = ({
                 {peopleSectionOpen ? (
                   <div className="pl-7 flex flex-col gap-2 pb-2">
                     <p className="text-(--gray-page)">
-                      These controls are UI-only for now and can be wired up
-                      later.
+                      Invite collaborators while the project is being created.
                     </p>
                     <p className="text-(--gray-page)">Current clients</p>
                     <div className="flex items-center justify-start gap-2 w-full flex-wrap">

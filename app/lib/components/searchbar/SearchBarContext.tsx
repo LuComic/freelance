@@ -3,16 +3,25 @@
 import type { Id } from "@/convex/_generated/dataModel";
 import { createContext, useContext, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import type { SearchPerson } from "./SearchBarData";
+import type {
+  SearchPerson,
+  SearchTemplate,
+  SearchTemplateType,
+} from "./SearchBarData";
 
 export type SearchTag = "people" | "template";
 export type InviteRole = "client" | "coCreator";
 export type SearchPersonSelectHandler = (person: SearchPerson) => void;
+export type SearchTemplateSelectHandler = (template: SearchTemplate) => void;
 export type PersonInviteDefaults = {
   projectId?: Id<"projects">;
   projectName?: string;
   role?: InviteRole;
   expandInviteSection?: boolean;
+};
+export type TemplateSearchOptions = {
+  types?: SearchTemplateType[];
+  selectHandler?: SearchTemplateSelectHandler;
 };
 
 type SearchBarContextValue = {
@@ -22,12 +31,15 @@ type SearchBarContextValue = {
   personModalInviteDefaults: PersonInviteDefaults | null;
   searchInviteDefaults: PersonInviteDefaults | null;
   peopleSearchSelectHandler: SearchPersonSelectHandler | null;
+  templateSearchTypes: SearchTemplateType[] | null;
+  templateSearchSelectHandler: SearchTemplateSelectHandler | null;
   openSearch: () => void;
   openTaggedSearch: (
     tag: SearchTag,
     inviteDefaults?: PersonInviteDefaults,
     selectHandler?: SearchPersonSelectHandler,
   ) => void;
+  openTemplateSearch: (options?: TemplateSearchOptions) => void;
   openPersonModal: (
     person: SearchPerson,
     inviteDefaults?: PersonInviteDefaults,
@@ -55,6 +67,11 @@ export const SearchBarProvider = ({
     useState<PersonInviteDefaults | null>(null);
   const [peopleSearchSelectHandler, setPeopleSearchSelectHandler] =
     useState<SearchPersonSelectHandler | null>(null);
+  const [templateSearchTypes, setTemplateSearchTypes] = useState<
+    SearchTemplateType[] | null
+  >(null);
+  const [templateSearchSelectHandler, setTemplateSearchSelectHandler] =
+    useState<SearchTemplateSelectHandler | null>(null);
 
   const value = useMemo(
     () => ({
@@ -64,9 +81,13 @@ export const SearchBarProvider = ({
       personModalInviteDefaults,
       searchInviteDefaults,
       peopleSearchSelectHandler,
+      templateSearchTypes,
+      templateSearchSelectHandler,
       openSearch: () => {
         setSearchInviteDefaults(null);
         setPeopleSearchSelectHandler(null);
+        setTemplateSearchTypes(null);
+        setTemplateSearchSelectHandler(null);
         setIsOpen(true);
       },
       openTaggedSearch: (
@@ -79,6 +100,16 @@ export const SearchBarProvider = ({
         setPeopleSearchSelectHandler(() =>
           tag === "people" ? selectHandler ?? null : null,
         );
+        setTemplateSearchTypes(null);
+        setTemplateSearchSelectHandler(null);
+        setIsOpen(true);
+      },
+      openTemplateSearch: (options?: TemplateSearchOptions) => {
+        setActiveTag("template");
+        setSearchInviteDefaults(null);
+        setPeopleSearchSelectHandler(null);
+        setTemplateSearchTypes(options?.types ?? null);
+        setTemplateSearchSelectHandler(() => options?.selectHandler ?? null);
         setIsOpen(true);
       },
       openPersonModal: (
@@ -93,6 +124,8 @@ export const SearchBarProvider = ({
         setActiveTag(null);
         setSearchInviteDefaults(null);
         setPeopleSearchSelectHandler(null);
+        setTemplateSearchTypes(null);
+        setTemplateSearchSelectHandler(null);
       },
       closePersonModal: () => {
         setPersonModalPerson(null);
@@ -102,6 +135,8 @@ export const SearchBarProvider = ({
         setActiveTag(null);
         setSearchInviteDefaults(null);
         setPeopleSearchSelectHandler(null);
+        setTemplateSearchTypes(null);
+        setTemplateSearchSelectHandler(null);
       },
     }),
     [
@@ -111,6 +146,8 @@ export const SearchBarProvider = ({
       personModalInviteDefaults,
       personModalPerson,
       searchInviteDefaults,
+      templateSearchSelectHandler,
+      templateSearchTypes,
     ],
   );
 

@@ -1,86 +1,43 @@
 import type { ConnectionPerson } from "../connections/types";
-
-export const PLACEHOLDER_FILES = [
-  "Docs",
-  "Components",
-  "Blocks",
-  "Charts",
-  "Directory",
-  "Create",
-  "Accordion",
-  "Button",
-  "Card",
-  "Dialog",
-  "Input",
-  "Select",
-  "Table",
-  "Tabs",
-  "Toast",
-];
+import type { Id } from "@/convex/_generated/dataModel";
+import type { PageComponentType } from "@/lib/pageDocument";
+import type {
+  PageTemplateBlueprintV1,
+  ProjectTemplateBlueprintV1,
+} from "@/lib/templateBlueprint";
 
 export type SearchPerson = ConnectionPerson;
 
 export type TemplatePage = {
   title: string;
   description: string;
-  components: string[];
+  components: PageComponentType[];
 };
+
+export type SearchTemplateType = "page" | "project";
 
 export type SearchTemplateBase = {
+  id: Id<"templates">;
   name: string;
   author: string;
+  description: string | null;
+  updatedAt: number;
 };
 
-export type PageSearchTemplate = SearchTemplateBase & {
+export type SearchTemplateSummary = SearchTemplateBase & {
+  templateType: SearchTemplateType;
+};
+
+export type PageSearchTemplate = SearchTemplateSummary & {
   templateType: "page";
+  blueprint: PageTemplateBlueprintV1;
   page: TemplatePage;
 };
 
-export type ProjectSearchTemplate = SearchTemplateBase & {
+export type ProjectSearchTemplate = SearchTemplateSummary & {
   templateType: "project";
+  blueprint: ProjectTemplateBlueprintV1;
   pages: TemplatePage[];
 };
 
 export type SearchTemplate = PageSearchTemplate | ProjectSearchTemplate;
-
-export const PLACEHOLDER_TEMPLATES: SearchTemplate[] = [
-  {
-    templateType: "project",
-    name: "Client Kickoff",
-    author: "Alex Morgan",
-    pages: [
-      {
-        title: "Requirements",
-        description: "Collect goals, scope, and timeline.",
-        components: ["Input", "Select", "Textarea"],
-      },
-      {
-        title: "Stakeholders",
-        description: "Track key contacts and roles.",
-        components: ["Table", "Tag"],
-      },
-    ],
-  },
-  {
-    templateType: "page",
-    name: "Design Handoff",
-    author: "Jordan Lee",
-    page: {
-      title: "Assets",
-      description: "Attach and organize final design exports.",
-      components: ["Files", "Checklist"],
-    },
-  },
-  {
-    templateType: "project",
-    name: "Feedback Loop",
-    author: "Sam Carter",
-    pages: [
-      {
-        title: "Review Form",
-        description: "Gather structured feedback from collaborators.",
-        components: ["Rating", "Textarea", "Radio"],
-      },
-    ],
-  },
-];

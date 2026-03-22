@@ -17,11 +17,23 @@ import {
   serializePageConfigDocument,
 } from "../pages/content";
 import { generateUniqueJoinCode } from "./model";
+import {
+  appendProjectTemplatePages,
+  getTemplateBlueprint,
+} from "../templates/content";
+import { requireReadableTemplate } from "../templates/model";
+import type { ProjectTemplateBlueprintV1 } from "../../lib/templateBlueprint";
 
 export const createProject = mutation({
   args: {
     name: v.string(),
     description: v.optional(v.string()),
+    template: v.optional(
+      v.object({
+        templateId: v.id("templates"),
+        expectedUpdatedAt: v.number(),
+      }),
+    ),
     members: v.optional(
       v.array(
         v.object({
@@ -56,6 +68,39 @@ export const createProject = mutation({
       "untitled-project",
     );
     const joinCode = await generateUniqueJoinCode(ctx);
+    let selectedTemplate:
+      | {
+          templateId: Doc<"templates">["_id"];
+          contentJson: string;
+          blueprint: ProjectTemplateBlueprintV1;
+        }
+      | null = null;
+
+    if (args.template) {
+      const template = await requireReadableTemplate(
+        ctx,
+        args.template.templateId,
+        userId,
+      );
+
+      if (template.updatedAt !== args.template.expectedUpdatedAt) {
+        throw invalidState(
+          "This template has changed. Please search and select it again.",
+        );
+      }
+
+      const blueprint = getTemplateBlueprint(template);
+
+      if (template.type !== "project" || blueprint.type !== "project") {
+        throw invalidState("This template is not a project template.");
+      }
+
+      selectedTemplate = {
+        templateId: template._id,
+        contentJson: template.contentJson ?? "",
+        blueprint,
+      };
+    }
 
     const initialContentJson = serializePageConfigDocument(
       createInitialPageConfig(),
@@ -69,6 +114,8 @@ export const createProject = mutation({
       description: trimmedDescription,
       pageIds: [],
       joinCode,
+      sourceTemplateId: selectedTemplate?.templateId,
+      sourceTemplateContentJson: selectedTemplate?.contentJson,
       createdAt: now,
       updatedAt: now,
     });
@@ -97,24 +144,47 @@ export const createProject = mutation({
       });
     }
 
-    const initialPageTitle = "Page 1";
-    const initialPageSlug = "page-1";
+    let initialPageId: Doc<"pages">["_id"];
+    let initialPageSlug: string;
 
-    const initialPageId = await ctx.db.insert("pages", {
-      projectId,
-      title: initialPageTitle,
-      slug: initialPageSlug,
-      contentJson: initialContentJson,
-      createdByUserId: userId,
-      updatedByUserId: userId,
-      createdAt: now,
-      updatedAt: now,
-    });
+    if (selectedTemplate) {
+      const createdPages = await appendProjectTemplatePages(ctx, {
+        project: {
+          _id: projectId,
+          pageIds: [],
+        },
+        userId,
+        templateId: selectedTemplate.templateId,
+        blueprint: selectedTemplate.blueprint,
+      });
+      const [firstCreatedPage] = createdPages;
 
-    await ctx.db.patch(projectId, {
-      pageIds: [initialPageId],
-      updatedAt: now,
-    });
+      if (!firstCreatedPage) {
+        throw invalidState("Project templates must include at least one page.");
+      }
+
+      initialPageId = firstCreatedPage.id;
+      initialPageSlug = firstCreatedPage.slug;
+    } else {
+      const initialPageTitle = "Page 1";
+      initialPageSlug = "page-1";
+
+      initialPageId = await ctx.db.insert("pages", {
+        projectId,
+        title: initialPageTitle,
+        slug: initialPageSlug,
+        contentJson: initialContentJson,
+        createdByUserId: userId,
+        updatedByUserId: userId,
+        createdAt: now,
+        updatedAt: now,
+      });
+
+      await ctx.db.patch(projectId, {
+        pageIds: [initialPageId],
+        updatedAt: now,
+      });
+    }
 
     const projectIds = Array.from(new Set([...(user.projectIds ?? []), projectId]));
     await ctx.db.patch(userId, {

@@ -17,7 +17,7 @@ export const SaveProjectTemplate = ({ pages }: SaveProjectTemplateProps) => {
     <div className="w-full flex flex-col">
       {pages.map((page, pageIndex) => (
         <div
-          key={page.title}
+          key={`${page.title}-${pageIndex}`}
           className={`${pageIndex % 2 !== 0 && "bg-(--gray)/10"} w-full p-2 flex flex-col gap-2`}
         >
           <button

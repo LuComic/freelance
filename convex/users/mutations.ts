@@ -17,7 +17,7 @@ export const updateProfile = mutation({
       args.name !== undefined ? args.name.trim() : (user.name ?? undefined);
     const nextBio =
       args.bio !== undefined
-        ? (args.bio.trim() || undefined)
+        ? args.bio.trim() || undefined
         : (user.bio ?? undefined);
 
     if (args.name === undefined && args.bio === undefined) {
@@ -102,7 +102,11 @@ export const deleteAccount = mutation({
       for (const member of members) {
         const memberUser = await ctx.db.get(member.userId);
 
-        if (memberUser && memberUser._id !== userId && isAnonymousUser(memberUser)) {
+        if (
+          memberUser &&
+          memberUser._id !== userId &&
+          isAnonymousUser(memberUser)
+        ) {
           guestUserIds.add(memberUser._id);
         }
       }
@@ -148,7 +152,9 @@ export const deleteAccount = mutation({
       }
     }
 
-    const guestProjectUpgrades = await ctx.db.query("guestProjectUpgrades").collect();
+    const guestProjectUpgrades = await ctx.db
+      .query("guestProjectUpgrades")
+      .collect();
     for (const guestProjectUpgrade of guestProjectUpgrades) {
       if (guestProjectUpgrade.guestUserId === userId) {
         await ctx.db.delete(guestProjectUpgrade._id);
@@ -183,7 +189,9 @@ export const deleteAccount = mutation({
     }
 
     const authAccounts = await ctx.db.query("authAccounts").collect();
-    const userAccounts = authAccounts.filter((account) => account.userId === userId);
+    const userAccounts = authAccounts.filter(
+      (account) => account.userId === userId,
+    );
     const accountIds = new Set(userAccounts.map((account) => account._id));
 
     if (accountIds.size > 0) {
@@ -230,7 +238,8 @@ export const deleteAccount = mutation({
         nextProjectIds &&
         nextProjectIds.length !== user.projectIds.length
       ) {
-        patch.projectIds = nextProjectIds.length > 0 ? nextProjectIds : undefined;
+        patch.projectIds =
+          nextProjectIds.length > 0 ? nextProjectIds : undefined;
       }
 
       if (

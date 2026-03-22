@@ -1,8 +1,11 @@
 "use client";
 
+import { api } from "@/convex/_generated/api";
+import { useMutation } from "convex/react";
 import { ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import type { SearchTemplate } from "./SearchBarData";
+import { useOptionalPageDocument } from "../project/PageDocumentContext";
 
 type TemplateModalProps = {
   template: SearchTemplate | null;
@@ -15,10 +18,52 @@ export const TemplateModal = ({
   open,
   onOpenChange,
 }: TemplateModalProps) => {
+  const pageDocument = useOptionalPageDocument();
+  const applyProjectTemplate = useMutation(
+    api.templates.mutations.applyProjectTemplate,
+  );
   const closeModal = useCallback(() => onOpenChange(false), [onOpenChange]);
   const [pageDropdowns, setPageDropdowns] = useState<Record<string, boolean>>(
     {},
   );
+  const [isApplying, setIsApplying] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const canUseTemplate = Boolean(pageDocument?.activePage);
+
+  const handleUseTemplate = async () => {
+    if (!template || !pageDocument?.activePage || isApplying) {
+      return;
+    }
+
+    setError(null);
+    setIsApplying(true);
+
+    try {
+      if (template.templateType === "page") {
+        await pageDocument.applyPageTemplate({
+          templateId: template.id,
+          expectedUpdatedAt: template.updatedAt,
+        });
+      } else {
+        await applyProjectTemplate({
+          projectId: pageDocument.activePage.project.id as never,
+          templateId: template.id,
+          expectedUpdatedAt: template.updatedAt,
+        });
+      }
+
+      closeModal();
+    } catch (applyError) {
+      setError(
+        applyError instanceof Error
+          ? applyError.message
+          : "Could not use this template.",
+      );
+    } finally {
+      setIsApplying(false);
+    }
+  };
 
   useEffect(() => {
     if (!open) {
@@ -37,6 +82,12 @@ export const TemplateModal = ({
       document.body.style.overflow = "auto";
     };
   }, [closeModal, open]);
+
+  useEffect(() => {
+    setPageDropdowns({});
+    setError(null);
+    setIsApplying(false);
+  }, [template]);
 
   if (!open || !template) return null;
 
@@ -61,7 +112,7 @@ export const TemplateModal = ({
         </div>
 
         <p className="text-(--gray-page)">
-          Here will be the template's description
+          {template.description?.trim() || "No description provided."}
         </p>
 
         <div className="w-full flex flex-col gap-2">
@@ -84,7 +135,7 @@ export const TemplateModal = ({
             <div className="w-full flex flex-col">
               {template.pages.map((page, index) => (
                 <div
-                  key={page.title}
+                  key={`${page.title}-${index}`}
                   className={`${index % 2 !== 0 && "bg-(--gray)/10"} w-full p-2 flex flex-col gap-2`}
                 >
                   <button
@@ -93,18 +144,19 @@ export const TemplateModal = ({
                     onClick={() =>
                       setPageDropdowns((prev) => ({
                         ...prev,
-                        [page.title]: !prev[page.title],
+                        [`${page.title}-${index}`]:
+                          !prev[`${page.title}-${index}`],
                       }))
                     }
                   >
                     <ChevronRight
                       size={20}
-                      className={`${pageDropdowns[page.title] ? "rotate-90" : "rotate-0"}`}
+                      className={`${pageDropdowns[`${page.title}-${index}`] ? "rotate-90" : "rotate-0"}`}
                     />
                     {page.title}
                   </button>
 
-                  {pageDropdowns[page.title] ? (
+                  {pageDropdowns[`${page.title}-${index}`] ? (
                     <div className="pl-7 flex flex-col gap-2 pb-2">
                       <div className="flex items-center justify-start gap-2 w-full flex-wrap">
                         {page.components.map(
@@ -126,6 +178,15 @@ export const TemplateModal = ({
           )}
         </div>
 
+        {!canUseTemplate ? (
+          <p className="text-sm text-(--declined-border)">
+            Open a project page to use a template.
+          </p>
+        ) : null}
+        {error ? (
+          <p className="text-sm text-(--declined-border)">{error}</p>
+        ) : null}
+
         <div className="w-full flex items-center gap-1">
           <button
             type="button"
@@ -136,9 +197,11 @@ export const TemplateModal = ({
           </button>
           <button
             type="button"
-            className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm w-full border border-(--vibrant) bg-(--vibrant)/10 hover:bg-(--vibrant)/20"
+            className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm w-full border border-(--vibrant) bg-(--vibrant)/10 hover:bg-(--vibrant)/20 disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={!canUseTemplate || isApplying}
+            onClick={() => void handleUseTemplate()}
           >
-            Use
+            {isApplying ? "Using..." : "Use"}
           </button>
         </div>
       </div>

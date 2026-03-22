@@ -29,7 +29,7 @@ export const TopBar = () => {
   const { isEditing, isLive, modeLock, setIsEditing, setIsLive } =
     useEditMode();
   const pageDocument = useOptionalPageDocument();
-  const { openTaggedSearch } = useSearchBar();
+  const { openTemplateSearch } = useSearchBar();
   const isConfig = !isEditing && !isLive;
   const pathname = usePathname();
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
@@ -215,7 +215,7 @@ export const TopBar = () => {
             <MenubarGroup>
               <MenubarItem
                 className="data-highlighted:bg-(--darkest-hover) data-highlighted:text-(--light)"
-                onSelect={() => openTaggedSearch("template")}
+                onSelect={() => openTemplateSearch()}
               >
                 <button className="flex w-full items-center justify-start gap-2">
                   <Search size={15} />
