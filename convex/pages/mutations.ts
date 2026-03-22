@@ -165,6 +165,53 @@ export const savePage = mutation({
     if (!project || project.isArchived) {
       throw notFound(`Project ${page.projectId} was not found.`);
     }
+    const projectMembers = await ctx.db
+      .query("projectMembers")
+      .withIndex("by_project", (query) => query.eq("projectId", page.projectId))
+      .collect();
+    const activeClientUserIds = new Set<string>(
+      projectMembers
+        .filter(
+          (membership) =>
+            membership.status === "active" && membership.role === "client",
+        )
+        .map((membership) => String(membership.userId)),
+    );
+    const nextDocument = {
+      ...args.document,
+      components: Object.fromEntries(
+        Object.entries(args.document.components).map(([instanceId, component]) => {
+          if (component.type !== "IdeaBoard" || activeClientUserIds.size === 0) {
+            return [instanceId, component];
+          }
+
+          return [
+            instanceId,
+            {
+              ...component,
+              state: {
+                ...component.state,
+                ideas: component.state.ideas
+                  .filter(
+                    (idea) =>
+                      component.config.canClientAdd ||
+                      idea.createdByUserId === null ||
+                      !activeClientUserIds.has(idea.createdByUserId),
+                  )
+                  .map((idea) => ({
+                    ...idea,
+                    votes: component.config.canClientVote
+                      ? idea.votes
+                      : idea.votes.filter(
+                          (userId) => !activeClientUserIds.has(userId),
+                        ),
+                  })),
+              },
+            },
+          ];
+        }),
+      ),
+    };
 
     const siblingPages = await getOrderedProjectPages(ctx, project);
     const nextSlug = uniqueSlugFromLabel(
@@ -179,7 +226,7 @@ export const savePage = mutation({
     await ctx.db.patch(page._id, {
       title: trimmedTitle,
       slug: nextSlug,
-      contentJson: serializePageDocument(args.document),
+      contentJson: serializePageDocument(nextDocument),
       updatedAt: now,
       updatedByUserId: userId,
     });

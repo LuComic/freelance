@@ -33,10 +33,7 @@ async function listActiveProjectMembers(
   return memberships.filter((membership) => membership.status === "active");
 }
 
-async function listBlockedUserIds(
-  ctx: ProjectCtx,
-  currentUserId: Id<"users">,
-) {
+async function listBlockedUserIds(ctx: ProjectCtx, currentUserId: Id<"users">) {
   const [requestedConnections, receivedConnections] = await Promise.all([
     ctx.db
       .query("connections")
@@ -80,7 +77,9 @@ async function listHiddenCollaboratorIds(
 
   return new Set(
     [...requestedConnections, ...receivedConnections]
-      .filter((connection) => connection.hiddenByUserIds?.includes(currentUserId))
+      .filter((connection) =>
+        connection.hiddenByUserIds?.includes(currentUserId),
+      )
       .map((connection) => getOtherUserId(connection, currentUserId)),
   );
 }
@@ -100,12 +99,9 @@ async function getSortedMemberItemsByRole(
   );
   const clients: ConnectionUserListItem[] = [];
   const coCreators: ConnectionUserListItem[] = [];
+  const members: ConnectionUserListItem[] = [];
 
   for (const membership of memberships) {
-    if (membership.role === "owner") {
-      continue;
-    }
-
     const user = userById.get(membership.userId);
     if (!user) {
       continue;
@@ -115,6 +111,8 @@ async function getSortedMemberItemsByRole(
       ...toConnectionUserListItem(user),
       name: buildProjectMemberDisplayName(user, membership),
     };
+
+    members.push(item);
 
     if (membership.role === "client") {
       clients.push(item);
@@ -129,6 +127,7 @@ async function getSortedMemberItemsByRole(
   return {
     clients: clients.sort(compareConnectionUserListItems),
     coCreators: coCreators.sort(compareConnectionUserListItems),
+    members: members.sort(compareConnectionUserListItems),
   };
 }
 
@@ -193,9 +192,7 @@ export async function listHistoricalCollaborators(
 
   return collaborators
     .filter(
-      (
-        user,
-      ): user is NonNullable<typeof user> =>
+      (user): user is NonNullable<typeof user> =>
         user !== null && user.isAnonymous !== true,
     )
     .map((user) => toConnectionUserListItem(user))
@@ -209,14 +206,22 @@ export const getProjectMembers = query({
   handler: async (ctx, args) => {
     try {
       const { userId } = await requireCurrentAuth(ctx);
-      const viewerMembership = await requireProjectMember(ctx, args.projectId, userId);
-      const membersByRole = await getSortedMemberItemsByRole(ctx, args.projectId);
+      const viewerMembership = await requireProjectMember(
+        ctx,
+        args.projectId,
+        userId,
+      );
+      const membersByRole = await getSortedMemberItemsByRole(
+        ctx,
+        args.projectId,
+      );
 
       return {
         projectId: args.projectId,
         viewerRole: viewerMembership.role,
         clients: membersByRole.clients,
         coCreators: membersByRole.coCreators,
+        members: membersByRole.members,
       };
     } catch (error) {
       if (
@@ -257,7 +262,11 @@ export const removeProjectMember = mutation({
       throw notFound(`User ${args.targetUserId} was not found.`);
     }
 
-    const viewerMembership = await requireProjectEditor(ctx, project._id, userId);
+    const viewerMembership = await requireProjectEditor(
+      ctx,
+      project._id,
+      userId,
+    );
 
     if (viewerMembership.role !== "owner") {
       throw invalidState("Only the project owner can remove members.");

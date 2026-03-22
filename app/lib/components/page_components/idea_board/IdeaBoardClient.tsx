@@ -9,12 +9,14 @@ import { useState } from "react";
 import { ChevronRight, Heart, List, Medal } from "lucide-react";
 import {
   createIdea,
+  getIdeaAuthorName,
   getIdeaVoteCount,
   hasIdeaVoteFromUser,
   toggleIdeaVote,
 } from "./ideaBoardVotes";
 
 type IdeaBoardClientProps = {
+  authorNames: Record<string, string>;
   config: PageComponentInstanceByType<"IdeaBoard">["config"];
   currentUserId: Id<"users"> | null;
   liveState: PageComponentLiveStateByType<"IdeaBoard">["state"];
@@ -26,6 +28,7 @@ type IdeaBoardClientProps = {
 };
 
 export const IdeaBoardClient = ({
+  authorNames,
   config,
   currentUserId,
   liveState,
@@ -143,7 +146,7 @@ export const IdeaBoardClient = ({
       </div>
 
       <div className="w-full max-w-full min-w-0 overflow-x-auto border rounded-md border-(--gray)">
-        <div className="min-w-[900px] flex flex-col">
+        <div className="min-w-[1100px] flex flex-col">
           {filter === "rankings" ? (
             <>
               <div
@@ -155,7 +158,10 @@ export const IdeaBoardClient = ({
                 <span className="p-2 border-r border-(--gray) h-full text-wrap flex items-center justify-start">
                   Votes
                 </span>
-                <span className="p-2 col-span-8 border-(--gray) h-full text-wrap flex items-center justify-start">
+                <span className="p-2 border-r border-(--gray) col-span-2 h-full text-wrap flex items-center justify-start">
+                  Author
+                </span>
+                <span className="p-2 col-span-6 border-(--gray) h-full text-wrap flex items-center justify-start">
                   Idea
                 </span>
               </div>
@@ -171,7 +177,10 @@ export const IdeaBoardClient = ({
                     <Heart size={16} />
                     {getIdeaVoteCount(idea)}
                   </span>
-                  <span className="text-wrap p-2 col-span-8 h-full text-left flex items-center justify-start">
+                  <span className="text-wrap p-2 border-r border-(--gray) col-span-2 h-full text-left flex items-center justify-start">
+                    {getIdeaAuthorName(idea, authorNames)}
+                  </span>
+                  <span className="text-wrap p-2 col-span-6 h-full text-left flex items-center justify-start">
                     {idea.idea}
                   </span>
                 </div>
@@ -180,7 +189,7 @@ export const IdeaBoardClient = ({
           ) : (
             <>
               <div
-                className={`w-full text-(--gray-page) ${visibleIdeas.length > 0 ? "border-b" : ""} border-(--gray) text-left grid justify-between items-start grid-cols-8 bg-(--darkest) h-[44px]`}
+                className={`w-full text-(--gray-page) ${visibleIdeas.length > 0 ? "border-b" : ""} border-(--gray) text-left grid justify-between items-start grid-cols-10 bg-(--darkest) h-[44px]`}
               >
                 <span className="border-r p-2 border-(--gray) h-full text-wrap flex items-center justify-start">
                   Actions
@@ -188,13 +197,16 @@ export const IdeaBoardClient = ({
                 <span className="p-2 border-r border-(--gray) h-full text-wrap flex items-center justify-start">
                   Votes
                 </span>
+                <span className="p-2 border-r border-(--gray) col-span-2 h-full text-wrap flex items-center justify-start">
+                  Author
+                </span>
                 <span className="p-2 col-span-6 border-(--gray) h-full text-wrap flex items-center justify-start">
                   Idea
                 </span>
               </div>
               {visibleIdeas.map((idea, index) => (
                 <div
-                  className={`w-full ${index !== visibleIdeas.length - 1 ? "border-b" : ""} border-(--gray) text-left grid justify-between items-start grid-cols-8 ${index % 2 !== 0 ? "bg-(--gray)/10" : ""} h-[44px]`}
+                  className={`w-full ${index !== visibleIdeas.length - 1 ? "border-b" : ""} border-(--gray) text-left grid justify-between items-start grid-cols-10 ${index % 2 !== 0 ? "bg-(--gray)/10" : ""} h-[44px]`}
                   key={idea.id}
                 >
                   <div className="flex p-2 border-r border-(--gray) h-full justify-start items-center gap-1 flex-wrap">
@@ -223,6 +235,9 @@ export const IdeaBoardClient = ({
                   <span className="p-2 border-r border-(--gray) h-full flex items-center justify-start gap-2 text-wrap text-left capitalize">
                     <Heart size={16} />
                     {getIdeaVoteCount(idea)}
+                  </span>
+                  <span className="text-wrap p-2 border-r border-(--gray) col-span-2 h-full text-left flex items-center justify-start">
+                    {getIdeaAuthorName(idea, authorNames)}
                   </span>
                   <span className="text-wrap p-2 col-span-6 h-full text-left flex items-center justify-start">
                     {idea.idea}

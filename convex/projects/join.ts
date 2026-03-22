@@ -4,8 +4,17 @@ import type { MutationCtx, QueryCtx } from "../_generated/server";
 import { internalMutation, mutation, query } from "../_generated/server";
 import { buildUserDisplayName } from "../connections/model";
 import { requireCurrentAuth } from "../lib/auth";
-import { assertNonAnonymousUser, deleteGuestUser, isAnonymousUser } from "../lib/guests";
-import { APP_ERROR_CODES, ConvexDomainError, invalidState, notFound } from "../lib/errors";
+import {
+  assertNonAnonymousUser,
+  deleteGuestUser,
+  isAnonymousUser,
+} from "../lib/guests";
+import {
+  APP_ERROR_CODES,
+  ConvexDomainError,
+  invalidState,
+  notFound,
+} from "../lib/errors";
 import { requireProjectEditor, requireProjectMember } from "../lib/permissions";
 import { getOrderedProjectPages } from "../lib/projectRecords";
 import {
@@ -14,7 +23,10 @@ import {
   normalizeJoinCode,
 } from "./model";
 
-type RedirectProject = Pick<Doc<"projects">, "_id" | "slug" | "pageIds" | "isArchived">;
+type RedirectProject = Pick<
+  Doc<"projects">,
+  "_id" | "slug" | "pageIds" | "isArchived"
+>;
 type RedirectCtx = QueryCtx | MutationCtx;
 
 function isProjectEditorRole(role: Doc<"projectMembers">["role"]) {
@@ -36,10 +48,7 @@ async function getDefaultProjectPath(
   ctx: RedirectCtx,
   project: RedirectProject,
 ) {
-  const pages = await getOrderedProjectPages(
-    ctx,
-    project as Doc<"projects">,
-  );
+  const pages = await getOrderedProjectPages(ctx, project as Doc<"projects">);
 
   return pages[0]
     ? `/projects/${project.slug}/${pages[0].slug}`
@@ -106,7 +115,10 @@ export const validateJoinCode = query({
       return null;
     }
 
-    const project = await getProjectByNormalizedJoinCode(ctx, normalizedJoinCode);
+    const project = await getProjectByNormalizedJoinCode(
+      ctx,
+      normalizedJoinCode,
+    );
 
     if (!project) {
       return null;
@@ -240,7 +252,10 @@ export const createGuestMembershipFromJoin = internalMutation({
     }
 
     const normalizedJoinCode = normalizeJoinCode(args.joinCode);
-    const project = await getProjectByNormalizedJoinCode(ctx, normalizedJoinCode);
+    const project = await getProjectByNormalizedJoinCode(
+      ctx,
+      normalizedJoinCode,
+    );
 
     if (!project) {
       throw invalidState("That project code is no longer valid.");
@@ -273,6 +288,76 @@ export const createGuestMembershipFromJoin = internalMutation({
   },
 });
 
+export const joinCurrentUserByCode = mutation({
+  args: {
+    joinCode: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const { userId, user } = await requireCurrentAuth(ctx);
+    assertNonAnonymousUser(
+      user,
+      "Guest accounts are already tied to a project.",
+    );
+
+    const normalizedJoinCode = normalizeJoinCode(args.joinCode);
+
+    if (!normalizedJoinCode) {
+      throw invalidState("Enter a valid project code.");
+    }
+
+    const project = await getProjectByNormalizedJoinCode(
+      ctx,
+      normalizedJoinCode,
+    );
+
+    if (!project || project.isArchived === true) {
+      throw invalidState("That project code is not valid.");
+    }
+
+    const existingMembership = await ctx.db
+      .query("projectMembers")
+      .withIndex("by_project_user", (query) =>
+        query.eq("projectId", project._id).eq("userId", userId),
+      )
+      .unique();
+    const now = Date.now();
+
+    if (!existingMembership) {
+      await ctx.db.insert("projectMembers", {
+        projectId: project._id,
+        userId,
+        role: "client",
+        status: "active",
+        addedByUserId: project.ownerId,
+        createdAt: now,
+        updatedAt: now,
+      });
+    } else if (existingMembership.status === "removed") {
+      await ctx.db.patch(existingMembership._id, {
+        role: "client",
+        status: "active",
+        addedByUserId: project.ownerId,
+        updatedAt: now,
+      });
+    }
+
+    const nextProjectIds = user.projectIds?.includes(project._id)
+      ? (user.projectIds ?? [])
+      : [...(user.projectIds ?? []), project._id];
+
+    await ctx.db.patch(userId, {
+      projectIds: nextProjectIds,
+      lastOpenedProjectId: project._id,
+    });
+
+    return {
+      projectId: project._id,
+      projectSlug: project.slug,
+      redirectPath: await getDefaultProjectPath(ctx, project),
+    };
+  },
+});
+
 export const deleteGuestAfterFailedJoin = internalMutation({
   args: {
     guestUserId: v.id("users"),
@@ -301,7 +386,9 @@ export const prepareGuestUpgrade = mutation({
     ).filter((membership) => membership.status === "active");
 
     if (activeMemberships.length !== 1) {
-      throw invalidState("This guest account is not tied to a single active project.");
+      throw invalidState(
+        "This guest account is not tied to a single active project.",
+      );
     }
 
     const [membership] = activeMemberships;
@@ -351,7 +438,10 @@ export const completeGuestUpgrade = mutation({
   },
   handler: async (ctx, args) => {
     const { userId, user } = await requireCurrentAuth(ctx);
-    assertNonAnonymousUser(user, "Guest accounts must finish signing in before linking projects.");
+    assertNonAnonymousUser(
+      user,
+      "Guest accounts must finish signing in before linking projects.",
+    );
     const upgradeMatches = await ctx.db
       .query("guestProjectUpgrades")
       .withIndex("by_token", (query) => query.eq("token", args.token))
@@ -376,7 +466,9 @@ export const completeGuestUpgrade = mutation({
         consumedAt: Date.now(),
         updatedAt: Date.now(),
       });
-      throw invalidState("This guest upgrade request expired. Please try again.");
+      throw invalidState(
+        "This guest upgrade request expired. Please try again.",
+      );
     }
 
     const isInPlaceUpgrade = upgrade.guestUserId === userId;
@@ -431,10 +523,13 @@ export const completeGuestUpgrade = mutation({
         updatedAt: Date.now(),
       });
       await deleteGuestUser(ctx, guestUser._id);
-      throw invalidState("This guest account is no longer an active project client.");
+      throw invalidState(
+        "This guest account is no longer an active project client.",
+      );
     }
 
-    const formerName = upgrade.formerName.trim() || buildUserDisplayName(guestUser);
+    const formerName =
+      upgrade.formerName.trim() || buildUserDisplayName(guestUser);
     const now = Date.now();
 
     if (isInPlaceUpgrade) {
@@ -457,15 +552,21 @@ export const completeGuestUpgrade = mutation({
       });
     } else if (existingMembership.status === "removed") {
       await ctx.db.patch(existingMembership._id, {
-        role: resolveTransferredRole(existingMembership.role, guestMembership.role),
+        role: resolveTransferredRole(
+          existingMembership.role,
+          guestMembership.role,
+        ),
         status: "active",
-        addedByUserId: existingMembership.addedByUserId ?? guestMembership.addedByUserId,
+        addedByUserId:
+          existingMembership.addedByUserId ?? guestMembership.addedByUserId,
         formerName: existingMembership.formerName ?? formerName,
         updatedAt: now,
       });
     }
 
-    const nextProjectIds = Array.from(new Set([...(user.projectIds ?? []), project._id]));
+    const nextProjectIds = Array.from(
+      new Set([...(user.projectIds ?? []), project._id]),
+    );
 
     await ctx.db.patch(userId, {
       projectIds: nextProjectIds,

@@ -1,7 +1,6 @@
 "use client";
 
 import { api } from "@/convex/_generated/api";
-import type { Doc } from "@/convex/_generated/dataModel";
 import {
   createComponentInstanceId,
   createComponentToken,
@@ -24,165 +23,29 @@ import {
   useState,
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useEditMode, type InsertableComponentCommand } from "./EditModeContext";
+import {
+  useEditMode,
+  type InsertableComponentCommand,
+} from "./EditModeContext";
+import {
+  canReuseActivePageForRoute,
+  getPageRoute,
+  resolveDeleteRedirectPath,
+} from "./page_document_helpers/routing";
+import { sanitizeDocumentBeforeCreatorSave } from "./page_document_helpers/sanitizeDocumentBeforeSave";
+import type {
+  ActivePageDocumentContextValue,
+  ActivePageState,
+  DeleteStatus,
+  PageDocumentContextValue,
+  SaveStatus,
+  ViewerProjectRole,
+} from "./page_document_helpers/types";
 import { resolveComponentTypeFromCommand } from "../page_components/testing_editor/commands";
 
-type SaveStatus = "idle" | "saving" | "error";
-type DeleteStatus = "idle" | "deleting" | "error";
-type ViewerProjectRole = Doc<"projectMembers">["role"];
-
-type ActivePageState = {
-  project: {
-    id: string;
-    slug: string;
-    name: string;
-  };
-  page: {
-    id: string;
-    slug: string;
-    title: string;
-    description: string | null;
-    createdAt: number;
-    updatedAt: number;
-  };
-};
-
-type PageDocumentContextValue = {
-  isActivePage: boolean;
-  isLoading: boolean;
-  saveStatus: SaveStatus;
-  saveError: string | null;
-  deleteStatus: DeleteStatus;
-  deleteError: string | null;
-  hasUnsavedChanges: boolean;
-  activePage: ActivePageState | null;
-  viewerRole: ViewerProjectRole | null;
-  document: PageDocumentV1 | null;
-  setPageTitle: (title: string) => void;
-  updateEditorText: (value: string) => void;
-  insertComponentAtRange: (args: {
-    command: InsertableComponentCommand;
-    value: string;
-    start: number;
-    end?: number;
-  }) => { nextValue: string; nextCursor: number } | null;
-  updateComponentConfig: (
-    instanceId: string,
-    updater: (component: PageComponentDocument) => PageComponentDocument,
-  ) => void;
-  updateComponentLiveState: (
-    instanceId: string,
-    updater: (liveState: PageComponentLiveState) => PageComponentLiveState,
-  ) => void;
-  commitPageTitle: (title: string) => Promise<void>;
-  commitComponentLiveState: (
-    instanceId: string,
-    updater: (liveState: PageComponentLiveState) => PageComponentLiveState,
-  ) => Promise<void>;
-  saveDocument: () => Promise<void>;
-  createPageAndOpen: () => Promise<void>;
-  deletePage: () => Promise<void>;
-};
-
-type ActivePageDocumentContextValue = PageDocumentContextValue & {
-  activePage: ActivePageState;
-  document: PageDocumentV1;
-};
-
-const PageDocumentContext = createContext<PageDocumentContextValue | null>(null);
-
-type ProjectPageSummary = {
-  id: string;
-  slug: string;
-};
-
-function getPageRoute(pathname: string) {
-  const segments = pathname.split("/").filter(Boolean);
-  if (segments[0] !== "projects" || segments.length < 3) {
-    return null;
-  }
-
-  const pageSlug = segments[2];
-  if (
-    pageSlug === "analytics" ||
-    pageSlug === "settings" ||
-    pageSlug === "terms" ||
-    pageSlug === "privacy" ||
-    pageSlug === "cookies"
-  ) {
-    return null;
-  }
-
-  return {
-    projectSlug: segments[1],
-    pageSlug,
-  };
-}
-
-function getProjectPagePath(projectSlug: string, pageSlug: string) {
-  return `/projects/${projectSlug}/${pageSlug}`;
-}
-
-function canReuseActivePageForRoute(args: {
-  route: ReturnType<typeof getPageRoute>;
-  activePage: ActivePageState | null;
-  pendingRouteProjectId: string | null;
-  pendingRoutePageId: string | null;
-}) {
-  const { route, activePage, pendingRouteProjectId, pendingRoutePageId } = args;
-
-  if (!route || !activePage) {
-    return false;
-  }
-
-  return (
-    (activePage.project.slug === route.projectSlug &&
-      activePage.page.slug === route.pageSlug) ||
-    (pendingRouteProjectId !== null &&
-      activePage.project.id === pendingRouteProjectId) ||
-    (pendingRoutePageId !== null && activePage.page.id === pendingRoutePageId)
-  );
-}
-
-function resolveDeleteRedirectPath(args: {
-  currentPageId: string;
-  projectSlug: string;
-  projectPages: ProjectPageSummary[];
-  visitHistoryPageIds: string[];
-}) {
-  const { currentPageId, projectSlug, projectPages, visitHistoryPageIds } = args;
-  const remainingPages = projectPages.filter((page) => page.id !== currentPageId);
-
-  if (remainingPages.length === 0) {
-    return "/projects";
-  }
-
-  for (let index = visitHistoryPageIds.length - 1; index >= 0; index -= 1) {
-    const candidatePageId = visitHistoryPageIds[index];
-    const candidatePage = remainingPages.find((page) => page.id === candidatePageId);
-
-    if (candidatePage) {
-      return getProjectPagePath(projectSlug, candidatePage.slug);
-    }
-  }
-
-  const currentPageIndex = projectPages.findIndex((page) => page.id === currentPageId);
-  const previousSibling =
-    currentPageIndex > 0 ? projectPages[currentPageIndex - 1] : null;
-
-  if (previousSibling && previousSibling.id !== currentPageId) {
-    return getProjectPagePath(projectSlug, previousSibling.slug);
-  }
-
-  const nextSibling =
-    currentPageIndex >= 0 ? projectPages[currentPageIndex + 1] : null;
-
-  if (nextSibling && nextSibling.id !== currentPageId) {
-    return getProjectPagePath(projectSlug, nextSibling.slug);
-  }
-
-  return getProjectPagePath(projectSlug, remainingPages[0].slug);
-}
+const PageDocumentContext = createContext<PageDocumentContextValue | null>(
+  null,
+);
 
 export function PageDocumentProvider({
   children,
@@ -203,11 +66,15 @@ export function PageDocumentProvider({
   const [pendingRouteProjectId, setPendingRouteProjectId] = useState<
     string | null
   >(null);
-  const [pendingRoutePageId, setPendingRoutePageId] = useState<string | null>(null);
-  const [savedTitleSnapshot, setSavedTitleSnapshot] = useState<string | null>(null);
-  const [savedDocumentSnapshot, setSavedDocumentSnapshot] = useState<string | null>(
+  const [pendingRoutePageId, setPendingRoutePageId] = useState<string | null>(
     null,
   );
+  const [savedTitleSnapshot, setSavedTitleSnapshot] = useState<string | null>(
+    null,
+  );
+  const [savedDocumentSnapshot, setSavedDocumentSnapshot] = useState<
+    string | null
+  >(null);
   const componentSeedRef = useRef(0);
   const lastHydratedPageKeyRef = useRef<string | null>(null);
   const lastRouteCorrectionKeyRef = useRef<string | null>(null);
@@ -236,10 +103,27 @@ export function PageDocumentProvider({
             ? (activePage?.project.id as never)
             : undefined,
           pageSlug: route.pageSlug,
-          pageId: canUseActivePageFallback ? (activePage?.page.id as never) : undefined,
+          pageId: canUseActivePageFallback
+            ? (activePage?.page.id as never)
+            : undefined,
         };
-  const pageData = useQuery(api.pages.queries.getPageEditorBySlugs, pageQueryArgs);
+  const pageData = useQuery(
+    api.pages.queries.getPageEditorBySlugs,
+    pageQueryArgs,
+  );
   const projects = useQuery(api.projects.queries.listCurrentUserProjects);
+  const activeProjectMembers = useQuery(
+    api.projects.members.getProjectMembers,
+    activePage ? { projectId: activePage.project.id as never } : "skip",
+  );
+  const activeClientUserIds = useMemo(
+    () =>
+      new Set<string>(
+        activeProjectMembers?.clients.map((member) => String(member.userId)) ??
+          [],
+      ),
+    [activeProjectMembers],
+  );
   const savePage = useMutation(api.pages.mutations.savePage);
   const savePageLiveState = useMutation(api.pages.mutations.savePageLiveState);
   const createPage = useMutation(api.pages.mutations.createPage);
@@ -261,7 +145,10 @@ export function PageDocumentProvider({
       activePage.page.id,
     ];
 
-    projectVisitHistoryRef.current.set(activePage.project.id, nextProjectHistory);
+    projectVisitHistoryRef.current.set(
+      activePage.project.id,
+      nextProjectHistory,
+    );
   }, [activePage]);
 
   useEffect(() => {
@@ -468,32 +355,38 @@ export function PageDocumentProvider({
     });
   }, [activePage?.page.id]);
 
-  const setPageTitle = useCallback((title: string) => {
-    setActivePage((prev) =>
-      prev
-        ? {
-            ...prev,
-            page: {
-              ...prev.page,
-              title,
-            },
-          }
-        : prev,
-    );
-    setSaveError(null);
-  }, [setActivePage, setSaveError]);
+  const setPageTitle = useCallback(
+    (title: string) => {
+      setActivePage((prev) =>
+        prev
+          ? {
+              ...prev,
+              page: {
+                ...prev.page,
+                title,
+              },
+            }
+          : prev,
+      );
+      setSaveError(null);
+    },
+    [setActivePage, setSaveError],
+  );
 
-  const updateEditorText = useCallback((value: string) => {
-    setDocument((prev) =>
-      prev
-        ? {
-            ...prev,
-            editorText: value,
-          }
-        : prev,
-    );
-    setSaveError(null);
-  }, [setDocument, setSaveError]);
+  const updateEditorText = useCallback(
+    (value: string) => {
+      setDocument((prev) =>
+        prev
+          ? {
+              ...prev,
+              editorText: value,
+            }
+          : prev,
+      );
+      setSaveError(null);
+    },
+    [setDocument, setSaveError],
+  );
 
   const updateComponentConfig = useCallback(
     (
@@ -604,11 +497,23 @@ export function PageDocumentProvider({
   const persistDocument = useCallback(
     async (currentPage: ActivePageState, currentDocument: PageDocumentV1) => {
       const shouldSaveLiveState = isLive;
+      const nextDocument =
+        !shouldSaveLiveState && activeProjectMembers !== undefined
+          ? sanitizeDocumentBeforeCreatorSave(
+              currentDocument,
+              activeClientUserIds,
+            )
+          : currentDocument;
       const trimmedTitle = currentPage.page.title.trim();
       if (!shouldSaveLiveState && !trimmedTitle) {
         setSaveError("Page title cannot be empty.");
         setSaveStatus("error");
         return;
+      }
+
+      if (nextDocument !== currentDocument) {
+        documentRef.current = nextDocument;
+        setDocument(nextDocument);
       }
 
       setSaveStatus("saving");
@@ -619,7 +524,7 @@ export function PageDocumentProvider({
           const result = await savePageLiveState({
             pageId: currentPage.page.id as never,
             title: trimmedTitle,
-            document: currentDocument,
+            document: nextDocument,
           });
 
           documentRef.current = result.document;
@@ -655,7 +560,7 @@ export function PageDocumentProvider({
         const result = await savePage({
           pageId: currentPage.page.id as never,
           title: trimmedTitle,
-          document: currentDocument,
+          document: nextDocument,
         });
 
         setActivePage((prev) =>
@@ -678,11 +583,13 @@ export function PageDocumentProvider({
         ) {
           setPendingRouteProjectId(currentPage.project.id);
           setPendingRoutePageId(result.pageId);
-          router.replace(`/projects/${currentPage.project.slug}/${result.slug}`);
+          router.replace(
+            `/projects/${currentPage.project.slug}/${result.slug}`,
+          );
         }
 
         setSavedTitleSnapshot(result.title);
-        setSavedDocumentSnapshot(JSON.stringify(currentDocument));
+        setSavedDocumentSnapshot(JSON.stringify(nextDocument));
         setSaveStatus("idle");
       } catch (error) {
         setSaveError(
@@ -697,6 +604,8 @@ export function PageDocumentProvider({
       router,
       savePage,
       savePageLiveState,
+      activeProjectMembers,
+      activeClientUserIds,
       setActivePage,
       setDocument,
       setPendingRoutePageId,
@@ -755,7 +664,11 @@ export function PageDocumentProvider({
       const currentPage = activePageRef.current;
       const currentDocument = documentRef.current;
 
-      if (!currentPage || !currentDocument || !currentDocument.components[instanceId]) {
+      if (
+        !currentPage ||
+        !currentDocument ||
+        !currentDocument.components[instanceId]
+      ) {
         return;
       }
 
@@ -823,9 +736,9 @@ export function PageDocumentProvider({
       });
       projectVisitHistoryRef.current.set(
         currentPage.project.id,
-        (projectVisitHistoryRef.current.get(currentPage.project.id) ?? []).filter(
-          (pageId) => pageId !== currentPage.page.id,
-        ),
+        (
+          projectVisitHistoryRef.current.get(currentPage.project.id) ?? []
+        ).filter((pageId) => pageId !== currentPage.page.id),
       );
       router.replace(fallbackPath);
     } catch (error) {
@@ -835,13 +748,7 @@ export function PageDocumentProvider({
       );
       setDeleteStatus("error");
     }
-  }, [
-    deletePageMutation,
-    projects,
-    router,
-    setDeleteError,
-    setDeleteStatus,
-  ]);
+  }, [deletePageMutation, projects, router, setDeleteError, setDeleteStatus]);
 
   useEffect(() => {
     if (!isLive || !hasUnsavedChanges || saveStatus === "saving") {
@@ -926,9 +833,9 @@ export function usePageComponentState<TType extends PageComponentType>(
   expectedType: TType,
 ) {
   const context = usePageDocument();
-  const component = context.document.components[
-    instanceId
-  ] as PageComponentDocumentByType<TType> | undefined;
+  const component = context.document.components[instanceId] as
+    | PageComponentDocumentByType<TType>
+    | undefined;
 
   if (!component || component.type !== expectedType) {
     throw new Error(`Component ${instanceId} was not found.`);

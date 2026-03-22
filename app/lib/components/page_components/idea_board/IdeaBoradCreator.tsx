@@ -9,15 +9,14 @@ import { useState } from "react";
 import { ChevronRight, Heart, List, Medal, Trash } from "lucide-react";
 import {
   createIdea,
+  getIdeaAuthorName,
   getIdeaVoteCount,
   hasIdeaVoteFromUser,
-  removeIdeasByUsers,
-  removeVotesByUsers,
   toggleIdeaVote,
 } from "./ideaBoardVotes";
 
 type IdeaBoardCreatorProps = {
-  clientUserIds: Id<"users">[];
+  authorNames: Record<string, string>;
   currentUserId: Id<"users"> | null;
   liveState: PageComponentLiveStateByType<"IdeaBoard">["state"];
   onChangeLiveState: (
@@ -34,7 +33,7 @@ type IdeaBoardCreatorProps = {
 };
 
 export const IdeaBoradCreator = ({
-  clientUserIds,
+  authorNames,
   currentUserId,
   liveState,
   onChangeLiveState,
@@ -91,13 +90,6 @@ export const IdeaBoradCreator = ({
       ...currentConfig,
       canClientAdd,
     }));
-
-    if (!canClientAdd) {
-      onChangeLiveState((currentState) => ({
-        ...currentState,
-        ideas: removeIdeasByUsers(currentState.ideas, clientUserIds),
-      }));
-    }
   };
 
   const handleClientVotingPermissions = (index: number) => {
@@ -107,13 +99,6 @@ export const IdeaBoradCreator = ({
       ...currentConfig,
       canClientVote,
     }));
-
-    if (!canClientVote) {
-      onChangeLiveState((currentState) => ({
-        ...currentState,
-        ideas: removeVotesByUsers(currentState.ideas, clientUserIds),
-      }));
-    }
   };
 
   return (
@@ -172,6 +157,10 @@ export const IdeaBoradCreator = ({
         </button>
         {clientEditing && (
           <>
+            <p className="text-(--gray-page)">
+              Removing client's permissions when they have already voted or
+              sumbitted an idea, will remove their votes/ideas.
+            </p>
             <div className="flex flex-col gap-1">
               <p className="font-medium text-(--gray-page)">
                 Can a client add their own ideas?
@@ -242,7 +231,7 @@ export const IdeaBoradCreator = ({
       </div>
 
       <div className="w-full max-w-full min-w-0 overflow-x-auto border rounded-md border-(--gray)">
-        <div className="min-w-[900px] flex flex-col">
+        <div className="min-w-[1100px] flex flex-col">
           {filter === "rankings" ? (
             <>
               <div
@@ -254,7 +243,10 @@ export const IdeaBoradCreator = ({
                 <span className="p-2 border-r border-(--gray) h-full text-wrap flex items-center justify-start">
                   Votes
                 </span>
-                <span className="p-2 col-span-8 border-(--gray) h-full text-wrap flex items-center justify-start">
+                <span className="p-2 border-r border-(--gray) col-span-2 h-full text-wrap flex items-center justify-start">
+                  Author
+                </span>
+                <span className="p-2 col-span-6 border-(--gray) h-full text-wrap flex items-center justify-start">
                   Idea
                 </span>
               </div>
@@ -274,7 +266,10 @@ export const IdeaBoradCreator = ({
                     <Heart size={16} />
                     {getIdeaVoteCount(idea)}
                   </span>
-                  <span className="text-wrap p-2 col-span-8 h-full text-left flex items-center justify-start">
+                  <span className="text-wrap p-2 border-r border-(--gray) col-span-2 h-full text-left flex items-center justify-start">
+                    {getIdeaAuthorName(idea, authorNames)}
+                  </span>
+                  <span className="text-wrap p-2 col-span-6 h-full text-left flex items-center justify-start">
                     {idea.idea}
                   </span>
                 </div>
@@ -283,7 +278,7 @@ export const IdeaBoradCreator = ({
           ) : (
             <>
               <div
-                className={`w-full text-(--gray-page) ${visibleIdeas.length > 0 ? "border-b" : ""} border-(--gray) text-left grid justify-between items-start grid-cols-8 bg-(--darkest) h-[44px]`}
+                className={`w-full text-(--gray-page) ${visibleIdeas.length > 0 ? "border-b" : ""} border-(--gray) text-left grid justify-between items-start grid-cols-10 bg-(--darkest) h-[44px]`}
               >
                 <span className="border-r p-2 border-(--gray) h-full text-wrap flex items-center justify-start">
                   Actions
@@ -291,13 +286,16 @@ export const IdeaBoradCreator = ({
                 <span className="p-2 border-r border-(--gray) h-full text-wrap flex items-center justify-start">
                   Votes
                 </span>
+                <span className="p-2 border-r border-(--gray) col-span-2 h-full text-wrap flex items-center justify-start">
+                  Author
+                </span>
                 <span className="p-2 col-span-6 border-(--gray) h-full text-wrap flex items-center justify-start">
                   Idea
                 </span>
               </div>
               {visibleIdeas.map((idea, index) => (
                 <div
-                  className={`w-full ${index !== visibleIdeas.length - 1 ? "border-b" : ""} border-(--gray) text-left grid justify-between items-start grid-cols-8 ${index % 2 !== 0 ? "bg-(--gray)/10" : ""} h-[44px]`}
+                  className={`w-full ${index !== visibleIdeas.length - 1 ? "border-b" : ""} border-(--gray) text-left grid justify-between items-start grid-cols-10 ${index % 2 !== 0 ? "bg-(--gray)/10" : ""} h-[44px]`}
                   key={idea.id}
                 >
                   <div className="flex py-2 border-r border-(--gray) h-full justify-around items-center gap-1 flex-wrap">
@@ -332,6 +330,9 @@ export const IdeaBoradCreator = ({
                   >
                     <Heart size={16} />
                     {getIdeaVoteCount(idea)}
+                  </span>
+                  <span className="text-wrap p-2 border-r border-(--gray) col-span-2 h-full text-left flex items-center justify-start">
+                    {getIdeaAuthorName(idea, authorNames)}
                   </span>
                   <span className="text-wrap p-2 col-span-6 h-full text-left flex items-center justify-start">
                     {idea.idea}

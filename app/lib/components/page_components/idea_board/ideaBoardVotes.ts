@@ -33,6 +33,17 @@ export function getIdeaVoteCount(idea: Pick<IdeaBoardIdea, "votes">) {
   return idea.votes.length;
 }
 
+export function getIdeaAuthorName(
+  idea: Pick<IdeaBoardIdea, "createdByUserId">,
+  authorNames: Record<string, string>,
+) {
+  if (idea.createdByUserId === null) {
+    return "Unknown";
+  }
+
+  return authorNames[idea.createdByUserId] ?? "Unknown";
+}
+
 export function hasIdeaVoteFromUser(
   idea: Pick<IdeaBoardIdea, "votes">,
   currentUserId: IdeaBoardUserId | null,

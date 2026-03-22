@@ -30,6 +30,9 @@ export default function Page() {
   const completeGuestUpgrade = useMutation(
     api.projects.join.completeGuestUpgrade,
   );
+  const joinCurrentUserByCode = useMutation(
+    api.projects.join.joinCurrentUserByCode,
+  );
   const completedUpgradeTokenRef = useRef<string | null>(null);
   const [joinCodeDraft, setJoinCodeDraft] = useState("");
   const [guestNameDraft, setGuestNameDraft] = useState("");
@@ -89,11 +92,6 @@ export default function Page() {
       return;
     }
 
-    if (isSignedInRealUser) {
-      setJoinError("Join via code is only available while signed out.");
-      return;
-    }
-
     if (!validatedJoinTarget) {
       const trimmedJoinCode = joinCodeDraft.trim();
 
@@ -114,8 +112,32 @@ export default function Page() {
           return;
         }
 
-        setValidatedJoinTarget(result as JoinTarget);
         setJoinCodeDraft(result.joinCode);
+
+        if (isSignedInRealUser) {
+          setIsJoining(true);
+
+          try {
+            const joinResult = await joinCurrentUserByCode({
+              joinCode: result.joinCode,
+            });
+
+            router.replace(joinResult.redirectPath);
+            router.refresh();
+          } catch (error) {
+            setJoinError(
+              error instanceof Error
+                ? error.message
+                : "Could not join this project.",
+            );
+          } finally {
+            setIsJoining(false);
+          }
+
+          return;
+        }
+
+        setValidatedJoinTarget(result as JoinTarget);
         setGuestNameDraft("");
       } catch (error) {
         setJoinError(
@@ -195,13 +217,13 @@ export default function Page() {
             disabled={isVerifyingCode || isJoining || isCompletingUpgrade}
             className="ml-2 rounded-md bg-(--vibrant) px-2 py-1 hover:bg-(--vibrant-hover) disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {validatedJoinTarget
-              ? isJoining
+            {isVerifyingCode
+              ? "Checking..."
+              : isJoining
                 ? "Joining..."
-                : "Join"
-              : isVerifyingCode
-                ? "Checking..."
-                : "Next"}
+                : validatedJoinTarget || isSignedInRealUser
+                  ? "Join"
+                  : "Next"}
           </button>
         </form>
       </div>
@@ -217,10 +239,10 @@ export default function Page() {
         </p>
       ) : null}
       {joinError ? (
-        <p className="text-sm text-(--declined-border)">{joinError}</p>
+        <p className="text-(--declined-border)">{joinError}</p>
       ) : null}
       {upgradeError ? (
-        <p className="text-sm text-(--declined-border)">{upgradeError}</p>
+        <p className="text-(--declined-border)">{upgradeError}</p>
       ) : null}
 
       <div className="w-full flex flex-col items-start justify-start overflow-hidden rounded-md border border-(--gray)">
