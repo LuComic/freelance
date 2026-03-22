@@ -60,11 +60,13 @@ export const TemplateModal = ({
           <p className="text-(--gray-page)">{template.templateType} template</p>
         </div>
 
+        <p className="text-(--gray-page)">
+          Here will be the template's description
+        </p>
+
         <div className="w-full flex flex-col gap-2">
           {template.templateType === "page" ? (
             <div className="w-full flex flex-col gap-2">
-              <p className="font-medium">{template.page.title}</p>
-              <p className="text-(--gray-page)">{template.page.description}</p>
               <div className="flex items-center justify-start gap-2 w-full flex-wrap">
                 {template.page.components.map(
                   (componentName, componentIndex) => (
@@ -104,7 +106,6 @@ export const TemplateModal = ({
 
                   {pageDropdowns[page.title] ? (
                     <div className="pl-7 flex flex-col gap-2 pb-2">
-                      <p className="text-(--gray-page)">{page.description}</p>
                       <div className="flex items-center justify-start gap-2 w-full flex-wrap">
                         {page.components.map(
                           (componentName, componentIndex) => (

@@ -9,8 +9,6 @@ type SavePageTemplateProps = {
 export const SavePageTemplate = ({ page }: SavePageTemplateProps) => {
   return (
     <div className="w-full flex flex-col gap-2">
-      <p className="font-medium">{page.title}</p>
-      <p className="text-(--gray-page)">{page.description}</p>
       <div className="flex items-center justify-start gap-2 w-full flex-wrap">
         {page.components.map((componentName, componentIndex) => (
           <div

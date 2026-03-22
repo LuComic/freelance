@@ -40,7 +40,6 @@ export const SaveProjectTemplate = ({ pages }: SaveProjectTemplateProps) => {
 
           {pageDropdowns[pageIndex] ? (
             <div className="pl-7 flex flex-col gap-2 pb-2">
-              <p className="text-(--gray-page)">{page.description}</p>
               <div className="flex items-center justify-start gap-2 w-full flex-wrap">
                 {page.components.map((componentName, componentIndex) => (
                   <div

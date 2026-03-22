@@ -40,6 +40,9 @@ export const SaveTemplateModal = ({
   const [templateName, setTemplateName] = useState(
     "Freelance Website Template",
   );
+  const [templateDescription, setTemplateDescription] = useState(
+    "This template is used for freelancers",
+  );
   const [templateType, setTemplateType] = useState<"page" | "project">("page");
   const [visibility, setVisibility] = useState<"private" | "public">("private");
 
@@ -114,6 +117,15 @@ export const SaveTemplateModal = ({
             placeholder="Template name..."
             value={templateName}
             onChange={(e) => setTemplateName(e.target.value)}
+          />
+
+          <p className="text-(--gray-page)">Template description</p>
+          <textarea
+            rows={3}
+            className="rounded-md bg-(--dim) px-2 py-1.5 outline-none resize-none"
+            placeholder="Template description..."
+            value={templateDescription}
+            onChange={(event) => setTemplateDescription(event.target.value)}
           />
 
           <p className="text-(--gray-page)">Visibility</p>

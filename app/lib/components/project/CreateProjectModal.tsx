@@ -224,20 +224,12 @@ export const CreateProjectModal = ({
                     </p>
                     <p className="text-(--gray-page)">Search template</p>
                     <div className="w-full flex items-center gap-2">
-                      <input
-                        type="text"
-                        className="rounded-md bg-(--dim) px-2 py-1.5 outline-none w-full"
-                        placeholder="Search"
-                        value={templateSearch}
-                        onChange={(event) =>
-                          setTemplateSearch(event.target.value)
-                        }
-                      />
                       <button
                         type="button"
-                        className="rounded-md border border-(--gray) text-(--gray) p-2 hover:bg-(--gray)/20"
+                        className="w-max gap-2 rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) flex items-center justify-center"
                       >
-                        <Search size={18} />
+                        <Search size={16} />
+                        Search
                       </button>
                     </div>
 

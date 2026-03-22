@@ -363,7 +363,7 @@ export const SearchBar = () => {
                 autoFocus
               />
               <KbdGroup>
-                <Kbd className="bg-(--gray) text-(--light)">Ctrl + K</Kbd>
+                <Kbd className="bg-(--gray) text-(--light)">Ctrl + P</Kbd>
               </KbdGroup>
             </div>
 
