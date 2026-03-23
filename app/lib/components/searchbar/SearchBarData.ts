@@ -18,6 +18,7 @@ export type SearchTemplateType = "page" | "project";
 
 export type SearchTemplateBase = {
   id: Id<"templates">;
+  authorUserId: Id<"users">;
   name: string;
   author: string;
   description: string | null;

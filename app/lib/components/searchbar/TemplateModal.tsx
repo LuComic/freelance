@@ -1,7 +1,7 @@
 "use client";
 
 import { api } from "@/convex/_generated/api";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import type { SearchTemplate } from "./SearchBarData";
@@ -19,17 +19,22 @@ export const TemplateModal = ({
   onOpenChange,
 }: TemplateModalProps) => {
   const pageDocument = useOptionalPageDocument();
+  const currentProfile = useQuery(api.users.queries.currentProfile);
   const applyProjectTemplate = useMutation(
     api.templates.mutations.applyProjectTemplate,
   );
+  const deleteTemplate = useMutation(api.templates.mutations.deleteTemplate);
   const closeModal = useCallback(() => onOpenChange(false), [onOpenChange]);
   const [pageDropdowns, setPageDropdowns] = useState<Record<string, boolean>>(
     {},
   );
   const [isApplying, setIsApplying] = useState(false);
+  const [isDeleteConfirming, setIsDeleteConfirming] = useState(false);
+  const [isDeletingTemplate, setIsDeletingTemplate] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const canUseTemplate = Boolean(pageDocument?.activePage);
+  const canDeleteTemplate = currentProfile?.id === template?.authorUserId;
 
   const handleUseTemplate = async () => {
     if (!template || !pageDocument?.activePage || isApplying) {
@@ -65,6 +70,37 @@ export const TemplateModal = ({
     }
   };
 
+  const handleDeleteTemplate = async () => {
+    if (!template || !canDeleteTemplate || isDeletingTemplate) {
+      return;
+    }
+
+    if (!isDeleteConfirming) {
+      setError(null);
+      setIsDeleteConfirming(true);
+      return;
+    }
+
+    setError(null);
+    setIsDeletingTemplate(true);
+
+    try {
+      await deleteTemplate({
+        templateId: template.id,
+      });
+      closeModal();
+    } catch (deleteError) {
+      setError(
+        deleteError instanceof Error
+          ? deleteError.message
+          : "Could not delete this template.",
+      );
+      setIsDeleteConfirming(false);
+    } finally {
+      setIsDeletingTemplate(false);
+    }
+  };
+
   useEffect(() => {
     if (!open) {
       document.body.style.overflow = "auto";
@@ -87,6 +123,8 @@ export const TemplateModal = ({
     setPageDropdowns({});
     setError(null);
     setIsApplying(false);
+    setIsDeleteConfirming(false);
+    setIsDeletingTemplate(false);
   }, [template]);
 
   if (!open || !template) return null;
@@ -107,8 +145,24 @@ export const TemplateModal = ({
           </div>
         </div>
 
-        <div className="w-full border-y border-(--gray) py-3 flex flex-col gap-1">
-          <p className="text-(--gray-page)">{template.templateType} template</p>
+        <div className="w-full border-y border-(--gray) py-3 flex items-center justify-between">
+          <p className="text-(--gray-page) capitalize">
+            {template.templateType} template
+          </p>
+          {canDeleteTemplate ? (
+            <button
+              type="button"
+              className="w-max rounded-md border px-2 py-1 border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-(--declined-bg)/10"
+              onClick={() => void handleDeleteTemplate()}
+              disabled={isDeletingTemplate}
+            >
+              {isDeletingTemplate
+                ? "Deleting..."
+                : isDeleteConfirming
+                  ? "Are you sure?"
+                  : "Delete template"}
+            </button>
+          ) : null}
         </div>
 
         <p className="text-(--gray-page)">

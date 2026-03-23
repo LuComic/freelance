@@ -15,6 +15,7 @@ import { buildTemplateAuthorName, requireReadableTemplate } from "./model";
 
 type TemplatePreviewSource = {
   id: Doc<"templates">["_id"];
+  authorUserId: Doc<"templates">["authorUserId"];
   name: string;
   description: string | null;
   templateType: Doc<"templates">["type"];
@@ -72,6 +73,7 @@ export function buildTemplatePreview(
   if (blueprint.type === "page") {
     return {
       id: source.id,
+      authorUserId: source.authorUserId,
       name: source.name,
       description: source.description,
       templateType: source.templateType,
@@ -88,6 +90,7 @@ export function buildTemplatePreview(
 
   return {
     id: source.id,
+    authorUserId: source.authorUserId,
     name: source.name,
     description: source.description,
     templateType: source.templateType,
@@ -196,6 +199,7 @@ export const getTemplatePreview = query({
     return buildTemplatePreview(
       {
         id: template._id,
+        authorUserId: template.authorUserId,
         name: template.name,
         description: template.description ?? null,
         templateType: template.type,

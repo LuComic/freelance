@@ -23,7 +23,7 @@ import {
   assertBlueprintType,
   getTemplateBlueprint,
 } from "./content";
-import { requireReadableTemplate } from "./model";
+import { requireManageableTemplate, requireReadableTemplate } from "./model";
 
 type SaveTemplateResult = {
   templateId: Id<"templates">;
@@ -45,6 +45,10 @@ type ApplyProjectTemplateResult = {
     slug: string;
     title: string;
   }>;
+};
+
+type DeleteTemplateResult = {
+  templateId: Id<"templates">;
 };
 
 export const saveTemplate = mutation({
@@ -207,6 +211,26 @@ export const applyProjectTemplate = mutation({
     return {
       projectId: project._id,
       createdPages,
+    };
+  },
+});
+
+export const deleteTemplate = mutation({
+  args: {
+    templateId: v.id("templates"),
+  },
+  handler: async (ctx, args): Promise<DeleteTemplateResult> => {
+    const { userId } = await requireCurrentAuth(ctx);
+    const template = await requireManageableTemplate(
+      ctx,
+      args.templateId,
+      userId,
+    );
+
+    await ctx.db.delete(template._id);
+
+    return {
+      templateId: template._id,
     };
   },
 });

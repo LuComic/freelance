@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query } from "../_generated/server";
+import type { Id } from "../_generated/dataModel";
 import { requireCurrentAuth } from "../lib/auth";
 import { APP_ERROR_CODES, ConvexDomainError } from "../lib/errors";
 import { getOrderedProjectPages } from "../lib/projectRecords";
@@ -49,14 +50,14 @@ function getTemplateSearchRank(
 }
 
 function compareTemplates(
-  viewerUserId: string,
+  viewerUserId: Id<"users">,
   left: {
-    authorUserId: string;
+    authorUserId: Id<"users">;
     updatedAt: number;
     name: string;
   },
   right: {
-    authorUserId: string;
+    authorUserId: Id<"users">;
     updatedAt: number;
     name: string;
   },
@@ -145,7 +146,7 @@ export const searchVisibleTemplates = query({
             description: template.description ?? null,
             templateType: template.type,
             author: authorName,
-            authorUserId: String(template.authorUserId),
+            authorUserId: template.authorUserId,
             updatedAt: template.updatedAt,
             normalizedName: normalizeSearchQuery(template.name),
             normalizedAuthor: normalizeSearchQuery(authorName),
@@ -158,15 +159,24 @@ export const searchVisibleTemplates = query({
 
       if (!normalizedQuery) {
         return candidates
-          .sort((left, right) => compareTemplates(String(userId), left, right))
+          .sort((left, right) => compareTemplates(userId, left, right))
           .slice(0, limit)
           .map(
-            ({ id, name, description, templateType, author, updatedAt }) => ({
+            ({
               id,
               name,
               description,
               templateType,
               author,
+              authorUserId,
+              updatedAt,
+            }) => ({
+              id,
+              name,
+              description,
+              templateType,
+              author,
+              authorUserId,
               updatedAt,
             }),
           );
@@ -190,11 +200,7 @@ export const searchVisibleTemplates = query({
             return left.rank - right.rank;
           }
 
-          return compareTemplates(
-            String(userId),
-            left.candidate,
-            right.candidate,
-          );
+          return compareTemplates(userId, left.candidate, right.candidate);
         })
         .slice(0, limit)
         .map(
@@ -205,6 +211,7 @@ export const searchVisibleTemplates = query({
               description,
               templateType,
               author,
+              authorUserId,
               updatedAt,
             },
           }) => ({
@@ -213,6 +220,7 @@ export const searchVisibleTemplates = query({
             description,
             templateType,
             author,
+            authorUserId,
             updatedAt,
           }),
         );
