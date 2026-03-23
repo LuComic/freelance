@@ -33,7 +33,9 @@ export const TabItem = ({
         onClick={onSelect}
       >
         <span className="flex min-w-0 items-center gap-2 text-sm">
-          <span className="truncate text-(--light)">
+          <span
+            className={`truncate ${isActive ? "text-(--light)" : "text-(--gray-page)"}`}
+          >
             {truncateLabel(title)}
           </span>
           <span className="truncate text-(--gray-page)">

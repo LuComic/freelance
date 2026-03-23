@@ -6,7 +6,10 @@ import { getRenderablePageComponent } from "./componentRegistry";
 import { MainHeadline } from "@/app/lib/components/page_components/text/parts/MainHeadline";
 import { SectionHeader } from "@/app/lib/components/page_components/text/parts/SectionHeader";
 import { Subheader } from "@/app/lib/components/page_components/text/parts/Subheader";
-import { isPageComponentType, type PageComponentType } from "@/lib/pageDocument";
+import {
+  isPageComponentType,
+  type PageComponentType,
+} from "@/lib/pageDocument";
 
 const LINE_HEADING_REGEX = /^(#{1,6})\s+(.*)$/;
 

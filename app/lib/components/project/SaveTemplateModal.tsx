@@ -38,8 +38,12 @@ export const SaveTemplateModal = ({
   onOpenChange,
 }: SaveTemplateModalProps) => {
   const pageDocument = useOptionalPageDocument();
-  const hasActivePage = Boolean(pageDocument?.activePage && pageDocument.document);
-  const activeProjectId = hasActivePage ? pageDocument!.activePage!.project.id : null;
+  const hasActivePage = Boolean(
+    pageDocument?.activePage && pageDocument.document,
+  );
+  const activeProjectId = hasActivePage
+    ? pageDocument!.activePage!.project.id
+    : null;
   const saveTemplate = useMutation(api.templates.mutations.saveTemplate);
   const projectTemplateSource = useQuery(
     api.templates.queries.getProjectTemplateSource,
@@ -78,8 +82,8 @@ export const SaveTemplateModal = ({
       title: pageDocument.activePage.page.title,
       components: getOrderedComponentTypes(pageDocument.document),
     };
-    const sourcePages =
-      (projectTemplateSource?.pages ?? []) as ProjectTemplateSourcePage[];
+    const sourcePages = (projectTemplateSource?.pages ??
+      []) as ProjectTemplateSourcePage[];
 
     if (sourcePages.length === 0) {
       return [activePageSummary];
@@ -88,10 +92,7 @@ export const SaveTemplateModal = ({
     return sourcePages.map((page: ProjectTemplateSourcePage) =>
       page.id === activePageSummary.id ? activePageSummary : page,
     );
-  }, [
-    pageDocument,
-    projectTemplateSource,
-  ]);
+  }, [pageDocument, projectTemplateSource]);
 
   useEffect(() => {
     if (!open) {
@@ -125,7 +126,12 @@ export const SaveTemplateModal = ({
   }, [open]);
 
   const handleSave = async () => {
-    if (!templateName.trim() || isSaving || !pageDocument?.activePage || !pageDocument.document) {
+    if (
+      !templateName.trim() ||
+      isSaving ||
+      !pageDocument?.activePage ||
+      !pageDocument.document
+    ) {
       return;
     }
 
@@ -171,7 +177,8 @@ export const SaveTemplateModal = ({
           <div className="flex flex-col gap-1">
             <p className="md:text-3xl text-xl font-medium">Save Template</p>
             <p className="text-(--gray-page)">
-              Save this structure as a reusable template.
+              Save this structure as a reusable template. Saves just the
+              components, no text.
             </p>
           </div>
         </div>
@@ -260,11 +267,13 @@ export const SaveTemplateModal = ({
             <p className="text-(--gray-page)">Loading project pages...</p>
           ) : (
             <SaveProjectTemplate
-              pages={projectPagesPreview.map((page: ProjectTemplateSourcePage) => ({
-                title: page.title,
-                description: "",
-                components: page.components,
-              }))}
+              pages={projectPagesPreview.map(
+                (page: ProjectTemplateSourcePage) => ({
+                  title: page.title,
+                  description: "",
+                  components: page.components,
+                }),
+              )}
             />
           )}
         </div>
@@ -289,7 +298,8 @@ export const SaveTemplateModal = ({
               !hasActivePage ||
               !templateName.trim() ||
               isSaving ||
-              (templateType === "project" && projectTemplateSource === undefined)
+              (templateType === "project" &&
+                projectTemplateSource === undefined)
             }
           >
             {isSaving ? "Saving..." : "Save Template"}
