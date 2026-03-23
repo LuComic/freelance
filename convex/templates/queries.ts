@@ -7,7 +7,7 @@ import { getOrderedProjectPages } from "../lib/projectRecords";
 import { templateTypeValidator } from "../lib/validators";
 import { parsePageDocument } from "../pages/content";
 import { requireProjectEditor } from "../lib/permissions";
-import { getOrderedComponentTypes } from "../../lib/templateBlueprint";
+import { getOrderedTemplateItemLabels } from "../../lib/templateBlueprint";
 import { buildTemplateAuthorName } from "./model";
 
 function normalizeSearchQuery(value: string) {
@@ -254,13 +254,16 @@ export const getProjectTemplateSource = query({
     const pages = await getOrderedProjectPages(ctx, project);
 
     return {
-      pages: pages.map((page) => ({
-        id: page._id,
-        title: page.title,
-        components: getOrderedComponentTypes(
-          parsePageDocument(page.contentJson),
-        ),
-      })),
+      pages: pages.map((page) => {
+        const document = parsePageDocument(page.contentJson);
+
+        return {
+          id: page._id,
+          title: page.title,
+          document,
+          components: getOrderedTemplateItemLabels(document),
+        };
+      }),
     };
   },
 });

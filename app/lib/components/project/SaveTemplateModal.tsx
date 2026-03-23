@@ -14,9 +14,9 @@ import {
 import {
   createPageTemplateBlueprint,
   createProjectTemplateBlueprint,
-  getOrderedComponentTypes,
+  getOrderedTemplateItemLabels,
 } from "@/lib/templateBlueprint";
-import type { PageComponentType } from "@/lib/pageDocument";
+import type { PageDocumentV1 } from "@/lib/pageDocument";
 import { SavePageTemplate } from "./SavePageTemplate";
 import { SaveProjectTemplate } from "./SaveProjectTemplate";
 import type { TemplatePage } from "../searchbar/SearchBarData";
@@ -30,7 +30,8 @@ type SaveTemplateModalProps = {
 type ProjectTemplateSourcePage = {
   id: string;
   title: string;
-  components: PageComponentType[];
+  document: PageDocumentV1;
+  components: string[];
 };
 
 export const SaveTemplateModal = ({
@@ -67,7 +68,7 @@ export const SaveTemplateModal = ({
         ? {
             title: pageDocument.activePage.page.title || "Current page",
             description: "",
-            components: getOrderedComponentTypes(pageDocument.document),
+            components: getOrderedTemplateItemLabels(pageDocument.document),
           }
         : null,
     [pageDocument],
@@ -80,7 +81,8 @@ export const SaveTemplateModal = ({
     const activePageSummary = {
       id: pageDocument.activePage.page.id,
       title: pageDocument.activePage.page.title,
-      components: getOrderedComponentTypes(pageDocument.document),
+      document: pageDocument.document,
+      components: getOrderedTemplateItemLabels(pageDocument.document),
     };
     const sourcePages = (projectTemplateSource?.pages ??
       []) as ProjectTemplateSourcePage[];
@@ -177,8 +179,8 @@ export const SaveTemplateModal = ({
           <div className="flex flex-col gap-1">
             <p className="md:text-3xl text-xl font-medium">Save Template</p>
             <p className="text-(--gray-page)">
-              Save this structure as a reusable template. Saves just the
-              components, no text.
+              Save this structure as a reusable template with placeholder text
+              for editable fields.
             </p>
           </div>
         </div>

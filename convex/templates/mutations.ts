@@ -14,9 +14,10 @@ import {
   type PageDocumentV1,
 } from "../../lib/pageDocument";
 import {
-  appendComponentTypesToDocument,
+  appendTemplateSourceToDocument,
   assertTemplateBlueprintV1,
-  type TemplateBlueprintV1,
+  getTemplatePageSource,
+  type TemplateBlueprint,
 } from "../../lib/templateBlueprint";
 import {
   appendProjectTemplatePages,
@@ -28,7 +29,7 @@ import { requireManageableTemplate, requireReadableTemplate } from "./model";
 type SaveTemplateResult = {
   templateId: Id<"templates">;
   updatedAt: number;
-  templateType: TemplateBlueprintV1["type"];
+  templateType: TemplateBlueprint["type"];
 };
 
 type ApplyPageTemplateResult = {
@@ -139,9 +140,9 @@ export const applyPageTemplate = mutation({
       throw notFound(`Project ${page.projectId} was not found.`);
     }
 
-    const nextDocument = appendComponentTypesToDocument(
+    const nextDocument = appendTemplateSourceToDocument(
       args.baseDocument,
-      blueprint.components,
+      getTemplatePageSource(blueprint),
     );
     const trimmedTitle = args.baseTitle.trim() || page.title;
     const siblingPages = await getOrderedProjectPages(ctx, project);

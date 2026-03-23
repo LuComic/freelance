@@ -22,7 +22,7 @@ import {
   getTemplateBlueprint,
 } from "../templates/content";
 import { requireReadableTemplate } from "../templates/model";
-import type { ProjectTemplateBlueprintV1 } from "../../lib/templateBlueprint";
+import type { ProjectTemplateBlueprint } from "../../lib/templateBlueprint";
 
 export const createProject = mutation({
   args: {
@@ -72,7 +72,7 @@ export const createProject = mutation({
       | {
           templateId: Doc<"templates">["_id"];
           contentJson: string;
-          blueprint: ProjectTemplateBlueprintV1;
+          blueprint: ProjectTemplateBlueprint;
         }
       | null = null;
 

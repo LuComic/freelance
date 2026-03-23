@@ -3,8 +3,8 @@
 import { api } from "@/convex/_generated/api";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import type {
-  PageTemplateBlueprintV1,
-  ProjectTemplateBlueprintV1,
+  PageTemplateBlueprint,
+  ProjectTemplateBlueprint,
 } from "@/lib/templateBlueprint";
 import { useConvex, useQuery } from "convex/react";
 import { Search } from "lucide-react";
@@ -216,15 +216,18 @@ export const SearchBar = () => {
     setIsLoadingTemplatePreview(true);
 
     try {
-      const preview = await convex.query(api.templates.content.getTemplatePreview, {
-        templateId: template.id,
-      });
+      const preview = await convex.query(
+        api.templates.content.getTemplatePreview,
+        {
+          templateId: template.id,
+        },
+      );
       const typedPreview: SearchTemplate =
         preview.templateType === "page" && "page" in preview && preview.page
           ? {
               ...preview,
               templateType: "page",
-              blueprint: preview.blueprint as PageTemplateBlueprintV1,
+              blueprint: preview.blueprint as PageTemplateBlueprint,
               page: preview.page,
             }
           : preview.templateType === "project" &&
@@ -233,7 +236,7 @@ export const SearchBar = () => {
             ? {
                 ...preview,
                 templateType: "project",
-                blueprint: preview.blueprint as ProjectTemplateBlueprintV1,
+                blueprint: preview.blueprint as ProjectTemplateBlueprint,
                 pages: preview.pages,
               }
             : (() => {
@@ -278,15 +281,17 @@ export const SearchBar = () => {
           },
         }))
       : activeTag === "template"
-        ? visibleTemplateSearchResults.map((template: SearchTemplateSummary) => ({
-            key: String(template.id),
-            title: template.name,
-            subtitle: `by ${template.author}`,
-            badge: `${template.templateType} template`,
-            onSelect: () => {
-              void handleTemplateSelect(template);
-            },
-          }))
+        ? visibleTemplateSearchResults.map(
+            (template: SearchTemplateSummary) => ({
+              key: String(template.id),
+              title: template.name,
+              subtitle: `by ${template.author}`,
+              badge: `${template.templateType} template`,
+              onSelect: () => {
+                void handleTemplateSelect(template);
+              },
+            }),
+          )
         : visiblePageSearchResults.map((page: SearchPageResult) => ({
             key: `${page.projectId}:${page.pageId}`,
             title: page.pageTitle,

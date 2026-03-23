@@ -1,7 +1,11 @@
 # Agents.md - Codex
 
 This file has instructions and an overview of what to do and not to do when prompted with a task.
-Usually your task is to focus on the backend, so focus on related functions and helper files that already exist.
+
+## Overall
+
+- Usually your task is to focus on the backend, so focus on related functions and helper files that already exist.
+- Keep the chagnes and updates as minimal as possible. At the same time, effective. Avoid overcomplicating things.
 
 ## Commands
 

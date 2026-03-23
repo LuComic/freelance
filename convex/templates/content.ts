@@ -7,9 +7,12 @@ import { serializePageDocument } from "../pages/content";
 import { uniqueSlugFromLabel } from "../lib/slugs";
 import {
   assertTemplateBlueprintV1,
-  buildPageDocumentFromComponentTypes,
-  type ProjectTemplateBlueprintV1,
-  type TemplateBlueprintV1,
+  buildPageDocumentFromTemplateSource,
+  getTemplatePageSource,
+  getTemplateSourceItemLabels,
+  type ProjectTemplateBlueprint,
+  type ProjectTemplatePageBlueprint,
+  type TemplateBlueprint,
 } from "../../lib/templateBlueprint";
 import { buildTemplateAuthorName, requireReadableTemplate } from "./model";
 
@@ -23,20 +26,19 @@ type TemplatePreviewSource = {
   updatedAt: number;
 };
 
-function toTemplatePreviewPage(page: {
-  title: string;
-  components: ProjectTemplateBlueprintV1["pages"][number]["components"];
-}) {
+function toTemplatePreviewPage(page: ProjectTemplatePageBlueprint) {
+  const templateSource = getTemplatePageSource(page);
+
   return {
     title: page.title,
     description: "",
-    components: [...page.components],
+    components: getTemplateSourceItemLabels(templateSource),
   };
 }
 
 export function parseTemplateBlueprint(
   contentJson?: string | null,
-): TemplateBlueprintV1 {
+): TemplateBlueprint {
   if (!contentJson) {
     throw invalidState("Template content is missing.");
   }
@@ -68,9 +70,11 @@ export function getTemplateBlueprint(
 
 export function buildTemplatePreview(
   source: TemplatePreviewSource,
-  blueprint: TemplateBlueprintV1,
+  blueprint: TemplateBlueprint,
 ) {
   if (blueprint.type === "page") {
+    const templateSource = getTemplatePageSource(blueprint);
+
     return {
       id: source.id,
       authorUserId: source.authorUserId,
@@ -83,7 +87,7 @@ export function buildTemplatePreview(
       page: {
         title: source.name,
         description: "",
-        components: [...blueprint.components],
+        components: getTemplateSourceItemLabels(templateSource),
       },
     };
   }
@@ -101,10 +105,10 @@ export function buildTemplatePreview(
   };
 }
 
-export function assertBlueprintType<TType extends TemplateBlueprintV1["type"]>(
-  blueprint: TemplateBlueprintV1,
+export function assertBlueprintType<TType extends TemplateBlueprint["type"]>(
+  blueprint: TemplateBlueprint,
   type: TType,
-): asserts blueprint is Extract<TemplateBlueprintV1, { type: TType }> {
+): asserts blueprint is Extract<TemplateBlueprint, { type: TType }> {
   if (blueprint.type !== type) {
     throw invalidState(`This template is not a ${type} template.`);
   }
@@ -119,7 +123,7 @@ export async function appendProjectTemplatePages(
     };
     userId: Id<"users">;
     templateId: Id<"templates">;
-    blueprint: ProjectTemplateBlueprintV1;
+    blueprint: ProjectTemplateBlueprint;
   },
 ) {
   const existingSlugs = new Set<string>();
@@ -153,7 +157,9 @@ export async function appendProjectTemplatePages(
       title,
       slug,
       contentJson: serializePageDocument(
-        buildPageDocumentFromComponentTypes(pageBlueprint.components),
+        buildPageDocumentFromTemplateSource(
+          getTemplatePageSource(pageBlueprint),
+        ),
       ),
       sourceTemplateId: args.templateId,
       createdByUserId: args.userId,

@@ -1,9 +1,8 @@
 import type { ConnectionPerson } from "../connections/types";
 import type { Id } from "@/convex/_generated/dataModel";
-import type { PageComponentType } from "@/lib/pageDocument";
 import type {
-  PageTemplateBlueprintV1,
-  ProjectTemplateBlueprintV1,
+  PageTemplateBlueprint,
+  ProjectTemplateBlueprint,
 } from "@/lib/templateBlueprint";
 
 export type SearchPerson = ConnectionPerson;
@@ -11,7 +10,7 @@ export type SearchPerson = ConnectionPerson;
 export type TemplatePage = {
   title: string;
   description: string;
-  components: PageComponentType[];
+  components: string[];
 };
 
 export type SearchTemplateType = "page" | "project";
@@ -31,13 +30,13 @@ export type SearchTemplateSummary = SearchTemplateBase & {
 
 export type PageSearchTemplate = SearchTemplateSummary & {
   templateType: "page";
-  blueprint: PageTemplateBlueprintV1;
+  blueprint: PageTemplateBlueprint;
   page: TemplatePage;
 };
 
 export type ProjectSearchTemplate = SearchTemplateSummary & {
   templateType: "project";
-  blueprint: ProjectTemplateBlueprintV1;
+  blueprint: ProjectTemplateBlueprint;
   pages: TemplatePage[];
 };
 
