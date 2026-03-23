@@ -158,7 +158,7 @@ export const IdeaBoradCreator = ({
         {clientEditing && (
           <>
             <p className="text-(--gray-page)">
-              Removing client's permissions when they have already voted or
+              Removing client&apos;s permissions when they have already voted or
               sumbitted an idea, will remove their votes/ideas.
             </p>
             <div className="flex flex-col gap-1">

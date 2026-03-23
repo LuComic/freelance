@@ -52,7 +52,7 @@ export function ProjectEmailListSection({
 
   return (
     <div
-      className={`${shaded ? "bg-(--gray)/10 " : ""}w-full p-2 flex flex-col gap-2`}
+      className={`${shaded ? "bg-(--gray)/10" : ""}w-full p-2 flex flex-col gap-2`}
     >
       <button
         type="button"

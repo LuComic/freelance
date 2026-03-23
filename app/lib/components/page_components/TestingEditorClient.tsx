@@ -14,6 +14,7 @@ import {
   getActiveLineFromCursor,
   getSlashCommandTokenRange,
   getSlashCompletionSuffix,
+  replaceSlashCommandWithStructuralBlock,
   resolveComponentTypeFromCommand,
 } from "@/app/lib/components/page_components/testing_editor/commands";
 import { INITIAL_TEXT } from "@/app/lib/components/page_components/testing_editor/constants";
@@ -185,6 +186,24 @@ export default function TestingEditorClient() {
               const command = slashRange?.token.slice(1).toLowerCase() as
                 | InsertableComponentCommand
                 | undefined;
+              const structuralReplacement =
+                replaceSlashCommandWithStructuralBlock(
+                  nextValue,
+                  cursorPosition,
+                );
+
+              if (structuralReplacement) {
+                updateEditorText(structuralReplacement.nextValue);
+                setActiveLine(
+                  getActiveLineFromCursor(
+                    structuralReplacement.nextValue,
+                    structuralReplacement.nextCursor,
+                  ),
+                );
+                setCaretPosition(structuralReplacement.nextCursor);
+                return;
+              }
+
               const replacement =
                 slashRange &&
                 command &&
@@ -235,6 +254,24 @@ export default function TestingEditorClient() {
                     ),
                   );
                   setCaretPosition(slashAction.nextCursor);
+                  return;
+                }
+
+                const structuralReplacement =
+                  replaceSlashCommandWithStructuralBlock(
+                    textarea.value,
+                    textarea.selectionStart,
+                  );
+                if (structuralReplacement) {
+                  event.preventDefault();
+                  updateEditorText(structuralReplacement.nextValue);
+                  setActiveLine(
+                    getActiveLineFromCursor(
+                      structuralReplacement.nextValue,
+                      structuralReplacement.nextCursor,
+                    ),
+                  );
+                  setCaretPosition(structuralReplacement.nextCursor);
                   return;
                 }
 

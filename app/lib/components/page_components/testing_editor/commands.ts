@@ -4,16 +4,25 @@ import {
   resolveComponentTypeFromCommand as resolveComponentTypeFromCatalog,
 } from "@/app/lib/components/page_components/componentCatalog";
 import { createComponentToken, type PageComponentType } from "@/lib/pageDocument";
+import {
+  createDropdownScaffold,
+  DROPDOWN_SLASH_COMMAND,
+  getDropdownScaffoldCursorOffset,
+} from "./dropdownBlocks";
 
 const SLASH_ACTION_COMMANDS = ["lib", "template"] as const;
+const SLASH_INSERTION_COMMANDS = [DROPDOWN_SLASH_COMMAND] as const;
 const ALL_COMPLETABLE_SLASH_COMMANDS = [
   ...PRIMARY_INSERTABLE_COMMANDS,
+  ...SLASH_INSERTION_COMMANDS,
   ...SLASH_ACTION_COMMANDS,
 ] as const;
 
 type SlashAction =
   | { type: "open-component-library" }
   | { type: "open-tagged-search"; tag: "template" };
+
+type SlashInsertion = { type: "insert-dropdown-block" };
 
 function getTokenRangeAtCursor(value: string, cursor: number) {
   let start = cursor;
@@ -135,6 +144,42 @@ export function consumeSlashActionCommand(value: string, cursor: number) {
     nextValue: `${value.slice(0, start)}${value.slice(end)}`,
     nextCursor: start,
   };
+}
+
+function resolveSlashInsertion(token: string): SlashInsertion | null {
+  const command = token.slice(1).toLowerCase();
+  if (command === DROPDOWN_SLASH_COMMAND) {
+    return { type: "insert-dropdown-block" };
+  }
+
+  return null;
+}
+
+export function replaceSlashCommandWithStructuralBlock(
+  value: string,
+  cursor: number,
+) {
+  const { start, end, token } = getTokenRangeAtCursor(value, cursor);
+  if (!token.startsWith("/")) {
+    return null;
+  }
+
+  const insertion = resolveSlashInsertion(token);
+  if (!insertion) {
+    return null;
+  }
+
+  if (insertion.type === "insert-dropdown-block") {
+    const scaffold = createDropdownScaffold();
+    return {
+      nextValue: `${value.slice(0, start)}${scaffold}${value.slice(end)}`,
+      nextCursor: start + getDropdownScaffoldCursorOffset(),
+      start,
+      end,
+    };
+  }
+
+  return null;
 }
 
 export function replaceSlashCommandWithToken(

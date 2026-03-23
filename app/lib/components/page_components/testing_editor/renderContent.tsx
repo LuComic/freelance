@@ -3,6 +3,8 @@
 import { type ComponentType, type ReactNode } from "react";
 import { COMPONENT_TAG_REGEX, COMPONENT_TOKEN_REGEX } from "./constants";
 import { getRenderablePageComponent } from "./componentRegistry";
+import { PageContentDropdownBlock } from "./PageContentDropdownBlock";
+import { parseEditorBlocks } from "./dropdownBlocks";
 import { MainHeadline } from "@/app/lib/components/page_components/text/parts/MainHeadline";
 import { SectionHeader } from "@/app/lib/components/page_components/text/parts/SectionHeader";
 import { Subheader } from "@/app/lib/components/page_components/text/parts/Subheader";
@@ -69,10 +71,10 @@ function renderPlainTextSegment(segment: string, keyStart: number) {
   return { nodes, nextKey: key };
 }
 
-export function renderContentWithComponents(content: string) {
+function renderTokenizedContent(content: string, keyStart: number) {
   const nodes: ReactNode[] = [];
   let lastIndex = 0;
-  let key = 0;
+  let key = keyStart;
   const matches = [
     ...content.matchAll(COMPONENT_TOKEN_REGEX),
     ...content.matchAll(COMPONENT_TAG_REGEX),
@@ -142,7 +144,47 @@ export function renderContentWithComponents(content: string) {
     const tailText = content.slice(lastIndex);
     const renderedTail = renderPlainTextSegment(tailText, key);
     nodes.push(...renderedTail.nodes);
+    key = renderedTail.nextKey;
   }
 
-  return nodes;
+  return { nodes, nextKey: key };
+}
+
+function renderStructuredContent(content: string, keyStart: number) {
+  const blocks = parseEditorBlocks(content);
+  if (blocks.length === 0) {
+    return renderTokenizedContent(content, keyStart);
+  }
+
+  const nodes: ReactNode[] = [];
+  let key = keyStart;
+
+  for (const block of blocks) {
+    if (block.type === "content") {
+      const renderedContent = renderTokenizedContent(block.content, key);
+      nodes.push(...renderedContent.nodes);
+      key = renderedContent.nextKey;
+      continue;
+    }
+
+    const dropdownKey = key;
+    key += 1;
+    const renderedBody = renderStructuredContent(block.body, key);
+    key = renderedBody.nextKey;
+
+    nodes.push(
+      <PageContentDropdownBlock
+        key={`dropdown-${dropdownKey}`}
+        title={block.title}
+      >
+        {renderedBody.nodes}
+      </PageContentDropdownBlock>,
+    );
+  }
+
+  return { nodes, nextKey: key };
+}
+
+export function renderContentWithComponents(content: string) {
+  return renderStructuredContent(content, 0).nodes;
 }
