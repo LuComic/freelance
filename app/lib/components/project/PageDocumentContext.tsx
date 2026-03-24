@@ -43,6 +43,11 @@ import type {
   ViewerProjectRole,
 } from "./page_document_helpers/types";
 import { resolveComponentTypeFromCommand } from "../page_components/testing_editor/commands";
+import {
+  createDropdownScaffold,
+  DROPDOWN_SLASH_COMMAND,
+  getDropdownScaffoldCursorOffset,
+} from "../page_components/testing_editor/dropdownBlocks";
 
 type ProjectMemberListItem = {
   userId: string;
@@ -470,6 +475,28 @@ export function PageDocumentProvider({
       start: number;
       end?: number;
     }) => {
+      if (command === DROPDOWN_SLASH_COMMAND) {
+        const scaffold = createDropdownScaffold();
+        const nextValue = `${value.slice(0, start)}${scaffold}${value.slice(
+          end ?? start,
+        )}`;
+
+        setDocument((prev) =>
+          prev
+            ? {
+                ...prev,
+                editorText: nextValue,
+              }
+            : prev,
+        );
+        setSaveError(null);
+
+        return {
+          nextValue,
+          nextCursor: start + getDropdownScaffoldCursorOffset(),
+        };
+      }
+
       const type = resolveComponentTypeFromCommand(command);
       if (!type) {
         return null;

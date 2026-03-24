@@ -1,4 +1,4 @@
-export type PageComponentLibraryTag = "progress" | "text" | "input";
+export type PageComponentLibraryTag = "progress" | "text" | "input" | "util";
 
 export type RegisteredPageComponentDefinition<
   Type extends string,

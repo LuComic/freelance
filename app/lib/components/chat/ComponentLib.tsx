@@ -27,7 +27,7 @@ export const ComponentLib = ({
       <div className="md:grid flex flex-col items-center justify-center grid-cols-2 w-full gap-2">
         {visibleComps.map((item) => (
           <ComponentItem
-            key={item.type}
+            key={item.key}
             compName={item.name}
             compDesc={item.description}
             previewSrc={item.previewSrc}

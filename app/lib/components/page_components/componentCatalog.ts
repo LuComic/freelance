@@ -4,6 +4,7 @@ import {
   type RegisteredPageComponentCommand,
 } from "@/lib/pageDocument/registeredComponents";
 import type { PageComponentLibraryTag } from "@/lib/pageDocument/registeredDefinitions";
+import { DROPDOWN_SLASH_COMMAND } from "./testing_editor/dropdownBlocks";
 
 type ComponentLibraryMetadata = {
   name: string;
@@ -71,7 +72,8 @@ const LEGACY_PAGE_COMPONENT_CATALOG = [
     commands: ["mainheadline", "h1"],
     componentLibrary: {
       name: "Main Headline (H1)",
-      description: "Large top-level headline text. Commands: /mainheadline, /h1",
+      description:
+        "Large top-level headline text. Commands: /mainheadline, /h1",
       previewSrc: "/component-previews/text-h1.svg",
       tag: "text",
     },
@@ -114,7 +116,8 @@ type LegacyInsertableComponentCommand =
 
 export type InsertableComponentCommand =
   | LegacyInsertableComponentCommand
-  | RegisteredPageComponentCommand;
+  | RegisteredPageComponentCommand
+  | typeof DROPDOWN_SLASH_COMMAND;
 
 export type PageComponentCatalogEntry = {
   type: PageComponentType;
@@ -122,13 +125,17 @@ export type PageComponentCatalogEntry = {
   componentLibrary: ComponentLibraryMetadata;
 };
 
-const REGISTERED_PAGE_COMPONENT_CATALOG = REGISTERED_PAGE_COMPONENT_DEFINITIONS.map(
-  (definition) => ({
+type ComponentLibraryItem = ComponentLibraryMetadata & {
+  key: string;
+  insertCommand: InsertableComponentCommand;
+};
+
+const REGISTERED_PAGE_COMPONENT_CATALOG =
+  REGISTERED_PAGE_COMPONENT_DEFINITIONS.map((definition) => ({
     type: definition.type,
     commands: definition.commands as readonly InsertableComponentCommand[],
     componentLibrary: definition.componentLibrary,
-  }),
-) as PageComponentCatalogEntry[];
+  })) as PageComponentCatalogEntry[];
 
 export const PAGE_COMPONENT_CATALOG = [
   ...LEGACY_PAGE_COMPONENT_CATALOG,
@@ -143,13 +150,22 @@ export const INSERTABLE_COMPONENT_COMMANDS = PAGE_COMPONENT_CATALOG.flatMap(
   ({ type, commands }) => commands.map((command) => ({ command, type })),
 );
 
-export const COMPONENT_LIBRARY_ITEMS = PAGE_COMPONENT_CATALOG.map(
-  ({ type, commands, componentLibrary }) => ({
-    type,
+export const COMPONENT_LIBRARY_ITEMS: readonly ComponentLibraryItem[] = [
+  ...PAGE_COMPONENT_CATALOG.map(({ type, commands, componentLibrary }) => ({
+    key: type,
     insertCommand: commands[0],
     ...componentLibrary,
-  }),
-);
+  })),
+  {
+    key: "DropdownBlock",
+    name: "Dropdown Block",
+    description:
+      "A structural editor block rather than a regular component. Use it for collapsible sections. Command: /dropdown",
+    previewSrc: "/component-previews/dropdown.svg",
+    tag: "util",
+    insertCommand: DROPDOWN_SLASH_COMMAND,
+  },
+] as const;
 
 export function resolveComponentTypeFromCommand(command: string) {
   const match = INSERTABLE_COMPONENT_COMMANDS.find(

@@ -1,0 +1,12 @@
+<svg width="320" height="180" viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="320" height="180" fill="#171717"/>
+  <text x="10" y="20" font-size="10" fill="#E8E8E8" font-family="Arial, sans-serif">Dropdown</text>
+  <line x1="10" y1="32" x2="310" y2="32" stroke="#454545"/>
+  <rect x="10" y="52" width="184" height="22" rx="4" fill="#152238" stroke="#0061FF"/>
+  <text x="22" y="66" font-size="8" fill="#D8D8D8" font-family="Arial, sans-serif">dropdwon</text>
+  <path d="M168 58L174 63L168 68" stroke="#D8D8D8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="10" y="96" width="112" height="5" rx="2.5" fill="#8A8A8A"/>
+  <rect x="10" y="106" width="154" height="5" rx="2.5" fill="#6F6F6F"/>
+  <rect x="10" y="116" width="128" height="5" rx="2.5" fill="#6F6F6F"/>
+  <line x1="10" y1="132" x2="310" y2="132" stroke="#454545"/>
+</svg>

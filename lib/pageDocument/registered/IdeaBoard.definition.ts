@@ -86,7 +86,7 @@ export const IdeaBoardDefinition = defineRegisteredPageComponentDefinition({
     name: "Idea Board",
     description:
       "Add and vote on different ideas, which can be submitted by all project members. Commands: /ideaboard, /board",
-    previewSrc: "/component-previews/text-field.svg",
+    previewSrc: "/component-previews/idea-board.svg",
     tag: "input",
   },
 });
