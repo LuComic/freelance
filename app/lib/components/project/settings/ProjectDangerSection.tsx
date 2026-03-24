@@ -56,7 +56,10 @@ export function ProjectDangerSection({
             className="w-max rounded-md border px-2 py-1 border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-(--declined-bg)/10"
             onClick={() => void onDelete()}
             disabled={
-              isLoading || isUnavailable || isDeletingProject || !canDeleteProject
+              isLoading ||
+              isUnavailable ||
+              isDeletingProject ||
+              !canDeleteProject
             }
           >
             {isDeletingProject

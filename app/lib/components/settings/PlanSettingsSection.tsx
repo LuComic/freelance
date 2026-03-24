@@ -9,7 +9,6 @@ type PricingPlan = {
   price: string;
   features: string[];
   footer?: string;
-  borderClassName: string;
 };
 
 const pricingPlans: PricingPlan[] = [
@@ -18,7 +17,6 @@ const pricingPlans: PricingPlan[] = [
     description: "Join projects as a client or co-creator.",
     price: "$0",
     features: ["Join shared projects", "Co-create in invited projects"],
-    borderClassName: "border-(--gray)",
   },
   {
     name: "Starter",
@@ -30,7 +28,6 @@ const pricingPlans: PricingPlan[] = [
       "Client sharing and feedback",
     ],
     footer: "Best place to start",
-    borderClassName: "border-(--gray)",
   },
   {
     name: "Pro Unlimited",
@@ -42,7 +39,6 @@ const pricingPlans: PricingPlan[] = [
       "Early access to upcoming features",
     ],
     footer: "Best value for regular use",
-    borderClassName: "border-(--vibrant)",
   },
 ];
 
@@ -61,6 +57,9 @@ export function PlanSettingsSection({
     });
   }, [activeSection]);
 
+  // For this simple hardcoded data this is the plan's index the user has (0-2)
+  const hasPlan = 0;
+
   return (
     <div className="w-full p-2 flex flex-col gap-2">
       <button
@@ -77,32 +76,37 @@ export function PlanSettingsSection({
 
       {open ? (
         <div className="pl-7 flex flex-col gap-2 pb-2">
-          <div className="flex flex-col md:grid gap-4 grid-cols-3">
-            {pricingPlans.map((plan) => (
+          <div className="flex flex-col md:grid gap-3 grid-cols-3">
+            {pricingPlans.map((plan, index) => (
               <div
                 key={plan.name}
-                className={`rounded-lg border bg-(--darkest) py-3 px-3.5 ${plan.borderClassName}`}
+                className={`rounded-lg flex flex-col gap-4 border bg-(--darkest) py-3 px-3.5 ${hasPlan === index ? "border-(--vibrant)" : "border-(--gray)"}`}
               >
-                <p className="font-medium">{plan.name}</p>
-                <p className="mt-3 leading-7 text-(--gray-page)">
+                <p className="font-medium">
+                  {plan.name}{" "}
+                  {hasPlan === index ? (
+                    <span className="text-(--vibrant)">Current Plan</span>
+                  ) : null}
+                </p>
+                <p className="leading-7 text-(--gray-page)">
                   {plan.description}
                 </p>
 
-                <p className="mt-5 text-3xl font-semibold">
+                <p className="text-3xl font-semibold">
                   {plan.price}
                   <span className="text-base font-medium text-(--gray-page)">
                     /mo
                   </span>
                 </p>
 
-                <ul className="mt-5 space-y-2 leading-7 text-(--gray-page)">
+                <ul className="space-y-2 leading-7 text-(--gray-page)">
                   {plan.features.map((feature) => (
                     <li key={feature}>{feature}</li>
                   ))}
                 </ul>
 
                 {plan.footer ? (
-                  <p className="mt-5 font-medium">{plan.footer}</p>
+                  <p className="font-medium">{plan.footer}</p>
                 ) : null}
               </div>
             ))}

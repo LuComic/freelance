@@ -110,7 +110,7 @@ export default function SettingsPage() {
               expandInviteSection: false,
             });
           }}
-          shaded
+          shaded={true}
         />
         <ProjectEmailListSection
           title="Co-creators"
