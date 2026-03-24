@@ -40,6 +40,14 @@
   --declined-bg: #fa808e; 
   */
 
+  --google-bg: #fff;
+  --google-text: #242424;
+  --google-border: #7ebb03;
+
+  --apple-bg: #000;
+  --apple-text: #fff;
+  --apple-border: #666;
+
   --dim: #090909;
   --darkest: #111111;
   --darkest-hover: #212121;

@@ -37,13 +37,13 @@ export const LandingHeader = () => {
 
         <div className="flex items-center gap-2">
           <Link
-            href="#"
+            href="/projects"
             className="hidden rounded-md border border-(--gray) bg-(--darkest) px-2 py-1 font-medium text-(--gray-page) hover:bg-(--darkest-hover) hover:text-(--light) sm:inline"
           >
             Join a Project
           </Link>
           <Link
-            href="/projects/"
+            href="/login"
             className="rounded-md bg-(--vibrant) px-2 py-1 font-medium hover:bg-(--vibrant-hover)"
           >
             Get started

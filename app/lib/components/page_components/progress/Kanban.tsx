@@ -5,11 +5,7 @@ import { useEditMode } from "@/app/lib/components/project/EditModeContext";
 import { KanbanCreator } from "./KanbanCreator";
 import { KanbanClient } from "./KanbanClient";
 
-export const Kanban = ({
-  instanceId,
-}: {
-  instanceId: string;
-}) => {
+export const Kanban = ({ instanceId }: { instanceId: string }) => {
   const { isLive } = useEditMode();
   const { component, liveState, updateConfig, updateLiveState } =
     usePageComponentState(instanceId, "Kanban");

@@ -1,10 +1,10 @@
 import Image from "next/image";
-import { SignInButton } from "../lib/components/landing/SignInButton";
+import Link from "next/link";
 
 export default function Home() {
   return (
     <>
-      <section className="mx-auto w-full max-w-7xl px-4 pt-20 pb-12 sm:px-6 lg:px-8">
+      <section className="mx-auto w-full md:max-w-7xl px-4 pt-20 pb-12 sm:px-6 lg:px-8">
         <div className="relative z-10 flex min-h-136 flex-col">
           <div className="flex flex-col items-center text-center">
             <h1
@@ -18,10 +18,15 @@ export default function Home() {
             </p>
 
             <div className="mt-6 flex w-full max-w-md flex-col gap-3 sm:flex-row sm:justify-center">
-              <SignInButton />
+              <Link
+                href="/login"
+                className="inline-flex h-10 items-center justify-center rounded-md bg-(--vibrant) px-1.5 py-0.5 font-medium hover:bg-(--vibrant-hover)"
+              >
+                Create an Account
+              </Link>
               <a
                 href="#about"
-                className="inline-flex h-10 items-center justify-center rounded-md bg-white/90 px-2 py-1 font-medium text-(--dim) hover:bg-white"
+                className="inline-flex h-10 items-center justify-center rounded-md bg-white/90 px-1.5 py-0.5 font-medium text-(--dim) hover:bg-white"
               >
                 Join with code
               </a>
