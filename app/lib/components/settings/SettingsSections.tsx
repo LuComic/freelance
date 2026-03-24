@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { AccountSettingsSection } from "./AccountSettingsSection";
 import { LegalSettingsSection } from "./LegalSettingsSection";
 import { OverallSettingsSection } from "./OverallSettingsSection";
+import { PlanSettingsSection } from "./PlanSettingsSection";
 import { useAccountSettingsController } from "./useAccountSettingsController";
 
 export function SettingsSections() {
@@ -58,6 +59,7 @@ export function SettingsSections() {
         isDeletingAccount={isDeletingAccount}
         onDeleteAccount={handleDeleteAccount}
       />
+      <PlanSettingsSection activeSection={section} />
       <LegalSettingsSection activeSection={section} />
     </div>
   );

@@ -88,94 +88,100 @@ export function AccountSettingsSection({
                 onClick={() => void startGuestUpgrade()}
                 disabled={isStartingUpgrade}
               >
-                {isStartingUpgrade ? "Creating account..." : "Create an account"}
+                {isStartingUpgrade
+                  ? "Creating account..."
+                  : "Create an account"}
               </button>
               {upgradeError ? (
-                <p className="text-sm text-(--declined-border)">{upgradeError}</p>
+                <p className="text-sm text-(--declined-border)">
+                  {upgradeError}
+                </p>
               ) : null}
             </>
           ) : null}
           {!isAnonymous ? (
             <>
-          <p className="text-(--gray-page)">Username</p>
-          <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
-            {isProfileLoading ? "Loading..." : currentName || "Not set"}
-          </div>
+              <p className="text-(--gray-page)">Username</p>
+              <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
+                {isProfileLoading ? "Loading..." : currentName || "Not set"}
+              </div>
 
-          <p className="text-(--gray-page)">Change username</p>
-          <input
-            type="text"
-            placeholder="Enter a new username..."
-            className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
-            value={nameDraft}
-            onChange={(e) => setNameDraft(e.target.value)}
-            disabled={isProfileLoading || isSavingName}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                void onNameSave();
-              }
-            }}
-          />
-          <button
-            type="button"
-            className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-(--vibrant)"
-            onClick={() => void onNameSave()}
-            disabled={!canSaveName}
-          >
-            {isSavingName ? "Saving..." : "Save"}
-          </button>
+              <p className="text-(--gray-page)">Change username</p>
+              <input
+                type="text"
+                placeholder="Enter a new username..."
+                className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
+                value={nameDraft}
+                onChange={(e) => setNameDraft(e.target.value)}
+                disabled={isProfileLoading || isSavingName}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    void onNameSave();
+                  }
+                }}
+              />
+              <button
+                type="button"
+                className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-(--vibrant)"
+                onClick={() => void onNameSave()}
+                disabled={!canSaveName}
+              >
+                {isSavingName ? "Saving..." : "Save"}
+              </button>
 
-          <p className="text-(--gray-page)">Bio/Description</p>
-          <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
-            {isProfileLoading ? "Loading..." : currentBio || "Not set"}
-          </div>
+              <p className="text-(--gray-page)">Bio/Description</p>
+              <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
+                {isProfileLoading ? "Loading..." : currentBio || "Not set"}
+              </div>
 
-          <p className="text-(--gray-page)">Change bio</p>
-          <input
-            type="text"
-            placeholder="Enter a new bio..."
-            className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
-            value={bioDraft}
-            onChange={(e) => setBioDraft(e.target.value)}
-            disabled={isProfileLoading || isSavingBio}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                void onBioSave();
-              }
-            }}
-          />
-          <button
-            type="button"
-            className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-(--vibrant)"
-            onClick={() => void onBioSave()}
-            disabled={!canSaveBio}
-          >
-            {isSavingBio ? "Saving..." : "Save"}
-          </button>
+              <p className="text-(--gray-page)">Change bio</p>
+              <input
+                type="text"
+                placeholder="Enter a new bio..."
+                className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
+                value={bioDraft}
+                onChange={(e) => setBioDraft(e.target.value)}
+                disabled={isProfileLoading || isSavingBio}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    void onBioSave();
+                  }
+                }}
+              />
+              <button
+                type="button"
+                className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-(--vibrant)"
+                onClick={() => void onBioSave()}
+                disabled={!canSaveBio}
+              >
+                {isSavingBio ? "Saving..." : "Save"}
+              </button>
 
-          <p className="text-(--gray-page)">Email</p>
-          <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
-            {isProfileLoading ? "Loading..." : currentEmail || "Not set"}
-          </div>
-          <p className="text-(--gray-page)">Delete account</p>
-          <button
-            type="button"
-            className="w-max rounded-md border px-2 py-1 border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20"
-            onClick={() => void onDeleteAccount()}
-            disabled={isDeletingAccount}
-          >
-            {isDeletingAccount
-              ? "Deleting..."
-              : isDeleteConfirming
-                ? "Are you sure?"
-                : "Delete account"}
-          </button>
-          {deleteError ? (
-            <p className="text-sm text-(--declined-border)">{deleteError}</p>
-          ) : null}
-          {saveError ? (
-            <p className="text-sm text-(--declined-border)">{saveError}</p>
-          ) : null}
+              <p className="text-(--gray-page)">Email</p>
+              <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
+                {isProfileLoading ? "Loading..." : currentEmail || "Not set"}
+              </div>
+              <p className="text-(--gray-page)">Delete account</p>
+              <button
+                type="button"
+                className="w-max rounded-md border px-2 py-1 border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20"
+                onClick={() => void onDeleteAccount()}
+                disabled={isDeletingAccount}
+              >
+                {isDeletingAccount
+                  ? "Deleting..."
+                  : isDeleteConfirming
+                    ? "Are you sure?"
+                    : "Delete account"}
+              </button>
+              {deleteError ? (
+                <p className="text-sm text-(--declined-border)">
+                  {deleteError}
+                </p>
+              ) : null}
+              {saveError ? (
+                <p className="text-sm text-(--declined-border)">{saveError}</p>
+              ) : null}
             </>
           ) : null}
         </div>
