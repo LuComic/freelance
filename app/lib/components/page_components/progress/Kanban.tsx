@@ -11,7 +11,9 @@ export const Kanban = ({ instanceId }: { instanceId: string }) => {
     usePageComponentState(instanceId, "Kanban");
 
   return (
-    <div className="w-full flex flex-col gap-2">
+    <div
+      className={`w-full flex flex-col gap-2 ${!isLive ? "bg-(--gray)/10" : null}`}
+    >
       {isLive ? (
         <KanbanClient liveState={liveState.state} />
       ) : (

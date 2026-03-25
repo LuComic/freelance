@@ -58,12 +58,60 @@ function renderPlainTextSegment(segment: string, keyStart: number) {
   const nodes: ReactNode[] = [];
   const lines = segment.split("\n");
   let key = keyStart;
+  let textBuffer = "";
 
-  lines.forEach((line, lineIndex) => {
+  const flushTextBuffer = () => {
+    const text = textBuffer.replace(/\n+$/g, "");
+    textBuffer = "";
+
+    if (!text) {
+      return;
+    }
+
+    nodes.push(
+      <span className="whitespace-pre-wrap" key={`text-${key++}`}>
+        {text}
+      </span>,
+    );
+  };
+
+  const renderBlankLines = (count: number) => {
+    for (let index = 0; index < count; index += 1) {
+      nodes.push(
+        <span className="whitespace-pre-wrap" key={`space-${key++}`}>
+          {"\n"}
+        </span>,
+      );
+    }
+  };
+
+  for (let lineIndex = 0; lineIndex < lines.length; lineIndex += 1) {
+    const line = lines[lineIndex];
+
+    if (line.length === 0) {
+      flushTextBuffer();
+
+      let emptyLineCount = 1;
+      while (
+        lineIndex + emptyLineCount < lines.length &&
+        lines[lineIndex + emptyLineCount]?.length === 0
+      ) {
+        emptyLineCount += 1;
+      }
+
+      const isTrailingEmptyGroup = lineIndex + emptyLineCount === lines.length;
+      renderBlankLines(
+        isTrailingEmptyGroup ? Math.max(0, emptyLineCount - 1) : emptyLineCount,
+      );
+      lineIndex += emptyLineCount - 1;
+      continue;
+    }
+
     const match = line.match(LINE_HEADING_REGEX);
-    const isLastLine = lineIndex === lines.length - 1;
 
     if (match) {
+      flushTextBuffer();
+
       const level = match[1].length;
       const text = match[2];
 
@@ -74,22 +122,16 @@ function renderPlainTextSegment(segment: string, keyStart: number) {
       } else {
         nodes.push(<Subheader key={`text-${key++}`} text={text} />);
       }
-    } else if (line.length > 0) {
-      nodes.push(
-        <span className="whitespace-pre-wrap" key={`text-${key++}`}>
-          {line}
-        </span>,
-      );
+      continue;
     }
 
-    if (!isLastLine && !match) {
-      nodes.push(
-        <span className="whitespace-pre-wrap" key={`text-${key++}`}>
-          {"\n"}
-        </span>,
-      );
+    if (textBuffer.length > 0) {
+      textBuffer += "\n";
     }
-  });
+    textBuffer += line;
+  }
+
+  flushTextBuffer();
 
   return { nodes, nextKey: key };
 }

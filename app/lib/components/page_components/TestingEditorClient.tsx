@@ -156,7 +156,7 @@ export default function TestingEditorClient() {
   const { insertComponentAtRange, updateEditorText } = pageDocument;
 
   if (!isEditing || isLive) {
-    return <div className="w-full">{renderedContent}</div>;
+    return <div className="w-full flex flex-col gap-1">{renderedContent}</div>;
   }
 
   return (

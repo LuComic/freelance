@@ -15,7 +15,9 @@ export const Select = ({
     usePageComponentState(instanceId, "Select");
 
   return (
-    <div className="w-full flex flex-col gap-2">
+    <div
+      className={`w-full flex flex-col gap-2 ${!isLive ? "bg-(--gray)/10" : null}`}
+    >
       {isLive ? (
         <SelectClient
           config={component.config}

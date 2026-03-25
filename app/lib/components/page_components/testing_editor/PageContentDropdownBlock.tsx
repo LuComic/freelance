@@ -13,10 +13,10 @@ export function PageContentDropdownBlock({
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="w-full p-2 flex flex-col gap-2 bg-(--gray)/10 my-1">
+    <div className="w-full p-2 flex flex-col gap-2 my-1 border-b border-(--gray)">
       <button
         type="button"
-        className="flex font-medium @[40rem]:text-lg text-base items-center justify-start gap-2"
+        className={`flex font-medium @[40rem]:text-lg text-base items-center justify-start gap-2 ${open ? "underline" : null} underline-offset-4 decoration-1`}
         onClick={() => setOpen((prev) => !prev)}
       >
         <ChevronRight

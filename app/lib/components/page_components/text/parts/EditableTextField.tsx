@@ -33,7 +33,7 @@ export const EditableTextField = ({
   };
 
   return (
-    <div className="w-full border-b border-(--gray) pb-2 flex flex-col gap-2">
+    <div className="w-full border-b border-(--gray) pb-1 flex flex-col gap-2 mb-2">
       {isLive || !editable ? (
         renderClient(text)
       ) : (

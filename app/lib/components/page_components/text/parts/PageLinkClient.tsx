@@ -32,7 +32,7 @@ export const PageLinkClient = ({
   return (
     <Link
       href={`/projects/${projectSlug}/${targetPage.slug}`}
-      className="mb-1 w-max text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover) page-link-selected"
+      className="w-max text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover) page-link-selected"
     >
       {trimmedText}
     </Link>

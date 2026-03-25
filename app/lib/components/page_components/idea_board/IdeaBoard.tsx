@@ -32,7 +32,9 @@ export const IdeaBoard = ({ instanceId }: { instanceId: string }) => {
   );
 
   return (
-    <div className="w-full flex flex-col gap-2">
+    <div
+      className={`w-full flex flex-col gap-2 ${!isLive ? "bg-(--gray)/10" : null}`}
+    >
       {isLive ? (
         <IdeaBoardClient
           authorNames={authorNames}

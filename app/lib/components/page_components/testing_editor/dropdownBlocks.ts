@@ -66,7 +66,9 @@ export function createDropdownScaffold(title = DROPDOWN_SCAFFOLD_TITLE) {
   return `${DROPDOWN_OPENING_PREFIX} ${title}\n\n${DROPDOWN_CLOSING_LINE}`;
 }
 
-export function getDropdownScaffoldCursorOffset(title = DROPDOWN_SCAFFOLD_TITLE) {
+export function getDropdownScaffoldCursorOffset(
+  title = DROPDOWN_SCAFFOLD_TITLE,
+) {
   return `${DROPDOWN_OPENING_PREFIX} ${title}\n`.length;
 }
 
@@ -88,7 +90,11 @@ export function parseEditorBlocks(content: string): ParsedEditorBlock[] {
 
     let closingLine: ParsedLine | null = null;
 
-    for (let searchIndex = index + 1; searchIndex < lines.length; searchIndex += 1) {
+    for (
+      let searchIndex = index + 1;
+      searchIndex < lines.length;
+      searchIndex += 1
+    ) {
       const candidate = lines[searchIndex];
 
       if (candidate.text.match(DROPDOWN_OPENING_LINE_REGEX)) {
