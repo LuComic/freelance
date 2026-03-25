@@ -6,17 +6,20 @@ import type {
   PageTemplateBlueprint,
   ProjectTemplateBlueprint,
 } from "@/lib/templateBlueprint";
-import { useConvex, useQuery } from "convex/react";
+import { useConvex } from "convex/react";
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import {
-  startTransition,
-  useDeferredValue,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useRef, useState } from "react";
 import { PersonModal } from "./PersonModal";
+import {
+  getEmptyMessage,
+  getPersonModalKey,
+  getSearchPlaceholder,
+  getTagCommandMatch,
+  getTagGhostCompletion,
+  type SearchPageResult,
+  useSearchBarResults,
+} from "./SearchBarHelpers";
 import { SearchBarItem } from "./SearchBarItem";
 import { useSearchBar } from "./SearchBarContext";
 import type {
@@ -34,18 +37,6 @@ type SearchItem = {
   onSelect: () => void;
 };
 
-type SearchPageResult = {
-  projectId: string;
-  projectSlug: string;
-  projectName: string;
-  pageId: string;
-  pageSlug: string;
-  pageTitle: string;
-  pageDescription: string | null;
-  projectUpdatedAt: number;
-  pageUpdatedAt: number;
-};
-
 export const SearchBar = () => {
   const convex = useConvex();
   const router = useRouter();
@@ -53,16 +44,6 @@ export const SearchBar = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [selectedTemplate, setSelectedTemplate] =
     useState<SearchTemplate | null>(null);
-  const [debouncedPeopleQuery, setDebouncedPeopleQuery] = useState("");
-  const [resolvedPeopleSearchState, setResolvedPeopleSearchState] = useState<{
-    query: string;
-    results: SearchPerson[];
-  }>();
-  const [resolvedPageSearchResults, setResolvedPageSearchResults] = useState<
-    SearchPageResult[] | undefined
-  >(undefined);
-  const [resolvedTemplateSearchResults, setResolvedTemplateSearchResults] =
-    useState<SearchTemplateSummary[] | undefined>(undefined);
   const [isLoadingTemplatePreview, setIsLoadingTemplatePreview] =
     useState(false);
   const [templateActionError, setTemplateActionError] = useState<string | null>(
@@ -79,137 +60,68 @@ export const SearchBar = () => {
     templateSearchTypes,
     templateSearchSelectHandler,
     openSearch,
+    openTaggedSearch,
+    openTemplateSearch,
     openPersonModal,
     closeSearch,
     closePersonModal,
     clearTag,
   } = useSearchBar();
-  const deferredSearchQuery = useDeferredValue(
-    activeTag === "people" ? "" : searchQuery,
-  );
-  const normalizedSearchQuery = searchQuery.trim();
-  const peopleSearchArgs =
-    isOpen && activeTag === "people" && debouncedPeopleQuery.length >= 2
-      ? {
-          query: debouncedPeopleQuery,
-          limit: 10,
-        }
-      : "skip";
-  const pageSearchArgs =
-    isOpen && activeTag === null
-      ? {
-          query: deferredSearchQuery.trim(),
-          limit: 10,
-        }
-      : "skip";
-  const templateSearchArgs =
-    isOpen && activeTag === "template"
-      ? {
-          query: deferredSearchQuery.trim(),
-          limit: 10,
-          types: templateSearchTypes ?? undefined,
-        }
-      : "skip";
-  const pageSearchResults = useQuery(
-    api.search.queries.searchPagesAcrossProjects,
-    pageSearchArgs,
-  );
-  const peopleSearchResults = useQuery(
-    api.search.queries.searchPeople,
-    peopleSearchArgs,
-  );
-  const templateSearchResults = useQuery(
-    api.templates.queries.searchVisibleTemplates,
-    templateSearchArgs,
-  );
-  const visiblePeopleSearchResults: SearchPerson[] =
-    peopleSearchResults ?? resolvedPeopleSearchState?.results ?? [];
-  const visiblePageSearchResults: SearchPageResult[] =
-    pageSearchResults ?? resolvedPageSearchResults ?? [];
-  const visibleTemplateSearchResults: SearchTemplateSummary[] =
-    templateSearchResults ?? resolvedTemplateSearchResults ?? [];
-  const isLoadingPeople =
-    isOpen &&
-    activeTag === "people" &&
-    normalizedSearchQuery.length >= 2 &&
-    (debouncedPeopleQuery !== normalizedSearchQuery ||
-      (peopleSearchResults === undefined &&
-        visiblePeopleSearchResults.length === 0));
-  const isLoadingPages =
-    isOpen &&
-    activeTag === null &&
-    pageSearchResults === undefined &&
-    visiblePageSearchResults.length === 0;
-  const isLoadingTemplates =
-    isOpen &&
-    activeTag === "template" &&
-    templateSearchResults === undefined &&
-    visibleTemplateSearchResults.length === 0;
+  const {
+    normalizedSearchQuery,
+    visiblePeopleSearchResults,
+    visiblePageSearchResults,
+    visibleTemplateSearchResults,
+    isLoadingPeople,
+    isLoadingPages,
+    isLoadingTemplates,
+  } = useSearchBarResults({
+    isOpen,
+    activeTag,
+    searchQuery,
+    templateSearchTypes,
+    setTemplateActionError,
+  });
+  const tagGhostCompletion =
+    activeTag === null ? getTagGhostCompletion(searchQuery) : null;
 
   useEffect(() => {
-    if (!isOpen || activeTag !== "people") {
-      startTransition(() => {
-        setDebouncedPeopleQuery("");
-        setResolvedPeopleSearchState(undefined);
-      });
+    if (activeTag !== null) {
       return;
     }
 
-    const timeoutId = window.setTimeout(() => {
-      setDebouncedPeopleQuery(normalizedSearchQuery);
-    }, 250);
+    const tagCommandMatch = getTagCommandMatch(searchQuery);
 
-    return () => window.clearTimeout(timeoutId);
-  }, [activeTag, isOpen, normalizedSearchQuery]);
-
-  useEffect(() => {
-    if (!isOpen || activeTag !== "people" || debouncedPeopleQuery.length < 2) {
-      startTransition(() => {
-        setResolvedPeopleSearchState(undefined);
-      });
+    if (!tagCommandMatch) {
       return;
     }
 
-    if (peopleSearchResults !== undefined) {
-      startTransition(() => {
-        setResolvedPeopleSearchState({
-          query: debouncedPeopleQuery,
-          results: peopleSearchResults,
-        });
+    if (tagCommandMatch.tag === "people") {
+      openTaggedSearch(
+        "people",
+        searchInviteDefaults ?? undefined,
+        peopleSearchSelectHandler ?? undefined,
+      );
+    } else {
+      openTemplateSearch({
+        types: templateSearchTypes ?? undefined,
+        selectHandler: templateSearchSelectHandler ?? undefined,
       });
-    }
-  }, [activeTag, debouncedPeopleQuery, isOpen, peopleSearchResults]);
-
-  useEffect(() => {
-    if (!isOpen || activeTag !== null) {
-      startTransition(() => {
-        setResolvedPageSearchResults(undefined);
-      });
-      return;
     }
 
-    if (pageSearchResults !== undefined) {
-      startTransition(() => {
-        setResolvedPageSearchResults(pageSearchResults);
-      });
-    }
-  }, [activeTag, isOpen, pageSearchResults]);
-
-  useEffect(() => {
-    if (!isOpen || activeTag !== "template") {
-      startTransition(() => {
-        setResolvedTemplateSearchResults(undefined);
-        setTemplateActionError(null);
-      });
-      return;
-    }
-
-    if (templateSearchResults !== undefined) {
-      startTransition(() => {
-        setResolvedTemplateSearchResults(templateSearchResults);
-      });
-    }
-  }, [activeTag, isOpen, templateSearchResults]);
+    setSearchQuery("");
+    setSelectedIndex(0);
+    setTemplateActionError(null);
+  }, [
+    activeTag,
+    openTaggedSearch,
+    openTemplateSearch,
+    peopleSearchSelectHandler,
+    searchInviteDefaults,
+    searchQuery,
+    templateSearchSelectHandler,
+    templateSearchTypes,
+  ]);
 
   const handleTemplateSelect = async (template: SearchTemplateSummary) => {
     setTemplateActionError(null);
@@ -358,32 +270,17 @@ export const SearchBar = () => {
     });
   }, [searchItems.length, selectedSearchItemIndex]);
 
-  const emptyMessage =
-    activeTag === "people"
-      ? normalizedSearchQuery.length < 2
-        ? "Type at least 2 characters"
-        : isLoadingPeople
-          ? "Searching people..."
-          : "No people found"
-      : activeTag === "template"
-        ? isLoadingTemplates
-          ? "Loading templates..."
-          : "No templates found"
-        : isLoadingPages
-          ? "Loading pages..."
-          : normalizedSearchQuery.length === 0
-            ? "No pages yet"
-            : "No pages found";
-  const personModalKey = personModalPerson
-    ? [
-        personModalPerson.userId,
-        personModalInviteDefaults?.projectId ?? "",
-        personModalInviteDefaults?.role ?? "",
-        personModalInviteDefaults?.expandInviteSection
-          ? "expanded"
-          : "collapsed",
-      ].join(":")
-    : "person-modal";
+  const emptyMessage = getEmptyMessage({
+    activeTag,
+    normalizedSearchQuery,
+    isLoadingPeople,
+    isLoadingPages,
+    isLoadingTemplates,
+  });
+  const personModalKey = getPersonModalKey(
+    personModalPerson,
+    personModalInviteDefaults,
+  );
 
   return (
     <>
@@ -429,34 +326,44 @@ export const SearchBar = () => {
                   {activeTag}
                 </span>
               ) : null}
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setSelectedIndex(0);
-                  setTemplateActionError(null);
-                }}
-                onKeyDown={(e) => {
-                  if (
-                    e.key === "Backspace" &&
-                    searchQuery.length === 0 &&
-                    activeTag
-                  ) {
-                    e.preventDefault();
-                    clearTag();
-                  }
-                }}
-                placeholder={
-                  activeTag === "people"
-                    ? "Search for users..."
-                    : activeTag === "template"
-                      ? "Search templates..."
-                      : "Search pages across projects..."
-                }
-                className="flex-1 bg-transparent text-(--light) text-base outline-none placeholder:text-(--gray)"
-                autoFocus
-              />
+              <div className="relative flex-1">
+                {tagGhostCompletion ? (
+                  <div className="pointer-events-none absolute inset-0 flex items-center text-base text-(--gray)">
+                    <span className="invisible">{searchQuery}</span>
+                    <span>{tagGhostCompletion.completion}</span>
+                  </div>
+                ) : null}
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setSelectedIndex(0);
+                    setTemplateActionError(null);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Tab" && tagGhostCompletion) {
+                      e.preventDefault();
+                      setSearchQuery(tagGhostCompletion.command);
+                      setSelectedIndex(0);
+                      setTemplateActionError(null);
+                      return;
+                    }
+
+                    if (
+                      e.key === "Backspace" &&
+                      searchQuery.length === 0 &&
+                      activeTag
+                    ) {
+                      e.preventDefault();
+                      clearTag();
+                    }
+                  }}
+                  placeholder={getSearchPlaceholder(activeTag)}
+                  className="w-full bg-transparent text-(--light) text-base outline-none placeholder:text-(--gray)"
+                  autoFocus
+                />
+              </div>
               <KbdGroup>
                 <Kbd className="bg-(--gray) text-(--light)">Ctrl + P</Kbd>
               </KbdGroup>
