@@ -103,7 +103,7 @@ export const IdeaBoradCreator = ({
 
   return (
     <>
-      <p className="@[40rem]:text-xl text-lg font-medium">Idea Board</p>
+      <p className="@[40rem]:text-xl text-lg font-medium mt-2">Idea Board</p>
       <p className="text-(--gray-page)">
         Here you can add and vote on ideas submitted by all project members
         (unless the client is denied). Only creators can remove ideas
@@ -134,7 +134,7 @@ export const IdeaBoradCreator = ({
 
             <button
               type="button"
-              className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) "
+              className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
               onClick={handleNewIdea}
             >
               Add idea
@@ -231,11 +231,11 @@ export const IdeaBoradCreator = ({
       </div>
 
       <div className="w-full max-w-full min-w-0 overflow-x-auto border rounded-md border-(--gray)">
-        <div className="min-w-[1100px] flex flex-col">
+        <div className="min-w-225 flex flex-col">
           {filter === "rankings" ? (
             <>
               <div
-                className={`w-full text-(--gray-page) ${rankedIdeas.length > 0 ? "border-b" : ""} border-(--gray) text-left grid justify-between items-start grid-cols-10 bg-(--darkest) h-[44px]`}
+                className={`w-full text-(--gray-page) ${rankedIdeas.length > 0 ? "border-b" : ""} border-(--gray) text-left grid justify-between items-start grid-cols-10 bg-(--darkest) h-11`}
               >
                 <span className="border-r p-2 border-(--gray) h-full text-wrap flex items-center justify-start">
                   Rank
@@ -252,7 +252,7 @@ export const IdeaBoradCreator = ({
               </div>
               {rankedIdeas.map((idea, index) => (
                 <div
-                  className={`w-full ${index !== rankedIdeas.length - 1 ? "border-b" : ""} text-left grid justify-between items-start grid-cols-10 ${index === 0 ? "text-(--first-place)" : index === 1 ? "text-(--second-place)" : index === 2 ? "text-(--third-place)" : ""} border-(--gray) ${index % 2 !== 0 ? "bg-(--gray)/10" : ""} h-[44px]`}
+                  className={`w-full ${index !== rankedIdeas.length - 1 ? "border-b" : ""} text-left grid justify-between items-start grid-cols-10 ${index === 0 ? "text-(--first-place)" : index === 1 ? "text-(--second-place)" : index === 2 ? "text-(--third-place)" : ""} border-(--gray) ${index % 2 !== 0 ? "bg-(--gray)/10" : ""} h-11`}
                   key={idea.id}
                 >
                   <span
@@ -278,7 +278,7 @@ export const IdeaBoradCreator = ({
           ) : (
             <>
               <div
-                className={`w-full text-(--gray-page) ${visibleIdeas.length > 0 ? "border-b" : ""} border-(--gray) text-left grid justify-between items-start grid-cols-10 bg-(--darkest) h-[44px]`}
+                className={`w-full text-(--gray-page) ${visibleIdeas.length > 0 ? "border-b" : ""} border-(--gray) text-left grid justify-between items-start grid-cols-10 bg-(--darkest) h-11`}
               >
                 <span className="border-r p-2 border-(--gray) h-full text-wrap flex items-center justify-start">
                   Actions
@@ -295,7 +295,7 @@ export const IdeaBoradCreator = ({
               </div>
               {visibleIdeas.map((idea, index) => (
                 <div
-                  className={`w-full ${index !== visibleIdeas.length - 1 ? "border-b" : ""} border-(--gray) text-left grid justify-between items-start grid-cols-10 ${index % 2 !== 0 ? "bg-(--gray)/10" : ""} h-[44px]`}
+                  className={`w-full ${index !== visibleIdeas.length - 1 ? "border-b" : ""} border-(--gray) text-left grid justify-between items-start grid-cols-10 ${index % 2 !== 0 ? "bg-(--gray)/10" : ""} h-11`}
                   key={idea.id}
                 >
                   <div className="flex py-2 border-r border-(--gray) h-full justify-around items-center gap-1 flex-wrap">

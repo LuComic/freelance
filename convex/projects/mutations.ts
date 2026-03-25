@@ -2,7 +2,11 @@ import { v } from "convex/values";
 import type { Doc } from "../_generated/dataModel";
 import { mutation } from "../_generated/server";
 import { requireCurrentAuth } from "../lib/auth";
-import { assertNonAnonymousUser, deleteGuestUser, isAnonymousUser } from "../lib/guests";
+import {
+  assertNonAnonymousUser,
+  deleteGuestUser,
+  isAnonymousUser,
+} from "../lib/guests";
 import { invalidState, notFound } from "../lib/errors";
 import {
   assertProjectRole,
@@ -23,6 +27,7 @@ import {
 } from "../templates/content";
 import { requireReadableTemplate } from "../templates/model";
 import type { ProjectTemplateBlueprint } from "../../lib/templateBlueprint";
+import { getCurrentEntitlementsForUser } from "../billing/model";
 
 export const createProject = mutation({
   args: {
@@ -46,6 +51,15 @@ export const createProject = mutation({
   handler: async (ctx, args) => {
     const { userId, user } = await requireCurrentAuth(ctx);
     assertNonAnonymousUser(user, "Guest accounts can't create projects.");
+    const entitlements = await getCurrentEntitlementsForUser(ctx, userId);
+
+    if (!entitlements.canCreateOwnedProjects) {
+      throw invalidState(
+        entitlements.createProjectMessage ??
+          "Upgrade your plan to create more projects.",
+      );
+    }
+
     const now = Date.now();
     const trimmedName = args.name.trim();
     const trimmedDescription = args.description?.trim() || undefined;
@@ -68,13 +82,11 @@ export const createProject = mutation({
       "untitled-project",
     );
     const joinCode = await generateUniqueJoinCode(ctx);
-    let selectedTemplate:
-      | {
-          templateId: Doc<"templates">["_id"];
-          contentJson: string;
-          blueprint: ProjectTemplateBlueprint;
-        }
-      | null = null;
+    let selectedTemplate: {
+      templateId: Doc<"templates">["_id"];
+      contentJson: string;
+      blueprint: ProjectTemplateBlueprint;
+    } | null = null;
 
     if (args.template) {
       const template = await requireReadableTemplate(
@@ -186,7 +198,9 @@ export const createProject = mutation({
       });
     }
 
-    const projectIds = Array.from(new Set([...(user.projectIds ?? []), projectId]));
+    const projectIds = Array.from(
+      new Set([...(user.projectIds ?? []), projectId]),
+    );
     await ctx.db.patch(userId, {
       projectIds,
       lastOpenedProjectId: projectId,
@@ -329,7 +343,8 @@ export const deleteProject = mutation({
         nextProjectIds &&
         nextProjectIds.length !== user.projectIds.length
       ) {
-        patch.projectIds = nextProjectIds.length > 0 ? nextProjectIds : undefined;
+        patch.projectIds =
+          nextProjectIds.length > 0 ? nextProjectIds : undefined;
       }
 
       if (user.lastOpenedProjectId === project._id) {

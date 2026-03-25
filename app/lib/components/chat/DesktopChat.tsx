@@ -77,7 +77,7 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
   return (
     <div className="hidden md:block self-stretch">
       {chatOpen ? (
-        <div className="w-[491px] h-full min-h-dvh bg-(--darkest) border-l border-(--gray) flex flex-col items-start justify-start p-2 px-3 gap-4 overflow-hidden">
+        <div className="w-122.75 h-full min-h-dvh bg-(--darkest) border-l border-(--gray) flex flex-col items-start justify-start p-2 px-3 gap-4 overflow-hidden">
           <div className="flex items-center justify-start gap-2 w-full">
             <button
               onClick={() => setChatOpen(false)}
@@ -147,7 +147,7 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
           </div>
         </div>
       ) : (
-        <div className="w-[50px] h-full min-h-dvh bg-(--darkest) border-l border-(--gray) flex flex-col items-center justify-start p-2 gap-4">
+        <div className="w-12.5 h-full min-h-dvh bg-(--darkest) border-l border-(--gray) flex flex-col items-center justify-start p-2 gap-4">
           <button
             onClick={() => setChatOpen(true)}
             className=" p-1 rounded-lg hover:bg-(--darkest-hover)"
@@ -156,7 +156,7 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
           </button>
           <div className="flex flex-col bg-(--dim) rounded-lg justify-center p-1 h-max gap-4">
             <button
-              className={`h-full  p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
+              className={`h-full p-1 rounded-md hover:bg-(--quite-dark) w-full ${
                 visibleActiveTab === "chat"
                   ? "bg-(--quite-dark) text-(--vibrant)"
                   : ""
@@ -170,7 +170,7 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
             </button>
             {!componentsLocked ? (
               <button
-                className={`h-full  p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
+                className={`h-full  p-1 rounded-md hover:bg-(--quite-dark) w-full ${
                   visibleActiveTab === "components"
                     ? "bg-(--quite-dark) text-(--vibrant)"
                     : ""

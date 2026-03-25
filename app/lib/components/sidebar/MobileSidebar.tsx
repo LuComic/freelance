@@ -118,7 +118,9 @@ export const MobileSidebar = ({
             >
               <Settings size={20} className="mx-auto" />
             </button>
-            {!isAnonymous ? <CreateProjectModal /> : null}
+            {!isAnonymous ? (
+              <CreateProjectModal redirectWhenBlocked="/settings?section=plan" />
+            ) : null}
           </div>
 
           {resolvedActiveTab === "files" ? <Files /> : null}

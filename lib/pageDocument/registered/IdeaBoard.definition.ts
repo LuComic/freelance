@@ -88,5 +88,6 @@ export const IdeaBoardDefinition = defineRegisteredPageComponentDefinition({
       "Add and vote on different ideas, which can be submitted by all project members. Commands: /ideaboard, /board",
     previewSrc: "/component-previews/idea-board.svg",
     tag: "input",
+    limited: true,
   },
 });

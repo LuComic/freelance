@@ -109,6 +109,13 @@ export const KanbanCreator = ({
     }));
   };
 
+  const handleDeleteTask = (itemId: number) => {
+    onChangeLiveState((currentLiveState) => ({
+      ...currentLiveState,
+      items: currentLiveState.items.filter((item) => item.id !== itemId),
+    }));
+  };
+
   const handleStatusChange = (id: number, status: KanbanItem["status"]) => {
     onChangeLiveState((currentLiveState) => ({
       ...currentLiveState,
@@ -151,7 +158,9 @@ export const KanbanCreator = ({
 
   return (
     <>
-      <p className="@[40rem]:text-xl text-lg font-medium">Current Progress</p>
+      <p className="@[40rem]:text-xl text-lg font-medium mt-2">
+        Current Progress
+      </p>
       <p className="text-(--gray-page)">
         Here you can display the progress of your work as a kanban table. The
         table is divided into &quot;Todo&quot; (features/things to do or fix),
@@ -205,27 +214,31 @@ export const KanbanCreator = ({
               </SelectContent>
             </Select>
             <div className="flex items-center justify-start gap-2 w-full">
-              {config.tags.map((tag) => (
-                <button
-                  key={tag}
-                  className={`px-1.5 py-0.5 rounded-md border ${!selectedTags.includes(tag) && "border-(--gray-page) text-(--gray-page)"} `}
-                  onClick={() => {
-                    if (selectedTags.includes(tag)) {
-                      setSelectedTags((prev) =>
-                        prev.filter((prevTag) => prevTag !== tag),
-                      );
-                    } else {
-                      setSelectedTags((prev) => [...prev, tag]);
-                    }
-                  }}
-                >
-                  {tag}
-                </button>
-              ))}
+              {config.tags.length > 0 ? (
+                config.tags.map((tag) => (
+                  <button
+                    key={tag}
+                    className={`px-1.5 py-0.5 rounded-md border ${!selectedTags.includes(tag) && "border-(--gray-page) text-(--gray-page)"} `}
+                    onClick={() => {
+                      if (selectedTags.includes(tag)) {
+                        setSelectedTags((prev) =>
+                          prev.filter((prevTag) => prevTag !== tag),
+                        );
+                      } else {
+                        setSelectedTags((prev) => [...prev, tag]);
+                      }
+                    }}
+                  >
+                    {tag}
+                  </button>
+                ))
+              ) : (
+                <span className="text-(--gray-page)">No tags setup</span>
+              )}
             </div>
 
             <button
-              className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) "
+              className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
               onClick={handleNewTask}
             >
               Add idea
@@ -308,7 +321,14 @@ export const KanbanCreator = ({
               </span>
               <div className="w-full flex items-center gap-1">
                 <button
-                  className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm  w-full border border-(--gray)  hover:bg-(--gray)/20"
+                  className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm w-full border border-(--gray)  hover:bg-(--gray)/20"
+                  onClick={() => handleDeleteTask(feature.id)}
+                >
+                  <Trash size={16} />
+                  Delete
+                </button>
+                <button
+                  className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm w-full border border-(--gray)  hover:bg-(--gray)/20"
                   onClick={() => handleDismissing(feature.id)}
                 >
                   <TimerReset size={16} />
@@ -320,7 +340,7 @@ export const KanbanCreator = ({
         </div>
       ) : (
         <div className="w-full max-w-full min-w-0 overflow-x-auto border rounded-md border-(--gray)">
-          <div className="min-w-[900px] flex flex-col">
+          <div className="min-w-225 flex flex-col">
             <div
               className={`w-full text-(--gray-page) ${tableRows.length > 0 && "border-b"} border-(--gray) text-left grid justify-between items-start grid-cols-3 bg-(--darkest)`}
             >

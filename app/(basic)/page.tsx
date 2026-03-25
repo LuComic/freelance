@@ -25,7 +25,7 @@ export default function Home() {
                 Create an Account
               </Link>
               <a
-                href="#about"
+                href="/projects"
                 className="inline-flex h-10 items-center justify-center rounded-md bg-white/90 px-1.5 py-0.5 font-medium text-(--dim) hover:bg-white"
               >
                 Join with code

@@ -1,6 +1,7 @@
 "use client";
 
 import { type ComponentType, type ReactNode } from "react";
+import { useOptionalPageDocument } from "@/app/lib/components/project/PageDocumentContext";
 import { COMPONENT_TAG_REGEX, COMPONENT_TOKEN_REGEX } from "./constants";
 import { getRenderablePageComponent } from "./componentRegistry";
 import { PageContentDropdownBlock } from "./PageContentDropdownBlock";
@@ -12,6 +13,10 @@ import {
   isPageComponentType,
   type PageComponentType,
 } from "@/lib/pageDocument";
+import {
+  canViewOrInteractWithPageComponentType,
+  getPageComponentDisplayName,
+} from "@/lib/pageDocument/componentAccess";
 
 const LINE_HEADING_REGEX = /^(#{1,6})\s+(.*)$/;
 
@@ -22,6 +27,24 @@ function RenderedComponentInstance({
   type: PageComponentType;
   instanceId: string;
 }) {
+  const pageDocument = useOptionalPageDocument();
+  const planTier = pageDocument?.planTier ?? "free";
+  const viewerRole = pageDocument?.viewerRole ?? null;
+
+  if (
+    !canViewOrInteractWithPageComponentType({
+      planTier,
+      viewerRole,
+      type,
+    })
+  ) {
+    return (
+      <div className="w-full rounded-md border border-(--gray) bg-(--gray)/10 px-2 py-1.5 text-sm text-(--gray-page)">
+        {getPageComponentDisplayName(type)} requires Pro.
+      </div>
+    );
+  }
+
   const componentMatch = getRenderablePageComponent(type);
   if (!componentMatch) {
     return null;

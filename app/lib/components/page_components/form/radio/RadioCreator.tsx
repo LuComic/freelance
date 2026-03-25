@@ -70,7 +70,9 @@ export const RadioCreator = ({
 
   return (
     <>
-      <p className="@[40rem]:text-xl text-lg font-medium">Radio field setup</p>
+      <p className="@[40rem]:text-xl text-lg font-medium mt-2">
+        Radio field setup
+      </p>
       <p className="text-(--gray-page)">
         Configure the title, description, and available choices for a
         single-choice radio component.
@@ -143,7 +145,7 @@ export const RadioCreator = ({
             </div>
 
             <button
-              className="w-max rounded-md px-2.5 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) "
+              className="w-max rounded-md px-2.5 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
               onClick={handleNewOption}
             >
               Add

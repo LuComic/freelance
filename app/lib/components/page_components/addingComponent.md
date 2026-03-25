@@ -145,6 +145,7 @@ componentLibrary: {
   description: "What it does. Command: /yourcomponent",
   previewSrc: "/component-previews/text-field.svg",
   tag: "input",
+  limited: false,
 }
 ```
 
@@ -249,6 +250,7 @@ export const YourComponentDefinition = defineRegisteredPageComponentDefinition({
     description: "What it does. Command: /yourcomponent",
     previewSrc: "/component-previews/text-field.svg",
     tag: "input",
+    limited: false,
   },
 });
 ```

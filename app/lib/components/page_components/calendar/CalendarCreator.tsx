@@ -115,7 +115,7 @@ export const CalendarCreator = ({
         onSave={updateEvent}
       />
 
-      <p className="@[40rem]:text-xl text-lg font-medium">Calendar</p>
+      <p className="@[40rem]:text-xl text-lg font-medium mt-2">Calendar</p>
       <p className="text-(--gray-page)">
         A calendar for scheduling different dates for clients and creators
       </p>

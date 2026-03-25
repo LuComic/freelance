@@ -24,6 +24,8 @@ import {
   parsePageDocument,
   serializePageDocument,
 } from "./content";
+import { getCurrentEntitlementsForUser } from "../billing/model";
+import { findLimitedComponentAccessViolation } from "../../lib/pageDocument/componentAccess";
 
 function buildProjectActorSnapshot(
   user: Parameters<typeof buildProjectMemberDisplayName>[0] & {
@@ -165,6 +167,7 @@ export const savePage = mutation({
     if (!project || project.isArchived) {
       throw notFound(`Project ${page.projectId} was not found.`);
     }
+    const currentDocument = parsePageDocument(page.contentJson);
     const projectMembers = await ctx.db
       .query("projectMembers")
       .withIndex("by_project", (query) => query.eq("projectId", page.projectId))
@@ -180,38 +183,55 @@ export const savePage = mutation({
     const nextDocument = {
       ...args.document,
       components: Object.fromEntries(
-        Object.entries(args.document.components).map(([instanceId, component]) => {
-          if (component.type !== "IdeaBoard" || activeClientUserIds.size === 0) {
-            return [instanceId, component];
-          }
+        Object.entries(args.document.components).map(
+          ([instanceId, component]) => {
+            if (
+              component.type !== "IdeaBoard" ||
+              activeClientUserIds.size === 0
+            ) {
+              return [instanceId, component];
+            }
 
-          return [
-            instanceId,
-            {
-              ...component,
-              state: {
-                ...component.state,
-                ideas: component.state.ideas
-                  .filter(
-                    (idea) =>
-                      component.config.canClientAdd ||
-                      idea.createdByUserId === null ||
-                      !activeClientUserIds.has(idea.createdByUserId),
-                  )
-                  .map((idea) => ({
-                    ...idea,
-                    votes: component.config.canClientVote
-                      ? idea.votes
-                      : idea.votes.filter(
-                          (userId) => !activeClientUserIds.has(userId),
-                        ),
-                  })),
+            return [
+              instanceId,
+              {
+                ...component,
+                state: {
+                  ...component.state,
+                  ideas: component.state.ideas
+                    .filter(
+                      (idea) =>
+                        component.config.canClientAdd ||
+                        idea.createdByUserId === null ||
+                        !activeClientUserIds.has(idea.createdByUserId),
+                    )
+                    .map((idea) => ({
+                      ...idea,
+                      votes: component.config.canClientVote
+                        ? idea.votes
+                        : idea.votes.filter(
+                            (userId) => !activeClientUserIds.has(userId),
+                          ),
+                    })),
+                },
               },
-            },
-          ];
-        }),
+            ];
+          },
+        ),
       ),
     };
+    const entitlements = await getCurrentEntitlementsForUser(ctx, userId);
+    const limitedComponentViolation = findLimitedComponentAccessViolation({
+      currentDocument,
+      nextDocument,
+      planTier: entitlements.plan.tier,
+    });
+
+    if (limitedComponentViolation) {
+      throw invalidState(
+        `Upgrade to Pro to use ${limitedComponentViolation.componentName}.`,
+      );
+    }
 
     const siblingPages = await getOrderedProjectPages(ctx, project);
     const nextSlug = uniqueSlugFromLabel(
@@ -267,7 +287,11 @@ export const savePageLiveState = mutation({
     if (!project || project.isArchived) {
       throw notFound(`Project ${page.projectId} was not found.`);
     }
-
+    const currentDocument = parsePageDocument(page.contentJson);
+    const nextDocument = mergePageLiveStateDocument(
+      currentDocument,
+      args.document,
+    );
     const shouldRenamePage = trimmedTitle !== page.title;
     let nextSlug = page.slug;
 
@@ -284,11 +308,6 @@ export const savePageLiveState = mutation({
       );
     }
 
-    const currentDocument = parsePageDocument(page.contentJson);
-    const nextDocument = mergePageLiveStateDocument(
-      currentDocument,
-      args.document,
-    );
     const changedComponents = getChangedLiveStateComponents(
       currentDocument,
       nextDocument,
@@ -344,36 +363,40 @@ export const savePageLiveState = mutation({
         group.changes.push(change);
       }
 
-      const activityWrites = orderedActivityGroups.flatMap((group, groupIndex) => {
-        const groupCreatedAt = now + groupIndex;
-        const activityGroupId = `${page._id}:${actorSnapshot.actorUserId}:${group.componentInstanceId}:${groupCreatedAt}`;
+      const activityWrites = orderedActivityGroups.flatMap(
+        (group, groupIndex) => {
+          const groupCreatedAt = now + groupIndex;
+          const activityGroupId = `${page._id}:${actorSnapshot.actorUserId}:${group.componentInstanceId}:${groupCreatedAt}`;
 
-        return group.changes.map((change, entryOrder) =>
-          ctx.db.insert("projectActivity", {
-            projectId: project._id,
-            pageId: page._id,
-            pageTitleSnapshot: trimmedTitle,
-            actorUserId: actorSnapshot.actorUserId,
-            actorNameSnapshot: actorSnapshot.actorNameSnapshot,
-            actorImageSnapshot: actorSnapshot.actorImageSnapshot ?? undefined,
-            activityGroupId,
-            entryOrder,
-            componentInstanceId: change.componentInstanceId,
-            componentType: change.componentType,
-            componentLabelSnapshot: change.componentLabelSnapshot,
-            oldValue: change.oldValue,
-            newValue: change.newValue,
-            createdAt: groupCreatedAt,
-            updatedAt: groupCreatedAt,
-          }),
-        );
-      });
+          return group.changes.map((change, entryOrder) =>
+            ctx.db.insert("projectActivity", {
+              projectId: project._id,
+              pageId: page._id,
+              pageTitleSnapshot: trimmedTitle,
+              actorUserId: actorSnapshot.actorUserId,
+              actorNameSnapshot: actorSnapshot.actorNameSnapshot,
+              actorImageSnapshot: actorSnapshot.actorImageSnapshot ?? undefined,
+              activityGroupId,
+              entryOrder,
+              componentInstanceId: change.componentInstanceId,
+              componentType: change.componentType,
+              componentLabelSnapshot: change.componentLabelSnapshot,
+              oldValue: change.oldValue,
+              newValue: change.newValue,
+              createdAt: groupCreatedAt,
+              updatedAt: groupCreatedAt,
+            }),
+          );
+        },
+      );
       let notificationWrites: ReturnType<typeof createNotification>[] = [];
 
       if (membership.role === "client" && changedComponents.length > 0) {
         const projectMembers = await ctx.db
           .query("projectMembers")
-          .withIndex("by_project", (query) => query.eq("projectId", page.projectId))
+          .withIndex("by_project", (query) =>
+            query.eq("projectId", page.projectId),
+          )
           .collect();
         const recipients = projectMembers.filter(
           (projectMember) =>
@@ -402,21 +425,21 @@ export const savePageLiveState = mutation({
         );
       }
 
-      await Promise.all([
-        ...notificationWrites,
-        ...activityWrites,
-      ]);
+      await Promise.all([...notificationWrites, ...activityWrites]);
     } else if (membership.role === "client" && changedComponents.length > 0) {
       const actorSnapshot = buildProjectActorSnapshot(user, membership);
       const projectMembers = await ctx.db
         .query("projectMembers")
-        .withIndex("by_project", (query) => query.eq("projectId", page.projectId))
+        .withIndex("by_project", (query) =>
+          query.eq("projectId", page.projectId),
+        )
         .collect();
       const recipients = projectMembers.filter(
         (projectMember) =>
           projectMember.status === "active" &&
           projectMember.userId !== userId &&
-          (projectMember.role === "owner" || projectMember.role === "coCreator"),
+          (projectMember.role === "owner" ||
+            projectMember.role === "coCreator"),
       );
       const [firstChangedComponent] = changedComponents;
 

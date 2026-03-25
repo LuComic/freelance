@@ -149,7 +149,7 @@ export const FeedbackCreator = ({
 
   return (
     <>
-      <p className="@[40rem]:text-xl text-lg font-medium">
+      <p className="@[40rem]:text-xl text-lg font-medium mt-2">
         Client&apos;s ideas
       </p>
       <p className="text-(--gray-page)">
@@ -198,7 +198,7 @@ export const FeedbackCreator = ({
             </div>
 
             <button
-              className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) "
+              className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
               onClick={handleNewTag}
             >
               Add tag
@@ -345,7 +345,7 @@ export const FeedbackCreator = ({
         ) : null
       ) : (
         <div className="w-full max-w-full min-w-0 overflow-x-auto border rounded-md border-(--gray)">
-          <div className="min-w-[900px] flex flex-col">
+          <div className="min-w-225 flex flex-col">
             <div
               className={`w-full text-(--gray-page) ${visibleData.length > 0 && "border-b"} border-(--gray) text-left grid justify-between items-start grid-cols-13 bg-(--darkest)`}
             >

@@ -8,7 +8,8 @@ import {
   EllipsisVertical,
 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
-import { useMutation } from "convex/react";
+import { currentEntitlementsQuery } from "@/lib/convexFunctionReferences";
+import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -46,10 +47,12 @@ export const FileItem = ({
 }: SidebarItemProps) => {
   const router = useRouter();
   const createPage = useMutation(api.pages.mutations.createPage);
+  const entitlements = useQuery(currentEntitlementsQuery, {});
   const projectBasePath = "/projects/" + project.slug;
   const [isCreatingPage, setIsCreatingPage] = useState(false);
   const isCreatePageDisabled =
     isCreatingPage || project.viewerRole === "client";
+  const canAccessAnalytics = entitlements?.canAccessAnalytics === true;
 
   return (
     <>
@@ -81,18 +84,28 @@ export const FileItem = ({
                     Settings
                   </Link>
                 </MenubarItem>
-                <MenubarItem
-                  asChild
-                  className="hover:bg-(--darkest-hover)! hover:text-(--light)! "
-                >
-                  <Link
-                    href={projectBasePath + "/analytics"}
-                    className="flex items-center justify-start gap-2"
+                {canAccessAnalytics ? (
+                  <MenubarItem
+                    asChild
+                    className="hover:bg-(--darkest-hover)! hover:text-(--light)! "
+                  >
+                    <Link
+                      href={projectBasePath + "/analytics"}
+                      className="flex items-center justify-start gap-2"
+                    >
+                      <ChartNoAxesCombined />
+                      Analytics
+                    </Link>
+                  </MenubarItem>
+                ) : (
+                  <MenubarItem
+                    disabled
+                    className="cursor-not-allowed opacity-50"
                   >
                     <ChartNoAxesCombined />
                     Analytics
-                  </Link>
-                </MenubarItem>
+                  </MenubarItem>
+                )}
               </MenubarGroup>
             </MenubarContent>
           </MenubarMenu>

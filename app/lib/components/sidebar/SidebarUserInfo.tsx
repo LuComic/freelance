@@ -185,7 +185,7 @@ export const SidebarUserInfo = ({
         </Link>
       </Unauthenticated>
       <AuthLoading>
-        <div className="bg-(--gray)/60 w-full mt-2 h-[34px] rounded-md animate-pulse"></div>
+        <div className="bg-(--gray)/60 w-full mt-2 h-8.5 rounded-md animate-pulse"></div>
       </AuthLoading>
       <Authenticated>
         {profile?.isAnonymous ? (

@@ -135,7 +135,7 @@ export const TemplateModal = ({
       onClick={closeModal}
     >
       <div
-        className="w-full max-h-[85vh] h-auto flex flex-col items-start justify-start gap-2 p-3 md:max-w-3xl bg-(--darkest) rounded-xl overflow-y-auto border border-(--gray)"
+        className="w-full max-h-[85vh] h-auto flex flex-col items-start justify-start gap-3 p-3 md:max-w-3xl bg-(--darkest) rounded-xl overflow-y-auto border border-(--gray)"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="w-full flex items-start justify-between gap-2">
@@ -165,7 +165,7 @@ export const TemplateModal = ({
           ) : null}
         </div>
 
-        <p className="text-(--gray-page)">
+        <p className="text-(--gray-page) border-b border-(--gray) pb-3 w-full">
           {template.description?.trim() || "No description provided."}
         </p>
 

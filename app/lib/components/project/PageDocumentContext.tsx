@@ -1,6 +1,8 @@
 "use client";
 
 import { api } from "@/convex/_generated/api";
+import type { PlanTier } from "@/lib/billing/plans";
+import { currentEntitlementsQuery } from "@/lib/convexFunctionReferences";
 import {
   createComponentInstanceId,
   createComponentToken,
@@ -42,6 +44,7 @@ import type {
   SaveStatus,
   ViewerProjectRole,
 } from "./page_document_helpers/types";
+import { canInsertComponentCommand } from "../page_components/componentCatalog";
 import { resolveComponentTypeFromCommand } from "../page_components/testing_editor/commands";
 import {
   createDropdownScaffold,
@@ -126,6 +129,7 @@ export function PageDocumentProvider({
     api.pages.queries.getPageEditorBySlugs,
     pageQueryArgs,
   );
+  const entitlements = useQuery(currentEntitlementsQuery, {});
   const projects = useQuery(api.projects.queries.listCurrentUserProjects);
   const activeProjectMembers = useQuery(
     api.projects.members.getProjectMembers,
@@ -141,6 +145,8 @@ export function PageDocumentProvider({
       ),
     [activeProjectMembers],
   );
+  const planTier = (entitlements?.plan.tier ?? null) as PlanTier | null;
+  const canUseLimitedComponents = entitlements?.canUseLimitedComponents === true;
   const savePage = useMutation(api.pages.mutations.savePage);
   const savePageLiveState = useMutation(api.pages.mutations.savePageLiveState);
   const applyPageTemplateMutation = useMutation(
@@ -497,6 +503,10 @@ export function PageDocumentProvider({
         };
       }
 
+      if (!canInsertComponentCommand(command, canUseLimitedComponents)) {
+        return null;
+      }
+
       const type = resolveComponentTypeFromCommand(command);
       if (!type) {
         return null;
@@ -533,7 +543,7 @@ export function PageDocumentProvider({
         nextCursor: start + token.length,
       };
     },
-    [setDocument, setSaveError],
+    [canUseLimitedComponents, setDocument, setSaveError],
   );
 
   const persistDocument = useCallback(
@@ -890,6 +900,8 @@ export function PageDocumentProvider({
       hasUnsavedChanges,
       activePage,
       viewerRole,
+      planTier,
+      canUseLimitedComponents,
       document,
       setPageTitle,
       updateEditorText,
@@ -910,6 +922,7 @@ export function PageDocumentProvider({
       deleteError,
       deletePage,
       deleteStatus,
+      canUseLimitedComponents,
       commitPageTitle,
       document,
       commitComponentLiveState,
@@ -921,6 +934,7 @@ export function PageDocumentProvider({
       saveError,
       saveStatus,
       setPageTitle,
+      planTier,
       updateComponentConfig,
       updateComponentLiveState,
       updateEditorText,

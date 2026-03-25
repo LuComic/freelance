@@ -11,6 +11,7 @@ type ComponentLibraryMetadata = {
   description: string;
   previewSrc: string;
   tag: PageComponentLibraryTag;
+  limited: boolean;
 };
 
 const LEGACY_PAGE_COMPONENT_CATALOG = [
@@ -23,6 +24,7 @@ const LEGACY_PAGE_COMPONENT_CATALOG = [
         "Schedule and share project events in a calendar. Commands: /calendar, /testing",
       previewSrc: "/component-previews/calendar.svg",
       tag: "input",
+      limited: false,
     },
   },
   {
@@ -33,6 +35,7 @@ const LEGACY_PAGE_COMPONENT_CATALOG = [
       description: "Display the progress as a Kanban table. Command: /kanban",
       previewSrc: "/component-previews/kanban.svg",
       tag: "progress",
+      limited: false,
     },
   },
   {
@@ -44,6 +47,7 @@ const LEGACY_PAGE_COMPONENT_CATALOG = [
         "Client can give feedback or recommend things they'd like. Command: /feedback",
       previewSrc: "/component-previews/recommend.svg",
       tag: "input",
+      limited: false,
     },
   },
   {
@@ -55,6 +59,7 @@ const LEGACY_PAGE_COMPONENT_CATALOG = [
         "Simple select component for multiple answers. Command: /select",
       previewSrc: "/component-previews/select.svg",
       tag: "input",
+      limited: false,
     },
   },
   {
@@ -65,6 +70,7 @@ const LEGACY_PAGE_COMPONENT_CATALOG = [
       description: "Simple radio element for a single answer. Command: /radio",
       previewSrc: "/component-previews/radio.svg",
       tag: "input",
+      limited: false,
     },
   },
   {
@@ -76,6 +82,7 @@ const LEGACY_PAGE_COMPONENT_CATALOG = [
         "Large top-level headline text. Commands: /mainheadline, /h1",
       previewSrc: "/component-previews/text-h1.svg",
       tag: "text",
+      limited: false,
     },
   },
   {
@@ -86,6 +93,7 @@ const LEGACY_PAGE_COMPONENT_CATALOG = [
       description: "Medium section heading text. Commands: /sectionheader, /h2",
       previewSrc: "/component-previews/text-h2.svg",
       tag: "text",
+      limited: false,
     },
   },
   {
@@ -96,6 +104,7 @@ const LEGACY_PAGE_COMPONENT_CATALOG = [
       description: "Smaller heading for subsections. Commands: /subheader, /h3",
       previewSrc: "/component-previews/text-h3.svg",
       tag: "text",
+      limited: false,
     },
   },
   {
@@ -107,6 +116,7 @@ const LEGACY_PAGE_COMPONENT_CATALOG = [
         "Link to another page in the current project. Command: /pagelink",
       previewSrc: "/component-previews/text-h3.svg",
       tag: "text",
+      limited: false,
     },
   },
 ] as const;
@@ -150,6 +160,29 @@ export const INSERTABLE_COMPONENT_COMMANDS = PAGE_COMPONENT_CATALOG.flatMap(
   ({ type, commands }) => commands.map((command) => ({ command, type })),
 );
 
+export function isInsertableCommandLimited(command: InsertableComponentCommand) {
+  const match = PAGE_COMPONENT_CATALOG.find(({ commands }) =>
+    commands.includes(command),
+  );
+
+  return match?.componentLibrary.limited ?? false;
+}
+
+export function canInsertComponentCommand(
+  command: InsertableComponentCommand,
+  canUseLimitedComponents: boolean,
+) {
+  return canUseLimitedComponents || !isInsertableCommandLimited(command);
+}
+
+export function listAllowedInsertableCommands(
+  canUseLimitedComponents: boolean,
+) {
+  return PAGE_COMPONENT_CATALOG.flatMap(({ commands, componentLibrary }) =>
+    canUseLimitedComponents || !componentLibrary.limited ? [...commands] : [],
+  );
+}
+
 export const COMPONENT_LIBRARY_ITEMS: readonly ComponentLibraryItem[] = [
   ...PAGE_COMPONENT_CATALOG.map(({ type, commands, componentLibrary }) => ({
     key: type,
@@ -163,6 +196,7 @@ export const COMPONENT_LIBRARY_ITEMS: readonly ComponentLibraryItem[] = [
       "A structural editor block rather than a regular component. Use it for collapsible sections. Command: /dropdown",
     previewSrc: "/component-previews/dropdown.svg",
     tag: "util",
+    limited: false,
     insertCommand: DROPDOWN_SLASH_COMMAND,
   },
 ] as const;

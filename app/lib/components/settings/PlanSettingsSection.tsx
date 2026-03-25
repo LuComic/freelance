@@ -1,55 +1,42 @@
 "use client";
 
+import { BILLING_PLAN_ORDER, type PlanTier } from "@/lib/billing/plans";
+import {
+  cancelCurrentPlanAction,
+  currentEntitlementsQuery,
+  openBillingPortalAction,
+  reactivateCurrentPlanAction,
+  startCheckoutAction,
+} from "@/lib/convexFunctionReferences";
 import { ChevronRight } from "lucide-react";
-import { useEffect, useState } from "react";
-
-type PricingPlan = {
-  name: string;
-  description: string;
-  price: string;
-  features: string[];
-  footer?: string;
-};
-
-const pricingPlans: PricingPlan[] = [
-  {
-    name: "Free",
-    description: "Join projects as a client or co-creator.",
-    price: "$0",
-    features: ["Join shared projects", "Co-create in invited projects"],
-  },
-  {
-    name: "Starter",
-    description: "For getting started with your own work.",
-    price: "$5",
-    features: [
-      "Create up to 3 projects",
-      "Core components included",
-      "Client sharing and feedback",
-    ],
-    footer: "Best place to start",
-  },
-  {
-    name: "Pro Unlimited",
-    description: "For active freelancers and small teams shipping often.",
-    price: "$15",
-    features: [
-      "Unlimited projects",
-      "All components included",
-      "Early access to upcoming features",
-    ],
-    footer: "Best value for regular use",
-  },
-];
+import { useAction, useQuery } from "convex/react";
+import { useEffect, useMemo, useState } from "react";
 
 type PlanSettingsSectionProps = {
   activeSection: string | null;
 };
 
+function formatPeriodEndDate(timestamp: number) {
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(timestamp * 1000));
+}
+
 export function PlanSettingsSection({
   activeSection,
 }: PlanSettingsSectionProps) {
+  const entitlements = useQuery(currentEntitlementsQuery, {});
+  const startCheckout = useAction(startCheckoutAction);
+  const openBillingPortal = useAction(openBillingPortalAction);
+  const cancelCurrentPlan = useAction(cancelCurrentPlanAction);
+  const reactivateCurrentPlan = useAction(reactivateCurrentPlanAction);
   const [open, setOpen] = useState(activeSection === "plan");
+  const [pendingAction, setPendingAction] = useState<
+    PlanTier | "portal" | null
+  >(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -57,8 +44,67 @@ export function PlanSettingsSection({
     });
   }, [activeSection]);
 
-  // For this simple hardcoded data this is the plan's index the user has (0-2)
-  const hasPlan = 1;
+  const currentTier = (entitlements?.plan.tier ?? "free") as PlanTier;
+  const starterUsageLabel =
+    entitlements?.ownedProjectLimit === 3
+      ? ` (${entitlements.ownedProjectCount}/3)`
+      : "";
+  const currentSubscription = entitlements?.subscription ?? null;
+  const currentPlanSummary = useMemo(() => {
+    if (!currentSubscription?.cancelAtPeriodEnd) {
+      return null;
+    }
+
+    return `Access ends ${formatPeriodEndDate(currentSubscription.currentPeriodEnd)}.`;
+  }, [currentSubscription]);
+
+  const handlePlanAction = async (targetTier: PlanTier) => {
+    if (targetTier === "free") {
+      return;
+    }
+
+    setActionError(null);
+
+    try {
+      if (currentTier === targetTier) {
+        setPendingAction(targetTier);
+
+        if (currentSubscription?.cancelAtPeriodEnd) {
+          await reactivateCurrentPlan({});
+        } else {
+          await cancelCurrentPlan({});
+        }
+        return;
+      }
+
+      if (currentTier === "free") {
+        setPendingAction(targetTier);
+        const result = await startCheckout({ targetTier });
+
+        if (!result?.url) {
+          throw new Error("Stripe Checkout did not return a URL.");
+        }
+
+        window.location.assign(result.url);
+        return;
+      }
+
+      setPendingAction("portal");
+      const result = await openBillingPortal({});
+
+      if (!result?.url) {
+        throw new Error("Stripe Billing Portal did not return a URL.");
+      }
+
+      window.location.assign(result.url);
+    } catch (error) {
+      setActionError(
+        error instanceof Error ? error.message : "Could not update your plan.",
+      );
+    } finally {
+      setPendingAction(null);
+    }
+  };
 
   return (
     <div className="w-full p-2 flex flex-col gap-2">
@@ -76,15 +122,29 @@ export function PlanSettingsSection({
 
       {open ? (
         <div className="pl-7 flex flex-col gap-2 pb-2">
-          <div className="flex flex-col md:grid gap-3 grid-cols-3">
-            {pricingPlans.map((plan, index) => {
-              const current: boolean = hasPlan === index;
+          <div className="flex flex-col @[40rem]:grid gap-3 grid-cols-3">
+            {BILLING_PLAN_ORDER.map((plan) => {
+              const current = currentTier === plan.tier;
+              const buttonLabel =
+                plan.tier === "free"
+                  ? null
+                  : current
+                    ? currentSubscription?.cancelAtPeriodEnd
+                      ? "Resume Plan"
+                      : "Cancel Plan"
+                    : currentTier === "free"
+                      ? "Choose Plan"
+                      : "Switch Plan";
+              const isBusy =
+                pendingAction === plan.tier ||
+                (!current && pendingAction === "portal");
+
               return (
                 <div
-                  key={plan.name}
+                  key={plan.tier}
                   className={`relative h-full overflow-hidden rounded-lg flex flex-col gap-4 border bg-(--darkest) py-3 px-3.5 ${current ? "border-(--vibrant)" : "border-(--gray)"}`}
                 >
-                  {plan.name === "Pro Unlimited" ? (
+                  {plan.tier === "pro" ? (
                     <div
                       aria-hidden="true"
                       className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
@@ -117,7 +177,7 @@ export function PlanSettingsSection({
                       </p>
 
                       <p className="text-3xl font-semibold">
-                        {plan.price}
+                        {plan.priceLabel}
                         <span className="text-base font-medium text-(--gray-page)">
                           /mo
                         </span>
@@ -125,19 +185,32 @@ export function PlanSettingsSection({
 
                       <ul className="space-y-2 leading-7 text-(--gray-page)">
                         {plan.features.map((feature) => (
-                          <li key={feature}>{feature}</li>
+                          <li key={feature}>
+                            {plan.tier === "starter" &&
+                            feature === "Create up to 3 projects"
+                              ? `${feature}${starterUsageLabel}`
+                              : feature}
+                          </li>
                         ))}
                       </ul>
 
                       {plan.footer ? (
                         <p className="font-medium">{plan.footer}</p>
                       ) : null}
+                      {current && currentPlanSummary ? (
+                        <p className="text-sm text-(--gray-page)">
+                          {currentPlanSummary}
+                        </p>
+                      ) : null}
                     </div>
-                    {index !== 0 ? (
+                    {buttonLabel ? (
                       <button
-                        className={`rounded-md ${current ? "bg-(--vibrant)" : "border border-(--gray)"} px-1.5 py-1 font-medium ${current ? "hover:bg-(--vibrant-hover)" : "hover:bg-(--gray)/10"}`}
+                        type="button"
+                        disabled={entitlements === undefined || isBusy}
+                        className={`rounded-md ${current ? "bg-(--vibrant)" : "border border-(--gray)"} px-1.5 py-1 font-medium ${current ? "hover:bg-(--vibrant-hover)" : "hover:bg-(--gray)/10"} disabled:cursor-not-allowed disabled:opacity-60`}
+                        onClick={() => void handlePlanAction(plan.tier)}
                       >
-                        {hasPlan === index ? "Cancel Plan" : "Choose Plan"}
+                        {isBusy ? "Working..." : buttonLabel}
                       </button>
                     ) : null}
                   </div>
@@ -145,6 +218,9 @@ export function PlanSettingsSection({
               );
             })}
           </div>
+          {actionError ? (
+            <p className="text-(--declined-border)">{actionError}</p>
+          ) : null}
         </div>
       ) : null}
     </div>

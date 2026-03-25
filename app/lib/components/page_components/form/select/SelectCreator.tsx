@@ -62,7 +62,9 @@ export const SelectCreator = ({
 
   return (
     <>
-      <p className="@[40rem]:text-xl text-lg font-medium">Select field setup</p>
+      <p className="@[40rem]:text-xl text-lg font-medium mt-2">
+        Select field setup
+      </p>
       <p className="text-(--gray-page)">
         Configure the title, description, and available choices for a
         select-style multi-choice component.
@@ -135,7 +137,7 @@ export const SelectCreator = ({
             </div>
 
             <button
-              className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) "
+              className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
               onClick={handleNewOption}
             >
               Add

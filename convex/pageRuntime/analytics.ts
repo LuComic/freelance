@@ -10,6 +10,7 @@ import {
   requireProjectBySlug,
 } from "../lib/projectRecords";
 import { parsePageDocument } from "../pages/content";
+import { getCurrentEntitlementsForUser } from "../billing/model";
 import {
   PAGE_COMPONENT_TOKEN_REGEX,
   type FeedbackItem,
@@ -507,6 +508,11 @@ export const getProjectAnalyticsBySlug = query({
       const project = await resolveProjectByReference(ctx, args);
 
       await requireProjectMember(ctx, project._id, userId);
+      const entitlements = await getCurrentEntitlementsForUser(ctx, userId);
+
+      if (!entitlements.canAccessAnalytics) {
+        return null;
+      }
 
       const [pages, latestActivity] = await Promise.all([
         getOrderedProjectPages(ctx, project),

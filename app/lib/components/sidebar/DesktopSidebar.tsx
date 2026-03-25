@@ -84,7 +84,7 @@ export const DesktopSidebar = ({
   return (
     <div className="hidden md:block self-stretch">
       {resolvedSidebarOpen ? (
-        <nav className="w-[363px] h-full min-h-dvh bg-(--darkest) border-r border-(--gray) flex flex-col items-start justify-start p-2 px-3 gap-4 overflow-hidden">
+        <nav className="w-90.75 h-full min-h-dvh bg-(--darkest) border-r border-(--gray) flex flex-col items-start justify-start p-2 px-3 gap-4 overflow-hidden">
           <div className="flex items-center justify-between w-full">
             <Link href="/projects" className="text-(--gray) text-xl">
               Empty Canvas
@@ -141,7 +141,9 @@ export const DesktopSidebar = ({
             >
               <Settings size={20} className="mx-auto" />
             </button>
-            {!isAnonymous ? <CreateProjectModal /> : null}
+            {!isAnonymous ? (
+              <CreateProjectModal redirectWhenBlocked="/settings?section=plan" />
+            ) : null}
           </div>
           {resolvedActiveTab === "files" ? <Files /> : null}
           {!isAnonymous && resolvedActiveTab === "friends" ? (
@@ -159,7 +161,7 @@ export const DesktopSidebar = ({
           </div>
         </nav>
       ) : (
-        <nav className="w-[50px] h-full min-h-dvh bg-(--darkest) border-r border-(--gray) flex flex-col items-center justify-start p-2 gap-4">
+        <nav className="w-12.5 h-full min-h-dvh bg-(--darkest) border-r border-(--gray) flex flex-col items-center justify-start p-2 gap-4">
           <button
             onClick={() => {
               acknowledgeConnectionsRequest();
@@ -171,7 +173,7 @@ export const DesktopSidebar = ({
           </button>
           <div className="flex flex-col bg-(--dim) rounded-lg justify-center p-1 h-max gap-4">
             <button
-              className={`h-full  p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
+              className={`h-full  p-1 rounded-md hover:bg-(--quite-dark) w-full ${
                 resolvedActiveTab === "files"
                   ? "bg-(--quite-dark) text-(--vibrant)"
                   : ""
@@ -186,7 +188,7 @@ export const DesktopSidebar = ({
             </button>
             {!isAnonymous ? (
               <button
-                className={`h-full  p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
+                className={`h-full  p-1 rounded-md hover:bg-(--quite-dark) w-full ${
                   resolvedActiveTab === "friends"
                     ? "bg-(--quite-dark) text-(--vibrant)"
                     : ""
@@ -201,7 +203,7 @@ export const DesktopSidebar = ({
               </button>
             ) : null}
             <button
-              className={`h-full  p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
+              className={`h-full  p-1 rounded-md hover:bg-(--quite-dark) w-full ${
                 resolvedActiveTab === "settings"
                   ? "bg-(--quite-dark) text-(--vibrant)"
                   : ""
@@ -214,13 +216,15 @@ export const DesktopSidebar = ({
             >
               <Settings size={20} className="mx-auto" />
             </button>
-            {!isAnonymous ? <CreateProjectModal /> : null}
+            {!isAnonymous ? (
+              <CreateProjectModal redirectWhenBlocked="/settings?section=plan" />
+            ) : null}
           </div>
           <div className="flex flex-col gap-2 items-center justify-center mt-auto w-full">
             <SidebarUserInfo profile={userProfile} compact={true} />
             <Authenticated>
               <Link
-                className={`aspect-square p-1 rounded-lg hover:bg-(--darkest-hover) w-full ${
+                className={`aspect-square p-1 rounded-md hover:bg-(--darkest-hover) w-full ${
                   hasUnreadNotifications ? "notification relative" : ""
                 }`}
                 href="/notifications"

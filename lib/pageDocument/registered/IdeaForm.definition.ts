@@ -1,5 +1,4 @@
 import { defineRegisteredPageComponentDefinition } from "../registeredDefinitions";
-import { isRecord } from "../utils";
 
 export const IdeaFormDefinition = defineRegisteredPageComponentDefinition({
   type: "IdeaForm",
@@ -30,5 +29,6 @@ export const IdeaFormDefinition = defineRegisteredPageComponentDefinition({
       "Collect simple ideas with an optional color. Commands: /ideaform, /ideas",
     previewSrc: "/component-previews/text-field.svg",
     tag: "input",
+    limited: true,
   },
 });

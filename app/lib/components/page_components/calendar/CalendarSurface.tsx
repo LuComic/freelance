@@ -231,22 +231,20 @@ export const CalendarSurface = ({
 
       {viewMode !== "day" ? (
         <div className="grid grid-cols-7 w-full">
-          {WEEKDAYS.map((day) => (
-            <>
-              <span
-                key={day}
-                className="text-(--gray-page) @[40rem]:text-base text-sm hidden @[40rem]:inline"
-              >
-                {day}
-              </span>
-              <span
-                key={day + "id"}
-                className="text-(--gray-page) @[40rem]:text-base text-sm inline @[40rem]:hidden"
-              >
-                {day.slice(0, 3)}
-              </span>
-            </>
-          ))}
+          {WEEKDAYS.flatMap((day) => [
+            <span
+              key={`${day}-full`}
+              className="text-(--gray-page) @[40rem]:text-base text-sm hidden @[40rem]:inline"
+            >
+              {day}
+            </span>,
+            <span
+              key={`${day}-short`}
+              className="text-(--gray-page) @[40rem]:text-base text-sm inline @[40rem]:hidden"
+            >
+              {day.slice(0, 3)}
+            </span>,
+          ])}
         </div>
       ) : null}
 

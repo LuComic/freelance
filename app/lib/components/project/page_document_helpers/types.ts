@@ -1,4 +1,5 @@
 import type { Doc } from "@/convex/_generated/dataModel";
+import type { PlanTier } from "@/lib/billing/plans";
 import type {
   PageComponentDocument,
   PageComponentLiveState,
@@ -36,6 +37,8 @@ export type PageDocumentContextValue = {
   hasUnsavedChanges: boolean;
   activePage: ActivePageState | null;
   viewerRole: ViewerProjectRole | null;
+  planTier: PlanTier | null;
+  canUseLimitedComponents: boolean;
   document: PageDocumentV1 | null;
   setPageTitle: (title: string) => void;
   updateEditorText: (value: string) => void;

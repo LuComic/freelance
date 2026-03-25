@@ -1,8 +1,9 @@
 "use client";
 
 import { api } from "@/convex/_generated/api";
+import { currentEntitlementsQuery } from "@/lib/convexFunctionReferences";
 import { ChevronRight, Plus, Search, Trash } from "lucide-react";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import type { SearchPerson, SearchTemplate } from "../searchbar/SearchBarData";
@@ -11,15 +12,22 @@ import { useSearchBar } from "../searchbar/SearchBarContext";
 type CreateProjectModalProps = {
   trigger?: ReactNode;
   buttonClassName?: string;
+  redirectWhenBlocked?: string;
 };
 
 export const CreateProjectModal = ({
   trigger,
   buttonClassName,
+  redirectWhenBlocked,
 }: CreateProjectModalProps) => {
   const router = useRouter();
-  const { openTaggedSearch, openTemplateSearch } = useSearchBar();
+  const {
+    isOpen: isSearchOpen,
+    openTaggedSearch,
+    openTemplateSearch,
+  } = useSearchBar();
   const createProject = useMutation(api.projects.mutations.createProject);
+  const entitlements = useQuery(currentEntitlementsQuery, {});
   const [open, setOpen] = useState(false);
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
@@ -34,6 +42,9 @@ export const CreateProjectModal = ({
   const [coCreators, setCoCreators] = useState<SearchPerson[]>([]);
   const selectedProjectTemplate =
     selectedTemplate?.templateType === "project" ? selectedTemplate : null;
+  const canCreateOwnedProjects = entitlements?.canCreateOwnedProjects === true;
+  const createProjectMessage =
+    entitlements?.createProjectMessage ?? "Loading plan access...";
 
   const getPersonLabel = (person: SearchPerson) => person.name;
 
@@ -78,7 +89,7 @@ export const CreateProjectModal = ({
 
     document.body.style.overflow = "hidden";
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (event.key === "Escape" && !isSearchOpen) {
         closeModal();
       }
     };
@@ -88,10 +99,11 @@ export const CreateProjectModal = ({
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "auto";
     };
-  }, [open]);
+  }, [isSearchOpen, open]);
 
   const submit = async () => {
-    if (!projectName.trim() || isSubmitting) {
+    if (!projectName.trim() || isSubmitting || !canCreateOwnedProjects) {
+      setError(createProjectMessage);
       return;
     }
 
@@ -147,7 +159,18 @@ export const CreateProjectModal = ({
             open ? "bg-(--quite-dark) text-(--vibrant)" : ""
           }`
         }
-        onClick={() => setOpen(true)}
+        disabled={!canCreateOwnedProjects && !redirectWhenBlocked}
+        title={!canCreateOwnedProjects ? createProjectMessage : undefined}
+        onClick={() => {
+          if (!canCreateOwnedProjects) {
+            if (redirectWhenBlocked) {
+              router.push(redirectWhenBlocked);
+            }
+            return;
+          }
+
+          setOpen(true);
+        }}
       >
         {trigger ?? <Plus size={20} className="mx-auto" />}
       </button>
@@ -229,7 +252,7 @@ export const CreateProjectModal = ({
 
                     {selectedProjectTemplate ? (
                       <>
-                        <div className="flex flex-wrap items-center gap-1 md:text-lg text-base">
+                        <div className="flex flex-wrap items-center gap-1.5 md:text-lg text-base">
                           <p className="font-medium">
                             {selectedProjectTemplate.name}
                           </p>

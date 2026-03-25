@@ -12,11 +12,16 @@ import {
 
 const SLASH_ACTION_COMMANDS = ["lib", "template"] as const;
 const SLASH_INSERTION_COMMANDS = [DROPDOWN_SLASH_COMMAND] as const;
-const ALL_COMPLETABLE_SLASH_COMMANDS = [
-  ...PRIMARY_INSERTABLE_COMMANDS,
-  ...SLASH_INSERTION_COMMANDS,
-  ...SLASH_ACTION_COMMANDS,
-] as const;
+
+function getCompletableSlashCommands(
+  allowedInsertableCommands: readonly InsertableComponentCommand[],
+) {
+  return [
+    ...allowedInsertableCommands,
+    ...SLASH_INSERTION_COMMANDS,
+    ...SLASH_ACTION_COMMANDS,
+  ];
+}
 
 type SlashAction =
   | { type: "open-component-library" }
@@ -56,7 +61,12 @@ export function getActiveLineFromCursor(value: string, cursor: number) {
   return value.slice(0, cursor).split("\n").length;
 }
 
-export function completeSlashCommand(value: string, cursor: number) {
+export function completeSlashCommand(
+  value: string,
+  cursor: number,
+  allowedInsertableCommands: readonly InsertableComponentCommand[] =
+    PRIMARY_INSERTABLE_COMMANDS,
+) {
   const { start, end, token } = getTokenRangeAtCursor(value, cursor);
   if (!token.startsWith("/")) {
     return null;
@@ -71,8 +81,8 @@ export function completeSlashCommand(value: string, cursor: number) {
     };
   }
 
-  const matches = ALL_COMPLETABLE_SLASH_COMMANDS.filter((command) =>
-    command.startsWith(partial),
+  const matches = getCompletableSlashCommands(allowedInsertableCommands).filter(
+    (command) => command.startsWith(partial),
   );
   if (matches.length !== 1) {
     return null;
@@ -89,7 +99,12 @@ export function completeSlashCommand(value: string, cursor: number) {
   };
 }
 
-export function getSlashCompletionSuffix(value: string, cursor: number) {
+export function getSlashCompletionSuffix(
+  value: string,
+  cursor: number,
+  allowedInsertableCommands: readonly InsertableComponentCommand[] =
+    PRIMARY_INSERTABLE_COMMANDS,
+) {
   const { token } = getTokenRangeAtCursor(value, cursor);
   if (!token.startsWith("/")) {
     return null;
@@ -100,8 +115,8 @@ export function getSlashCompletionSuffix(value: string, cursor: number) {
     return "lib for all possible commands";
   }
 
-  const matches = ALL_COMPLETABLE_SLASH_COMMANDS.filter((command) =>
-    command.startsWith(partial),
+  const matches = getCompletableSlashCommands(allowedInsertableCommands).filter(
+    (command) => command.startsWith(partial),
   );
   if (matches.length !== 1) {
     return null;

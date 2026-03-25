@@ -17,6 +17,7 @@ import {
   replaceSlashCommandWithStructuralBlock,
   resolveComponentTypeFromCommand,
 } from "@/app/lib/components/page_components/testing_editor/commands";
+import { listAllowedInsertableCommands } from "@/app/lib/components/page_components/componentCatalog";
 import { INITIAL_TEXT } from "@/app/lib/components/page_components/testing_editor/constants";
 import { renderContentWithComponents } from "@/app/lib/components/page_components/testing_editor/renderContent";
 
@@ -40,6 +41,13 @@ export default function TestingEditorClient() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lastCursorRef = useRef(0);
   const content = pageDocument?.document?.editorText ?? INITIAL_TEXT;
+  const allowedInsertableCommands = useMemo(
+    () =>
+      listAllowedInsertableCommands(
+        pageDocument?.canUseLimitedComponents === true,
+      ),
+    [pageDocument?.canUseLimitedComponents],
+  );
 
   const lines = useMemo(() => {
     const lineCount = Math.max(1, content.split("\n").length);
@@ -67,7 +75,11 @@ export default function TestingEditorClient() {
         return;
       }
 
-      const suffix = getSlashCompletionSuffix(value, cursorPosition);
+      const suffix = getSlashCompletionSuffix(
+        value,
+        cursorPosition,
+        allowedInsertableCommands,
+      );
       if (!suffix) {
         setGhostCompletion(null);
         return;
@@ -76,7 +88,7 @@ export default function TestingEditorClient() {
       const { top, left } = getCaretCoordinates(textarea, cursorPosition);
       setGhostCompletion({ suffix, top, left });
     },
-    [isEditing, isLive],
+    [allowedInsertableCommands, isEditing, isLive],
   );
 
   const setCaretPosition = useCallback(
@@ -207,6 +219,7 @@ export default function TestingEditorClient() {
               const replacement =
                 slashRange &&
                 command &&
+                allowedInsertableCommands.includes(command) &&
                 resolveComponentTypeFromCommand(command)
                   ? insertComponentAtRange({
                       command,
@@ -285,6 +298,7 @@ export default function TestingEditorClient() {
                 const replacement =
                   slashRange &&
                   command &&
+                  allowedInsertableCommands.includes(command) &&
                   resolveComponentTypeFromCommand(command)
                     ? insertComponentAtRange({
                         command,
@@ -317,6 +331,7 @@ export default function TestingEditorClient() {
               const completion = completeSlashCommand(
                 textarea.value,
                 textarea.selectionStart,
+                allowedInsertableCommands,
               );
               if (!completion) {
                 return;

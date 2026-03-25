@@ -17,6 +17,7 @@ export type RegisteredPageComponentDefinition<
     description: string;
     previewSrc: string;
     tag: PageComponentLibraryTag;
+    limited: boolean;
   };
 };
 
