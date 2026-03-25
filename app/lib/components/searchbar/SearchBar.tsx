@@ -333,6 +333,7 @@ export const SearchBar = () => {
                     <span>{tagGhostCompletion.completion}</span>
                   </div>
                 ) : null}
+
                 <input
                   type="text"
                   value={searchQuery}
