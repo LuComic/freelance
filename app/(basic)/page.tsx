@@ -30,12 +30,12 @@ export default function Home() {
               >
                 Create an Account
               </Link>
-              <a
+              <Link
                 href="/projects"
                 className="inline-flex h-10 items-center justify-center rounded-md bg-white/90 px-1.5 py-0.5 font-medium text-(--dim) hover:bg-white"
               >
                 Join with code
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -240,7 +240,8 @@ export default function Home() {
               className="text-2xl font-semibold sm:text-3xl"
               style={{ fontFamily: '"Lexend Variable", sans-serif' }}
             >
-              Start free, upgrade when you need more
+              No payments in beta testing. Limited to 5 projects, everything
+              else works.
             </h2>
           </div>
         </div>

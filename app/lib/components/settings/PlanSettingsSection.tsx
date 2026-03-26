@@ -119,8 +119,15 @@ export function PlanSettingsSection({
         />
         Plan
       </button>
-
       {open ? (
+        <div className="pl-7 flex flex-col gap-2 pb-2">
+          <p className="text-(--gray-page)">
+            No payments required - limited testing version. Limited to 5
+            projects
+          </p>
+        </div>
+      ) : null}
+      {/* {open ? (
         <div className="pl-7 flex flex-col gap-2 pb-2">
           <div className="flex flex-col @[40rem]:grid gap-3 grid-cols-3">
             {BILLING_PLAN_ORDER.map((plan) => {
@@ -222,7 +229,7 @@ export function PlanSettingsSection({
             <p className="text-(--declined-border)">{actionError}</p>
           ) : null}
         </div>
-      ) : null}
+      ) : null} */}
     </div>
   );
 }

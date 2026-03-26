@@ -7,6 +7,11 @@ import { v } from "convex/values";
 import { action } from "../_generated/server";
 import { api } from "../_generated/api";
 import { components } from "../_generated/api";
+import {
+  BILLING_BETA_DISABLED_MESSAGE,
+  BILLING_BETA_MODE,
+} from "../../lib/billing/config";
+import { invalidState } from "../lib/errors";
 import { getAppUrl, getStripePriceIdForTier } from "./model";
 
 const stripeComponent = (components as { stripe?: unknown }).stripe;
@@ -30,6 +35,10 @@ export const startCheckout = action({
 
     if (!userId) {
       throw new Error("Not authenticated.");
+    }
+
+    if (BILLING_BETA_MODE) {
+      throw invalidState(BILLING_BETA_DISABLED_MESSAGE);
     }
 
     const [profile, entitlements] = await Promise.all([
@@ -81,6 +90,10 @@ export const openBillingPortal = action({
       throw new Error("Not authenticated.");
     }
 
+    if (BILLING_BETA_MODE) {
+      throw invalidState(BILLING_BETA_DISABLED_MESSAGE);
+    }
+
     const entitlements = await ctx.runQuery(currentEntitlementsQuery, {});
 
     if (!entitlements?.subscription) {
@@ -101,6 +114,10 @@ export const cancelCurrentPlan = action({
 
     if (!userId) {
       throw new Error("Not authenticated.");
+    }
+
+    if (BILLING_BETA_MODE) {
+      throw invalidState(BILLING_BETA_DISABLED_MESSAGE);
     }
 
     const entitlements = await ctx.runQuery(currentEntitlementsQuery, {});
@@ -125,6 +142,10 @@ export const reactivateCurrentPlan = action({
 
     if (!userId) {
       throw new Error("Not authenticated.");
+    }
+
+    if (BILLING_BETA_MODE) {
+      throw invalidState(BILLING_BETA_DISABLED_MESSAGE);
     }
 
     const entitlements = await ctx.runQuery(currentEntitlementsQuery, {});

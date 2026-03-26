@@ -1,6 +1,12 @@
 import type { ActionCtx, MutationCtx, QueryCtx } from "../_generated/server";
 import type { Id } from "../_generated/dataModel";
 import { components } from "../_generated/api";
+import {
+  BILLING_BETA_EFFECTIVE_TIER,
+  BILLING_BETA_MODE,
+  BILLING_BETA_OWNED_PROJECT_LIMIT,
+  BILLING_BETA_PROJECT_LIMIT_MESSAGE,
+} from "../../lib/billing/config";
 import type { PlanTier } from "../../lib/billing/plans";
 import { getBillingPlan } from "../../lib/billing/plans";
 
@@ -129,10 +135,39 @@ export async function getCurrentEntitlementsForUser(
   ctx: QueryCtx | MutationCtx,
   userId: Id<"users">,
 ) {
-  const [subscription, ownedProjectCount] = await Promise.all([
-    getCurrentPlanSubscription(ctx, userId),
-    getOwnedProjectCount(ctx, userId),
-  ]);
+  const ownedProjectCount = await getOwnedProjectCount(ctx, userId);
+
+  if (BILLING_BETA_MODE) {
+    const canCreateOwnedProjects =
+      ownedProjectCount < BILLING_BETA_OWNED_PROJECT_LIMIT;
+
+    return {
+      plan: {
+        tier: BILLING_BETA_EFFECTIVE_TIER,
+        name: "Beta",
+        description:
+          "All paid features are unlocked during the testing period.",
+        priceLabel: "$0",
+        footer: "Limited to 5 owned projects during beta.",
+      },
+      features: [
+        "Create up to 5 projects during beta",
+        "All components included",
+        "Analytics included",
+      ],
+      ownedProjectCount,
+      ownedProjectLimit: BILLING_BETA_OWNED_PROJECT_LIMIT,
+      canCreateOwnedProjects,
+      createProjectMessage: canCreateOwnedProjects
+        ? null
+        : BILLING_BETA_PROJECT_LIMIT_MESSAGE,
+      canAccessAnalytics: true,
+      canUseLimitedComponents: true,
+      subscription: null,
+    };
+  }
+
+  const subscription = await getCurrentPlanSubscription(ctx, userId);
   const planTier = subscription
     ? (getPlanTierByPriceId(subscription.priceId) ?? "free")
     : "free";
