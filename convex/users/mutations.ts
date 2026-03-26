@@ -171,6 +171,29 @@ export const deleteAccount = mutation({
       }
     }
 
+    const notifications = await ctx.db.query("notifications").collect();
+    for (const notification of notifications) {
+      if (
+        notification.userId === userId ||
+        notification.actorUserId === userId ||
+        notification.connectionUserId === userId ||
+        (notification.projectId !== undefined &&
+          deletedProjectIds.has(notification.projectId))
+      ) {
+        await ctx.db.delete(notification._id);
+      }
+    }
+
+    const projectActivityEntries = await ctx.db.query("projectActivity").collect();
+    for (const activityEntry of projectActivityEntries) {
+      if (
+        activityEntry.actorUserId === userId ||
+        deletedProjectIds.has(activityEntry.projectId)
+      ) {
+        await ctx.db.delete(activityEntry._id);
+      }
+    }
+
     const sessions = await ctx.db
       .query("authSessions")
       .withIndex("userId", (query) => query.eq("userId", userId))
