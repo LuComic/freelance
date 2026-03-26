@@ -6,6 +6,7 @@ import { LegalSettingsSection } from "./LegalSettingsSection";
 import { OverallSettingsSection } from "./OverallSettingsSection";
 import { PlanSettingsSection } from "./PlanSettingsSection";
 import { useAccountSettingsController } from "./useAccountSettingsController";
+import { LimitsSettingsSection } from "./LimitsSection";
 
 export function SettingsSections() {
   const searchParams = useSearchParams();
@@ -60,6 +61,7 @@ export function SettingsSections() {
         onDeleteAccount={handleDeleteAccount}
       />
       <PlanSettingsSection activeSection={section} />
+      <LimitsSettingsSection activeSection={section} />
       <LegalSettingsSection activeSection={section} />
     </div>
   );

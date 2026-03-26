@@ -179,7 +179,7 @@ export default function Page() {
   };
 
   return (
-    <div className="h-full @[40rem]:max-w-2/3 mx-auto w-full flex flex-col gap-4 items-start justify-center">
+    <div className="h-max @[40rem]:max-w-2/3 mx-auto w-full flex flex-col gap-4 items-start justify-center">
       <div className="w-full border-b border-(--gray) pb-2 flex flex-col gap-2">
         <p className="@[40rem]:text-3xl text-xl font-medium">Welcome back!</p>
       </div>

@@ -4,11 +4,11 @@ import type { Id } from "../_generated/dataModel";
 import { requireCurrentAuth } from "../lib/auth";
 import { invalidState, notFound } from "../lib/errors";
 import { assertNonAnonymousUser } from "../lib/guests";
+import { serializePageDocumentWithLimits } from "../lib/pageLimits";
 import { requirePageAccess, requireProjectEditor } from "../lib/permissions";
 import { getOrderedProjectPages } from "../lib/projectRecords";
 import { uniqueSlugFromLabel } from "../lib/slugs";
 import { templateVisibilityValidator } from "../lib/validators";
-import { serializePageDocument } from "../pages/content";
 import {
   assertPageDocumentV1,
   type PageDocumentV1,
@@ -154,11 +154,12 @@ export const applyPageTemplate = mutation({
       "untitled-page",
     );
     const now = Date.now();
+    const contentJson = serializePageDocumentWithLimits(nextDocument);
 
     await ctx.db.patch(page._id, {
       title: trimmedTitle,
       slug: nextSlug,
-      contentJson: serializePageDocument(nextDocument),
+      contentJson,
       updatedByUserId: userId,
       updatedAt: now,
     });

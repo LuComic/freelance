@@ -13,17 +13,17 @@ import {
 } from "../notifications/model";
 import { getAnalyticsActivityChanges } from "../pageRuntime/analytics";
 import { buildProjectMemberDisplayName } from "../projects/model";
+import {
+  assertProjectCanAddPages,
+  serializePageDocumentWithLimits,
+} from "../lib/pageLimits";
 import { getOrderedProjectPages } from "../lib/projectRecords";
 import { uniqueSlugFromLabel } from "../lib/slugs";
 import {
   assertPageDocumentV1,
   mergePageLiveStateDocument,
 } from "../../lib/pageDocument";
-import {
-  createInitialPage,
-  parsePageDocument,
-  serializePageDocument,
-} from "./content";
+import { createInitialPage, parsePageDocument } from "./content";
 import { getCurrentEntitlementsForUser } from "../billing/model";
 import { findLimitedComponentAccessViolation } from "../../lib/pageDocument/componentAccess";
 
@@ -54,6 +54,7 @@ export const createPage = mutation({
     }
 
     await requireProjectEditor(ctx, project._id, userId);
+    assertProjectCanAddPages(project);
 
     const existingPages = await getOrderedProjectPages(ctx, project);
     const nextPageNumber = existingPages.length + 1;
@@ -63,8 +64,7 @@ export const createPage = mutation({
       existingPages.map((page) => page.slug),
       "untitled-page",
     );
-
-    const contentJson = serializePageDocument(createInitialPage());
+    const contentJson = serializePageDocumentWithLimits(createInitialPage());
 
     const pageId = await ctx.db.insert("pages", {
       projectId: project._id,
@@ -242,11 +242,12 @@ export const savePage = mutation({
       "untitled-page",
     );
     const now = Date.now();
+    const contentJson = serializePageDocumentWithLimits(nextDocument);
 
     await ctx.db.patch(page._id, {
       title: trimmedTitle,
       slug: nextSlug,
-      contentJson: serializePageDocument(nextDocument),
+      contentJson,
       updatedAt: now,
       updatedByUserId: userId,
     });
@@ -318,11 +319,12 @@ export const savePageLiveState = mutation({
     );
     type AnalyticsActivityChange = (typeof analyticsActivityChanges)[number];
     const now = Date.now();
+    const contentJson = serializePageDocumentWithLimits(nextDocument);
 
     await ctx.db.patch(page._id, {
       title: trimmedTitle,
       slug: nextSlug,
-      contentJson: serializePageDocument(nextDocument),
+      contentJson,
       updatedAt: now,
       updatedByUserId: userId,
     });

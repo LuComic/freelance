@@ -10,6 +10,7 @@ export const SidebarSettings = () => {
         items={["Username", "Bio", "Email", "Delete account"]}
       />
       <SettingsItem title="Plan" items={["Free", "Starter", "Pro Unlimited"]} />
+      <SettingsItem title="Limits" items={["Limits for all users"]} />
       <SettingsItem
         title="Legal"
         items={["Cookies", "Terms of Service", "Privacy Policy"]}

@@ -3,7 +3,10 @@ import { query, type MutationCtx } from "../_generated/server";
 import type { Doc, Id } from "../_generated/dataModel";
 import { requireCurrentAuth } from "../lib/auth";
 import { invalidState } from "../lib/errors";
-import { serializePageDocument } from "../pages/content";
+import {
+  assertProjectCanAddPages,
+  serializePageDocumentWithLimits,
+} from "../lib/pageLimits";
 import { uniqueSlugFromLabel } from "../lib/slugs";
 import {
   assertTemplateBlueprintV1,
@@ -135,6 +138,8 @@ export async function appendProjectTemplatePages(
   }> = [];
   const now = Date.now();
 
+  assertProjectCanAddPages(args.project, args.blueprint.pages.length);
+
   for (const pageId of args.project.pageIds) {
     const existingPage = await ctx.db.get(pageId);
 
@@ -151,16 +156,15 @@ export async function appendProjectTemplatePages(
     const title = pageBlueprint.title.trim();
     const slug = uniqueSlugFromLabel(title, existingSlugs, "untitled-page");
     existingSlugs.add(slug);
+    const contentJson = serializePageDocumentWithLimits(
+      buildPageDocumentFromTemplateSource(getTemplatePageSource(pageBlueprint)),
+    );
 
     const pageId = await ctx.db.insert("pages", {
       projectId: args.project._id,
       title,
       slug,
-      contentJson: serializePageDocument(
-        buildPageDocumentFromTemplateSource(
-          getTemplatePageSource(pageBlueprint),
-        ),
-      ),
+      contentJson,
       sourceTemplateId: args.templateId,
       createdByUserId: args.userId,
       updatedByUserId: args.userId,

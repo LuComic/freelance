@@ -13,13 +13,11 @@ import {
   requireProjectEditor,
   requireProjectMember,
 } from "../lib/permissions";
+import { serializePageDocumentWithLimits } from "../lib/pageLimits";
 import { upsertProjectInviteForUser } from "./invites";
 import { uniqueSlugFromLabel } from "../lib/slugs";
 import { projectInviteRoleValidator } from "../lib/validators";
-import {
-  createInitialPageConfig,
-  serializePageConfigDocument,
-} from "../pages/content";
+import { createInitialPageConfig } from "../pages/content";
 import { generateUniqueJoinCode } from "./model";
 import {
   appendProjectTemplatePages,
@@ -113,8 +111,7 @@ export const createProject = mutation({
         blueprint,
       };
     }
-
-    const initialContentJson = serializePageConfigDocument(
+    const initialContentJson = serializePageDocumentWithLimits(
       createInitialPageConfig(),
     );
 
