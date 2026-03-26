@@ -111,7 +111,7 @@ export const ReviewModal = ({
                 Cancel
               </button>
               <button
-                className={`gap-1 flex items-center justify-center px-2 py-1 rounded-sm  w-full border ${action === "accept" ? "border-(--accepted-border) hover:bg-(--accepted-bg)/10" : "border-(--declined-border) hover:bg-(--declined-bg)/10"}`}
+                className={`gap-1 flex items-center justify-center px-2 py-1 rounded-sm  w-full border ${action === "accept" ? "border-(--accepted-border) bg-(--accepted-bg)/10 hover:bg-(--accepted-bg)/20" : "border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20"}`}
                 onClick={() => {
                   onSubmit(reviewInput);
                   closeReview();
@@ -137,8 +137,8 @@ export const ReviewModal = ({
       <button
         className={
           listView
-            ? "gap-1 flex items-center justify-center p-1.5 rounded-sm h-max aspect-square  hover:bg-(--gray)/20"
-            : "gap-1 flex items-center justify-center px-2 py-1 rounded-sm  w-full border border-(--gray)  hover:bg-(--gray)/20"
+            ? "gap-1 flex items-center justify-center p-1.5 rounded-sm h-max aspect-square hover:bg-(--gray)/20"
+            : "gap-1 flex items-center justify-center px-2 py-1 rounded-sm w-full border border-(--gray) hover:bg-(--gray)/20"
         }
         onClick={reviewIdea}
       >

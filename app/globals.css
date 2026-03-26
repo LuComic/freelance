@@ -57,15 +57,15 @@
   --gray: #504f4f;
   --light: #e9e8e9;
 
-  --vibrant: #0061ff;
-  --vibrant-hover: #0839ff;
+  --vibrant: #2563eb;
+  --vibrant-hover: #1d4ed8;
 
-  --pending-border: #ca8a04;
-  --pending-bg: #fef08a;
-  --accepted-border: #15803d;
-  --accepted-bg: #86efac;
-  --declined-border: #e11d48;
-  --declined-bg: #fda4af;
+  --pending-border: #d97706;
+  --pending-bg: #fffbeb;
+  --accepted-border: #16a34a;
+  --accepted-bg: #f0fdf4;
+  --declined-border: #dc2626;
+  --declined-bg: #fef2f2;
 
   --red: #e11d48;
   --red-bg: #fda4af;
