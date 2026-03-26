@@ -14,7 +14,13 @@ export default function Home() {
               Empty Canvas
             </h1>
             <p className="mt-3 max-w-2xl text-base leading-7 text-(--gray-page) sm:text-xl sm:leading-8">
-              Build premium client project pages faster.
+              Highly customisable communication tool between creators and
+              clients.
+              <br />
+              <em>
+                The site is right now in early beta. Create an account for
+                future updates and early testing (platform itself works).
+              </em>
             </p>
 
             <div className="mt-6 flex w-full max-w-md flex-col gap-3 sm:flex-row sm:justify-center">
@@ -364,18 +370,12 @@ export default function Home() {
           </div>
 
           <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-            <a
-              href="#"
+            <Link
+              href="/login"
               className="inline-flex h-10 items-center justify-center rounded-md bg-(--vibrant) px-2 py-1 font-medium hover:bg-(--vibrant-hover)"
             >
               Create Account
-            </a>
-            <a
-              href="#contact"
-              className="inline-flex h-10 items-center justify-center rounded-md border border-(--gray) bg-(--quite-dark) px-2 py-1 font-medium hover:bg-(--darkest-hover)"
-            >
-              Contact
-            </a>
+            </Link>
           </div>
         </div>
 
