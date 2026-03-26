@@ -1,3 +1,4 @@
+import { LegalToggles } from "@/app/lib/components/landing/login/LegalToggles";
 import { LoginPageButtons } from "@/app/lib/components/landing/login/LoginPageButtons";
 
 export default function Page() {
@@ -12,6 +13,7 @@ export default function Page() {
         In here this component you can login with either Google or Apple
       </p>
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
+        <LegalToggles />
         <LoginPageButtons type={"google"} />
         {/* <LoginPageButtons type={"apple"} /> */}
       </div>

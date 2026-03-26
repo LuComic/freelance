@@ -20,12 +20,13 @@ export const SelectClient = ({
   liveState,
   onChangeLiveState,
 }: SelectClientProps) => {
-
   const toggleOption = (id: number) => {
     onChangeLiveState((currentLiveState) => ({
       ...currentLiveState,
       selectedOptionIds: currentLiveState.selectedOptionIds.includes(id)
-        ? currentLiveState.selectedOptionIds.filter((optionId) => optionId !== id)
+        ? currentLiveState.selectedOptionIds.filter(
+            (optionId) => optionId !== id,
+          )
         : [...currentLiveState.selectedOptionIds, id],
     }));
   };
