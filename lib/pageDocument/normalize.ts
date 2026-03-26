@@ -670,6 +670,37 @@ export function normalizePageDocument(value: unknown): PageDocumentV1 {
   };
 }
 
+export function mergePageConfigDocument(
+  baseDocument: PageDocumentV1,
+  value: unknown,
+): PageDocumentV1 {
+  const configDocument = normalizePageConfigDocument(value);
+  const nextComponents: Record<string, PageComponentDocument> = {};
+
+  for (const [id, component] of Object.entries(configDocument.components)) {
+    const baseComponent = baseDocument.components[id];
+
+    if (
+      baseComponent &&
+      matchesStoredComponentType(baseComponent.type, component.type)
+    ) {
+      nextComponents[id] = {
+        ...component,
+        state: baseComponent.state,
+      } as PageComponentDocument;
+      continue;
+    }
+
+    nextComponents[id] = component;
+  }
+
+  return {
+    version: 1,
+    editorText: configDocument.editorText,
+    components: nextComponents,
+  };
+}
+
 export function mergePageLiveStateDocument(
   baseDocument: PageDocumentV1,
   value: unknown,

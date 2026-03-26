@@ -162,7 +162,7 @@ export const RadioCreator = ({
             {config.options.map((option) => (
               <div
                 key={option.id}
-                className="rounded-md border border-(--gray-page) text-(--gray-page) w-max px-2 py-1.5"
+                className="rounded-md border border-(--gray-page) text-(--gray-page) w-max px-1.5 py-0.5"
               >
                 {option.label}
               </div>

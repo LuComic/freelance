@@ -549,6 +549,11 @@ export function PageDocumentProvider({
   const persistDocument = useCallback(
     async (currentPage: ActivePageState, currentDocument: PageDocumentV1) => {
       const shouldSaveLiveState = isLive;
+      const baseTitle = savedTitleSnapshot ?? currentPage.page.title;
+      const baseDocument =
+        savedDocumentSnapshot !== null
+          ? (JSON.parse(savedDocumentSnapshot) as PageDocumentV1)
+          : currentDocument;
       const nextDocument =
         !shouldSaveLiveState && activeProjectMembers !== undefined
           ? sanitizeDocumentBeforeCreatorSave(
@@ -613,35 +618,36 @@ export function PageDocumentProvider({
           pageId: currentPage.page.id as never,
           title: trimmedTitle,
           document: nextDocument,
+          baseTitle,
+          baseDocument,
         });
 
-        setActivePage((prev) =>
-          prev
-            ? {
-                ...prev,
-                page: {
-                  ...prev.page,
-                  title: result.title,
-                  slug: result.slug,
-                },
-              }
-            : prev,
-        );
+        const nextPage: ActivePageState = {
+          ...currentPage,
+          page: {
+            ...currentPage.page,
+            title: result.title,
+            slug: result.slug,
+          },
+        };
+
+        documentRef.current = result.document;
+        activePageRef.current = nextPage;
+        setDocument(result.document);
+        setActivePage(nextPage);
 
         if (
           route &&
           (result.slug !== route.pageSlug ||
-            currentPage.project.slug !== route.projectSlug)
+            nextPage.project.slug !== route.projectSlug)
         ) {
-          setPendingRouteProjectId(currentPage.project.id);
+          setPendingRouteProjectId(nextPage.project.id);
           setPendingRoutePageId(result.pageId);
-          router.replace(
-            `/projects/${currentPage.project.slug}/${result.slug}`,
-          );
+          router.replace(`/projects/${nextPage.project.slug}/${result.slug}`);
         }
 
         setSavedTitleSnapshot(result.title);
-        setSavedDocumentSnapshot(JSON.stringify(nextDocument));
+        setSavedDocumentSnapshot(JSON.stringify(result.document));
         setSaveStatus("idle");
       } catch (error) {
         setSaveError(
@@ -658,6 +664,8 @@ export function PageDocumentProvider({
       savePageLiveState,
       activeProjectMembers,
       activeClientUserIds,
+      savedDocumentSnapshot,
+      savedTitleSnapshot,
       setActivePage,
       setDocument,
       setPendingRoutePageId,
@@ -878,7 +886,11 @@ export function PageDocumentProvider({
   }, [deletePageMutation, projects, router, setDeleteError, setDeleteStatus]);
 
   useEffect(() => {
-    if (!isLive || !hasUnsavedChanges || saveStatus === "saving") {
+    if (
+      !hasUnsavedChanges ||
+      saveStatus === "saving" ||
+      saveError !== null
+    ) {
       return;
     }
 
@@ -887,7 +899,7 @@ export function PageDocumentProvider({
     }, 300);
 
     return () => window.clearTimeout(timeoutId);
-  }, [hasUnsavedChanges, isLive, saveDocument, saveStatus]);
+  }, [hasUnsavedChanges, saveDocument, saveError, saveStatus]);
 
   const value = useMemo<PageDocumentContextValue>(
     () => ({

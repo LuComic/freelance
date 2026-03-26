@@ -21,7 +21,10 @@ import { getOrderedProjectPages } from "../lib/projectRecords";
 import { uniqueSlugFromLabel } from "../lib/slugs";
 import {
   assertPageDocumentV1,
+  mergePageConfigDocument,
   mergePageLiveStateDocument,
+  normalizePageConfigDocument,
+  type PageDocumentV1,
 } from "../../lib/pageDocument";
 import { createInitialPage, parsePageDocument } from "./content";
 import { getCurrentEntitlementsForUser } from "../billing/model";
@@ -38,6 +41,55 @@ function buildProjectActorSnapshot(
     actorNameSnapshot: buildProjectMemberDisplayName(user, membership),
     actorImageSnapshot: user.image ?? null,
   };
+}
+
+function sanitizeCreatorIdeaBoardDocument(
+  document: PageDocumentV1,
+  activeClientUserIds: Set<string>,
+) {
+  if (activeClientUserIds.size === 0) {
+    return document;
+  }
+
+  return {
+    ...document,
+    components: Object.fromEntries(
+      Object.entries(document.components).map(([instanceId, component]) => {
+        if (component.type !== "IdeaBoard") {
+          return [instanceId, component];
+        }
+
+        return [
+          instanceId,
+          {
+            ...component,
+            state: {
+              ...component.state,
+              ideas: component.state.ideas
+                .filter(
+                  (idea) =>
+                    component.config.canClientAdd ||
+                    idea.createdByUserId === null ||
+                    !activeClientUserIds.has(idea.createdByUserId),
+                )
+                .map((idea) => ({
+                  ...idea,
+                  votes: component.config.canClientVote
+                    ? idea.votes
+                    : idea.votes.filter(
+                        (userId) => !activeClientUserIds.has(userId),
+                      ),
+                })),
+            },
+          },
+        ];
+      }),
+    ) as PageDocumentV1["components"],
+  };
+}
+
+function getCreatorConfigSnapshot(document: PageDocumentV1) {
+  return JSON.stringify(normalizePageConfigDocument(document));
 }
 
 export const createPage = mutation({
@@ -144,12 +196,15 @@ export const savePage = mutation({
     pageId: v.id("pages"),
     title: v.string(),
     document: v.any(),
+    baseTitle: v.string(),
+    baseDocument: v.any(),
   },
   handler: async (ctx, args) => {
     const { userId } = await requireCurrentAuth(ctx);
     const page = await requirePageAccess(ctx, args.pageId, userId);
     await requireProjectEditor(ctx, page.projectId, userId);
     const trimmedTitle = args.title.trim();
+    const trimmedBaseTitle = args.baseTitle.trim();
 
     if (!trimmedTitle) {
       throw invalidState("Page title cannot be empty.");
@@ -160,6 +215,14 @@ export const savePage = mutation({
     } catch (error) {
       throw invalidState(
         error instanceof Error ? error.message : "Page document is invalid.",
+      );
+    }
+
+    try {
+      assertPageDocumentV1(args.baseDocument);
+    } catch (error) {
+      throw invalidState(
+        error instanceof Error ? error.message : "Page base document is invalid.",
       );
     }
 
@@ -180,46 +243,20 @@ export const savePage = mutation({
         )
         .map((membership) => String(membership.userId)),
     );
-    const nextDocument = {
-      ...args.document,
-      components: Object.fromEntries(
-        Object.entries(args.document.components).map(
-          ([instanceId, component]) => {
-            if (
-              component.type !== "IdeaBoard" ||
-              activeClientUserIds.size === 0
-            ) {
-              return [instanceId, component];
-            }
+    if (
+      page.title !== trimmedBaseTitle ||
+      getCreatorConfigSnapshot(currentDocument) !==
+        getCreatorConfigSnapshot(args.baseDocument)
+    ) {
+      throw invalidState(
+        "This page changed in another creator session. Refresh to load the latest version.",
+      );
+    }
 
-            return [
-              instanceId,
-              {
-                ...component,
-                state: {
-                  ...component.state,
-                  ideas: component.state.ideas
-                    .filter(
-                      (idea) =>
-                        component.config.canClientAdd ||
-                        idea.createdByUserId === null ||
-                        !activeClientUserIds.has(idea.createdByUserId),
-                    )
-                    .map((idea) => ({
-                      ...idea,
-                      votes: component.config.canClientVote
-                        ? idea.votes
-                        : idea.votes.filter(
-                            (userId) => !activeClientUserIds.has(userId),
-                          ),
-                    })),
-                },
-              },
-            ];
-          },
-        ),
-      ),
-    };
+    const nextDocument = sanitizeCreatorIdeaBoardDocument(
+      mergePageConfigDocument(currentDocument, args.document),
+      activeClientUserIds,
+    );
     const entitlements = await getCurrentEntitlementsForUser(ctx, userId);
     const limitedComponentViolation = findLimitedComponentAccessViolation({
       currentDocument,
@@ -256,6 +293,7 @@ export const savePage = mutation({
       pageId: page._id,
       slug: nextSlug,
       title: trimmedTitle,
+      document: nextDocument,
     };
   },
 });

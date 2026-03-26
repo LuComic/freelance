@@ -140,17 +140,29 @@ export const TopBar = () => {
         <span className="hidden @[64rem]:inline">Live</span>
       </button>
       {!isLive && <div className="w-px h-2/3 bg-(--gray)" />}
-      {!isLive && pageDocument?.saveStatus ? (
-        <button
-          onClick={() => void pageDocument.saveDocument()}
-          disabled={
-            pageDocument.saveStatus === "saving" ||
-            !pageDocument.hasUnsavedChanges
-          }
-          className="text-sm gap-1 flex items-center justify-center p-1 @[64rem]:px-2 @[64rem]:py-0.5 rounded-md border border-(--vibrant) bg-(--vibrant)/20 hover:bg-(--vibrant-hover)/20 disabled:border-(--gray-page) disabled:text-(--gray-page) disabled:bg-transparent disabled:hover:bg-transparent disabled:cursor-not-allowed mr-auto"
-        >
-          {pageDocument.saveStatus === "saving" ? "Saving" : "Save"}
-        </button>
+      {!isLive || pageDocument?.saveError ? (
+        <div className="mr-auto flex min-w-0 items-center gap-2">
+          {!isLive && pageDocument?.saveStatus ? (
+            <button
+              onClick={() => void pageDocument.saveDocument()}
+              disabled={
+                pageDocument.saveStatus === "saving" ||
+                !pageDocument.hasUnsavedChanges
+              }
+              className="text-sm gap-1 flex items-center justify-center p-1 @[64rem]:px-2 @[64rem]:py-0.5 rounded-md border border-(--vibrant) bg-(--vibrant)/20 hover:bg-(--vibrant-hover)/20 disabled:border-(--gray-page) disabled:text-(--gray-page) disabled:bg-transparent disabled:hover:bg-transparent disabled:cursor-not-allowed"
+            >
+              {pageDocument.saveStatus === "saving" ? "Saving" : "Save"}
+            </button>
+          ) : null}
+          {pageDocument?.saveError ? (
+            <p
+              className="max-w-36 @[64rem]:max-w-96 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-(--declined-border)"
+              title={pageDocument.saveError}
+            >
+              {pageDocument.saveError}
+            </p>
+          ) : null}
+        </div>
       ) : null}
       {isEditingTitle ? (
         <input
