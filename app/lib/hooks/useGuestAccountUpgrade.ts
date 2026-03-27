@@ -16,7 +16,9 @@ function getPreferredPath() {
 
 export function useGuestAccountUpgrade() {
   const { signIn } = useAuthActions();
-  const prepareGuestUpgrade = useMutation(api.projects.join.prepareGuestUpgrade);
+  const prepareGuestUpgrade = useMutation(
+    api.projects.join.prepareGuestUpgrade,
+  );
   const [isStartingUpgrade, setIsStartingUpgrade] = useState(false);
   const [upgradeError, setUpgradeError] = useState<string | null>(null);
 
@@ -34,7 +36,7 @@ export function useGuestAccountUpgrade() {
       });
       storeGuestUpgradeToken(result.token);
       await signIn("google", {
-        redirectTo: "/projects",
+        redirectTo: "/projects?betaUpgradeAttempt=google",
       });
     } catch (error) {
       setUpgradeError(

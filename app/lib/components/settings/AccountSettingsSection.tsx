@@ -62,7 +62,7 @@ export function AccountSettingsSection({
   }, [activeSection]);
 
   return (
-    <div className="bg-(--gray)/10 w-full p-2 flex flex-col gap-2">
+    <div className="w-full p-2 flex flex-col gap-2">
       <button
         type="button"
         className="flex font-medium @[40rem]:text-lg text-base items-center justify-start gap-2"

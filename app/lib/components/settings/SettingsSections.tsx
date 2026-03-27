@@ -3,7 +3,6 @@
 import { useSearchParams } from "next/navigation";
 import { AccountSettingsSection } from "./AccountSettingsSection";
 import { LegalSettingsSection } from "./LegalSettingsSection";
-import { OverallSettingsSection } from "./OverallSettingsSection";
 import { PlanSettingsSection } from "./PlanSettingsSection";
 import { useAccountSettingsController } from "./useAccountSettingsController";
 import { LimitsSettingsSection } from "./LimitsSection";
@@ -36,7 +35,6 @@ export function SettingsSections() {
 
   return (
     <div className="flex flex-col items-start justify-start w-full">
-      <OverallSettingsSection activeSection={section} />
       <AccountSettingsSection
         activeSection={section}
         isProfileLoading={isProfileLoading}

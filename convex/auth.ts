@@ -8,6 +8,7 @@ import Google from "@auth/core/providers/google";
 import { api, internal } from "./_generated/api";
 import type { Doc } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
+import { isBetaAllowlistedEmail } from "./lib/betaAccess";
 import { buildUserSearchText } from "./users/model";
 
 type AuthProfile = {
@@ -248,6 +249,21 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
       if (existingUser?._id) {
         await ctx.db.patch(existingUser._id, userData);
         return existingUser._id;
+      }
+
+      const isRealOAuthProvider =
+        args.provider.type === "oauth" || args.provider.type === "oidc";
+
+      if (isRealOAuthProvider) {
+        if (typeof userData.email !== "string") {
+          throw new Error(
+            "This Google account cannot be used because it does not provide an email address.",
+          );
+        }
+
+        if (!isBetaAllowlistedEmail(userData.email)) {
+          throw new Error("This Google account is not approved for beta yet.");
+        }
       }
 
       return await ctx.db.insert("users", userData);

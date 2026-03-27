@@ -7,9 +7,9 @@ import {
 } from "@/app/lib/guestUpgrade";
 import { CreateProjectModal } from "@/app/lib/components/project/CreateProjectModal";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { useConvex, useMutation, useQuery } from "convex/react";
+import { useConvex, useConvexAuth, useMutation, useQuery } from "convex/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 type JoinTarget = {
@@ -23,7 +23,9 @@ type JoinTarget = {
 
 export default function Page() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const convex = useConvex();
+  const { isLoading: isAuthLoading } = useConvexAuth();
   const { signIn } = useAuthActions();
   const profile = useQuery(api.users.queries.currentProfile);
   const projects = useQuery(api.projects.queries.listCurrentUserProjects);
@@ -46,6 +48,24 @@ export default function Page() {
   const isAnonymous = profile?.isAnonymous === true;
   const isSignedInRealUser =
     profile !== undefined && profile !== null && profile.isAnonymous !== true;
+  const didReturnFromGuestUpgrade =
+    searchParams.get("betaUpgradeAttempt") === "google";
+
+  useEffect(() => {
+    if (
+      !didReturnFromGuestUpgrade ||
+      isAuthLoading ||
+      profile === undefined ||
+      !profile?.isAnonymous
+    ) {
+      return;
+    }
+
+    void Promise.resolve().then(() => {
+      setUpgradeError("This Google account is not approved for beta yet.");
+    });
+    router.replace("/projects");
+  }, [didReturnFromGuestUpgrade, isAuthLoading, profile, router]);
 
   useEffect(() => {
     if (!profile || profile.isAnonymous) {

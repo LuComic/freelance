@@ -9,6 +9,7 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as betaAccess_queries from "../betaAccess/queries.js";
 import type * as billing_actions from "../billing/actions.js";
 import type * as billing_model from "../billing/model.js";
 import type * as billing_queries from "../billing/queries.js";
@@ -17,6 +18,7 @@ import type * as connections_mutations from "../connections/mutations.js";
 import type * as connections_queries from "../connections/queries.js";
 import type * as http from "../http.js";
 import type * as lib_auth from "../lib/auth.js";
+import type * as lib_betaAccess from "../lib/betaAccess.js";
 import type * as lib_errors from "../lib/errors.js";
 import type * as lib_guests from "../lib/guests.js";
 import type * as lib_pageLimits from "../lib/pageLimits.js";
@@ -58,6 +60,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  "betaAccess/queries": typeof betaAccess_queries;
   "billing/actions": typeof billing_actions;
   "billing/model": typeof billing_model;
   "billing/queries": typeof billing_queries;
@@ -66,6 +69,7 @@ declare const fullApi: ApiFromModules<{
   "connections/queries": typeof connections_queries;
   http: typeof http;
   "lib/auth": typeof lib_auth;
+  "lib/betaAccess": typeof lib_betaAccess;
   "lib/errors": typeof lib_errors;
   "lib/guests": typeof lib_guests;
   "lib/pageLimits": typeof lib_pageLimits;

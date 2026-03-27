@@ -18,8 +18,8 @@ export default function Home() {
               clients.
               <br />
               <em>
-                The site is right now in early beta. Create an account for
-                future updates and early testing (platform itself works).
+                The site is right now in early beta. Only select people can sign
+                up.
               </em>
             </p>
 
