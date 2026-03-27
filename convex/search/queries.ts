@@ -1,7 +1,10 @@
 import { v } from "convex/values";
 import type { Doc } from "../_generated/dataModel";
 import { query } from "../_generated/server";
-import { getConnectionByPairKey, toConnectionUserListItem } from "../connections/model";
+import {
+  getConnectionByPairKey,
+  toConnectionUserListItem,
+} from "../connections/model";
 import { requireCurrentAuth } from "../lib/auth";
 import { assertNonAnonymousUser, isAnonymousUser } from "../lib/guests";
 import { APP_ERROR_CODES, ConvexDomainError } from "../lib/errors";
@@ -14,10 +17,8 @@ type ProjectSearchOrder = {
 
 type PageSearchCandidate = {
   projectId: Doc<"projects">["_id"];
-  projectSlug: string;
   projectName: string;
   pageId: Doc<"pages">["_id"];
-  pageSlug: string;
   pageTitle: string;
   pageDescription: string | null;
   projectUpdatedAt: number;
@@ -61,7 +62,10 @@ function compareProjectsForSearch(
 
 function getSearchRank(
   normalizedQuery: string,
-  candidate: Pick<PageSearchCandidate, "normalizedPageTitle" | "normalizedProjectName">,
+  candidate: Pick<
+    PageSearchCandidate,
+    "normalizedPageTitle" | "normalizedProjectName"
+  >,
 ) {
   if (candidate.normalizedPageTitle === normalizedQuery) {
     return 0;
@@ -106,10 +110,8 @@ function compareCandidates(
 function toPageSearchResult(candidate: PageSearchCandidate): PageSearchResult {
   return {
     projectId: candidate.projectId,
-    projectSlug: candidate.projectSlug,
     projectName: candidate.projectName,
     pageId: candidate.pageId,
-    pageSlug: candidate.pageSlug,
     pageTitle: candidate.pageTitle,
     pageDescription: candidate.pageDescription,
     projectUpdatedAt: candidate.projectUpdatedAt,
@@ -137,7 +139,10 @@ export const searchPagesAcrossProjects = query({
       const projects = await Promise.all(
         activeMemberships.map((membership) => ctx.db.get(membership.projectId)),
       );
-      const visibleProjects = new Map<Doc<"projects">["_id"], Doc<"projects">>();
+      const visibleProjects = new Map<
+        Doc<"projects">["_id"],
+        Doc<"projects">
+      >();
 
       for (const project of projects) {
         if (!project || project.isArchived === true) {
@@ -157,10 +162,8 @@ export const searchPagesAcrossProjects = query({
 
             return orderedPages.map((page) => ({
               projectId: project._id,
-              projectSlug: project.slug,
               projectName: project.name,
               pageId: page._id,
-              pageSlug: page.slug,
               pageTitle: page.title,
               pageDescription: page.description ?? null,
               projectUpdatedAt: project.updatedAt,
@@ -250,7 +253,11 @@ export const searchPeople = query({
           continue;
         }
 
-        const connection = await getConnectionByPairKey(ctx, userId, result._id);
+        const connection = await getConnectionByPairKey(
+          ctx,
+          userId,
+          result._id,
+        );
         if (connection?.status === "blocked") {
           continue;
         }

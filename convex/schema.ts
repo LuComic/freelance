@@ -69,7 +69,6 @@ const schema = defineSchema({
   projects: defineTable({
     ownerId: v.id("users"),
     createdByUserId: v.id("users"),
-    slug: v.string(),
     name: v.string(),
     description: v.optional(v.string()),
     // Canonical page order for sidebar/navigation.
@@ -84,8 +83,6 @@ const schema = defineSchema({
     updatedAt: v.number(),
   })
     .index("by_owner", ["ownerId"])
-    .index("by_slug", ["slug"])
-    .index("by_owner_slug", ["ownerId", "slug"])
     .index("by_created_by", ["createdByUserId"])
     .index("by_join_code", ["joinCode"]),
 
@@ -156,7 +153,6 @@ const schema = defineSchema({
     readAt: v.optional(v.number()),
     actorUserId: v.id("users"),
     projectId: v.optional(v.id("projects")),
-    projectSlugSnapshot: v.optional(v.string()),
     projectNameSnapshot: v.optional(v.string()),
     pageId: v.optional(v.id("pages")),
     pageTitleSnapshot: v.optional(v.string()),
@@ -210,7 +206,6 @@ const schema = defineSchema({
   pages: defineTable({
     projectId: v.id("projects"),
     title: v.string(),
-    slug: v.string(),
     description: v.optional(v.string()),
     contentStorageId: v.optional(v.id("_storage")),
     contentJson: v.optional(v.string()),
@@ -220,9 +215,7 @@ const schema = defineSchema({
     isArchived: v.optional(v.boolean()),
     createdAt: v.number(),
     updatedAt: v.number(),
-  })
-    .index("by_project", ["projectId"])
-    .index("by_project_slug", ["projectId", "slug"]),
+  }).index("by_project", ["projectId"]),
 });
 
 export default schema;

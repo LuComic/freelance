@@ -1,8 +1,12 @@
 import type { ActivePageState, ProjectPageSummary } from "./types";
+import {
+  getProjectPagePath,
+  PROJECT_ROUTE_RESERVED_SEGMENTS,
+} from "../paths";
 
 export type PageRoute = {
-  projectSlug: string;
-  pageSlug: string;
+  projectId: string;
+  pageId: string;
 };
 
 export function getPageRoute(pathname: string): PageRoute | null {
@@ -11,55 +15,40 @@ export function getPageRoute(pathname: string): PageRoute | null {
     return null;
   }
 
-  const pageSlug = segments[2];
-  if (
-    pageSlug === "analytics" ||
-    pageSlug === "settings" ||
-    pageSlug === "terms" ||
-    pageSlug === "privacy" ||
-    pageSlug === "cookies"
-  ) {
+  const pageId = segments[2];
+  if (PROJECT_ROUTE_RESERVED_SEGMENTS.has(pageId)) {
     return null;
   }
 
   return {
-    projectSlug: segments[1],
-    pageSlug,
+    projectId: segments[1],
+    pageId,
   };
-}
-
-export function getProjectPagePath(projectSlug: string, pageSlug: string) {
-  return `/projects/${projectSlug}/${pageSlug}`;
 }
 
 export function canReuseActivePageForRoute(args: {
   route: PageRoute | null;
   activePage: ActivePageState | null;
-  pendingRouteProjectId: string | null;
-  pendingRoutePageId: string | null;
 }) {
-  const { route, activePage, pendingRouteProjectId, pendingRoutePageId } = args;
+  const { route, activePage } = args;
 
   if (!route || !activePage) {
     return false;
   }
 
   return (
-    (activePage.project.slug === route.projectSlug &&
-      activePage.page.slug === route.pageSlug) ||
-    (pendingRouteProjectId !== null &&
-      activePage.project.id === pendingRouteProjectId) ||
-    (pendingRoutePageId !== null && activePage.page.id === pendingRoutePageId)
+    activePage.project.id === route.projectId &&
+    activePage.page.id === route.pageId
   );
 }
 
 export function resolveDeleteRedirectPath(args: {
   currentPageId: string;
-  projectSlug: string;
+  projectId: string;
   projectPages: ProjectPageSummary[];
   visitHistoryPageIds: string[];
 }) {
-  const { currentPageId, projectSlug, projectPages, visitHistoryPageIds } =
+  const { currentPageId, projectId, projectPages, visitHistoryPageIds } =
     args;
   const remainingPages = projectPages.filter(
     (page) => page.id !== currentPageId,
@@ -76,7 +65,7 @@ export function resolveDeleteRedirectPath(args: {
     );
 
     if (candidatePage) {
-      return getProjectPagePath(projectSlug, candidatePage.slug);
+      return getProjectPagePath(projectId, candidatePage.id);
     }
   }
 
@@ -87,15 +76,15 @@ export function resolveDeleteRedirectPath(args: {
     currentPageIndex > 0 ? projectPages[currentPageIndex - 1] : null;
 
   if (previousSibling && previousSibling.id !== currentPageId) {
-    return getProjectPagePath(projectSlug, previousSibling.slug);
+    return getProjectPagePath(projectId, previousSibling.id);
   }
 
   const nextSibling =
     currentPageIndex >= 0 ? projectPages[currentPageIndex + 1] : null;
 
   if (nextSibling && nextSibling.id !== currentPageId) {
-    return getProjectPagePath(projectSlug, nextSibling.slug);
+    return getProjectPagePath(projectId, nextSibling.id);
   }
 
-  return getProjectPagePath(projectSlug, remainingPages[0].slug);
+  return getProjectPagePath(projectId, remainingPages[0].id);
 }

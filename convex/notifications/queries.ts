@@ -49,10 +49,6 @@ export const listNotifications = query({
           const project = notification.projectId
             ? await ctx.db.get(notification.projectId)
             : null;
-          const projectSlug =
-            project && project.isArchived !== true
-              ? project.slug
-              : (notification.projectSlugSnapshot ?? null);
           const projectName =
             project && project.isArchived !== true
               ? project.name
@@ -66,7 +62,7 @@ export const listNotifications = query({
               createdAt: notification.createdAt,
               actorName: notification.actorNameSnapshot,
               actorImage: notification.actorImageSnapshot ?? null,
-              projectSlug,
+              projectId: notification.projectId ?? null,
               projectName,
               pageTitle: notification.pageTitleSnapshot ?? null,
               componentLabel: notification.componentLabelSnapshot ?? null,

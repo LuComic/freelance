@@ -3,18 +3,9 @@
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-export function useProjectSettingsController(projectSlug: string) {
-  const router = useRouter();
-  const [projectIdSnapshot, setProjectIdSnapshot] = useState<string | null>(null);
-  const [resolvedProjectSlugSnapshot, setResolvedProjectSlugSnapshot] = useState<
-    string | null
-  >(null);
-  const [pendingRouteProjectId, setPendingRouteProjectId] = useState<
-    string | null
-  >(null);
+export function useProjectSettingsController(projectId: string) {
   const [nameDraft, setNameDraft] = useState("");
   const [savedNameSnapshot, setSavedNameSnapshot] = useState<string | null>(null);
   const [renameError, setRenameError] = useState<string | null>(null);
@@ -29,7 +20,6 @@ export function useProjectSettingsController(projectSlug: string) {
   const [pendingMemberRemovalUserId, setPendingMemberRemovalUserId] = useState<
     Id<"users"> | null
   >(null);
-  const lastRouteCorrectionKeyRef = useRef<string | null>(null);
   const ensuredJoinCodeProjectIdRef = useRef<string | null>(null);
   const [joinCodeSnapshot, setJoinCodeSnapshot] = useState<string | null>(null);
   const [joinCodeError, setJoinCodeError] = useState<string | null>(null);
@@ -40,20 +30,9 @@ export function useProjectSettingsController(projectSlug: string) {
     window.location.replace("/projects");
   };
 
-  const canUseProjectIdFallback =
-    projectIdSnapshot !== null &&
-    (resolvedProjectSlugSnapshot === projectSlug ||
-      pendingRouteProjectId === projectIdSnapshot);
   const projectData = useQuery(
-    api.projects.queries.getProjectRootBySlug,
-    projectSlug
-      ? {
-          projectSlug,
-          projectId: canUseProjectIdFallback
-            ? (projectIdSnapshot as never)
-            : undefined,
-        }
-      : "skip",
+    api.projects.queries.getProjectRoot,
+    projectId ? { projectId: projectId as never } : "skip",
   );
   const renameProject = useMutation(api.projects.mutations.renameProject);
   const deleteProject = useMutation(api.projects.mutations.deleteProject);
@@ -86,53 +65,12 @@ export function useProjectSettingsController(projectSlug: string) {
     }
 
     queueMicrotask(() => {
-      setProjectIdSnapshot(projectData.project.id);
-      setResolvedProjectSlugSnapshot(projectData.project.slug);
-
       if (savedNameSnapshot === null || !isNameDirty) {
         setNameDraft(projectData.project.name);
         setSavedNameSnapshot(projectData.project.name);
       }
     });
-  }, [isNameDirty, projectData, router, savedNameSnapshot]);
-
-  useEffect(() => {
-    if (!projectData) {
-      return;
-    }
-
-    if (projectSlug !== projectData.project.slug) {
-      const correctionKey = `${projectData.project.id}:${projectData.project.slug}`;
-      if (lastRouteCorrectionKeyRef.current === correctionKey) {
-        return;
-      }
-
-      lastRouteCorrectionKeyRef.current = correctionKey;
-      queueMicrotask(() => {
-        setPendingRouteProjectId(projectData.project.id);
-        window.history.replaceState(
-          window.history.state,
-          "",
-          `/projects/${projectData.project.slug}/settings`,
-        );
-      });
-      return;
-    }
-
-    lastRouteCorrectionKeyRef.current = null;
-  }, [projectData, projectSlug]);
-
-  useEffect(() => {
-    if (
-      pendingRouteProjectId !== null &&
-      projectData &&
-      projectSlug === projectData.project.slug
-    ) {
-      queueMicrotask(() => {
-        setPendingRouteProjectId(null);
-      });
-    }
-  }, [pendingRouteProjectId, projectData, projectSlug]);
+  }, [isNameDirty, projectData, savedNameSnapshot]);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -153,10 +91,7 @@ export function useProjectSettingsController(projectSlug: string) {
     });
   }, [projectData?.project.id]);
 
-  const currentProjectId = useMemo(
-    () => (projectData === null ? null : (projectData?.project.id ?? projectIdSnapshot)),
-    [projectData, projectIdSnapshot],
-  );
+  const currentProjectId = projectData === null ? null : (projectData?.project.id ?? projectId);
   const projectMembers = useQuery(
     api.projects.members.getProjectMembers,
     currentProjectId ? { projectId: currentProjectId as never } : "skip",
@@ -252,12 +187,8 @@ export function useProjectSettingsController(projectSlug: string) {
         projectId: currentProjectId as never,
         name: trimmedName,
       });
-      setProjectIdSnapshot(result.projectId);
-      setResolvedProjectSlugSnapshot(result.projectSlug);
-      setPendingRouteProjectId(result.projectId);
       setNameDraft(result.name);
       setSavedNameSnapshot(result.name);
-      router.replace(`/projects/${result.projectSlug}/settings`);
     } catch (error) {
       setRenameError(
         error instanceof Error ? error.message : "Could not rename project.",

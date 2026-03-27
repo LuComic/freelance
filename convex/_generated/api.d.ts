@@ -24,7 +24,6 @@ import type * as lib_guests from "../lib/guests.js";
 import type * as lib_pageLimits from "../lib/pageLimits.js";
 import type * as lib_permissions from "../lib/permissions.js";
 import type * as lib_projectRecords from "../lib/projectRecords.js";
-import type * as lib_slugs from "../lib/slugs.js";
 import type * as lib_storage from "../lib/storage.js";
 import type * as lib_validators from "../lib/validators.js";
 import type * as notifications_model from "../notifications/model.js";
@@ -75,7 +74,6 @@ declare const fullApi: ApiFromModules<{
   "lib/pageLimits": typeof lib_pageLimits;
   "lib/permissions": typeof lib_permissions;
   "lib/projectRecords": typeof lib_projectRecords;
-  "lib/slugs": typeof lib_slugs;
   "lib/storage": typeof lib_storage;
   "lib/validators": typeof lib_validators;
   "notifications/model": typeof notifications_model;

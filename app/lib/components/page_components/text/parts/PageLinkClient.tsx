@@ -2,17 +2,18 @@
 
 import Link from "next/link";
 import type { PageComponentInstanceByType } from "@/lib/pageDocument";
+import { getProjectPagePath } from "@/app/lib/components/project/paths";
 import type { ProjectPageOption } from "./PageLink";
 
 type PageLinkClientProps = {
   config: PageComponentInstanceByType<"PageLink">["config"];
-  projectSlug: string;
+  projectId: string;
   targetPage: ProjectPageOption | null;
 };
 
 export const PageLinkClient = ({
   config,
-  projectSlug,
+  projectId,
   targetPage,
 }: PageLinkClientProps) => {
   const trimmedText = config.text.trim();
@@ -31,7 +32,7 @@ export const PageLinkClient = ({
 
   return (
     <Link
-      href={`/projects/${projectSlug}/${targetPage.slug}`}
+      href={getProjectPagePath(projectId, targetPage.id)}
       className="w-max text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover) page-link-selected"
     >
       {trimmedText}

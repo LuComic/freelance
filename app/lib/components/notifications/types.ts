@@ -20,7 +20,7 @@ export type ConnectionNotification = BaseNotification & {
 
 export type ClientStateChangedNotification = BaseNotification & {
   type: "clientStateChanged";
-  projectSlug: string | null;
+  projectId: Id<"projects"> | null;
   projectName: string | null;
   pageTitle: string | null;
   componentLabel: string | null;

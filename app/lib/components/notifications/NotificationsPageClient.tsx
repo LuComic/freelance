@@ -5,6 +5,7 @@ import { useMutation, useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 import { api } from "@/convex/_generated/api";
 import { useSidebarController } from "../sidebar/SidebarControllerContext";
+import { getProjectAnalyticsPath } from "../project/paths";
 import type { AppNotification } from "./types";
 
 function formatNotificationDate(timestamp: number) {
@@ -73,11 +74,11 @@ export const NotificationsPageClient = () => {
     });
 
     if (notification.type === "clientStateChanged") {
-      if (!notification.projectSlug) {
+      if (!notification.projectId) {
         return;
       }
 
-      router.push(`/projects/${notification.projectSlug}/analytics`);
+      router.push(getProjectAnalyticsPath(String(notification.projectId)));
       return;
     }
 

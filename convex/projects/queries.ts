@@ -7,13 +7,12 @@ import { APP_ERROR_CODES, ConvexDomainError } from "../lib/errors";
 import { requireProjectMember } from "../lib/permissions";
 import {
   getOrderedProjectPages,
-  requireProjectBySlug,
+  requireProjectById,
 } from "../lib/projectRecords";
 import { buildUserDisplayName } from "../connections/model";
 
 type ProjectSummary = {
   id: Doc<"projects">["_id"];
-  slug: string;
   name: string;
   viewerRole: Doc<"projectMembers">["role"];
   description: string | null;
@@ -21,7 +20,6 @@ type ProjectSummary = {
   createdAt: number;
   pages: Array<{
     id: Doc<"pages">["_id"];
-    slug: string;
     title: string;
   }>;
 };
@@ -61,7 +59,6 @@ async function toProjectSummary(
   const pages = await getOrderedProjectPages(ctx, project);
   return {
     id: project._id,
-    slug: project.slug,
     name: project.name,
     viewerRole,
     description: project.description ?? null,
@@ -69,27 +66,9 @@ async function toProjectSummary(
     createdAt: project.createdAt,
     pages: pages.map((page) => ({
       id: page._id,
-      slug: page.slug,
       title: page.title,
     })),
   };
-}
-
-async function resolveProjectByReference(
-  ctx: QueryCtx,
-  args: {
-    projectSlug: string;
-    projectId?: Doc<"projects">["_id"];
-  },
-) {
-  if (args.projectId) {
-    const project = await ctx.db.get(args.projectId);
-    if (project && project.isArchived !== true) {
-      return project;
-    }
-  }
-
-  return requireProjectBySlug(ctx, args.projectSlug);
 }
 
 export const listCurrentUserProjects = query({
@@ -131,7 +110,6 @@ export const listCurrentUserProjects = query({
         .sort((left, right) => compareProjects(projectOrder, left, right))
         .map((summary) => ({
           id: summary.id,
-          slug: summary.slug,
           name: summary.name,
           viewerRole: summary.viewerRole,
           description: summary.description,
@@ -152,35 +130,14 @@ export const listCurrentUserProjects = query({
   },
 });
 
-export const getProjectSidebarBySlug = query({
+export const getProjectRoot = query({
   args: {
-    projectSlug: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const { userId } = await requireCurrentAuth(ctx);
-    const project = await requireProjectBySlug(ctx, args.projectSlug);
-    const membership = await requireProjectMember(ctx, project._id, userId);
-    const summary = await toProjectSummary(ctx, project, membership.role);
-    return {
-      id: summary.id,
-      slug: summary.slug,
-      name: summary.name,
-      description: summary.description,
-      pageCount: summary.pageCount,
-      pages: summary.pages,
-    };
-  },
-});
-
-export const getProjectRootBySlug = query({
-  args: {
-    projectSlug: v.string(),
-    projectId: v.optional(v.id("projects")),
+    projectId: v.id("projects"),
   },
   handler: async (ctx, args) => {
     try {
       const { userId } = await requireCurrentAuth(ctx);
-      const project = await resolveProjectByReference(ctx, args);
+      const project = await requireProjectById(ctx, args.projectId);
       await requireProjectMember(ctx, project._id, userId);
       const pages = await getOrderedProjectPages(ctx, project);
       const owner = await ctx.db.get(project.ownerId);
@@ -191,7 +148,6 @@ export const getProjectRootBySlug = query({
       return {
         project: {
           id: project._id,
-          slug: project.slug,
           name: project.name,
           description: project.description ?? null,
           owner: {
@@ -201,7 +157,6 @@ export const getProjectRootBySlug = query({
         },
         pages: pages.map((page) => ({
           id: page._id,
-          slug: page.slug,
           title: page.title,
         })),
       };

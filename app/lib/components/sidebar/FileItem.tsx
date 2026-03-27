@@ -21,34 +21,38 @@ import {
   MenubarMenu,
   MenubarTrigger,
 } from "@/components/ui/menubar";
+import {
+  getProjectAnalyticsPath,
+  getProjectPagePath,
+  getProjectPath,
+  getProjectSettingsPath,
+} from "../project/paths";
 
 interface SidebarItemProps {
   project: {
     id: string;
-    slug: string;
     name: string;
     viewerRole: "owner" | "coCreator" | "client";
     pages: Array<{
       id: string;
-      slug: string;
       title: string;
     }>;
   };
-  currentPageSlug?: string | null;
+  currentPageId?: string | null;
   isExpanded: boolean;
   onToggleExpanded: () => void;
 }
 
 export const FileItem = ({
   project,
-  currentPageSlug,
+  currentPageId,
   isExpanded,
   onToggleExpanded,
 }: SidebarItemProps) => {
   const router = useRouter();
   const createPage = useMutation(api.pages.mutations.createPage);
   const entitlements = useQuery(currentEntitlementsQuery, {});
-  const projectBasePath = "/projects/" + project.slug;
+  const projectBasePath = getProjectPath(project.id);
   const [isCreatingPage, setIsCreatingPage] = useState(false);
   const isCreatePageDisabled =
     isCreatingPage || project.viewerRole === "client";
@@ -82,7 +86,7 @@ export const FileItem = ({
                   className="hover:bg-(--darkest-hover)! hover:text-(--light)!"
                 >
                   <Link
-                    href={projectBasePath + "/settings"}
+                    href={getProjectSettingsPath(project.id)}
                     className="flex items-center justify-start gap-2"
                   >
                     <Cog />
@@ -95,7 +99,7 @@ export const FileItem = ({
                     className="hover:bg-(--darkest-hover)! hover:text-(--light)! "
                   >
                     <Link
-                      href={projectBasePath + "/analytics"}
+                      href={getProjectAnalyticsPath(project.id)}
                       className="flex items-center justify-start gap-2"
                     >
                       <ChartNoAxesCombined />
@@ -129,7 +133,7 @@ export const FileItem = ({
               const result = await createPage({
                 projectId: project.id as never,
               });
-              router.push(`${projectBasePath}/${result.pageSlug}`);
+              router.push(getProjectPagePath(project.id, result.pageId));
             } finally {
               setIsCreatingPage(false);
             }
@@ -145,11 +149,11 @@ export const FileItem = ({
             <Link
               key={page.id}
               className={`pl-8 flex w-full items-center justify-start gap-2 rounded-lg p-1 md:text-base text-sm ${
-                page.slug === currentPageSlug
+                page.id === currentPageId
                   ? "bg-(--darkest-hover) text-(--light)"
                   : "hover:bg-(--darkest-hover)"
               }`}
-              href={projectBasePath + "/" + page.slug}
+              href={getProjectPagePath(project.id, page.id)}
             >
               <File size={18} />
               <span className="hidden md:inline">

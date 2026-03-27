@@ -5,35 +5,15 @@ import type { AnalyticsPageData } from "@/app/lib/components/analytics/types";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 
 export default function AnalyticsPage() {
-  const params = useParams<{ projectSlug: string }>();
+  const params = useParams<{ projectId: string }>();
   const router = useRouter();
-  const projectSlug = params.projectSlug;
-  const [projectIdSnapshot, setProjectIdSnapshot] = useState<string | null>(
-    null,
-  );
-  const [resolvedProjectSlugSnapshot, setResolvedProjectSlugSnapshot] =
-    useState<string | null>(null);
-  const [pendingRouteProjectId, setPendingRouteProjectId] = useState<
-    string | null
-  >(null);
-  const lastRouteCorrectionKeyRef = useRef<string | null>(null);
-  const canUseProjectIdFallback =
-    projectIdSnapshot !== null &&
-    (resolvedProjectSlugSnapshot === projectSlug ||
-      pendingRouteProjectId === projectIdSnapshot);
+  const projectId = params.projectId;
   const data = useQuery(
-    api.pageRuntime.analytics.getProjectAnalyticsBySlug,
-    projectSlug
-      ? {
-          projectSlug,
-          projectId: canUseProjectIdFallback
-            ? (projectIdSnapshot as never)
-            : undefined,
-        }
-      : "skip",
+    api.pageRuntime.analytics.getProjectAnalytics,
+    projectId ? { projectId: projectId as never } : "skip",
   ) as AnalyticsPageData | null | undefined;
 
   useEffect(() => {
@@ -42,57 +22,8 @@ export default function AnalyticsPage() {
         router.replace("/projects");
         router.refresh();
       });
-      return;
     }
-
-    if (!data) {
-      return;
-    }
-
-    queueMicrotask(() => {
-      setProjectIdSnapshot(data.project.id);
-      setResolvedProjectSlugSnapshot(data.project.slug);
-    });
   }, [data, router]);
-
-  useEffect(() => {
-    if (!data) {
-      return;
-    }
-
-    if (projectSlug !== data.project.slug) {
-      const correctionKey = `${data.project.id}:${data.project.slug}`;
-
-      if (lastRouteCorrectionKeyRef.current === correctionKey) {
-        return;
-      }
-
-      lastRouteCorrectionKeyRef.current = correctionKey;
-      queueMicrotask(() => {
-        setPendingRouteProjectId(data.project.id);
-        window.history.replaceState(
-          window.history.state,
-          "",
-          `/projects/${data.project.slug}/analytics`,
-        );
-      });
-      return;
-    }
-
-    lastRouteCorrectionKeyRef.current = null;
-  }, [data, projectSlug]);
-
-  useEffect(() => {
-    if (
-      pendingRouteProjectId !== null &&
-      data &&
-      projectSlug === data.project.slug
-    ) {
-      queueMicrotask(() => {
-        setPendingRouteProjectId(null);
-      });
-    }
-  }, [data, pendingRouteProjectId, projectSlug]);
 
   return (
     <>

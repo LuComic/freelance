@@ -1,3 +1,10 @@
+import {
+  getProjectAnalyticsPath,
+  getProjectPagePath,
+  getProjectPath,
+  getProjectSettingsPath,
+} from "../project/paths";
+
 export type StoredTabKind =
   | "projectsIndex"
   | "notifications"
@@ -18,16 +25,12 @@ export type StoredTab = {
   title: string;
   contextLabel: string;
   projectId?: string;
-  projectSlug?: string;
   pageId?: string;
-  pageSlug?: string;
 };
 
 type LegacyStoredTab = {
   pageId: string;
   projectId: string;
-  pageSlug: string;
-  projectSlug: string;
   pageTitle: string;
   projectName: string;
 };
@@ -39,11 +42,9 @@ export type StoredTabsState = {
 
 export type TabProjectSummary = {
   id: string;
-  slug: string;
   name: string;
   pages: Array<{
     id: string;
-    slug: string;
     title: string;
   }>;
 };
@@ -51,12 +52,10 @@ export type TabProjectSummary = {
 type ActivePageTabInput = {
   project: {
     id: string;
-    slug: string;
     name: string;
   };
   page: {
     id: string;
-    slug: string;
     title: string;
   };
 };
@@ -167,8 +166,6 @@ function isLegacyStoredTab(value: unknown): value is LegacyStoredTab {
   return (
     typeof tab.pageId === "string" &&
     typeof tab.projectId === "string" &&
-    typeof tab.pageSlug === "string" &&
-    typeof tab.projectSlug === "string" &&
     typeof tab.pageTitle === "string" &&
     typeof tab.projectName === "string"
   );
@@ -178,14 +175,59 @@ function fromLegacyStoredTab(tab: LegacyStoredTab): StoredTab {
   return {
     tabId: `project-page:${tab.pageId}`,
     kind: "projectPage",
-    path: `/projects/${tab.projectSlug}/${tab.pageSlug}`,
+    path: getProjectPagePath(tab.projectId, tab.pageId),
     title: tab.pageTitle,
     contextLabel: tab.projectName,
     projectId: tab.projectId,
-    projectSlug: tab.projectSlug,
     pageId: tab.pageId,
-    pageSlug: tab.pageSlug,
   };
+}
+
+function normalizeStoredTab(tab: StoredTab): StoredTab | null {
+  switch (tab.kind) {
+    case "projectsIndex":
+      return STATIC_TABS.projectsIndex;
+    case "notifications":
+      return STATIC_TABS.notifications;
+    case "accountSettings":
+      return STATIC_TABS.accountSettings;
+    case "legalOverview":
+      return STATIC_TABS.legalOverview;
+    case "legalTerms":
+      return STATIC_TABS.legalTerms;
+    case "legalPrivacy":
+      return STATIC_TABS.legalPrivacy;
+    case "legalCookies":
+      return STATIC_TABS.legalCookies;
+    case "projectRoot":
+      return tab.projectId
+        ? {
+            ...tab,
+            path: getProjectPath(tab.projectId),
+          }
+        : null;
+    case "projectSettings":
+      return tab.projectId
+        ? {
+            ...tab,
+            path: getProjectSettingsPath(tab.projectId),
+          }
+        : null;
+    case "projectAnalytics":
+      return tab.projectId
+        ? {
+            ...tab,
+            path: getProjectAnalyticsPath(tab.projectId),
+          }
+        : null;
+    case "projectPage":
+      return tab.projectId && tab.pageId
+        ? {
+            ...tab,
+            path: getProjectPagePath(tab.projectId, tab.pageId),
+          }
+        : null;
+  }
 }
 
 function parseRawTabsCookie(value?: string | null) {
@@ -240,11 +282,10 @@ function createProjectRootTab(project: TabProjectSummary): StoredTab {
   return {
     tabId: `project-root:${project.id}`,
     kind: "projectRoot",
-    path: `/projects/${project.slug}`,
+    path: getProjectPath(project.id),
     title: project.name,
     contextLabel: "Project",
     projectId: project.id,
-    projectSlug: project.slug,
   };
 }
 
@@ -252,11 +293,10 @@ function createProjectSettingsTab(project: TabProjectSummary): StoredTab {
   return {
     tabId: `project-settings:${project.id}`,
     kind: "projectSettings",
-    path: `/projects/${project.slug}/settings`,
+    path: getProjectSettingsPath(project.id),
     title: "Project Settings",
     contextLabel: project.name,
     projectId: project.id,
-    projectSlug: project.slug,
   };
 }
 
@@ -264,11 +304,10 @@ function createProjectAnalyticsTab(project: TabProjectSummary): StoredTab {
   return {
     tabId: `project-analytics:${project.id}`,
     kind: "projectAnalytics",
-    path: `/projects/${project.slug}/analytics`,
+    path: getProjectAnalyticsPath(project.id),
     title: "Analytics",
     contextLabel: project.name,
     projectId: project.id,
-    projectSlug: project.slug,
   };
 }
 
@@ -278,13 +317,11 @@ export function createProjectPageTab(
   return {
     tabId: `project-page:${activePage.page.id}`,
     kind: "projectPage",
-    path: `/projects/${activePage.project.slug}/${activePage.page.slug}`,
+    path: getProjectPagePath(activePage.project.id, activePage.page.id),
     title: activePage.page.title,
     contextLabel: activePage.project.name,
     projectId: activePage.project.id,
-    projectSlug: activePage.project.slug,
     pageId: activePage.page.id,
-    pageSlug: activePage.page.slug,
   };
 }
 
@@ -313,14 +350,18 @@ export function resolveTabForRoute({
     return STATIC_TABS.projectsIndex;
   }
 
-  const projectSlug = segments[1];
-  const project = projects?.find((candidate) => candidate.slug === projectSlug);
+  if (segments.length > 3) {
+    return null;
+  }
+
+  const projectId = segments[1];
+  const project = projects?.find((candidate) => candidate.id === projectId);
 
   if (!project) {
     if (
       activePage &&
-      activePage.project.slug === projectSlug &&
-      segments[2] === activePage.page.slug
+      activePage.project.id === projectId &&
+      segments[2] === activePage.page.id
     ) {
       return createProjectPageTab(activePage);
     }
@@ -345,14 +386,12 @@ export function resolveTabForRoute({
   if (
     activePage &&
     activePage.project.id === project.id &&
-    activePage.page.slug === nestedSegment
+    activePage.page.id === nestedSegment
   ) {
     return createProjectPageTab(activePage);
   }
 
-  const page = project.pages.find(
-    (candidate) => candidate.slug === nestedSegment,
-  );
+  const page = project.pages.find((candidate) => candidate.id === nestedSegment);
 
   if (!page) {
     return null;
@@ -361,13 +400,11 @@ export function resolveTabForRoute({
   return {
     tabId: `project-page:${page.id}`,
     kind: "projectPage",
-    path: `/projects/${project.slug}/${page.slug}`,
+    path: getProjectPagePath(project.id, page.id),
     title: page.title,
     contextLabel: project.name,
     projectId: project.id,
-    projectSlug: project.slug,
     pageId: page.id,
-    pageSlug: page.slug,
   };
 }
 
@@ -382,8 +419,14 @@ export function dedupeAndSanitizeTabsState(
       continue;
     }
 
-    seenTabIds.add(tab.tabId);
-    nextTabs.push(tab);
+    const normalizedTab = normalizeStoredTab(tab);
+
+    if (!normalizedTab) {
+      continue;
+    }
+
+    seenTabIds.add(normalizedTab.tabId);
+    nextTabs.push(normalizedTab);
   }
 
   const nextRecentTabIds: string[] = [];
@@ -434,11 +477,15 @@ export function parseTabsCookie(value?: string | null): StoredTabsState {
   const rawTabs = Array.isArray(candidateState.tabs) ? candidateState.tabs : [];
   const tabs = rawTabs.flatMap((tab) => {
     if (isStoredTab(tab)) {
-      return [tab];
+      const normalizedTab = normalizeStoredTab(tab);
+
+      return normalizedTab ? [normalizedTab] : [];
     }
 
     if (isLegacyStoredTab(tab)) {
-      return [fromLegacyStoredTab(tab)];
+      const normalizedTab = normalizeStoredTab(fromLegacyStoredTab(tab));
+
+      return normalizedTab ? [normalizedTab] : [];
     }
 
     return [];
@@ -542,11 +589,9 @@ export function reconcileTabsWithProjects(
           return [
             {
               ...tab,
-              path: `/projects/${project.slug}/${page.slug}`,
+              path: getProjectPagePath(project.id, page.id),
               title: page.title,
               contextLabel: project.name,
-              projectSlug: project.slug,
-              pageSlug: page.slug,
             },
           ];
         }

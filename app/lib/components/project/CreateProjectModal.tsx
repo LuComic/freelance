@@ -6,6 +6,7 @@ import { ChevronRight, Plus, Search, Trash } from "lucide-react";
 import { useMutation, useQuery } from "convex/react";
 import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { getProjectPagePath } from "./paths";
 import type { SearchPerson, SearchTemplate } from "../searchbar/SearchBarData";
 import { useSearchBar } from "../searchbar/SearchBarContext";
 
@@ -137,7 +138,7 @@ export const CreateProjectModal = ({
       setProjectDescription("");
       setClients([]);
       setCoCreators([]);
-      router.push(`/projects/${result.projectSlug}/${result.initialPageSlug}`);
+      router.push(getProjectPagePath(result.projectId, result.initialPageId));
     } catch (submissionError) {
       setError(
         submissionError instanceof Error

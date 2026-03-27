@@ -7,59 +7,59 @@ import { useState } from "react";
 import { FileItem } from "./FileItem";
 
 type ExpansionState = {
-  scopeProjectSlug: string | null;
-  expandedProjectSlugs: string[];
+  scopeProjectId: string | null;
+  expandedProjectIds: string[];
 };
 
 export const Files = () => {
   const projects = useQuery(api.projects.queries.listCurrentUserProjects);
   const pathname = usePathname();
   const segments = pathname.split("/").filter(Boolean);
-  const currentProjectSlug =
+  const currentProjectId =
     segments[0] === "projects" ? (segments[1] ?? null) : null;
-  const currentPageSlug =
+  const currentPageId =
     segments[2] && segments[2] !== "analytics" && segments[2] !== "settings"
       ? segments[2]
       : null;
   const currentProject =
-    projects?.find((project) => project.slug === currentProjectSlug) ?? null;
+    projects?.find((project) => project.id === currentProjectId) ?? null;
   const projectTitle = currentProject?.name ?? "Projects";
   const [expansionState, setExpansionState] = useState<ExpansionState>({
-    scopeProjectSlug: currentProjectSlug,
-    expandedProjectSlugs: currentProjectSlug ? [currentProjectSlug] : [],
+    scopeProjectId: currentProjectId,
+    expandedProjectIds: currentProjectId ? [currentProjectId] : [],
   });
-  const scopedExpandedProjectSlugs =
-    expansionState.scopeProjectSlug === currentProjectSlug
-      ? expansionState.expandedProjectSlugs
-      : currentProjectSlug
-        ? [currentProjectSlug]
+  const scopedExpandedProjectIds =
+    expansionState.scopeProjectId === currentProjectId
+      ? expansionState.expandedProjectIds
+      : currentProjectId
+        ? [currentProjectId]
         : [];
-  const expandedProjectSlugs = Array.from(
+  const expandedProjectIds = Array.from(
     new Set(
-      currentPageSlug && currentProjectSlug
-        ? [...scopedExpandedProjectSlugs, currentProjectSlug]
-        : scopedExpandedProjectSlugs,
+      currentPageId && currentProjectId
+        ? [...scopedExpandedProjectIds, currentProjectId]
+        : scopedExpandedProjectIds,
     ),
   );
 
-  const toggleProjectExpanded = (projectSlug: string) => {
+  const toggleProjectExpanded = (projectId: string) => {
     setExpansionState((prev) => {
-      const nextScopedExpandedProjectSlugs =
-        prev.scopeProjectSlug === currentProjectSlug
-          ? prev.expandedProjectSlugs
-          : currentProjectSlug
-            ? [currentProjectSlug]
+      const nextScopedExpandedProjectIds =
+        prev.scopeProjectId === currentProjectId
+          ? prev.expandedProjectIds
+          : currentProjectId
+            ? [currentProjectId]
             : [];
 
       return {
-        scopeProjectSlug: currentProjectSlug,
-        expandedProjectSlugs: nextScopedExpandedProjectSlugs.includes(
-          projectSlug,
+        scopeProjectId: currentProjectId,
+        expandedProjectIds: nextScopedExpandedProjectIds.includes(
+          projectId,
         )
-          ? nextScopedExpandedProjectSlugs.filter(
-              (slug) => slug !== projectSlug,
+          ? nextScopedExpandedProjectIds.filter(
+              (expandedId) => expandedId !== projectId,
             )
-          : [...nextScopedExpandedProjectSlugs, projectSlug],
+          : [...nextScopedExpandedProjectIds, projectId],
       };
     });
   };
@@ -81,9 +81,9 @@ export const Files = () => {
           <FileItem
             key={project.id}
             project={project}
-            currentPageSlug={currentPageSlug}
-            isExpanded={expandedProjectSlugs.includes(project.slug)}
-            onToggleExpanded={() => toggleProjectExpanded(project.slug)}
+            currentPageId={currentPageId}
+            isExpanded={expandedProjectIds.includes(project.id)}
+            onToggleExpanded={() => toggleProjectExpanded(project.id)}
           />
         ))
       ) : (

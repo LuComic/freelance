@@ -44,7 +44,6 @@ export type LatestChange = {
 export type AnalyticsPageData = {
   project: {
     id: Id<"projects">;
-    slug: string;
     name: string;
   };
   latestChanges: LatestChange[];

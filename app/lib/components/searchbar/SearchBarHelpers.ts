@@ -17,10 +17,8 @@ const TAG_COMMANDS = [
 
 export type SearchPageResult = {
   projectId: string;
-  projectSlug: string;
   projectName: string;
   pageId: string;
-  pageSlug: string;
   pageTitle: string;
   pageDescription: string | null;
   projectUpdatedAt: number;

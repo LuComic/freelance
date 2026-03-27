@@ -18,7 +18,6 @@ import {
   serializePageDocumentWithLimits,
 } from "../lib/pageLimits";
 import { getOrderedProjectPages } from "../lib/projectRecords";
-import { uniqueSlugFromLabel } from "../lib/slugs";
 import {
   assertPageDocumentV1,
   mergePageConfigDocument,
@@ -111,17 +110,11 @@ export const createPage = mutation({
     const existingPages = await getOrderedProjectPages(ctx, project);
     const nextPageNumber = existingPages.length + 1;
     const title = `Page ${nextPageNumber}`;
-    const pageSlug = uniqueSlugFromLabel(
-      title,
-      existingPages.map((page) => page.slug),
-      "untitled-page",
-    );
     const contentJson = serializePageDocumentWithLimits(createInitialPage());
 
     const pageId = await ctx.db.insert("pages", {
       projectId: project._id,
       title,
-      slug: pageSlug,
       contentJson,
       createdByUserId: userId,
       updatedByUserId: userId,
@@ -140,7 +133,6 @@ export const createPage = mutation({
 
     return {
       pageId,
-      pageSlug,
       title,
     };
   },
@@ -162,30 +154,14 @@ export const renamePage = mutation({
     const page = await requirePageAccess(ctx, args.pageId, userId);
     await requireProjectEditor(ctx, page.projectId, userId);
 
-    const project = await ctx.db.get(page.projectId);
-    if (!project || project.isArchived) {
-      throw notFound(`Project ${page.projectId} was not found.`);
-    }
-
-    const siblingPages = await getOrderedProjectPages(ctx, project);
-    const nextSlug = uniqueSlugFromLabel(
-      trimmedTitle,
-      siblingPages
-        .filter((siblingPage) => siblingPage._id !== page._id)
-        .map((siblingPage) => siblingPage.slug),
-      "untitled-page",
-    );
-
     await ctx.db.patch(page._id, {
       title: trimmedTitle,
-      slug: nextSlug,
       updatedAt: Date.now(),
       updatedByUserId: userId,
     });
 
     return {
       pageId: page._id,
-      slug: nextSlug,
       title: trimmedTitle,
     };
   },
@@ -270,20 +246,11 @@ export const savePage = mutation({
       );
     }
 
-    const siblingPages = await getOrderedProjectPages(ctx, project);
-    const nextSlug = uniqueSlugFromLabel(
-      trimmedTitle,
-      siblingPages
-        .filter((siblingPage) => siblingPage._id !== page._id)
-        .map((siblingPage) => siblingPage.slug),
-      "untitled-page",
-    );
     const now = Date.now();
     const contentJson = serializePageDocumentWithLimits(nextDocument);
 
     await ctx.db.patch(page._id, {
       title: trimmedTitle,
-      slug: nextSlug,
       contentJson,
       updatedAt: now,
       updatedByUserId: userId,
@@ -291,7 +258,6 @@ export const savePage = mutation({
 
     return {
       pageId: page._id,
-      slug: nextSlug,
       title: trimmedTitle,
       document: nextDocument,
     };
@@ -332,19 +298,9 @@ export const savePageLiveState = mutation({
       args.document,
     );
     const shouldRenamePage = trimmedTitle !== page.title;
-    let nextSlug = page.slug;
 
     if (shouldRenamePage) {
       await requireProjectEditor(ctx, page.projectId, userId);
-
-      const siblingPages = await getOrderedProjectPages(ctx, project);
-      nextSlug = uniqueSlugFromLabel(
-        trimmedTitle,
-        siblingPages
-          .filter((siblingPage) => siblingPage._id !== page._id)
-          .map((siblingPage) => siblingPage.slug),
-        "untitled-page",
-      );
     }
 
     const changedComponents = getChangedLiveStateComponents(
@@ -361,7 +317,6 @@ export const savePageLiveState = mutation({
 
     await ctx.db.patch(page._id, {
       title: trimmedTitle,
-      slug: nextSlug,
       contentJson,
       updatedAt: now,
       updatedByUserId: userId,
@@ -453,7 +408,6 @@ export const savePageLiveState = mutation({
             type: "clientStateChanged",
             ...actorSnapshot,
             projectId: project._id,
-            projectSlugSnapshot: project.slug,
             projectNameSnapshot: project.name,
             pageId: page._id,
             pageTitleSnapshot: trimmedTitle,
@@ -490,7 +444,6 @@ export const savePageLiveState = mutation({
             type: "clientStateChanged",
             ...actorSnapshot,
             projectId: project._id,
-            projectSlugSnapshot: project.slug,
             projectNameSnapshot: project.name,
             pageId: page._id,
             pageTitleSnapshot: trimmedTitle,
@@ -506,7 +459,6 @@ export const savePageLiveState = mutation({
     return {
       pageId: page._id,
       title: trimmedTitle,
-      slug: nextSlug,
       document: nextDocument,
     };
   },

@@ -34,6 +34,7 @@ import {
   getPageRoute,
   resolveDeleteRedirectPath,
 } from "./page_document_helpers/routing";
+import { getProjectPagePath } from "./paths";
 import { sanitizeDocumentBeforeCreatorSave } from "./page_document_helpers/sanitizeDocumentBeforeSave";
 import type {
   ActivePageDocumentContextValue,
@@ -83,12 +84,6 @@ export function PageDocumentProvider({
   const [saveError, setSaveError] = useState<string | null>(null);
   const [deleteStatus, setDeleteStatus] = useState<DeleteStatus>("idle");
   const [deleteError, setDeleteError] = useState<string | null>(null);
-  const [pendingRouteProjectId, setPendingRouteProjectId] = useState<
-    string | null
-  >(null);
-  const [pendingRoutePageId, setPendingRoutePageId] = useState<string | null>(
-    null,
-  );
   const [savedTitleSnapshot, setSavedTitleSnapshot] = useState<string | null>(
     null,
   );
@@ -97,7 +92,6 @@ export function PageDocumentProvider({
   >(null);
   const componentSeedRef = useRef(0);
   const lastHydratedPageKeyRef = useRef<string | null>(null);
-  const lastRouteCorrectionKeyRef = useRef<string | null>(null);
   const activePageRef = useRef<ActivePageState | null>(null);
   const projectVisitHistoryRef = useRef<Map<string, string[]>>(new Map());
   const pendingDeleteRedirectPathRef = useRef<string | null>(null);
@@ -112,26 +106,15 @@ export function PageDocumentProvider({
   const canUseActivePageFallback = canReuseActivePageForRoute({
     route,
     activePage,
-    pendingRouteProjectId,
-    pendingRoutePageId,
   });
   const pageQueryArgs =
     route === null
       ? "skip"
       : {
-          projectSlug: route.projectSlug,
-          projectId: canUseActivePageFallback
-            ? (activePage?.project.id as never)
-            : undefined,
-          pageSlug: route.pageSlug,
-          pageId: canUseActivePageFallback
-            ? (activePage?.page.id as never)
-            : undefined,
+          projectId: route.projectId as never,
+          pageId: route.pageId as never,
         };
-  const pageData = useQuery(
-    api.pages.queries.getPageEditorBySlugs,
-    pageQueryArgs,
-  );
+  const pageData = useQuery(api.pages.queries.getPageEditor, pageQueryArgs);
   const entitlements = useQuery(currentEntitlementsQuery, {});
   const projects = useQuery(api.projects.queries.listCurrentUserProjects);
   const activeProjectMembers = useQuery(
@@ -197,14 +180,11 @@ export function PageDocumentProvider({
       setSaveError(null);
       setDeleteStatus("idle");
       setDeleteError(null);
-      setPendingRouteProjectId(null);
-      setPendingRoutePageId(null);
       setSavedTitleSnapshot(null);
       setSavedDocumentSnapshot(null);
       setViewerRole(null);
     });
     lastHydratedPageKeyRef.current = null;
-    lastRouteCorrectionKeyRef.current = null;
   }, [canUseActivePageFallback, pageData, route]);
 
   useEffect(() => {
@@ -218,8 +198,6 @@ export function PageDocumentProvider({
           setSaveError(null);
           setDeleteStatus("idle");
           setDeleteError(null);
-          setPendingRouteProjectId(null);
-          setPendingRoutePageId(null);
           setSavedTitleSnapshot(null);
           setSavedDocumentSnapshot(null);
           setViewerRole(null);
@@ -238,8 +216,6 @@ export function PageDocumentProvider({
         setSaveError(null);
         setDeleteStatus("idle");
         setDeleteError(null);
-        setPendingRouteProjectId(null);
-        setPendingRoutePageId(null);
         setSavedTitleSnapshot(null);
         setSavedDocumentSnapshot(null);
         setViewerRole(null);
@@ -260,10 +236,11 @@ export function PageDocumentProvider({
       !hasUnsavedChanges &&
       !!activePage &&
       !!document &&
-      (activePage.page.slug !== pageData.page.slug ||
+      (activePage.project.name !== pageData.project.name ||
         activePage.page.title !== pageData.page.title ||
         activePage.page.updatedAt !== pageData.page.updatedAt ||
-        currentDocumentSnapshot !== serverDocumentSnapshot);
+        currentDocumentSnapshot !== serverDocumentSnapshot ||
+        viewerRole !== pageData.viewerRole);
 
     if (isSamePage && !shouldSyncExistingPage) {
       return;
@@ -293,6 +270,7 @@ export function PageDocumentProvider({
     pageData,
     router,
     route,
+    viewerRole,
   ]);
 
   useEffect(() => {
@@ -317,65 +295,6 @@ export function PageDocumentProvider({
       setModeLock(null);
     }
   }, [canUseActivePageFallback, pageData, route, setModeLock]);
-
-  useEffect(() => {
-    if (
-      route &&
-      pageData &&
-      (route.projectSlug !== pageData.project.slug ||
-        route.pageSlug !== pageData.page.slug)
-    ) {
-      const correctionKey = `${pageData.project.id}:${pageData.project.slug}:${pageData.page.id}:${pageData.page.slug}`;
-      if (lastRouteCorrectionKeyRef.current === correctionKey) {
-        return;
-      }
-
-      lastRouteCorrectionKeyRef.current = correctionKey;
-      queueMicrotask(() => {
-        setPendingRouteProjectId(pageData.project.id);
-        setPendingRoutePageId(pageData.page.id);
-        window.history.replaceState(
-          window.history.state,
-          "",
-          `/projects/${pageData.project.slug}/${pageData.page.slug}`,
-        );
-      });
-      return;
-    }
-
-    if (
-      route &&
-      pageData &&
-      route.projectSlug === pageData.project.slug &&
-      route.pageSlug === pageData.page.slug
-    ) {
-      lastRouteCorrectionKeyRef.current = null;
-    }
-  }, [pageData, route]);
-
-  useEffect(() => {
-    if (!route || !activePage) {
-      if (pendingRouteProjectId !== null || pendingRoutePageId !== null) {
-        queueMicrotask(() => {
-          setPendingRouteProjectId(null);
-          setPendingRoutePageId(null);
-        });
-      }
-      return;
-    }
-
-    if (
-      route.projectSlug === activePage.project.slug &&
-      route.pageSlug === activePage.page.slug
-    ) {
-      if (pendingRouteProjectId !== null || pendingRoutePageId !== null) {
-        queueMicrotask(() => {
-          setPendingRouteProjectId(null);
-          setPendingRoutePageId(null);
-        });
-      }
-    }
-  }, [activePage, pendingRoutePageId, pendingRouteProjectId, route]);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -599,7 +518,6 @@ export function PageDocumentProvider({
             page: {
               ...currentPage.page,
               title: result.title,
-              slug: result.slug,
             },
           };
           const hasLocalChangesSinceSaveStarted =
@@ -610,18 +528,6 @@ export function PageDocumentProvider({
             activePageRef.current = nextPage;
             setDocument(result.document);
             setActivePage(nextPage);
-
-            if (
-              route &&
-              (result.slug !== route.pageSlug ||
-                nextPage.project.slug !== route.projectSlug)
-            ) {
-              setPendingRouteProjectId(nextPage.project.id);
-              setPendingRoutePageId(result.pageId);
-              router.replace(
-                `/projects/${nextPage.project.slug}/${result.slug}`,
-              );
-            }
           }
 
           setSavedTitleSnapshot(result.title);
@@ -643,7 +549,6 @@ export function PageDocumentProvider({
           page: {
             ...currentPage.page,
             title: result.title,
-            slug: result.slug,
           },
         };
         const hasLocalChangesSinceSaveStarted =
@@ -654,16 +559,6 @@ export function PageDocumentProvider({
           activePageRef.current = nextPage;
           setDocument(result.document);
           setActivePage(nextPage);
-
-          if (
-            route &&
-            (result.slug !== route.pageSlug ||
-              nextPage.project.slug !== route.projectSlug)
-          ) {
-            setPendingRouteProjectId(nextPage.project.id);
-            setPendingRoutePageId(result.pageId);
-            router.replace(`/projects/${nextPage.project.slug}/${result.slug}`);
-          }
         }
 
         setSavedTitleSnapshot(result.title);
@@ -678,8 +573,6 @@ export function PageDocumentProvider({
     },
     [
       isLive,
-      route,
-      router,
       savePage,
       savePageLiveState,
       activeProjectMembers,
@@ -688,8 +581,6 @@ export function PageDocumentProvider({
       savedTitleSnapshot,
       setActivePage,
       setDocument,
-      setPendingRoutePageId,
-      setPendingRouteProjectId,
       setSavedDocumentSnapshot,
       setSavedTitleSnapshot,
       setSaveError,
@@ -733,7 +624,6 @@ export function PageDocumentProvider({
           page: {
             ...currentPage.page,
             title: result.title,
-            slug: result.slug,
           },
         };
 
@@ -741,16 +631,6 @@ export function PageDocumentProvider({
         activePageRef.current = nextPage;
         setDocument(result.document);
         setActivePage(nextPage);
-
-        if (
-          route &&
-          (result.slug !== route.pageSlug ||
-            nextPage.project.slug !== route.projectSlug)
-        ) {
-          setPendingRouteProjectId(nextPage.project.id);
-          setPendingRoutePageId(result.pageId);
-          router.replace(`/projects/${nextPage.project.slug}/${result.slug}`);
-        }
 
         setSavedTitleSnapshot(result.title);
         setSavedDocumentSnapshot(JSON.stringify(result.document));
@@ -767,12 +647,8 @@ export function PageDocumentProvider({
     },
     [
       applyPageTemplateMutation,
-      route,
-      router,
       setActivePage,
       setDocument,
-      setPendingRoutePageId,
-      setPendingRouteProjectId,
       setSavedDocumentSnapshot,
       setSavedTitleSnapshot,
       setSaveError,
@@ -860,7 +736,7 @@ export function PageDocumentProvider({
     const result = await createPage({
       projectId: currentPage.project.id as never,
     });
-    router.push(`/projects/${currentPage.project.slug}/${result.pageSlug}`);
+    router.push(getProjectPagePath(currentPage.project.id, result.pageId));
   }, [createPage, router]);
 
   const deletePage = useCallback(async () => {
@@ -879,7 +755,7 @@ export function PageDocumentProvider({
       );
       const fallbackPath = resolveDeleteRedirectPath({
         currentPageId: currentPage.page.id,
-        projectSlug: currentPage.project.slug,
+        projectId: currentPage.project.id,
         projectPages: currentProject?.pages ?? [],
         visitHistoryPageIds:
           projectVisitHistoryRef.current.get(currentPage.project.id) ?? [],
@@ -920,7 +796,10 @@ export function PageDocumentProvider({
   const value = useMemo<PageDocumentContextValue>(
     () => ({
       isActivePage: route !== null,
-      isLoading: route !== null && pageData === undefined,
+      isLoading:
+        route !== null &&
+        pageData === undefined &&
+        !canUseActivePageFallback,
       saveStatus,
       saveError,
       deleteStatus,
@@ -963,6 +842,7 @@ export function PageDocumentProvider({
       saveStatus,
       setPageTitle,
       planTier,
+      canUseActivePageFallback,
       updateComponentConfig,
       updateComponentLiveState,
       updateEditorText,

@@ -15,7 +15,6 @@ import {
 } from "../lib/permissions";
 import { serializePageDocumentWithLimits } from "../lib/pageLimits";
 import { upsertProjectInviteForUser } from "./invites";
-import { uniqueSlugFromLabel } from "../lib/slugs";
 import { projectInviteRoleValidator } from "../lib/validators";
 import { createInitialPageConfig } from "../pages/content";
 import { generateUniqueJoinCode } from "./model";
@@ -73,12 +72,6 @@ export const createProject = mutation({
       throw invalidState("Project name cannot be empty.");
     }
 
-    const existingProjects = await ctx.db.query("projects").collect();
-    const projectSlug = uniqueSlugFromLabel(
-      trimmedName,
-      existingProjects.map((project) => project.slug),
-      "untitled-project",
-    );
     const joinCode = await generateUniqueJoinCode(ctx);
     let selectedTemplate: {
       templateId: Doc<"templates">["_id"];
@@ -118,7 +111,6 @@ export const createProject = mutation({
     const projectId = await ctx.db.insert("projects", {
       ownerId: userId,
       createdByUserId: userId,
-      slug: projectSlug,
       name: trimmedName,
       description: trimmedDescription,
       pageIds: [],
@@ -143,7 +135,6 @@ export const createProject = mutation({
       await upsertProjectInviteForUser(ctx, {
         project: {
           _id: projectId,
-          slug: projectSlug,
           name: trimmedName,
         },
         invitedByUserId: userId,
@@ -154,7 +145,6 @@ export const createProject = mutation({
     }
 
     let initialPageId: Doc<"pages">["_id"];
-    let initialPageSlug: string;
 
     if (selectedTemplate) {
       const createdPages = await appendProjectTemplatePages(ctx, {
@@ -173,15 +163,12 @@ export const createProject = mutation({
       }
 
       initialPageId = firstCreatedPage.id;
-      initialPageSlug = firstCreatedPage.slug;
     } else {
       const initialPageTitle = "Page 1";
-      initialPageSlug = "page-1";
 
       initialPageId = await ctx.db.insert("pages", {
         projectId,
         title: initialPageTitle,
-        slug: initialPageSlug,
         contentJson: initialContentJson,
         createdByUserId: userId,
         updatedByUserId: userId,
@@ -205,9 +192,7 @@ export const createProject = mutation({
 
     return {
       projectId,
-      projectSlug,
       initialPageId,
-      initialPageSlug,
     };
   },
 });
@@ -232,28 +217,13 @@ export const renameProject = mutation({
 
     await requireProjectEditor(ctx, project._id, userId);
 
-    const existingProjects = await ctx.db.query("projects").collect();
-    const projectSlug = uniqueSlugFromLabel(
-      trimmedName,
-      existingProjects
-        .filter(
-          (existingProject) =>
-            existingProject._id !== project._id &&
-            existingProject.isArchived !== true,
-        )
-        .map((existingProject) => existingProject.slug),
-      "untitled-project",
-    );
-
     await ctx.db.patch(project._id, {
       name: trimmedName,
-      slug: projectSlug,
       updatedAt: Date.now(),
     });
 
     return {
       projectId: project._id,
-      projectSlug,
       name: trimmedName,
     };
   },

@@ -19,12 +19,11 @@ import {
   createNotification,
 } from "../notifications/model";
 
-type InviteableProject = Pick<Doc<"projects">, "_id" | "slug" | "name" | "createdAt">;
+type InviteableProject = Pick<Doc<"projects">, "_id" | "name" | "createdAt">;
 type InviteCtx = QueryCtx | MutationCtx;
 type PendingSidebarProjectInvite = {
   inviteId: Id<"projectInvites">;
   projectId: Id<"projects">;
-  projectSlug: string;
   projectName: string;
   role: Doc<"projectInvites">["role"];
   label: string;
@@ -32,12 +31,17 @@ type PendingSidebarProjectInvite = {
   invitedByName: string;
   image: string | null;
 };
-type ProjectInviteTargetProject = Pick<Doc<"projects">, "_id" | "slug" | "name">;
-type ProjectInviteActor = Pick<Doc<"users">, "_id" | "name" | "email" | "image">;
+type ProjectInviteTargetProject = Pick<Doc<"projects">, "_id" | "name">;
+type ProjectInviteActor = Pick<
+  Doc<"users">,
+  "_id" | "name" | "email" | "image"
+>;
 
-const REOPENABLE_INVITE_STATUSES = new Set<
-  Doc<"projectInvites">["status"]
->(["declined", "revoked", "expired"]);
+const REOPENABLE_INVITE_STATUSES = new Set<Doc<"projectInvites">["status"]>([
+  "declined",
+  "revoked",
+  "expired",
+]);
 
 function compareInviteableProjects(
   projectOrder: Map<string, number>,
@@ -157,9 +161,7 @@ export async function upsertProjectInviteForUser(
   const existingMembership = await ctx.db
     .query("projectMembers")
     .withIndex("by_project_user", (query) =>
-      query
-        .eq("projectId", args.project._id)
-        .eq("userId", args.targetUserId),
+      query.eq("projectId", args.project._id).eq("userId", args.targetUserId),
     )
     .unique();
 
@@ -178,7 +180,9 @@ export async function upsertProjectInviteForUser(
   );
 
   if (pendingInvite) {
-    throw invalidState("This user already has a pending invite for this project.");
+    throw invalidState(
+      "This user already has a pending invite for this project.",
+    );
   }
 
   const reopenableInvite = matchingInvites
@@ -201,7 +205,6 @@ export async function upsertProjectInviteForUser(
       type: "projectInviteReceived",
       ...buildNotificationActorSnapshot(args.invitedByUser),
       projectId: args.project._id,
-      projectSlugSnapshot: args.project.slug,
       projectNameSnapshot: args.project.name,
       inviteId: reopenableInvite._id,
       sidebarTarget: "invites",
@@ -223,7 +226,6 @@ export async function upsertProjectInviteForUser(
       type: "projectInviteReceived",
       ...buildNotificationActorSnapshot(args.invitedByUser),
       projectId: args.project._id,
-      projectSlugSnapshot: args.project.slug,
       projectNameSnapshot: args.project.name,
       inviteId,
       sidebarTarget: "invites",
@@ -296,7 +298,6 @@ export async function listIncomingPendingProjectInvitesForSidebar(
     items.push({
       inviteId: invite._id,
       projectId: project._id,
-      projectSlug: project.slug,
       projectName: project.name,
       role: invite.role,
       label: formatInviteLabel(invite.role, project.name),
@@ -314,7 +315,10 @@ export const listInviteableProjects = query({
   handler: async (ctx) => {
     try {
       const { userId, user } = await requireCurrentAuth(ctx);
-      assertNonAnonymousUser(user, "Guest accounts can't invite people to projects.");
+      assertNonAnonymousUser(
+        user,
+        "Guest accounts can't invite people to projects.",
+      );
       const memberships = await ctx.db
         .query("projectMembers")
         .withIndex("by_user", (query) => query.eq("userId", userId))
@@ -325,7 +329,9 @@ export const listInviteableProjects = query({
           (membership.role === "owner" || membership.role === "coCreator"),
       );
       const projects = await Promise.all(
-        editableMemberships.map((membership) => ctx.db.get(membership.projectId)),
+        editableMemberships.map((membership) =>
+          ctx.db.get(membership.projectId),
+        ),
       );
       const visibleProjects = projects.filter(
         (project): project is NonNullable<typeof project> =>
@@ -336,10 +342,11 @@ export const listInviteableProjects = query({
       );
 
       return visibleProjects
-        .sort((left, right) => compareInviteableProjects(projectOrder, left, right))
+        .sort((left, right) =>
+          compareInviteableProjects(projectOrder, left, right),
+        )
         .map((project) => ({
           id: project._id,
-          slug: project.slug,
           name: project.name,
         }));
     } catch (error) {
@@ -364,7 +371,10 @@ export const inviteUserToProject = mutation({
   },
   handler: async (ctx, args) => {
     const { userId, user } = await requireCurrentAuth(ctx);
-    assertNonAnonymousUser(user, "Guest accounts can't invite people to projects.");
+    assertNonAnonymousUser(
+      user,
+      "Guest accounts can't invite people to projects.",
+    );
 
     const [project, targetUser] = await Promise.all([
       ctx.db.get(args.projectId),
@@ -396,7 +406,10 @@ export const acceptProjectInvite = mutation({
   },
   handler: async (ctx, args) => {
     const { userId, user } = await requireCurrentAuth(ctx);
-    assertNonAnonymousUser(user, "Guest accounts can't accept project invites.");
+    assertNonAnonymousUser(
+      user,
+      "Guest accounts can't accept project invites.",
+    );
     const invite = await requireProjectInviteRecipient(
       ctx,
       args.inviteId,
@@ -459,7 +472,6 @@ export const acceptProjectInvite = mutation({
     return {
       inviteId: invite._id,
       projectId: project._id,
-      projectSlug: project.slug,
       role: invite.role,
       status: "accepted" as const,
     };
@@ -472,7 +484,10 @@ export const declineProjectInvite = mutation({
   },
   handler: async (ctx, args) => {
     const { userId, user } = await requireCurrentAuth(ctx);
-    assertNonAnonymousUser(user, "Guest accounts can't decline project invites.");
+    assertNonAnonymousUser(
+      user,
+      "Guest accounts can't decline project invites.",
+    );
     const invite = await requireProjectInviteRecipient(
       ctx,
       args.inviteId,

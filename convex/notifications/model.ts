@@ -28,7 +28,6 @@ type CreateNotificationInput = {
   actorNameSnapshot: string;
   actorImageSnapshot?: string | null;
   projectId?: Id<"projects">;
-  projectSlugSnapshot?: string;
   projectNameSnapshot?: string;
   pageId?: Id<"pages">;
   pageTitleSnapshot?: string;
@@ -69,7 +68,6 @@ export async function createNotification(
     isRead: false,
     actorUserId: input.actorUserId,
     projectId: input.projectId,
-    projectSlugSnapshot: input.projectSlugSnapshot,
     projectNameSnapshot: input.projectNameSnapshot,
     pageId: input.pageId,
     pageTitleSnapshot: input.pageTitleSnapshot,
@@ -120,7 +118,9 @@ export async function markAllNotificationsReadForUser(
 function isNotificationComponentType(
   value: PageComponentType,
 ): value is NotificationComponentType {
-  return NOTIFICATION_COMPONENT_TYPES.includes(value as NotificationComponentType);
+  return NOTIFICATION_COMPONENT_TYPES.includes(
+    value as NotificationComponentType,
+  );
 }
 
 function getComponentLabel(component: PageComponentDocument) {
@@ -165,7 +165,9 @@ export function getChangedLiveStateComponents(
       continue;
     }
 
-    if (stringifyLiveState(currentComponent) === stringifyLiveState(nextComponent)) {
+    if (
+      stringifyLiveState(currentComponent) === stringifyLiveState(nextComponent)
+    ) {
       continue;
     }
 

@@ -93,7 +93,7 @@ directory. To learn more, launch the docs with `npx convex docs`.
 
 The Convex directory is organized by product domain instead of by raw table name.
 
-- `lib/` contains shared auth, permission, slug, storage, validator, and error helpers.
+- `lib/` contains shared auth, permission, storage, validator, and error helpers.
 - `users/`, `connections/`, `projects/`, `pages/`, and `templates/` are the primary schema-backed domains.
 - `search/` is reserved for federated search queries across visible records.
 - `pageRuntime/` is reserved for page-level interaction data such as feedback, forms, progress, and analytics.

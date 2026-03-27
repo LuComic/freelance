@@ -4,11 +4,11 @@
 
 `type`
 
-- The component name used in the page document, for example `"IdeaForm"`.
+- The component name used in the page document, for example `"YourComponent"`.
   Example:
 
 ```ts
-type: "IdeaForm";
+type: "YourComponent";
 ```
 
 `commands`
@@ -17,7 +17,7 @@ type: "IdeaForm";
   Example:
 
 ```ts
-commands: ["ideaform", "ideas"];
+commands: ["yourcomponent"];
 ```
 
 `createDefaultConfig`
@@ -118,14 +118,14 @@ normalizeState: (value, fallback) => {
 };
 ```
 
-Example for `IdeaForm`, because its state is `{ ideas: [] }`:
+Example for `YourComponent`, because its state is `{ items: [] }`:
 
 ```ts
 normalizeState: (value, fallback) => {
   if (
     typeof value === "object" &&
     value !== null &&
-    Array.isArray((value as { ideas?: unknown }).ideas)
+    Array.isArray((value as { items?: unknown }).items)
   ) {
     return value as typeof fallback;
   }
@@ -263,7 +263,6 @@ Add it to:
 
 ```ts
 export const REGISTERED_PAGE_COMPONENT_DEFINITIONS = [
-  IdeaFormDefinition,
   YourComponentDefinition,
 ] as const;
 ```
@@ -274,10 +273,6 @@ Add it to:
 
 ```tsx
 export const REGISTERED_PAGE_COMPONENT_RENDERERS = [
-  {
-    type: "IdeaForm",
-    Component: IdeaForm,
-  },
   {
     type: "YourComponent",
     Component: YourComponent,

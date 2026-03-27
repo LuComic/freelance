@@ -14,12 +14,10 @@ export type ViewerProjectRole = Doc<"projectMembers">["role"];
 export type ActivePageState = {
   project: {
     id: string;
-    slug: string;
     name: string;
   };
   page: {
     id: string;
-    slug: string;
     title: string;
     description: string | null;
     createdAt: number;
@@ -77,5 +75,4 @@ export type ActivePageDocumentContextValue = PageDocumentContextValue & {
 
 export type ProjectPageSummary = {
   id: string;
-  slug: string;
 };

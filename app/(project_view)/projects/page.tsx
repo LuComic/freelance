@@ -11,13 +11,16 @@ import { useConvex, useConvexAuth, useMutation, useQuery } from "convex/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import {
+  getProjectPagePath,
+  getProjectPath,
+} from "@/app/lib/components/project/paths";
 
 type JoinTarget = {
   joinCode: string;
   projectId: string;
-  projectSlug: string;
   projectName: string;
-  firstPageSlug: string | null;
+  firstPageId: string | null;
   redirectPath: string;
 };
 
@@ -291,8 +294,8 @@ export default function Page() {
                 <Link
                   href={
                     project.pages[0]
-                      ? `/projects/${project.slug}/${project.pages[0].slug}`
-                      : `/projects/${project.slug}`
+                      ? getProjectPagePath(project.id, project.pages[0].id)
+                      : getProjectPath(project.id)
                   }
                   className="font-medium hover:text-(--vibrant)"
                 >

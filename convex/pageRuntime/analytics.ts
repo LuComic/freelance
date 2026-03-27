@@ -1,13 +1,12 @@
 import { v } from "convex/values";
 import type { Doc } from "../_generated/dataModel";
 import { query } from "../_generated/server";
-import type { QueryCtx } from "../_generated/server";
 import { requireCurrentAuth } from "../lib/auth";
 import { APP_ERROR_CODES, ConvexDomainError } from "../lib/errors";
 import { requireProjectMember } from "../lib/permissions";
 import {
   getOrderedProjectPages,
-  requireProjectBySlug,
+  requireProjectById,
 } from "../lib/projectRecords";
 import { parsePageDocument } from "../pages/content";
 import { getCurrentEntitlementsForUser } from "../billing/model";
@@ -479,33 +478,14 @@ function groupLatestActivity(
   }));
 }
 
-async function resolveProjectByReference(
-  ctx: QueryCtx,
+export const getProjectAnalytics = query({
   args: {
-    projectSlug: string;
-    projectId?: Doc<"projects">["_id"];
-  },
-) {
-  if (args.projectId) {
-    const project = await ctx.db.get(args.projectId);
-
-    if (project && project.isArchived !== true) {
-      return project;
-    }
-  }
-
-  return requireProjectBySlug(ctx, args.projectSlug);
-}
-
-export const getProjectAnalyticsBySlug = query({
-  args: {
-    projectSlug: v.string(),
-    projectId: v.optional(v.id("projects")),
+    projectId: v.id("projects"),
   },
   handler: async (ctx, args) => {
     try {
       const { userId } = await requireCurrentAuth(ctx);
-      const project = await resolveProjectByReference(ctx, args);
+      const project = await requireProjectById(ctx, args.projectId);
 
       await requireProjectMember(ctx, project._id, userId);
       const entitlements = await getCurrentEntitlementsForUser(ctx, userId);
@@ -528,7 +508,6 @@ export const getProjectAnalyticsBySlug = query({
       return {
         project: {
           id: project._id,
-          slug: project.slug,
           name: project.name,
         },
         latestChanges: groupLatestActivity(latestActivity, 3),

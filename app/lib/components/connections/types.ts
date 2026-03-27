@@ -20,7 +20,6 @@ export type ConnectionPerson = {
 export type SidebarProjectInvite = {
   inviteId: Id<"projectInvites">;
   projectId: Id<"projects">;
-  projectSlug: string;
   projectName: string;
   role: "client" | "coCreator";
   label: string;

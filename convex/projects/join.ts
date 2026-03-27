@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import type { Doc } from "../_generated/dataModel";
+import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
 import { internalMutation, mutation, query } from "../_generated/server";
 import { buildUserDisplayName } from "../connections/model";
@@ -25,7 +25,7 @@ import {
 
 type RedirectProject = Pick<
   Doc<"projects">,
-  "_id" | "slug" | "pageIds" | "isArchived"
+  "_id" | "pageIds" | "isArchived"
 >;
 type RedirectCtx = QueryCtx | MutationCtx;
 
@@ -51,8 +51,8 @@ async function getDefaultProjectPath(
   const pages = await getOrderedProjectPages(ctx, project as Doc<"projects">);
 
   return pages[0]
-    ? `/projects/${project.slug}/${pages[0].slug}`
-    : `/projects/${project.slug}`;
+    ? `/projects/${project._id}/${pages[0]._id}`
+    : `/projects/${project._id}`;
 }
 
 async function resolvePreferredProjectPath(
@@ -71,7 +71,7 @@ async function resolvePreferredProjectPath(
     return trimmedPreferredPath;
   }
 
-  const projectPrefix = `/projects/${project.slug}`;
+  const projectPrefix = `/projects/${project._id}`;
 
   if (!trimmedPreferredPath.startsWith(projectPrefix)) {
     return defaultPath;
@@ -88,20 +88,17 @@ async function resolvePreferredProjectPath(
   }
 
   const segments = pathname.split("/").filter(Boolean);
-  const pageSlug = segments[2];
+  const pageId = segments[2];
 
-  if (!pageSlug || pageSlug === "settings" || pageSlug === "analytics") {
+  if (!pageId || pageId === "settings" || pageId === "analytics") {
     return defaultPath;
   }
 
-  const page = await ctx.db
-    .query("pages")
-    .withIndex("by_project_slug", (query) =>
-      query.eq("projectId", project._id).eq("slug", pageSlug),
-    )
-    .unique();
+  const page = await ctx.db.get(pageId as Id<"pages">);
 
-  return page && page.isArchived !== true ? trimmedPreferredPath : defaultPath;
+  return page && page.isArchived !== true && page.projectId === project._id
+    ? trimmedPreferredPath
+    : defaultPath;
 }
 
 export const validateJoinCode = query({
@@ -129,12 +126,11 @@ export const validateJoinCode = query({
     return {
       joinCode: normalizedJoinCode,
       projectId: project._id,
-      projectSlug: project.slug,
       projectName: project.name,
-      firstPageSlug: pages[0]?.slug ?? null,
+      firstPageId: pages[0]?._id ?? null,
       redirectPath: pages[0]
-        ? `/projects/${project.slug}/${pages[0].slug}`
-        : `/projects/${project.slug}`,
+        ? `/projects/${project._id}/${pages[0]._id}`
+        : `/projects/${project._id}`,
     };
   },
 });
@@ -282,7 +278,6 @@ export const createGuestMembershipFromJoin = internalMutation({
 
     return {
       projectId: project._id,
-      projectSlug: project.slug,
       redirectPath,
     };
   },
@@ -352,7 +347,6 @@ export const joinCurrentUserByCode = mutation({
 
     return {
       projectId: project._id,
-      projectSlug: project.slug,
       redirectPath: await getDefaultProjectPath(ctx, project),
     };
   },
@@ -590,7 +584,6 @@ export const completeGuestUpgrade = mutation({
 
     return {
       projectId: project._id,
-      projectSlug: project.slug,
       redirectPath,
     };
   },

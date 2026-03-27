@@ -2,7 +2,6 @@
 
 import type { ComponentType } from "react";
 import type { PageComponentType } from "@/lib/pageDocument";
-import { IdeaForm } from "./idea_form/IdeaForm";
 import { IdeaBoard } from "./idea_board/IdeaBoard";
 
 export type PageComponentRenderer = {
@@ -11,10 +10,6 @@ export type PageComponentRenderer = {
 };
 
 export const REGISTERED_PAGE_COMPONENT_RENDERERS = [
-  {
-    type: "IdeaForm",
-    Component: IdeaForm,
-  },
   {
     type: "IdeaBoard",
     Component: IdeaBoard,

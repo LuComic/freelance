@@ -12,7 +12,6 @@ import { PageLinkCreator } from "./PageLinkCreator";
 
 export type ProjectPageOption = {
   id: string;
-  slug: string;
   title: string;
 };
 
@@ -23,8 +22,7 @@ export const PageLink = ({ instanceId }: { instanceId: string }) => {
     instanceId,
     "PageLink",
   );
-  const projectData = useQuery(api.projects.queries.getProjectRootBySlug, {
-    projectSlug: activePage.project.slug,
+  const projectData = useQuery(api.projects.queries.getProjectRoot, {
     projectId: activePage.project.id as never,
   });
 
@@ -42,7 +40,7 @@ export const PageLink = ({ instanceId }: { instanceId: string }) => {
       {isLive ? (
         <PageLinkClient
           config={component.config}
-          projectSlug={activePage.project.slug}
+          projectId={activePage.project.id}
           targetPage={targetPage}
         />
       ) : (

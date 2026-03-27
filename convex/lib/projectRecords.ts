@@ -4,18 +4,15 @@ import { notFound } from "./errors";
 
 type ProjectCtx = QueryCtx | MutationCtx;
 
-export async function getProjectBySlug(ctx: ProjectCtx, slug: string) {
-  return ctx.db
-    .query("projects")
-    .withIndex("by_slug", (query) => query.eq("slug", slug))
-    .unique();
-}
-
-export async function requireProjectBySlug(ctx: ProjectCtx, slug: string) {
-  const project = await getProjectBySlug(ctx, slug);
+export async function requireProjectById(
+  ctx: ProjectCtx,
+  projectId: Id<"projects">,
+) {
+  const project = await ctx.db.get(projectId);
   if (!project || project.isArchived) {
-    throw notFound(`Project ${slug} was not found.`);
+    throw notFound(`Project ${projectId} was not found.`);
   }
+
   return project;
 }
 
@@ -23,27 +20,36 @@ export async function getOrderedProjectPages(
   ctx: ProjectCtx,
   project: Doc<"projects">,
 ) {
-  const pages = await Promise.all(project.pageIds.map((pageId) => ctx.db.get(pageId)));
+  const pages = await Promise.all(
+    project.pageIds.map((pageId) => ctx.db.get(pageId)),
+  );
   return pages.filter(
     (page): page is Doc<"pages"> =>
-      page !== null && page.isArchived !== true && page.projectId === project._id,
+      page !== null &&
+      page.isArchived !== true &&
+      page.projectId === project._id,
   );
 }
 
-export async function requirePageByProjectAndSlug(
+export async function requirePageByProjectId(
   ctx: ProjectCtx,
   projectId: Id<"projects">,
-  pageSlug: string,
+  pageId: Id<"pages">,
 ) {
-  const page = await ctx.db
-    .query("pages")
-    .withIndex("by_project_slug", (query) =>
-      query.eq("projectId", projectId).eq("slug", pageSlug),
-    )
-    .unique();
+  const page = await ctx.db.get(pageId);
+
+  if (!page || page.isArchived || page.projectId !== projectId) {
+    throw notFound(`Page ${pageId} was not found.`);
+  }
+
+  return page;
+}
+
+export async function requirePageById(ctx: ProjectCtx, pageId: Id<"pages">) {
+  const page = await ctx.db.get(pageId);
 
   if (!page || page.isArchived) {
-    throw notFound(`Page ${pageSlug} was not found.`);
+    throw notFound(`Page ${pageId} was not found.`);
   }
 
   return page;

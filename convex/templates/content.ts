@@ -7,7 +7,6 @@ import {
   assertProjectCanAddPages,
   serializePageDocumentWithLimits,
 } from "../lib/pageLimits";
-import { uniqueSlugFromLabel } from "../lib/slugs";
 import {
   assertTemplateBlueprintV1,
   buildPageDocumentFromTemplateSource,
@@ -129,33 +128,17 @@ export async function appendProjectTemplatePages(
     blueprint: ProjectTemplateBlueprint;
   },
 ) {
-  const existingSlugs = new Set<string>();
   const nextPageIds = [...args.project.pageIds];
   const createdPages: Array<{
     id: Doc<"pages">["_id"];
-    slug: string;
     title: string;
   }> = [];
   const now = Date.now();
 
   assertProjectCanAddPages(args.project, args.blueprint.pages.length);
 
-  for (const pageId of args.project.pageIds) {
-    const existingPage = await ctx.db.get(pageId);
-
-    if (
-      existingPage &&
-      existingPage.isArchived !== true &&
-      existingPage.projectId === args.project._id
-    ) {
-      existingSlugs.add(existingPage.slug);
-    }
-  }
-
   for (const pageBlueprint of args.blueprint.pages) {
     const title = pageBlueprint.title.trim();
-    const slug = uniqueSlugFromLabel(title, existingSlugs, "untitled-page");
-    existingSlugs.add(slug);
     const contentJson = serializePageDocumentWithLimits(
       buildPageDocumentFromTemplateSource(getTemplatePageSource(pageBlueprint)),
     );
@@ -163,7 +146,6 @@ export async function appendProjectTemplatePages(
     const pageId = await ctx.db.insert("pages", {
       projectId: args.project._id,
       title,
-      slug,
       contentJson,
       sourceTemplateId: args.templateId,
       createdByUserId: args.userId,
@@ -175,7 +157,6 @@ export async function appendProjectTemplatePages(
     nextPageIds.push(pageId);
     createdPages.push({
       id: pageId,
-      slug,
       title,
     });
   }

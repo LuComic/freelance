@@ -8,8 +8,8 @@ import { useProjectSettingsController } from "@/app/lib/components/project/setti
 import { useSearchBar } from "@/app/lib/components/searchbar/SearchBarContext";
 
 export default function SettingsPage() {
-  const params = useParams<{ projectSlug: string }>();
-  const projectSlug = params.projectSlug;
+  const params = useParams<{ projectId: string }>();
+  const projectId = params.projectId;
   const { openTaggedSearch } = useSearchBar();
   const {
     projectData,
@@ -42,7 +42,7 @@ export default function SettingsPage() {
     handleLeaveProject,
     handleRemoveProjectMember,
     handleRegenerateJoinCode,
-  } = useProjectSettingsController(projectSlug);
+  } = useProjectSettingsController(projectId);
 
   const project = projectData?.project ?? null;
   const clients =

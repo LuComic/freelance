@@ -6,8 +6,6 @@ import { invalidState, notFound } from "../lib/errors";
 import { assertNonAnonymousUser } from "../lib/guests";
 import { serializePageDocumentWithLimits } from "../lib/pageLimits";
 import { requirePageAccess, requireProjectEditor } from "../lib/permissions";
-import { getOrderedProjectPages } from "../lib/projectRecords";
-import { uniqueSlugFromLabel } from "../lib/slugs";
 import { templateVisibilityValidator } from "../lib/validators";
 import {
   assertPageDocumentV1,
@@ -35,7 +33,6 @@ type SaveTemplateResult = {
 type ApplyPageTemplateResult = {
   pageId: Id<"pages">;
   title: string;
-  slug: string;
   document: PageDocumentV1;
 };
 
@@ -43,7 +40,6 @@ type ApplyProjectTemplateResult = {
   projectId: Id<"projects">;
   createdPages: Array<{
     id: Id<"pages">;
-    slug: string;
     title: string;
   }>;
 };
@@ -145,20 +141,11 @@ export const applyPageTemplate = mutation({
       getTemplatePageSource(blueprint),
     );
     const trimmedTitle = args.baseTitle.trim() || page.title;
-    const siblingPages = await getOrderedProjectPages(ctx, project);
-    const nextSlug = uniqueSlugFromLabel(
-      trimmedTitle,
-      siblingPages
-        .filter((siblingPage) => siblingPage._id !== page._id)
-        .map((siblingPage) => siblingPage.slug),
-      "untitled-page",
-    );
     const now = Date.now();
     const contentJson = serializePageDocumentWithLimits(nextDocument);
 
     await ctx.db.patch(page._id, {
       title: trimmedTitle,
-      slug: nextSlug,
       contentJson,
       updatedByUserId: userId,
       updatedAt: now,
@@ -167,7 +154,6 @@ export const applyPageTemplate = mutation({
     return {
       pageId: page._id,
       title: trimmedTitle,
-      slug: nextSlug,
       document: nextDocument,
     };
   },

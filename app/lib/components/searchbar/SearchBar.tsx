@@ -10,6 +10,7 @@ import { useConvex } from "convex/react";
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { getProjectPagePath } from "../project/paths";
 import { PersonModal } from "./PersonModal";
 import {
   getEmptyMessage,
@@ -212,7 +213,7 @@ export const SearchBar = () => {
               closeSearch();
               setSearchQuery("");
               setSelectedIndex(0);
-              router.push(`/projects/${page.projectSlug}/${page.pageSlug}`);
+              router.push(getProjectPagePath(page.projectId, page.pageId));
             },
           }));
   const selectedSearchItemIndex =
