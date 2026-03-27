@@ -122,8 +122,8 @@ export function PlanSettingsSection({
       {open ? (
         <div className="pl-7 flex flex-col gap-2 pb-2">
           <p className="text-(--gray-page)">
-            No payments required - limited testing version. Limited to 5
-            projects
+            No payments required - limited testing version. All paid features
+            are unlocked during beta.
           </p>
         </div>
       ) : null}

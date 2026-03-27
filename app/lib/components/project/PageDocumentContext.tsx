@@ -65,6 +65,8 @@ const PageDocumentContext = createContext<PageDocumentContextValue | null>(
   null,
 );
 
+const AUTOSAVE_DEBOUNCE_MS = 800;
+
 export function PageDocumentProvider({
   children,
 }: {
@@ -100,6 +102,7 @@ export function PageDocumentProvider({
   const projectVisitHistoryRef = useRef<Map<string, string[]>>(new Map());
   const pendingDeleteRedirectPathRef = useRef<string | null>(null);
   const documentRef = useRef<PageDocumentV1 | null>(null);
+  const localRevisionRef = useRef(0);
   const currentDocumentSnapshot = document ? JSON.stringify(document) : null;
   const hasUnsavedChanges =
     activePage !== null &&
@@ -140,13 +143,13 @@ export function PageDocumentProvider({
       new Set<string>(
         activeProjectMembers?.clients.map((member: ProjectMemberListItem) =>
           String(member.userId),
-        ) ??
-          [],
+        ) ?? [],
       ),
     [activeProjectMembers],
   );
   const planTier = (entitlements?.plan.tier ?? null) as PlanTier | null;
-  const canUseLimitedComponents = entitlements?.canUseLimitedComponents === true;
+  const canUseLimitedComponents =
+    entitlements?.canUseLimitedComponents === true;
   const savePage = useMutation(api.pages.mutations.savePage);
   const savePageLiveState = useMutation(api.pages.mutations.savePageLiveState);
   const applyPageTemplateMutation = useMutation(
@@ -383,6 +386,7 @@ export function PageDocumentProvider({
 
   const setPageTitle = useCallback(
     (title: string) => {
+      localRevisionRef.current += 1;
       setActivePage((prev) =>
         prev
           ? {
@@ -401,6 +405,7 @@ export function PageDocumentProvider({
 
   const updateEditorText = useCallback(
     (value: string) => {
+      localRevisionRef.current += 1;
       setDocument((prev) =>
         prev
           ? {
@@ -419,6 +424,7 @@ export function PageDocumentProvider({
       instanceId: string,
       updater: (component: PageComponentDocument) => PageComponentDocument,
     ) => {
+      localRevisionRef.current += 1;
       setDocument((prev) => {
         if (!prev || !prev.components[instanceId]) {
           return prev;
@@ -442,6 +448,7 @@ export function PageDocumentProvider({
       instanceId: string,
       updater: (liveState: PageComponentLiveState) => PageComponentLiveState,
     ) => {
+      localRevisionRef.current += 1;
       setDocument((prev) => {
         if (!prev || !prev.components[instanceId]) {
           return prev;
@@ -482,6 +489,7 @@ export function PageDocumentProvider({
       end?: number;
     }) => {
       if (command === DROPDOWN_SLASH_COMMAND) {
+        localRevisionRef.current += 1;
         const scaffold = createDropdownScaffold();
         const nextValue = `${value.slice(0, start)}${scaffold}${value.slice(
           end ?? start,
@@ -521,6 +529,7 @@ export function PageDocumentProvider({
         end ?? start,
       )}`;
 
+      localRevisionRef.current += 1;
       setDocument((prev) =>
         prev
           ? {
@@ -573,6 +582,7 @@ export function PageDocumentProvider({
         setDocument(nextDocument);
       }
 
+      const submittedRevision = localRevisionRef.current;
       setSaveStatus("saving");
       setSaveError(null);
 
@@ -584,8 +594,6 @@ export function PageDocumentProvider({
             document: nextDocument,
           });
 
-          documentRef.current = result.document;
-          setDocument(result.document);
           const nextPage: ActivePageState = {
             ...currentPage,
             page: {
@@ -594,18 +602,26 @@ export function PageDocumentProvider({
               slug: result.slug,
             },
           };
+          const hasLocalChangesSinceSaveStarted =
+            localRevisionRef.current !== submittedRevision;
 
-          activePageRef.current = nextPage;
-          setActivePage(nextPage);
+          if (!hasLocalChangesSinceSaveStarted) {
+            documentRef.current = result.document;
+            activePageRef.current = nextPage;
+            setDocument(result.document);
+            setActivePage(nextPage);
 
-          if (
-            route &&
-            (result.slug !== route.pageSlug ||
-              nextPage.project.slug !== route.projectSlug)
-          ) {
-            setPendingRouteProjectId(nextPage.project.id);
-            setPendingRoutePageId(result.pageId);
-            router.replace(`/projects/${nextPage.project.slug}/${result.slug}`);
+            if (
+              route &&
+              (result.slug !== route.pageSlug ||
+                nextPage.project.slug !== route.projectSlug)
+            ) {
+              setPendingRouteProjectId(nextPage.project.id);
+              setPendingRoutePageId(result.pageId);
+              router.replace(
+                `/projects/${nextPage.project.slug}/${result.slug}`,
+              );
+            }
           }
 
           setSavedTitleSnapshot(result.title);
@@ -630,20 +646,24 @@ export function PageDocumentProvider({
             slug: result.slug,
           },
         };
+        const hasLocalChangesSinceSaveStarted =
+          localRevisionRef.current !== submittedRevision;
 
-        documentRef.current = result.document;
-        activePageRef.current = nextPage;
-        setDocument(result.document);
-        setActivePage(nextPage);
+        if (!hasLocalChangesSinceSaveStarted) {
+          documentRef.current = result.document;
+          activePageRef.current = nextPage;
+          setDocument(result.document);
+          setActivePage(nextPage);
 
-        if (
-          route &&
-          (result.slug !== route.pageSlug ||
-            nextPage.project.slug !== route.projectSlug)
-        ) {
-          setPendingRouteProjectId(nextPage.project.id);
-          setPendingRoutePageId(result.pageId);
-          router.replace(`/projects/${nextPage.project.slug}/${result.slug}`);
+          if (
+            route &&
+            (result.slug !== route.pageSlug ||
+              nextPage.project.slug !== route.projectSlug)
+          ) {
+            setPendingRouteProjectId(nextPage.project.id);
+            setPendingRoutePageId(result.pageId);
+            router.replace(`/projects/${nextPage.project.slug}/${result.slug}`);
+          }
         }
 
         setSavedTitleSnapshot(result.title);
@@ -689,10 +709,7 @@ export function PageDocumentProvider({
   }, [persistDocument]);
 
   const applyPageTemplate = useCallback(
-    async (args: {
-      templateId: string;
-      expectedUpdatedAt: number;
-    }) => {
+    async (args: { templateId: string; expectedUpdatedAt: number }) => {
       const currentPage = activePageRef.current;
       const currentDocument = documentRef.current;
 
@@ -782,6 +799,7 @@ export function PageDocumentProvider({
         },
       };
 
+      localRevisionRef.current += 1;
       activePageRef.current = nextPage;
       setActivePage(nextPage);
       setSaveError(null);
@@ -823,6 +841,7 @@ export function PageDocumentProvider({
         },
       };
 
+      localRevisionRef.current += 1;
       documentRef.current = nextDocument;
       setDocument(nextDocument);
       setSaveError(null);
@@ -855,7 +874,8 @@ export function PageDocumentProvider({
 
     try {
       const currentProject = projects?.find(
-        (project: ListedProjectSummary) => project.id === currentPage.project.id,
+        (project: ListedProjectSummary) =>
+          project.id === currentPage.project.id,
       );
       const fallbackPath = resolveDeleteRedirectPath({
         currentPageId: currentPage.page.id,
@@ -886,17 +906,13 @@ export function PageDocumentProvider({
   }, [deletePageMutation, projects, router, setDeleteError, setDeleteStatus]);
 
   useEffect(() => {
-    if (
-      !hasUnsavedChanges ||
-      saveStatus === "saving" ||
-      saveError !== null
-    ) {
+    if (!hasUnsavedChanges || saveStatus === "saving" || saveError !== null) {
       return;
     }
 
     const timeoutId = window.setTimeout(() => {
       void saveDocument();
-    }, 300);
+    }, AUTOSAVE_DEBOUNCE_MS);
 
     return () => window.clearTimeout(timeoutId);
   }, [hasUnsavedChanges, saveDocument, saveError, saveStatus]);

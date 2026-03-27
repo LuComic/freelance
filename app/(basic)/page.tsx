@@ -240,8 +240,7 @@ export default function Home() {
               className="text-2xl font-semibold sm:text-3xl"
               style={{ fontFamily: '"Lexend Variable", sans-serif' }}
             >
-              No payments in beta testing. Limited to 5 projects, everything
-              else works.
+              No payments in beta testing.
             </h2>
           </div>
         </div>

@@ -4,11 +4,9 @@ import {
   type RegisteredPageComponentStateMap,
 } from "./registeredComponents";
 
-export const DEFAULT_PAGE_EDITOR_TEXT = `Project brief
+export const DEFAULT_PAGE_EDITOR_TEXT = `Write your page content here.
 
-Write your page content here.
-
-This testing page now supports a full-page editing mode.`;
+use "/" for components or find them from the right sidebar`;
 
 export const LEGACY_PAGE_COMPONENT_TYPES = [
   "Calendar",

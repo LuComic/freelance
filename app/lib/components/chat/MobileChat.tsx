@@ -1,12 +1,7 @@
 "use client";
 
 import { startTransition, useEffect, useRef, useState } from "react";
-import {
-  MessageSquare,
-  PanelRightClose,
-  LayoutGrid,
-  LibraryBig,
-} from "lucide-react";
+import { PanelRightClose, LayoutGrid, LibraryBig } from "lucide-react";
 import { useEditMode } from "@/app/lib/components/project/EditModeContext";
 import { ComponentLib, type ComponentTag } from "./ComponentLib";
 
@@ -18,11 +13,9 @@ export const MobileChat = () => {
     componentLibraryOpenRequestNonce,
   } = useEditMode();
   const [chatOpen, setChatOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"chat" | "components">("chat");
   const [componentFilter, setComponentFilter] = useState<"" | ComponentTag>("");
   const handledComponentLibraryNonceRef = useRef(0);
   const componentsLocked = modeLock === "live";
-  const visibleActiveTab = componentsLocked ? "chat" : activeTab;
 
   const changeComponentFilter = (newFilter: ComponentTag) => {
     if (componentFilter === newFilter) {
@@ -46,7 +39,6 @@ export const MobileChat = () => {
     handledComponentLibraryNonceRef.current = componentLibraryOpenRequestNonce;
     startTransition(() => {
       setChatOpen(true);
-      setActiveTab("components");
     });
   }, [componentLibraryOpenRequestNonce, componentsLocked]);
 
@@ -61,35 +53,11 @@ export const MobileChat = () => {
             >
               <PanelRightClose size={22} />
             </button>
-            <span className="text-(--gray) text-xl">Chat</span>
+            <span className="text-(--gray) text-xl">Components</span>
           </div>
 
-          <div className="flex items-center justify-around p-1 rounded-lg bg-(--dim) w-full gap-1">
-            <button
-              className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                visibleActiveTab === "chat"
-                  ? "bg-(--quite-dark) text-(--vibrant)"
-                  : ""
-              }`}
-              onClick={() => setActiveTab("chat")}
-            >
-              <MessageSquare size={20} className="mx-auto" />
-            </button>
-            {!componentsLocked ? (
-              <button
-                className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                  visibleActiveTab === "components"
-                    ? "bg-(--quite-dark) text-(--vibrant)"
-                    : ""
-                }`}
-                onClick={() => setActiveTab("components")}
-              >
-                <LayoutGrid size={20} className="mx-auto" />
-              </button>
-            ) : null}
-          </div>
           <div className="w-full flex-1 min-h-0 overflow-y-auto">
-            {visibleActiveTab === "components" ? (
+            {!componentsLocked ? (
               <>
                 <div className="flex flex-wrap items-center justify-start gap-2 w-full mb-2">
                   {(
@@ -124,10 +92,10 @@ export const MobileChat = () => {
           onClick={() => setChatOpen(true)}
           className="bg-(--darkest) z-30 p-1.5 rounded-lg hover:bg-(--darkest-hover) fixed bottom-2 right-2"
         >
-          {!componentsLocked && visibleActiveTab === "components" ? (
+          {!componentsLocked ? (
             <LibraryBig size={24} />
           ) : (
-            <MessageSquare size={24} />
+            <LayoutGrid size={24} />
           )}
         </button>
       )}

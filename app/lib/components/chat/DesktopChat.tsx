@@ -1,12 +1,7 @@
 "use client";
 
 import { startTransition, useEffect, useRef, useState } from "react";
-import {
-  MessageSquare,
-  PanelRightClose,
-  PanelRightOpen,
-  LayoutGrid,
-} from "lucide-react";
+import { PanelRightClose, PanelRightOpen, LayoutGrid } from "lucide-react";
 import { CHAT_COOKIE, setCookie } from "@/app/lib/cookies";
 import { useEditMode } from "@/app/lib/components/project/EditModeContext";
 import { ComponentLib, type ComponentTag } from "./ComponentLib";
@@ -23,11 +18,9 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
     componentLibraryOpenRequestNonce,
   } = useEditMode();
   const [chatOpen, setChatOpen] = useState(initialOpen ?? false);
-  const [activeTab, setActiveTab] = useState<"chat" | "components">("chat");
   const [componentFilter, setComponentFilter] = useState<"" | ComponentTag>("");
   const handledComponentLibraryNonceRef = useRef(0);
   const componentsLocked = modeLock === "live";
-  const visibleActiveTab = componentsLocked ? "chat" : activeTab;
 
   useEffect(() => {
     setCookie(CHAT_COOKIE, String(chatOpen));
@@ -61,7 +54,6 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
     handledComponentLibraryNonceRef.current = componentLibraryOpenRequestNonce;
     startTransition(() => {
       setChatOpen(true);
-      setActiveTab("components");
     });
   }, [componentLibraryOpenRequestNonce, componentsLocked]);
 
@@ -85,38 +77,11 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
             >
               <PanelRightClose size={20} />
             </button>
-            <span className="text-(--gray) text-xl">
-              {visibleActiveTab === "chat" ? "Chat" : "Components"}
-            </span>
-          </div>
-
-          <div className="flex items-center justify-around p-1 rounded-xl bg-(--dim) w-full gap-1">
-            <button
-              className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                visibleActiveTab === "chat"
-                  ? "bg-(--quite-dark) text-(--vibrant)"
-                  : ""
-              }`}
-              onClick={() => setActiveTab("chat")}
-            >
-              <MessageSquare size={20} className="mx-auto" />
-            </button>
-            {!componentsLocked ? (
-              <button
-                className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
-                  visibleActiveTab === "components"
-                    ? "bg-(--quite-dark) text-(--vibrant)"
-                    : ""
-                }`}
-                onClick={() => setActiveTab("components")}
-              >
-                <LayoutGrid size={20} className="mx-auto" />
-              </button>
-            ) : null}
+            <span className="text-(--gray) text-xl">Components</span>
           </div>
 
           <div className="w-full flex-1 min-h-0 overflow-y-auto">
-            {visibleActiveTab === "components" ? (
+            {!componentsLocked ? (
               <>
                 <div className="flex flex-wrap items-center justify-start gap-2 w-full mb-2">
                   {(
@@ -155,28 +120,10 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
             <PanelRightOpen size={20} />
           </button>
           <div className="flex flex-col bg-(--dim) rounded-lg justify-center p-1 h-max gap-4">
-            <button
-              className={`h-full p-1 rounded-md hover:bg-(--quite-dark) w-full ${
-                visibleActiveTab === "chat"
-                  ? "bg-(--quite-dark) text-(--vibrant)"
-                  : ""
-              }`}
-              onClick={() => {
-                setActiveTab("chat");
-                setChatOpen(true);
-              }}
-            >
-              <MessageSquare size={20} className="mx-auto" />
-            </button>
             {!componentsLocked ? (
               <button
-                className={`h-full  p-1 rounded-md hover:bg-(--quite-dark) w-full ${
-                  visibleActiveTab === "components"
-                    ? "bg-(--quite-dark) text-(--vibrant)"
-                    : ""
-                }`}
+                className="h-full p-1 rounded-md bg-(--quite-dark) text-(--vibrant) hover:bg-(--quite-dark) w-full"
                 onClick={() => {
-                  setActiveTab("components");
                   setChatOpen(true);
                 }}
               >

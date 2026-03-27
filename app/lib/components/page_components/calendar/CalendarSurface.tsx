@@ -227,6 +227,10 @@ export const CalendarSurface = ({
         <p className="@[40rem]:text-xl text-lg font-medium">
           {getDayViewHeading(anchorDate)}
         </p>
+      ) : viewMode === "month" ? (
+        <p className="@[40rem]:text-xl text-lg font-medium">
+          {format(anchorDate, "MMMM yyyy")}
+        </p>
       ) : null}
 
       {viewMode !== "day" ? (

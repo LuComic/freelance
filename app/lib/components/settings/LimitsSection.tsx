@@ -53,7 +53,7 @@ export function LimitsSettingsSection({
             problem). If you find these too limiting, contact support at
             hello@gmail.com
           </p>
-          {BILLING_BETA_MODE ? (
+          {BILLING_BETA_MODE && BILLING_BETA_OWNED_PROJECT_LIMIT !== null ? (
             <p>
               - During beta, users are limited to{" "}
               {BILLING_BETA_OWNED_PROJECT_LIMIT} projects.

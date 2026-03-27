@@ -675,23 +675,34 @@ export function mergePageConfigDocument(
   value: unknown,
 ): PageDocumentV1 {
   const configDocument = normalizePageConfigDocument(value);
+  const normalizedDocument = normalizePageDocument(value);
   const nextComponents: Record<string, PageComponentDocument> = {};
 
   for (const [id, component] of Object.entries(configDocument.components)) {
     const baseComponent = baseDocument.components[id];
+    const normalizedComponent = normalizedDocument.components[id];
 
     if (
       baseComponent &&
-      matchesStoredComponentType(baseComponent.type, component.type)
+      matchesStoredComponentType(baseComponent.type, component.type) &&
+      normalizedComponent &&
+      matchesStoredComponentType(normalizedComponent.type, component.type)
     ) {
-      nextComponents[id] = {
-        ...component,
-        state: baseComponent.state,
-      } as PageComponentDocument;
+      nextComponents[id] = normalizedComponent;
       continue;
     }
 
-    nextComponents[id] = component;
+    if (normalizedComponent) {
+      nextComponents[id] = normalizedComponent;
+      continue;
+    }
+
+    nextComponents[id] = baseComponent
+      ? {
+          ...component,
+          state: baseComponent.state,
+        } as PageComponentDocument
+      : component;
   }
 
   return {
