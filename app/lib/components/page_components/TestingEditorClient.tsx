@@ -170,7 +170,7 @@ export default function TestingEditorClient() {
             {lines.map((lineNumber) => (
               <div
                 key={lineNumber}
-                className={`px-3 leading-7 ${
+                className={`px-3 leading-6 ${
                   lineNumber === activeLine
                     ? "bg-(--gray)/20 text-(--light)"
                     : ""
