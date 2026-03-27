@@ -84,7 +84,9 @@ export default function Page() {
       });
   }, [completeGuestUpgrade, profile, router]);
 
-  const handleJoinSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleJoinSubmit = async (
+    event: React.SubmitEvent<HTMLFormElement>,
+  ) => {
     event.preventDefault();
 
     if (isAnonymous) {
@@ -226,6 +228,12 @@ export default function Page() {
                   : "Next"}
           </button>
         </form>
+        <Link
+          href="/legal"
+          className="text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover)"
+        >
+          Legal documentation
+        </Link>
       </div>
       {validatedJoinTarget ? (
         <p className="text-(--gray-page)">

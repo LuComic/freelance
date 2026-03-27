@@ -8,10 +8,10 @@ export default function Page() {
       </div>
       <p className="text-(--gray-page)">Last updated: {LAST_UPDATED}</p>
       <p className="text-(--gray-page)">
-        This Cookie Policy explains how [COMPANY NAME] uses cookies and similar
-        technologies on [APP NAME]. It reflects the current codebase, which uses
-        first-party authentication and workspace preference cookies, but does
-        not contain a first-party analytics or marketing SDK.
+        This Cookie Policy explains how Lukas Jääger, based in Estonia, uses
+        cookies and similar technologies on Pageboard. It reflects the current
+        codebase, which uses first-party authentication and workspace preference
+        cookies, but does not contain a first-party analytics or marketing SDK.
       </p>
       <div className="w-full flex flex-col gap-3">
         <p className="wrap-break-word">
@@ -64,7 +64,7 @@ export default function Page() {
           6. Updates and contact. We may update this Cookie Policy from time to
           time. The latest version will be published here with a revised last
           updated date. Questions about cookies or similar technologies can be
-          sent to [EMAIL].
+          sent to lukasjaager@gmail.com.
         </p>
       </div>
     </>

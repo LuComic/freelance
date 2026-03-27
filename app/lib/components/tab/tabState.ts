@@ -2,6 +2,7 @@ export type StoredTabKind =
   | "projectsIndex"
   | "notifications"
   | "accountSettings"
+  | "legalOverview"
   | "legalTerms"
   | "legalPrivacy"
   | "legalCookies"
@@ -84,6 +85,13 @@ const STATIC_TABS = {
     title: "Settings",
     contextLabel: "Account",
   },
+  legalOverview: {
+    tabId: "legal-overview",
+    kind: "legalOverview",
+    path: "/legal",
+    title: "Legal",
+    contextLabel: "Workspace",
+  },
   legalTerms: {
     tabId: "legal-terms",
     kind: "legalTerms",
@@ -123,6 +131,7 @@ function isStoredTabKind(value: unknown): value is StoredTabKind {
     value === "projectsIndex" ||
     value === "notifications" ||
     value === "accountSettings" ||
+    value === "legalOverview" ||
     value === "legalTerms" ||
     value === "legalPrivacy" ||
     value === "legalCookies" ||
@@ -214,6 +223,8 @@ function getStaticTabFromPath(pathname: string) {
       return STATIC_TABS.notifications;
     case "/settings":
       return STATIC_TABS.accountSettings;
+    case "/legal":
+      return STATIC_TABS.legalOverview;
     case "/legal/terms":
       return STATIC_TABS.legalTerms;
     case "/legal/privacy":
@@ -339,7 +350,9 @@ export function resolveTabForRoute({
     return createProjectPageTab(activePage);
   }
 
-  const page = project.pages.find((candidate) => candidate.slug === nestedSegment);
+  const page = project.pages.find(
+    (candidate) => candidate.slug === nestedSegment,
+  );
 
   if (!page) {
     return null;
@@ -401,7 +414,9 @@ export function dedupeAndSanitizeTabsState(
 
   return {
     tabs: nextTabs,
-    recentTabIds: nextRecentTabIds.filter((tabId) => remainingTabIds.has(tabId)),
+    recentTabIds: nextRecentTabIds.filter((tabId) =>
+      remainingTabIds.has(tabId),
+    ),
   };
 }
 
@@ -434,9 +449,9 @@ export function parseTabsCookie(value?: string | null): StoredTabsState {
         (tabId): tabId is string => typeof tabId === "string",
       )
     : Array.isArray(candidateState.recentPageIds)
-      ? candidateState.recentPageIds.filter(
-          (tabId): tabId is string => typeof tabId === "string",
-        ).map((tabId) => `project-page:${tabId}`)
+      ? candidateState.recentPageIds
+          .filter((tabId): tabId is string => typeof tabId === "string")
+          .map((tabId) => `project-page:${tabId}`)
       : [];
 
   return dedupeAndSanitizeTabsState({
@@ -457,11 +472,15 @@ export function upsertTab(
   state: StoredTabsState,
   nextTab: StoredTab,
 ): StoredTabsState {
-  const existingTabIndex = state.tabs.findIndex((tab) => tab.tabId === nextTab.tabId);
+  const existingTabIndex = state.tabs.findIndex(
+    (tab) => tab.tabId === nextTab.tabId,
+  );
   const nextTabs =
     existingTabIndex === -1
       ? [...state.tabs, nextTab]
-      : state.tabs.map((tab, index) => (index === existingTabIndex ? nextTab : tab));
+      : state.tabs.map((tab, index) =>
+          index === existingTabIndex ? nextTab : tab,
+        );
 
   return dedupeAndSanitizeTabsState({
     tabs: nextTabs,
@@ -478,7 +497,9 @@ export function removeTabById(
 ): StoredTabsState {
   return dedupeAndSanitizeTabsState({
     tabs: state.tabs.filter((tab) => tab.tabId !== tabId),
-    recentTabIds: state.recentTabIds.filter((recentTabId) => recentTabId !== tabId),
+    recentTabIds: state.recentTabIds.filter(
+      (recentTabId) => recentTabId !== tabId,
+    ),
   });
 }
 
@@ -510,7 +531,9 @@ export function reconcileTabsWithProjects(
             return [];
           }
 
-          const page = project.pages.find((candidatePage) => candidatePage.id === tab.pageId);
+          const page = project.pages.find(
+            (candidatePage) => candidatePage.id === tab.pageId,
+          );
 
           if (!page) {
             return [];

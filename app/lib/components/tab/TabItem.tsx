@@ -21,7 +21,7 @@ export const TabItem = ({
 }: TabItemProps) => {
   return (
     <div
-      className={`flex h-9 min-w-[150px] shrink-0 items-center border-b-0 border-l-0 border-r border-t border-(--gray) overscroll-y-none ${
+      className={`flex h-9 min-w-37.5 shrink-0 items-center border-b-0 border-l-0 border-r border-t border-(--gray) overscroll-y-none ${
         isActive
           ? "bg-(--quite-dark)"
           : "bg-(--darkest) hover:bg-(--darkest-hover)"

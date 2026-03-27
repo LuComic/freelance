@@ -10,18 +10,20 @@ export default function Page() {
       </div>
       <p className="text-(--gray-page)">Last updated: {LAST_UPDATED}</p>
       <p className="text-(--gray-page)">
-        These Terms of Service govern your use of [APP NAME], a collaboration
-        platform for freelancers, clients, and co-creators to manage projects,
-        pages, templates, invites, collaboration workflows, feedback, and
-        workspace analytics. By using the service, you agree to these Terms.
+        These Terms of Service govern your use of Pageboard, a hobby
+        collaboration platform for freelancers, clients, and co-creators to
+        manage projects, pages, templates, invites, collaboration workflows,
+        feedback, and workspace analytics. By using the service, you agree to
+        these Terms.
       </p>
       <div className="w-full flex flex-col gap-3">
         <p className="wrap-break-word">
           1. Scope and provider. These Terms form a binding agreement between
-          you and [COMPANY NAME] of [ADDRESS]. They apply to your use of the
-          website, app, authenticated workspaces, guest join flows, project
-          templates, and any related paid plans or support services made
-          available through [APP NAME].
+          you and Lukas Jääger, the individual operator of Pageboard, based in
+          Estonia. They apply to your use of the website, app, authenticated
+          workspaces, guest join flows, project templates, and any related paid
+          plans or support services made available through Pageboard if those
+          are introduced later.
         </p>
         <p className="wrap-break-word">
           2. Accounts and eligibility. You must be at least 18 years old or
@@ -45,7 +47,8 @@ export default function Page() {
           cancellations, taxes, refunds, and plan limits will be governed by the
           plan information shown at checkout and these Terms. Payment card
           details are handled by Stripe, not stored in the visible application
-          code.
+          code. Until paid plans are launched, any references to subscriptions
+          are informational only.
         </p>
         <p className="wrap-break-word">
           5. Your content and responsibilities. You retain ownership of the
@@ -75,7 +78,7 @@ export default function Page() {
         <p className="wrap-break-word">
           8. Intellectual property and third parties. The service itself,
           including our software, branding, design, and non-user content,
-          belongs to [COMPANY NAME] or its licensors. The service also uses
+          belongs to Lukas Jääger or its licensors. The service also uses
           third-party providers including Google for authentication and Stripe
           for billing when enabled. Their separate terms and privacy notices may
           also apply.
@@ -96,17 +99,18 @@ export default function Page() {
           10. Governing law and disputes. These Terms are governed by the laws
           of Estonia, excluding conflict-of-law rules. Before formal
           proceedings, the parties should try in good faith to resolve disputes
-          through written notice sent to [EMAIL]. If a dispute cannot be
-          resolved amicably, it will be submitted to the competent courts of
-          Estonia, unless mandatory consumer law gives you the right to proceed
-          elsewhere.
+          through written notice sent to lukasjaager@gmail.com. If a dispute
+          cannot be resolved amicably, it will be submitted to the competent
+          courts of Estonia, unless mandatory consumer law gives you the right
+          to proceed elsewhere.
         </p>
         <p className="wrap-break-word">
           11. Updates and contact. We may update these Terms from time to time
           by publishing the revised version here with a new last updated date.
           Continued use of the service after the updated Terms take effect means
           you accept them, except where mandatory law requires a different
-          approach. Questions and legal notices should be sent to [EMAIL].
+          approach. Questions and legal notices should be sent to
+          lukasjaager@gmail.com.
         </p>
       </div>
     </>

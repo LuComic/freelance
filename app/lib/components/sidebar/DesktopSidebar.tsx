@@ -87,7 +87,7 @@ export const DesktopSidebar = ({
         <nav className="w-90.75 h-full min-h-dvh bg-(--darkest) border-r border-(--gray) flex flex-col items-start justify-start p-2 px-3 gap-4 overflow-hidden">
           <div className="flex items-center justify-between w-full">
             <Link href="/projects" className="text-(--gray) text-xl">
-              Empty Canvas
+              Pageboard
             </Link>
             <button
               onClick={() => {

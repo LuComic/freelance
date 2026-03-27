@@ -19,7 +19,7 @@ export const LandingHeader = () => {
             className="text-xl font-medium tracking-tight"
             style={{ fontFamily: '"Lexend Variable", sans-serif' }}
           >
-            Empty Canvas
+            Pageboard
           </span>
         </a>
 

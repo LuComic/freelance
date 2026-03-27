@@ -8,19 +8,21 @@ export default function Page() {
       </div>
       <p className="text-(--gray-page)">Last updated: {LAST_UPDATED}</p>
       <p className="text-(--gray-page)">
-        This Privacy Policy explains how [COMPANY NAME] processes personal data
-        when you use [APP NAME], a collaboration platform used by freelancers,
-        clients, and co-creators to create projects, invite other users, join
-        workspaces by code, collaborate on page content, submit feedback, manage
-        project activity, and, where enabled, handle paid subscriptions.
+        This Privacy Policy explains how Lukas Jääger, based in Estonia,
+        processes personal data when you use Pageboard, a hobby collaboration
+        platform used by freelancers, clients, and co-creators to create
+        projects, invite other users, join workspaces by code, collaborate on
+        page content, submit feedback, manage project activity, and, if later
+        enabled, handle paid subscriptions.
       </p>
       <div className="w-full flex flex-col gap-3">
         <p className="wrap-break-word">
-          1. Data controller. [COMPANY NAME OR SOLE TRADER NAME], registry code
-          [REGISTRY CODE, IF APPLICABLE], registered address [ADDRESS], email
-          [EMAIL], data protection contact [DPO EMAIL OR &quot;NO DPO
-          APPOINTED&quot;]. Replace these placeholders with the real controller
-          details before launch.
+          1. Data controller. Lukas Jääger is the controller for the personal
+          data processed through Pageboard. Contact email:
+          lukasjaager@gmail.com. Country: Estonia. This project is currently
+          operated as a personal hobby project and not as a registered business.
+          If that changes, this policy will be updated with the relevant
+          business details.
         </p>
         <p className="wrap-break-word">
           2. Personal data we process. Depending on how you use the service, we
@@ -72,7 +74,8 @@ export default function Page() {
           for backend infrastructure and authentication support, Google for
           OAuth sign-in, Stripe for billing when enabled, and any hosting or CDN
           provider used to deploy the frontend. Add the final hosting provider
-          name here: [HOSTING OR CDN PROVIDER NAME].
+          name here if you want to identify it explicitly: [HOSTING OR CDN
+          PROVIDER NAME].
         </p>
         <p className="wrap-break-word">
           6. International transfers. Some providers may process personal data
@@ -107,15 +110,15 @@ export default function Page() {
           and data portability where applicable. Some controls already exist in
           the product, including profile editing and account deletion. No
           self-service export tool was found in the current codebase, so
-          portability requests should be sent to [EMAIL]. We may need to verify
-          your identity before responding.
+          portability requests should be sent to lukasjaager@gmail.com. We may
+          need to verify your identity before responding.
         </p>
         <p className="wrap-break-word">
           10. Complaints and contact. If you have questions or want to exercise
-          your rights, contact [EMAIL]. You also have the right to lodge a
-          complaint with a supervisory authority, including the Estonian Data
-          Protection Inspectorate at https://www.aki.ee/en. [APP NAME] is not
-          directed to children under 16 without the lawful basis and
+          your rights, contact lukasjaager@gmail.com. You also have the right to
+          lodge a complaint with a supervisory authority, including the Estonian
+          Data Protection Inspectorate at https://www.aki.ee/en. Pageboard is
+          not directed to children under 16 without the lawful basis and
           authorization required by applicable law. We may update this Privacy
           Policy from time to time by publishing the revised version on this
           page with a new last updated date.

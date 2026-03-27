@@ -11,7 +11,7 @@ export default function Home() {
               className="text-3xl leading-tight font-semibold sm:text-5xl"
               style={{ fontFamily: '"Lexend Variable", sans-serif' }}
             >
-              Empty Canvas
+              Pageboard
             </h1>
             <p className="mt-3 max-w-2xl text-base leading-7 text-(--gray-page) sm:text-xl sm:leading-8">
               Highly customisable communication tool between creators and
@@ -65,7 +65,7 @@ export default function Home() {
           Built for quick first impressions
         </h2>
         <p className="mt-4 max-w-3xl leading-8 text-(--gray-page)">
-          Empty Canvas helps freelancers and small teams present work clearly,
+          Pageboard helps freelancers and small teams present work clearly,
           collect feedback, and keep progress visible in one place.
         </p>
       </section>
@@ -227,7 +227,7 @@ export default function Home() {
           “Clients understand the page immediately, and I spend less time
           explaining status in calls.”
         </p>
-        <p className="mt-4 text-(--gray-page)">John Doe, Freelance Designer</p>
+        <p className="mt-4 text-(--gray-page)">Lukas Jääger</p>
       </section>
 
       <section
@@ -383,10 +383,10 @@ export default function Home() {
         <div id="contact" className="scroll-mt-20 mt-6 text-(--gray-page)">
           Questions?{" "}
           <a
-            href="mailto:hello@example.com"
+            href="mailto:lukasjaager@gmail.com"
             className="underline decoration-(--vibrant) underline-offset-4"
           >
-            hello@example.com
+            lukasjaager@gmail.com
           </a>
         </div>
       </section>

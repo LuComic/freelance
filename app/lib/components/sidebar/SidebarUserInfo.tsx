@@ -179,7 +179,7 @@ export const SidebarUserInfo = ({
       <Unauthenticated>
         <Link
           className="rounded-md bg-(--vibrant) px-2 py-1 hover:bg-(--vibrant-hover)"
-          href="/"
+          href="/login"
         >
           Create an account
         </Link>
