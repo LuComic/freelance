@@ -60,9 +60,14 @@ export const FileItem = ({
         <button onClick={onToggleExpanded}>
           <ChevronRight className={`${isExpanded ? "rotate-90" : ""}`} />
         </button>
-        <Link href={projectBasePath} className="w-full">
+        <Link href={projectBasePath} className="w-full md:inline hidden">
           {project.name.length > 20
             ? project.name.slice(0, 20) + "..."
+            : project.name}
+        </Link>
+        <Link href={projectBasePath} className="w-full md:hidden inline">
+          {project.name.length > 30
+            ? project.name.slice(0, 30) + "..."
             : project.name}
         </Link>
         <Menubar className="ml-auto h-auto bg-transparent border-none shadow-none p-0">
@@ -147,9 +152,14 @@ export const FileItem = ({
               href={projectBasePath + "/" + page.slug}
             >
               <File size={18} />
-              <span>
+              <span className="hidden md:inline">
                 {page.title.length > 20
                   ? page.title.slice(0, 20) + "..."
+                  : page.title}
+              </span>
+              <span className="inline md:hidden">
+                {page.title.length > 30
+                  ? page.title.slice(0, 30) + "..."
                   : page.title}
               </span>
             </Link>

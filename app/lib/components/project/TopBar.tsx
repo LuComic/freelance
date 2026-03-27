@@ -149,7 +149,7 @@ export const TopBar = () => {
                 pageDocument.saveStatus === "saving" ||
                 !pageDocument.hasUnsavedChanges
               }
-              className="text-sm gap-1 flex items-center justify-center p-1 @[64rem]:px-2 @[64rem]:py-0.5 rounded-md border border-(--vibrant) bg-(--vibrant)/20 hover:bg-(--vibrant-hover)/20 disabled:border-(--gray-page) disabled:text-(--gray-page) disabled:bg-transparent disabled:hover:bg-transparent disabled:cursor-not-allowed"
+              className="text-sm gap-1 hidden @[35rem]:flex items-center justify-center p-1 @[64rem]:px-2 @[64rem]:py-0.5 rounded-md border border-(--vibrant) bg-(--vibrant)/20 hover:bg-(--vibrant-hover)/20 disabled:border-(--gray-page) disabled:text-(--gray-page) disabled:bg-transparent disabled:hover:bg-transparent disabled:cursor-not-allowed"
             >
               {pageDocument.saveStatus === "saving" ? "Saving" : "Save"}
             </button>
