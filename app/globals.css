@@ -215,4 +215,8 @@
     border-radius: 100vh;
     background-color: var(--vibrant);
   }
+
+  .invis-scroll {
+    scrollbar-color: transparent transparent;
+  }
 }
