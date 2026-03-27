@@ -160,11 +160,11 @@ export default function TestingEditorClient() {
   }
 
   return (
-    <div className="w-full h-[calc(100dvh-13rem)] pt-2 min-h-112 border border-transparent rounded-md overflow-hidden">
+    <div className="w-full h-[calc(100dvh-13rem)] min-h-112 border border-transparent rounded-md overflow-hidden">
       <div className="h-full w-full flex items-start justify-start">
         <div
           aria-hidden
-          className="@[40rem]:w-11 w-9 shrink-0 h-full text-right text-sm text-(--gray-page) select-none overflow-hidden border-r border-(--gray)/40"
+          className="@[35rem]:inline hidden w-11 shrink-0 h-full text-right text-sm text-(--gray-page) select-none overflow-hidden border-r border-(--gray)/40"
         >
           <div style={{ transform: `translateY(-${scrollTop}px)` }}>
             {lines.map((lineNumber) => (
@@ -373,7 +373,7 @@ export default function TestingEditorClient() {
               );
             }}
             spellCheck={false}
-            className="relative z-10 h-full w-full resize-none bg-transparent p-0 pl-4 text-base leading-7 text-(--light) caret-(--light) border-none outline-none focus:ring-0"
+            className="relative z-10 h-full w-full resize-none bg-transparent p-0 pt-2 pl-4 text-base text-(--light) caret-(--light) border-none outline-none focus:ring-0"
             placeholder="Start typing..."
           />
           {ghostCompletion ? (

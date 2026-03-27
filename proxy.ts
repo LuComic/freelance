@@ -4,7 +4,7 @@ import {
   nextjsMiddlewareRedirect,
 } from "@convex-dev/auth/nextjs/server";
 
-const isSignInPage = createRouteMatcher(["/login"]);
+const isSignInPage = createRouteMatcher(["/", "/login"]);
 const isProtectedRoute = createRouteMatcher([
   "/projects/(.*)",
   "/settings(.*)",
