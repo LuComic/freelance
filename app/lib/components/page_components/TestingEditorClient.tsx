@@ -160,11 +160,11 @@ export default function TestingEditorClient() {
   }
 
   return (
-    <div className="w-full h-[calc(100dvh-13rem)] min-h-112 border border-transparent rounded-md overflow-hidden">
+    <div className="w-full h-[calc(100dvh-13rem)] pt-2 min-h-112 border border-transparent rounded-md overflow-hidden">
       <div className="h-full w-full flex items-start justify-start">
         <div
           aria-hidden
-          className="w-11 shrink-0 h-full text-right text-sm text-(--gray-page) select-none overflow-hidden border-r border-(--gray)/40"
+          className="@[40rem]:w-11 w-9 shrink-0 h-full text-right text-sm text-(--gray-page) select-none overflow-hidden border-r border-(--gray)/40"
         >
           <div style={{ transform: `translateY(-${scrollTop}px)` }}>
             {lines.map((lineNumber) => (

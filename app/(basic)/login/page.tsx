@@ -114,10 +114,6 @@ export default function Page() {
             {emailIndicator}
           </span>
         </div>
-        <p className="text-sm text-(--gray-page)">
-          {emailStatusMessage} We verify the Google account email again after
-          sign-in.
-        </p>
         <button
           type="button"
           className={`flex items-center gap-2 justify-start w-full @[40rem]:w-1/2 border px-2 py-1.5 ${
