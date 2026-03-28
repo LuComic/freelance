@@ -14,14 +14,14 @@ export const LandingHeader = () => {
   return (
     <header className="fixed top-0 z-20 w-full border-b border-(--gray) bg-(--darkest)/75 backdrop-blur-lg">
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <a href="#" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2">
           <span
             className="text-xl font-medium tracking-tight"
             style={{ fontFamily: '"Lexend Variable", sans-serif' }}
           >
             Pageboard
           </span>
-        </a>
+        </Link>
 
         <nav className="hidden items-center gap-2 lg:flex">
           {NAV_LINKS.map((item) => (
