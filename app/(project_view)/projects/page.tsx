@@ -255,7 +255,7 @@ export default function Page() {
           href="/legal"
           className="text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover)"
         >
-          Legal documentation
+          Legal
         </Link>
       </div>
       {validatedJoinTarget ? (
