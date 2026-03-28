@@ -124,6 +124,13 @@ export const MobileSidebar = ({
             ) : null}
           </div>
 
+          <Link
+            href="/feedback"
+            className="px-1.5 py-0.5 rounded-md border border-(--vibrant) bg-(--vibrant)/20 hover:bg-(--vibrant-hover)/20 text-sm"
+          >
+            Feedback and ideas
+          </Link>
+
           {resolvedActiveTab === "files" ? <Files /> : null}
           {!isAnonymous && resolvedActiveTab === "friends" ? (
             <Connections connections={connections} />
