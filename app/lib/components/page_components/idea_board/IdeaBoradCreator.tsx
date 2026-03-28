@@ -252,7 +252,7 @@ export const IdeaBoradCreator = ({
               </div>
               {rankedIdeas.map((idea, index) => (
                 <div
-                  className={`w-full ${index !== rankedIdeas.length - 1 ? "border-b" : ""} text-left grid justify-between items-start grid-cols-10 ${index === 0 ? "text-(--first-place)" : index === 1 ? "text-(--second-place)" : index === 2 ? "text-(--third-place)" : ""} border-(--gray) ${index % 2 !== 0 ? "bg-(--gray)/10" : ""} h-11`}
+                  className={`w-full ${index !== rankedIdeas.length - 1 ? "border-b" : ""} text-left grid justify-between items-start grid-cols-10 ${index === 0 ? "text-(--first-place)" : index === 1 ? "text-(--second-place)" : index === 2 ? "text-(--third-place)" : ""} border-(--gray) ${index % 2 !== 0 ? "bg-(--gray)/10" : ""}`}
                   key={idea.id}
                 >
                   <span
@@ -295,7 +295,7 @@ export const IdeaBoradCreator = ({
               </div>
               {visibleIdeas.map((idea, index) => (
                 <div
-                  className={`w-full ${index !== visibleIdeas.length - 1 ? "border-b" : ""} border-(--gray) text-left grid justify-between items-start grid-cols-10 ${index % 2 !== 0 ? "bg-(--gray)/10" : ""} h-11`}
+                  className={`w-full ${index !== visibleIdeas.length - 1 ? "border-b" : ""} border-(--gray) text-left grid justify-between items-start grid-cols-10 ${index % 2 !== 0 ? "bg-(--gray)/10" : ""}`}
                   key={idea.id}
                 >
                   <div className="flex py-2 border-r border-(--gray) h-full justify-around items-center gap-1 flex-wrap">

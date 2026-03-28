@@ -2,7 +2,17 @@
 
 import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
-import { ChevronRight, Heart, List, Medal, Trash } from "lucide-react";
+import {
+  Bug,
+  ChevronRight,
+  CircleAlert,
+  Component,
+  Heart,
+  List,
+  Medal,
+  Paintbrush,
+  Trash,
+} from "lucide-react";
 import type { Id } from "@/convex/_generated/dataModel";
 import {
   betaFeedbackIdeasQuery,
@@ -14,6 +24,7 @@ import {
 type FeedbackIdea = {
   id: Id<"betaFeedbackIdeas">;
   body: string;
+  tags: FeedbackTag[];
   authorUserId: Id<"users">;
   authorName: string;
   voteCount: number;
@@ -21,6 +32,14 @@ type FeedbackIdea = {
   isAuthor: boolean;
   createdAt: number;
 };
+
+type FeedbackTag = "Bug" | "Critical" | "Feature" | "UI/UX";
+
+const UNSELECTED_TAG_CLASS_NAME =
+  "pl-2 pr-1.5 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) flex items-center gap-1";
+
+const FILTER_TAG_CLASS_NAME =
+  "flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border text-(--gray-page) border-(--gray-page) hover:bg-(--gray)/20";
 
 export const IdeaBoradEveryone = () => {
   const ideas = useQuery(betaFeedbackIdeasQuery, {}) as
@@ -33,10 +52,13 @@ export const IdeaBoradEveryone = () => {
   const [addingInput, setAddingInput] = useState("");
   const [filter, setFilter] = useState<"all" | "rankings">("all");
   const [submitPending, setSubmitPending] = useState(false);
-  const [actingIdeaId, setActingIdeaId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [selectedTags, setSelectedTags] = useState<FeedbackTag[]>([]);
+  const [tagFilter, setTagFilter] = useState<FeedbackTag | null>(null);
 
-  const visibleIdeas = ideas ?? [];
+  const visibleIdeas = (ideas ?? []).filter((idea) =>
+    tagFilter === null ? true : idea.tags.includes(tagFilter),
+  );
   const rankedIdeas = [...visibleIdeas].sort((firstIdea, secondIdea) => {
     if (secondIdea.voteCount !== firstIdea.voteCount) {
       return secondIdea.voteCount - firstIdea.voteCount;
@@ -53,8 +75,9 @@ export const IdeaBoradEveryone = () => {
     try {
       setSubmitPending(true);
       setErrorMessage(null);
-      await submitIdea({ body: nextIdea });
+      await submitIdea({ body: nextIdea, tags: selectedTags });
       setAddingInput("");
+      setSelectedTags([]);
     } catch (error) {
       setErrorMessage(
         error instanceof Error ? error.message : "Failed to submit feedback.",
@@ -66,30 +89,36 @@ export const IdeaBoradEveryone = () => {
 
   const handleDeleteIdea = async (ideaId: Id<"betaFeedbackIdeas">) => {
     try {
-      setActingIdeaId(String(ideaId));
       setErrorMessage(null);
       await deleteIdea({ ideaId });
     } catch (error) {
       setErrorMessage(
         error instanceof Error ? error.message : "Failed to delete feedback.",
       );
-    } finally {
-      setActingIdeaId(null);
     }
   };
 
   const handleLikeOrDislikeIdea = async (ideaId: Id<"betaFeedbackIdeas">) => {
     try {
-      setActingIdeaId(String(ideaId));
       setErrorMessage(null);
       await toggleIdeaVote({ ideaId });
     } catch (error) {
       setErrorMessage(
         error instanceof Error ? error.message : "Failed to update vote.",
       );
-    } finally {
-      setActingIdeaId(null);
     }
+  };
+
+  const toggleSelectedTag = (tag: FeedbackTag) => {
+    setSelectedTags((currentTags) =>
+      currentTags.includes(tag)
+        ? currentTags.filter((currentTag) => currentTag !== tag)
+        : [...currentTags, tag],
+    );
+  };
+
+  const toggleTagFilter = (tag: FeedbackTag) => {
+    setTagFilter((currentTag) => (currentTag === tag ? null : tag));
   };
 
   return (
@@ -117,6 +146,57 @@ export const IdeaBoradEveryone = () => {
                 }
               }}
             />
+
+            <div className="flex items-center justify-start gap-2 w-full">
+              <button
+                type="button"
+                className={
+                  selectedTags.includes("Bug")
+                    ? "pl-2 pr-1.5 py-0.5 rounded-md border border-(--green) flex items-center gap-1 bg-(--green-bg)/10 hover:bg-(--green-bg)/20"
+                    : UNSELECTED_TAG_CLASS_NAME
+                }
+                onClick={() => toggleSelectedTag("Bug")}
+              >
+                <Bug size={16} />
+                Bug
+              </button>
+              <button
+                type="button"
+                className={
+                  selectedTags.includes("Critical")
+                    ? "pl-2 pr-1.5 py-0.5 rounded-md border border-(--red) flex items-center gap-1 bg-(--red-bg)/10 hover:bg-(--red-bg)/20"
+                    : UNSELECTED_TAG_CLASS_NAME
+                }
+                onClick={() => toggleSelectedTag("Critical")}
+              >
+                <CircleAlert size={16} />
+                Critical
+              </button>
+              <button
+                type="button"
+                className={
+                  selectedTags.includes("Feature")
+                    ? "pl-2 pr-1.5 py-0.5 rounded-md border border-(--yellow) flex items-center gap-1 bg-(--yellow-bg)/10 hover:bg-(--yellow-bg)/20"
+                    : UNSELECTED_TAG_CLASS_NAME
+                }
+                onClick={() => toggleSelectedTag("Feature")}
+              >
+                <Component size={16} />
+                Feature
+              </button>
+              <button
+                type="button"
+                className={
+                  selectedTags.includes("UI/UX")
+                    ? "pl-2 pr-1.5 py-0.5 rounded-md border border-(--purple) flex items-center gap-1 bg-(--purple-bg)/10 hover:bg-(--purple-bg)/20"
+                    : UNSELECTED_TAG_CLASS_NAME
+                }
+                onClick={() => toggleSelectedTag("UI/UX")}
+              >
+                <Paintbrush size={16} />
+                UI/UX
+              </button>
+            </div>
 
             <button
               type="button"
@@ -150,16 +230,62 @@ export const IdeaBoradEveryone = () => {
           <Medal size={16} />
           Rankings
         </button>
+        <button
+          type="button"
+          className={
+            tagFilter === "Bug"
+              ? "flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border border-(--green) bg-(--green-bg)/10 hover:bg-(--green-bg)/20"
+              : FILTER_TAG_CLASS_NAME
+          }
+          onClick={() => toggleTagFilter("Bug")}
+        >
+          <Bug size={16} />
+          Bug
+        </button>
+        <button
+          type="button"
+          className={
+            tagFilter === "Critical"
+              ? "flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border border-(--red) bg-(--red-bg)/10 hover:bg-(--red-bg)/20"
+              : FILTER_TAG_CLASS_NAME
+          }
+          onClick={() => toggleTagFilter("Critical")}
+        >
+          <CircleAlert size={16} />
+          Critical
+        </button>
+        <button
+          type="button"
+          className={
+            tagFilter === "Feature"
+              ? "flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border border-(--yellow) bg-(--yellow-bg)/10 hover:bg-(--yellow-bg)/20"
+              : FILTER_TAG_CLASS_NAME
+          }
+          onClick={() => toggleTagFilter("Feature")}
+        >
+          <Component size={16} />
+          Feature
+        </button>
+        <button
+          type="button"
+          className={
+            tagFilter === "UI/UX"
+              ? "flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border border-(--purple) bg-(--purple-bg)/10 hover:bg-(--purple-bg)/20"
+              : FILTER_TAG_CLASS_NAME
+          }
+          onClick={() => toggleTagFilter("UI/UX")}
+        >
+          <Paintbrush size={16} />
+          UI/UX
+        </button>
       </div>
 
       <div className="w-full max-w-full min-w-0 overflow-x-auto border rounded-md border-(--gray)">
         <div className="min-w-225 flex flex-col">
-          {ideas === undefined ? (
-            <div className="p-2 text-(--gray-page)">Loading ideas...</div>
-          ) : filter === "rankings" ? (
+          {filter === "rankings" ? (
             <>
               <div
-                className={`w-full text-(--gray-page) ${rankedIdeas.length > 0 ? "border-b" : ""} border-(--gray) text-left grid justify-between items-start grid-cols-10 bg-(--darkest) h-11`}
+                className={`w-full text-(--gray-page) ${rankedIdeas.length > 0 ? "border-b" : ""} border-(--gray) text-left grid justify-between items-start grid-cols-12 bg-(--darkest) h-11`}
               >
                 <span className="border-r p-2 border-(--gray) h-full text-wrap flex items-center justify-start">
                   Rank
@@ -170,13 +296,16 @@ export const IdeaBoradEveryone = () => {
                 <span className="p-2 border-r border-(--gray) col-span-2 h-full text-wrap flex items-center justify-start">
                   Author
                 </span>
+                <span className="p-2 border-r border-(--gray) col-span-2 h-full text-wrap flex items-center justify-start">
+                  Tags
+                </span>
                 <span className="p-2 col-span-6 border-(--gray) h-full text-wrap flex items-center justify-start">
                   Idea
                 </span>
               </div>
               {rankedIdeas.map((idea, index) => (
                 <div
-                  className={`w-full ${index !== rankedIdeas.length - 1 ? "border-b" : ""} text-left grid justify-between items-start grid-cols-10 ${index === 0 ? "text-(--first-place)" : index === 1 ? "text-(--second-place)" : index === 2 ? "text-(--third-place)" : ""} border-(--gray) ${index % 2 !== 0 ? "bg-(--gray)/10" : ""} h-11`}
+                  className={`w-full ${index !== rankedIdeas.length - 1 ? "border-b" : ""} text-left grid justify-between items-start grid-cols-12 ${index === 0 ? "text-(--first-place)" : index === 1 ? "text-(--second-place)" : index === 2 ? "text-(--third-place)" : ""} border-(--gray) ${index % 2 !== 0 ? "bg-(--gray)/10" : ""}`}
                   key={idea.id}
                 >
                   <span
@@ -193,6 +322,9 @@ export const IdeaBoradEveryone = () => {
                   <span className="text-wrap p-2 border-r border-(--gray) col-span-2 h-full text-left flex items-center justify-start">
                     {idea.authorName}
                   </span>
+                  <span className="text-wrap p-2 border-r border-(--gray) col-span-2 h-full text-left flex items-center justify-start">
+                    {idea.tags.join(", ")}
+                  </span>
                   <span className="text-wrap p-2 col-span-6 h-full text-left flex items-center justify-start">
                     {idea.body}
                   </span>
@@ -202,7 +334,7 @@ export const IdeaBoradEveryone = () => {
           ) : (
             <>
               <div
-                className={`w-full text-(--gray-page) ${visibleIdeas.length > 0 ? "border-b" : ""} border-(--gray) text-left grid justify-between items-start grid-cols-10 bg-(--darkest) h-11`}
+                className={`w-full text-(--gray-page) ${visibleIdeas.length > 0 ? "border-b" : ""} border-(--gray) text-left grid justify-between items-start grid-cols-12 bg-(--darkest) h-11`}
               >
                 <span className="border-r p-2 border-(--gray) h-full text-wrap flex items-center justify-start">
                   Actions
@@ -213,16 +345,17 @@ export const IdeaBoradEveryone = () => {
                 <span className="p-2 border-r border-(--gray) col-span-2 h-full text-wrap flex items-center justify-start">
                   Author
                 </span>
+                <span className="p-2 border-r border-(--gray) col-span-2 h-full text-wrap flex items-center justify-start">
+                  Tags
+                </span>
                 <span className="p-2 col-span-6 border-(--gray) h-full text-wrap flex items-center justify-start">
                   Idea
                 </span>
               </div>
               {visibleIdeas.map((idea, index) => {
-                const isPending = actingIdeaId === String(idea.id);
-
                 return (
                   <div
-                    className={`w-full ${index !== visibleIdeas.length - 1 ? "border-b" : ""} border-(--gray) text-left grid justify-between items-start grid-cols-10 ${index % 2 !== 0 ? "bg-(--gray)/10" : ""} h-11`}
+                    className={`w-full ${index !== visibleIdeas.length - 1 ? "border-b" : ""} border-(--gray) text-left grid justify-between items-start grid-cols-12 ${index % 2 !== 0 ? "bg-(--gray)/10" : ""}`}
                     key={idea.id}
                   >
                     <div className="flex py-2 border-r border-(--gray) h-full justify-around items-center gap-1 flex-wrap">
@@ -230,7 +363,6 @@ export const IdeaBoradEveryone = () => {
                         type="button"
                         className="gap-1 flex items-center justify-center p-1.5 rounded-sm h-max aspect-square hover:bg-(--gray)/20 disabled:cursor-not-allowed"
                         onClick={() => void handleLikeOrDislikeIdea(idea.id)}
-                        disabled={isPending}
                       >
                         <Heart
                           color={`${idea.hasVoted ? "var(--vibrant)" : "var(--light)"}`}
@@ -243,7 +375,6 @@ export const IdeaBoradEveryone = () => {
                           type="button"
                           className="gap-1 flex items-center justify-center p-1.5 rounded-sm h-max aspect-square  hover:bg-(--gray)/20 disabled:cursor-not-allowed"
                           onClick={() => void handleDeleteIdea(idea.id)}
-                          disabled={isPending}
                         >
                           <Trash size={16} />
                         </button>
@@ -257,6 +388,9 @@ export const IdeaBoradEveryone = () => {
                     </span>
                     <span className="text-wrap p-2 border-r border-(--gray) col-span-2 h-full text-left flex items-center justify-start">
                       {idea.authorName}
+                    </span>
+                    <span className="text-wrap p-2 border-r border-(--gray) col-span-2 h-full text-left flex items-center justify-start">
+                      {idea.tags.join(", ")}
                     </span>
                     <span className="text-wrap p-2 col-span-6 h-full text-left flex items-center justify-start">
                       {idea.body}

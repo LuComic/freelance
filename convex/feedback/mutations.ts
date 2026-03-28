@@ -5,6 +5,7 @@ import { invalidState, notFound, unauthorized } from "../lib/errors";
 
 const MAX_IDEA_LENGTH = 280;
 const FALLBACK_AUTHOR_NAME = "Anonymous";
+const ALLOWED_TAGS = ["Bug", "Critical", "Feature", "UI/UX"] as const;
 
 function getAuthorName(name?: string | null) {
   const trimmedName = name?.trim();
@@ -18,10 +19,18 @@ function getAuthorName(name?: string | null) {
 export const submitIdea = mutation({
   args: {
     body: v.string(),
+    tags: v.array(v.string()),
   },
   handler: async (ctx, args) => {
     const { userId, user } = await requireCurrentAuth(ctx);
     const body = args.body.trim();
+    const tags = Array.from(
+      new Set(
+        args.tags.filter((tag): tag is (typeof ALLOWED_TAGS)[number] =>
+          ALLOWED_TAGS.includes(tag as (typeof ALLOWED_TAGS)[number]),
+        ),
+      ),
+    );
 
     if (body.length === 0) {
       throw invalidState("Feedback idea cannot be empty.");
@@ -37,6 +46,7 @@ export const submitIdea = mutation({
 
     return ctx.db.insert("betaFeedbackIdeas", {
       body,
+      tags,
       authorUserId: userId,
       authorNameSnapshot: getAuthorName(user.name),
       voterUserIds: [],

@@ -220,6 +220,7 @@ const schema = defineSchema({
 
   betaFeedbackIdeas: defineTable({
     body: v.string(),
+    tags: v.array(v.string()),
     authorUserId: v.id("users"),
     authorNameSnapshot: v.string(),
     voterUserIds: v.array(v.id("users")),

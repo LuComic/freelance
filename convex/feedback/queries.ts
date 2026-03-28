@@ -16,6 +16,7 @@ export const listIdeas = query({
     return ideas.map((idea) => ({
       id: idea._id,
       body: idea.body,
+      tags: idea.tags,
       authorUserId: idea.authorUserId,
       authorName: idea.authorNameSnapshot.trim() || FALLBACK_AUTHOR_NAME,
       voteCount: idea.voterUserIds.length,
