@@ -77,6 +77,7 @@ export const listNotifications = query({
             createdAt: notification.createdAt,
             actorName: notification.actorNameSnapshot,
             actorImage: notification.actorImageSnapshot ?? null,
+            projectId: notification.projectId ?? null,
             projectName,
             sidebarTarget: notification.sidebarTarget ?? null,
           };

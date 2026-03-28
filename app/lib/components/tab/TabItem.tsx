@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import { X } from "lucide-react";
 
 interface TabItemProps {
@@ -19,8 +22,19 @@ export const TabItem = ({
   onSelect,
   onClose,
 }: TabItemProps) => {
+  const tabRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isActive) {
+      return;
+    }
+
+    tabRef.current?.scrollIntoView();
+  }, [isActive]);
+
   return (
     <div
+      ref={tabRef}
       className={`flex h-9 min-w-37.5 shrink-0 items-center border-b-0 border-l-0 border-r border-t border-(--gray) overscroll-y-none ${
         isActive
           ? "bg-(--quite-dark)"

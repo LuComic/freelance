@@ -145,6 +145,7 @@ const schema = defineSchema({
     userId: v.id("users"),
     type: v.union(
       v.literal("projectInviteReceived"),
+      v.literal("projectMemberJoined"),
       v.literal("friendRequestReceived"),
       v.literal("friendRequestAccepted"),
       v.literal("clientStateChanged"),

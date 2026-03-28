@@ -17,6 +17,7 @@ import { projectInviteRoleValidator } from "../lib/validators";
 import {
   buildNotificationActorSnapshot,
   createNotification,
+  createProjectJoinNotifications,
 } from "../notifications/model";
 
 type InviteableProject = Pick<Doc<"projects">, "_id" | "name" | "createdAt">;
@@ -423,6 +424,7 @@ export const acceptProjectInvite = mutation({
 
     const now = Date.now();
     const project = await ctx.db.get(invite.projectId);
+    let didJoinProject = false;
 
     if (!project || project.isArchived === true) {
       await ctx.db.patch(invite._id, {
@@ -449,6 +451,7 @@ export const acceptProjectInvite = mutation({
         createdAt: now,
         updatedAt: now,
       });
+      didJoinProject = true;
     } else if (existingMembership.status === "removed") {
       await ctx.db.patch(existingMembership._id, {
         role: invite.role,
@@ -456,6 +459,7 @@ export const acceptProjectInvite = mutation({
         addedByUserId: invite.invitedByUserId,
         updatedAt: now,
       });
+      didJoinProject = true;
     }
 
     if (!user.projectIds?.includes(project._id)) {
@@ -468,6 +472,13 @@ export const acceptProjectInvite = mutation({
       status: "accepted",
       updatedAt: now,
     });
+
+    if (didJoinProject) {
+      await createProjectJoinNotifications(ctx, {
+        project,
+        joinedUser: user,
+      });
+    }
 
     return {
       inviteId: invite._id,

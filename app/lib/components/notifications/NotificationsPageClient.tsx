@@ -5,7 +5,10 @@ import { useMutation, useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 import { api } from "@/convex/_generated/api";
 import { useSidebarController } from "../sidebar/SidebarControllerContext";
-import { getProjectAnalyticsPath } from "../project/paths";
+import {
+  getProjectAnalyticsPath,
+  getProjectSettingsPath,
+} from "../project/paths";
 import type { AppNotification } from "./types";
 
 function formatNotificationDate(timestamp: number) {
@@ -20,6 +23,8 @@ function getNotificationText(notification: AppNotification) {
   switch (notification.type) {
     case "projectInviteReceived":
       return `${notification.actorName} invited you to '${notification.projectName ?? "a project"}'`;
+    case "projectMemberJoined":
+      return `${notification.actorName} joined '${notification.projectName ?? "a project"}'`;
     case "friendRequestReceived":
       return `${notification.actorName} sent you a friend request`;
     case "friendRequestAccepted":
@@ -72,6 +77,15 @@ export const NotificationsPageClient = () => {
     await markNotificationRead({
       notificationId: notification.id,
     });
+
+    if (notification.type === "projectMemberJoined") {
+      if (!notification.projectId) {
+        return;
+      }
+
+      router.push(getProjectSettingsPath(String(notification.projectId)));
+      return;
+    }
 
     if (notification.type === "clientStateChanged") {
       if (!notification.projectId) {

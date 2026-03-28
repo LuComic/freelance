@@ -17,16 +17,14 @@ import {
 } from "../lib/errors";
 import { requireProjectEditor, requireProjectMember } from "../lib/permissions";
 import { getOrderedProjectPages } from "../lib/projectRecords";
+import { createProjectJoinNotifications } from "../notifications/model";
 import {
   generateUniqueJoinCode,
   getProjectByNormalizedJoinCode,
   normalizeJoinCode,
 } from "./model";
 
-type RedirectProject = Pick<
-  Doc<"projects">,
-  "_id" | "pageIds" | "isArchived"
->;
+type RedirectProject = Pick<Doc<"projects">, "_id" | "pageIds" | "isArchived">;
 type RedirectCtx = QueryCtx | MutationCtx;
 
 function isProjectEditorRole(role: Doc<"projectMembers">["role"]) {
@@ -274,6 +272,11 @@ export const createGuestMembershipFromJoin = internalMutation({
       lastOpenedProjectId: project._id,
     });
 
+    await createProjectJoinNotifications(ctx, {
+      project,
+      joinedUser: guestUser,
+    });
+
     const redirectPath = await getDefaultProjectPath(ctx, project);
 
     return {
@@ -316,6 +319,7 @@ export const joinCurrentUserByCode = mutation({
       )
       .unique();
     const now = Date.now();
+    let didJoinProject = false;
 
     if (!existingMembership) {
       await ctx.db.insert("projectMembers", {
@@ -327,6 +331,7 @@ export const joinCurrentUserByCode = mutation({
         createdAt: now,
         updatedAt: now,
       });
+      didJoinProject = true;
     } else if (existingMembership.status === "removed") {
       await ctx.db.patch(existingMembership._id, {
         role: "client",
@@ -334,6 +339,7 @@ export const joinCurrentUserByCode = mutation({
         addedByUserId: project.ownerId,
         updatedAt: now,
       });
+      didJoinProject = true;
     }
 
     const nextProjectIds = user.projectIds?.includes(project._id)
@@ -344,6 +350,13 @@ export const joinCurrentUserByCode = mutation({
       projectIds: nextProjectIds,
       lastOpenedProjectId: project._id,
     });
+
+    if (didJoinProject) {
+      await createProjectJoinNotifications(ctx, {
+        project,
+        joinedUser: user,
+      });
+    }
 
     return {
       projectId: project._id,

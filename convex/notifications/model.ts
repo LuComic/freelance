@@ -19,7 +19,7 @@ export type NotificationComponentType =
 
 export type NotificationSidebarTarget = "invites" | "got" | "friends";
 
-type NotificationType = Doc<"notifications">["type"];
+type NotificationType = Doc<"notifications">["type"] | "projectMemberJoined";
 
 type CreateNotificationInput = {
   userId: Id<"users">;
@@ -46,6 +46,9 @@ type ChangedLiveStateComponent = {
   label: string;
 };
 
+type NotificationProject = Pick<Doc<"projects">, "_id" | "name">;
+type NotificationActor = Pick<Doc<"users">, "_id" | "name" | "email" | "image">;
+
 export function buildNotificationActorSnapshot(
   user: Pick<Doc<"users">, "_id" | "name" | "email" | "image">,
 ) {
@@ -64,7 +67,7 @@ export async function createNotification(
 
   return ctx.db.insert("notifications", {
     userId: input.userId,
-    type: input.type,
+    type: input.type as Doc<"notifications">["type"],
     isRead: false,
     actorUserId: input.actorUserId,
     projectId: input.projectId,
@@ -83,6 +86,43 @@ export async function createNotification(
     createdAt: now,
     updatedAt: now,
   });
+}
+
+export async function createProjectJoinNotifications(
+  ctx: MutationCtx,
+  args: {
+    project: NotificationProject;
+    joinedUser: NotificationActor;
+  },
+) {
+  const projectMembers = await ctx.db
+    .query("projectMembers")
+    .withIndex("by_project", (query) => query.eq("projectId", args.project._id))
+    .collect();
+  const recipients = projectMembers.filter(
+    (projectMember) =>
+      projectMember.status === "active" &&
+      projectMember.userId !== args.joinedUser._id &&
+      (projectMember.role === "owner" || projectMember.role === "coCreator"),
+  );
+
+  if (recipients.length === 0) {
+    return;
+  }
+
+  const actorSnapshot = buildNotificationActorSnapshot(args.joinedUser);
+
+  await Promise.all(
+    recipients.map((recipient) =>
+      createNotification(ctx, {
+        userId: recipient.userId,
+        type: "projectMemberJoined",
+        ...actorSnapshot,
+        projectId: args.project._id,
+        projectNameSnapshot: args.project.name,
+      }),
+    ),
+  );
 }
 
 export async function markAllNotificationsReadForUser(

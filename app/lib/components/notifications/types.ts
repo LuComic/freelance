@@ -12,8 +12,10 @@ type BaseNotification = {
 export type ConnectionNotification = BaseNotification & {
   type:
     | "projectInviteReceived"
+    | "projectMemberJoined"
     | "friendRequestReceived"
     | "friendRequestAccepted";
+  projectId: Id<"projects"> | null;
   projectName: string | null;
   sidebarTarget: SidebarConnectionsSection | null;
 };
