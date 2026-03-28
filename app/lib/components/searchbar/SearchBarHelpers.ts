@@ -129,12 +129,14 @@ export const useSearchBarResults = ({
   isOpen,
   activeTag,
   searchQuery,
+  searchInviteDefaults,
   templateSearchTypes,
   setTemplateActionError,
 }: {
   isOpen: boolean;
   activeTag: SearchTag | null;
   searchQuery: string;
+  searchInviteDefaults: PersonInviteDefaults | null;
   templateSearchTypes: SearchTemplateType[] | null;
   setTemplateActionError: (value: string | null) => void;
 }) => {
@@ -188,9 +190,38 @@ export const useSearchBarResults = ({
     api.templates.queries.searchVisibleTemplates,
     templateSearchArgs,
   );
+  const scopedProjectMembers = useQuery(
+    api.projects.members.getProjectMembers,
+    isOpen &&
+      activeTag === "people" &&
+      searchInviteDefaults?.projectId &&
+      searchInviteDefaults.role
+      ? {
+          projectId: searchInviteDefaults.projectId,
+        }
+      : "skip",
+  );
 
-  const visiblePeopleSearchResults: SearchPerson[] =
-    peopleSearchResults ?? resolvedPeopleSearchState?.results ?? [];
+  const projectRoleFilterIds = new Set(
+    searchInviteDefaults?.role === "client"
+      ? (scopedProjectMembers?.clients ?? []).map((member) => member.userId)
+      : searchInviteDefaults?.role === "coCreator"
+        ? (scopedProjectMembers?.coCreators ?? []).map(
+            (member) => member.userId,
+          )
+        : [],
+  );
+
+  const visiblePeopleSearchResults: SearchPerson[] = (
+    peopleSearchResults ??
+    resolvedPeopleSearchState?.results ??
+    []
+  ).filter(
+    (person) =>
+      !searchInviteDefaults?.projectId ||
+      !searchInviteDefaults.role ||
+      !projectRoleFilterIds.has(person.userId),
+  );
   const visiblePageSearchResults: SearchPageResult[] =
     pageSearchResults ?? resolvedPageSearchResults ?? [];
   const visibleTemplateSearchResults: SearchTemplateSummary[] =

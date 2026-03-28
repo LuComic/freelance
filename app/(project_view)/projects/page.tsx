@@ -251,12 +251,6 @@ export default function Page() {
                   : "Next"}
           </button>
         </form>
-        <Link
-          href="/legal"
-          className="text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover) cursor-pointer"
-        >
-          Legal
-        </Link>
       </div>
       {validatedJoinTarget ? (
         <p className="text-(--gray-page)">
@@ -276,12 +270,21 @@ export default function Page() {
         <p className="text-(--declined-border)">{upgradeError}</p>
       ) : null}
 
-      <Link
-        href="/tutorial"
-        className="text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover) cursor-pointer"
-      >
-        Tutorial | Demo
-      </Link>
+      <span className="inline text-wrap">
+        <Link
+          href="/tutorial"
+          className="text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover) cursor-pointer"
+        >
+          Tutorial
+        </Link>
+        <Link
+          href="/legal"
+          className="ml-2 text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover) cursor-pointer"
+        >
+          Legal
+        </Link>
+      </span>
+
       <div className="w-full flex flex-col items-start justify-start overflow-hidden rounded-md border border-(--gray)">
         <div className="w-full flex items-center justify-start p-2 bg-(--darkest) text-(--gray-page) border-b border-(--gray)">
           Projects

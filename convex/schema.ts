@@ -217,6 +217,17 @@ const schema = defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_project", ["projectId"]),
+
+  betaFeedbackIdeas: defineTable({
+    body: v.string(),
+    authorUserId: v.id("users"),
+    authorNameSnapshot: v.string(),
+    voterUserIds: v.array(v.id("users")),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_created_at", ["createdAt"])
+    .index("by_author", ["authorUserId"]),
 });
 
 export default schema;

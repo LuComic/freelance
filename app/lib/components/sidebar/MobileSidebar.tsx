@@ -62,8 +62,9 @@ export const MobileSidebar = ({
       {resolvedSidebarOpen ? (
         <nav className="w-90.75 h-dvh max-h-dvh bg-(--darkest) border-r border-(--gray) flex flex-col items-start justify-start p-2 gap-4 fixed z-30 top-0 left-0 overflow-hidden">
           <div className="flex items-center justify-between w-full">
-            <Link href="/projects" className="text-(--gray) text-xl">
+            <Link href="/projects" className="text-(--gray) text-xl inline">
               Pageboard
+              <span className="text-(--light) ml-1">Beta</span>
             </Link>
             <button
               onClick={() => {

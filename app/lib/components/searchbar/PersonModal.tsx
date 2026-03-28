@@ -30,6 +30,12 @@ const INVITE_ROLE_OPTIONS = [
   { value: "coCreator", label: "Co-creator" },
 ] as const;
 
+type ProjectInviteActionMode =
+  | "invite"
+  | "upgrade"
+  | "downgrade"
+  | "unavailable";
+
 export const PersonModal = ({
   person,
   inviteDefaults,
@@ -48,6 +54,9 @@ export const PersonModal = ({
   const inviteUserToProject = useMutation(
     api.projects.invites.inviteUserToProject,
   );
+  const changeProjectMemberRole = useMutation(
+    api.projects.members.changeProjectMemberRole,
+  );
   const { runConnectionAction, pendingAction, error, clearError } =
     useConnectionActions();
   const visiblePerson = relationshipData?.user ?? person;
@@ -59,9 +68,19 @@ export const PersonModal = ({
   const [selectedRole, setSelectedRole] = useState<InviteRole | "">(
     inviteDefaults?.role ?? "client",
   );
+  const selectedProjectMembership = useQuery(
+    api.projects.members.getProjectMembershipForUser,
+    open && person && selectedProjectId
+      ? {
+          projectId: selectedProjectId,
+          targetUserId: person.userId,
+        }
+      : "skip",
+  );
   const [inviteMessage, setInviteMessage] = useState<string | null>(null);
   const [inviteError, setInviteError] = useState<string | null>(null);
-  const [isInviting, setIsInviting] = useState(false);
+  const [isSubmittingInviteAction, setIsSubmittingInviteAction] =
+    useState(false);
   const [showInviteDropdown, setShowInviteDropdown] = useState(
     Boolean(inviteDefaults?.expandInviteSection),
   );
@@ -76,7 +95,7 @@ export const PersonModal = ({
   };
 
   const handleInvite = async () => {
-    if (!person || !selectedProjectId || !selectedRole) {
+    if (!person || !selectedProjectId || !resolvedRole) {
       return;
     }
 
@@ -84,7 +103,7 @@ export const PersonModal = ({
       inviteableProjects?.find((project) => project.id === selectedProjectId) ??
       null;
     const roleLabel = INVITE_ROLE_OPTIONS.find(
-      (role) => role.value === selectedRole,
+      (role) => role.value === resolvedRole,
     )?.label;
 
     if (!selectedProject || !roleLabel) {
@@ -93,27 +112,57 @@ export const PersonModal = ({
 
     setInviteError(null);
     setInviteMessage(null);
-    setIsInviting(true);
+    setIsSubmittingInviteAction(true);
 
     try {
-      await inviteUserToProject({
-        projectId: selectedProjectId,
-        targetUserId: person.userId,
-        role: selectedRole,
-      });
-      setInviteMessage(
-        `Invite sent to ${visiblePerson?.name ?? person.name} for ${selectedProject.name} as ${roleLabel}.`,
-      );
+      if (inviteActionMode === "invite") {
+        await inviteUserToProject({
+          projectId: selectedProjectId,
+          targetUserId: person.userId,
+          role: resolvedRole,
+        });
+        setInviteMessage(
+          `Invite sent to ${visiblePerson?.name ?? person.name} for ${selectedProject.name} as ${roleLabel}.`,
+        );
+      } else if (
+        inviteActionMode === "upgrade" ||
+        inviteActionMode === "downgrade"
+      ) {
+        await changeProjectMemberRole({
+          projectId: selectedProjectId,
+          targetUserId: person.userId,
+          role: resolvedRole,
+        });
+        setInviteMessage(
+          `Updated ${visiblePerson?.name ?? person.name} in ${selectedProject.name} to ${roleLabel.toLowerCase()}.`,
+        );
+      }
     } catch (inviteActionError) {
       setInviteError(
         inviteActionError instanceof Error
           ? inviteActionError.message
-          : "Could not invite this user to the project.",
+          : inviteActionMode === "invite"
+            ? "Could not invite this user to the project."
+            : "Could not update this project member.",
       );
     } finally {
-      setIsInviting(false);
+      setIsSubmittingInviteAction(false);
     }
   };
+
+  useEffect(() => {
+    setSelectedProjectId(inviteDefaults?.projectId ?? "");
+    setSelectedRole(inviteDefaults?.role ?? "client");
+    setInviteMessage(null);
+    setInviteError(null);
+    setIsSubmittingInviteAction(false);
+    setShowInviteDropdown(Boolean(inviteDefaults?.expandInviteSection));
+  }, [inviteDefaults, person]);
+
+  useEffect(() => {
+    setInviteMessage(null);
+    setInviteError(null);
+  }, [selectedProjectId, selectedRole]);
 
   useEffect(() => {
     if (!open) {
@@ -139,12 +188,47 @@ export const PersonModal = ({
     inviteableProjects?.find((project) => project.id === selectedProjectId) ??
     null;
   const canReceiveProjectInvite = Boolean(visiblePerson.email?.trim());
+  const currentMembershipRole = selectedProjectMembership?.role ?? null;
+  const inviteActionMode: ProjectInviteActionMode =
+    !selectedProject || selectedProjectMembership === undefined
+      ? "unavailable"
+      : currentMembershipRole === null
+        ? selectedRole
+          ? "invite"
+          : "unavailable"
+        : currentMembershipRole === "owner"
+          ? "unavailable"
+          : currentMembershipRole === "client"
+            ? "upgrade"
+            : currentMembershipRole === "coCreator"
+              ? "downgrade"
+              : "unavailable";
+  const resolvedRole: InviteRole | "" =
+    inviteActionMode === "upgrade"
+      ? "coCreator"
+      : inviteActionMode === "downgrade"
+        ? "client"
+        : selectedRole;
+  const inviteActionLabel =
+    inviteActionMode === "upgrade"
+      ? "Upgrade to co-creator"
+      : inviteActionMode === "downgrade"
+        ? "Downgrade to client"
+        : "Invite";
+  const inviteActionHelper = !selectedProject
+    ? null
+    : selectedProjectMembership === undefined
+      ? "Loading project membership..."
+      : currentMembershipRole === "owner"
+        ? "The project owner's role cannot be changed here."
+        : null;
   const canInvite =
     Boolean(selectedProject) &&
-    Boolean(selectedRole) &&
-    !isInviting &&
+    Boolean(resolvedRole) &&
+    !isSubmittingInviteAction &&
     (inviteableProjects?.length ?? 0) > 0 &&
-    canReceiveProjectInvite;
+    inviteActionMode !== "unavailable" &&
+    (inviteActionMode !== "invite" || canReceiveProjectInvite);
 
   return (
     <div
@@ -212,27 +296,29 @@ export const PersonModal = ({
                 </SelectContent>
               </Select>
 
-              <div className="w-full flex items-center gap-4">
-                {INVITE_ROLE_OPTIONS.map((role) => {
-                  const selected = selectedRole === role.value;
+              {currentMembershipRole === null ? (
+                <div className="w-full flex items-center gap-4">
+                  {INVITE_ROLE_OPTIONS.map((role) => {
+                    const selected = selectedRole === role.value;
 
-                  return (
-                    <button
-                      key={role.value}
-                      type="button"
-                      className="flex items-center gap-2 justify-start"
-                      onClick={() => setSelectedRole(role.value)}
-                    >
-                      <span className="h-5 flex items-center p-1 justify-center w-auto aspect-square rounded-full bg-(--dim)">
-                        {selected ? (
-                          <span className="bg-(--vibrant) aspect-square h-full rounded-full" />
-                        ) : null}
-                      </span>
-                      <span>{role.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
+                    return (
+                      <button
+                        key={role.value}
+                        type="button"
+                        className="flex items-center gap-2 justify-start"
+                        onClick={() => setSelectedRole(role.value)}
+                      >
+                        <span className="h-5 flex items-center p-1 justify-center w-auto aspect-square rounded-full bg-(--dim)">
+                          {selected ? (
+                            <span className="bg-(--vibrant) aspect-square h-full rounded-full" />
+                          ) : null}
+                        </span>
+                        <span>{role.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : null}
 
               <button
                 type="button"
@@ -240,7 +326,11 @@ export const PersonModal = ({
                 disabled={!canInvite}
                 onClick={() => void handleInvite()}
               >
-                {isInviting ? "Inviting..." : "Invite"}
+                {isSubmittingInviteAction
+                  ? inviteActionMode === "invite"
+                    ? "Inviting..."
+                    : "Updating..."
+                  : inviteActionLabel}
               </button>
 
               {inviteableProjects === undefined ? (
@@ -253,10 +343,23 @@ export const PersonModal = ({
                   or a co-creator.
                 </p>
               ) : null}
-              {!canReceiveProjectInvite ? (
+              {inviteActionMode === "invite" && !canReceiveProjectInvite ? (
                 <p className="pt-2 text-(--gray-page)">
                   This account cannot receive a project invite until it has an
                   email address.
+                </p>
+              ) : null}
+              {inviteActionHelper ? (
+                <p
+                  className={`pt-2 ${
+                    selectedProjectMembership === undefined
+                      ? "text-(--gray-page)"
+                      : inviteActionMode === "unavailable"
+                        ? "text-(--declined-border)"
+                        : "text-(--gray-page)"
+                  }`}
+                >
+                  {inviteActionHelper}
                 </p>
               ) : null}
               {inviteMessage ? (

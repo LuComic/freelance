@@ -17,6 +17,7 @@ import {
   notFound,
 } from "../lib/errors";
 import { requireProjectEditor, requireProjectMember } from "../lib/permissions";
+import { projectInviteRoleValidator } from "../lib/validators";
 import { buildProjectMemberDisplayName } from "./model";
 
 type ProjectCtx = QueryCtx | MutationCtx;
@@ -237,6 +238,38 @@ export const getProjectMembers = query({
   },
 });
 
+export const getProjectMembershipForUser = query({
+  args: {
+    projectId: v.id("projects"),
+    targetUserId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const { userId } = await requireCurrentAuth(ctx);
+    const project = await ctx.db.get(args.projectId);
+
+    if (!project || project.isArchived === true) {
+      throw notFound(`Project ${args.projectId} was not found.`);
+    }
+
+    await requireProjectEditor(ctx, project._id, userId);
+
+    const membership = await ctx.db
+      .query("projectMembers")
+      .withIndex("by_project_user", (query) =>
+        query.eq("projectId", project._id).eq("userId", args.targetUserId),
+      )
+      .unique();
+
+    if (!membership || membership.status !== "active") {
+      return null;
+    }
+
+    return {
+      role: membership.role,
+    };
+  },
+});
+
 export const removeProjectMember = mutation({
   args: {
     projectId: v.id("projects"),
@@ -326,6 +359,66 @@ export const removeProjectMember = mutation({
     return {
       projectId: project._id,
       targetUserId: args.targetUserId,
+    };
+  },
+});
+
+export const changeProjectMemberRole = mutation({
+  args: {
+    projectId: v.id("projects"),
+    targetUserId: v.id("users"),
+    role: projectInviteRoleValidator,
+  },
+  handler: async (ctx, args) => {
+    const { userId } = await requireCurrentAuth(ctx);
+
+    if (args.targetUserId === userId) {
+      throw invalidState("You can't change your own role in this project.");
+    }
+
+    const [project, targetUser] = await Promise.all([
+      ctx.db.get(args.projectId),
+      ctx.db.get(args.targetUserId),
+    ]);
+
+    if (!project || project.isArchived === true) {
+      throw notFound(`Project ${args.projectId} was not found.`);
+    }
+
+    if (!targetUser) {
+      throw notFound(`User ${args.targetUserId} was not found.`);
+    }
+
+    await requireProjectEditor(ctx, project._id, userId);
+
+    const targetMembership = await ctx.db
+      .query("projectMembers")
+      .withIndex("by_project_user", (query) =>
+        query.eq("projectId", project._id).eq("userId", args.targetUserId),
+      )
+      .unique();
+
+    if (!targetMembership || targetMembership.status !== "active") {
+      throw invalidState("This user is not an active project member.");
+    }
+
+    if (targetMembership.role === "owner") {
+      throw invalidState("The project owner's role cannot be changed.");
+    }
+
+    if (targetMembership.role === args.role) {
+      throw invalidState("This user already has that role in this project.");
+    }
+
+    await ctx.db.patch(targetMembership._id, {
+      role: args.role,
+      updatedAt: Date.now(),
+    });
+
+    return {
+      projectId: project._id,
+      targetUserId: args.targetUserId,
+      role: args.role,
     };
   },
 });

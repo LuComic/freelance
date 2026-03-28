@@ -80,6 +80,7 @@ export const SearchBar = () => {
     isOpen,
     activeTag,
     searchQuery,
+    searchInviteDefaults,
     templateSearchTypes,
     setTemplateActionError,
   });
@@ -223,7 +224,7 @@ export const SearchBar = () => {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "p") {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
         if (isOpen) {
           closeSearch();
@@ -367,7 +368,7 @@ export const SearchBar = () => {
                 />
               </div>
               <KbdGroup>
-                <Kbd className="bg-(--gray) text-(--light)">Ctrl + P</Kbd>
+                <Kbd className="bg-(--gray) text-(--light)">Ctrl + K</Kbd>
               </KbdGroup>
             </div>
 

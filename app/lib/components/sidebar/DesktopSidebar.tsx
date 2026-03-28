@@ -86,8 +86,9 @@ export const DesktopSidebar = ({
       {resolvedSidebarOpen ? (
         <nav className="w-90.75 h-full min-h-dvh bg-(--darkest) border-r border-(--gray) flex flex-col items-start justify-start p-2 px-3 gap-4 overflow-hidden">
           <div className="flex items-center justify-between w-full">
-            <Link href="/projects" className="text-(--gray) text-xl">
+            <Link href="/projects" className="text-(--gray) text-xl inline">
               Pageboard
+              <span className="text-(--light) ml-1">Beta</span>
             </Link>
             <button
               onClick={() => {
@@ -145,6 +146,12 @@ export const DesktopSidebar = ({
               <CreateProjectModal redirectWhenBlocked="/settings?section=plan" />
             ) : null}
           </div>
+          <Link
+            href="/feedback"
+            className="px-1.5 py-0.5 rounded-md border border-(--vibrant) bg-(--vibrant)/20 hover:bg-(--vibrant-hover)/20 text-sm"
+          >
+            Feedback and ideas
+          </Link>
           {resolvedActiveTab === "files" ? <Files /> : null}
           {!isAnonymous && resolvedActiveTab === "friends" ? (
             <Connections connections={connections} />

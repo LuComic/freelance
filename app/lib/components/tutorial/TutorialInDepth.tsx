@@ -51,7 +51,7 @@ export const TutorialInDepth = () => {
             easily see the changes the client made.
             <br />
             Other images show a more advanced version of the same project,
-            client's view and the workflow.
+            client&apos;s view and the workflow.
           </p>
           <div className="flex flex-col gap-2">
             {screenshots.map((screenshot) => (

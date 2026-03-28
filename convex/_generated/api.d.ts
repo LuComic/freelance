@@ -16,6 +16,8 @@ import type * as billing_queries from "../billing/queries.js";
 import type * as connections_model from "../connections/model.js";
 import type * as connections_mutations from "../connections/mutations.js";
 import type * as connections_queries from "../connections/queries.js";
+import type * as feedback_mutations from "../feedback/mutations.js";
+import type * as feedback_queries from "../feedback/queries.js";
 import type * as http from "../http.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_betaAccess from "../lib/betaAccess.js";
@@ -66,6 +68,8 @@ declare const fullApi: ApiFromModules<{
   "connections/model": typeof connections_model;
   "connections/mutations": typeof connections_mutations;
   "connections/queries": typeof connections_queries;
+  "feedback/mutations": typeof feedback_mutations;
+  "feedback/queries": typeof feedback_queries;
   http: typeof http;
   "lib/auth": typeof lib_auth;
   "lib/betaAccess": typeof lib_betaAccess;
