@@ -94,11 +94,6 @@ export const IdeaBoradEveryone = () => {
 
   return (
     <div className="flex flex-col gap-2 w-full">
-      <p className="@[40rem]:text-xl text-lg font-medium mt-2">Idea Board</p>
-      <p className="text-(--gray-page)">
-        Here you can add and vote on ideas submitted by all beta users. Only
-        idea authors can remove their own ideas.
-      </p>
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
         <button
           type="button"
