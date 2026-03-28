@@ -64,7 +64,7 @@ export default function Home() {
         >
           Built for quick first impressions
         </h2>
-        <p className="mt-4 max-w-3xl leading-8 text-(--gray-page)">
+        <p className="mt-4 max-w-3xl text-(--gray-page)">
           Pageboard helps freelancers and small teams present work clearly,
           collect feedback, and keep progress visible in one place.
         </p>
@@ -77,20 +77,20 @@ export default function Home() {
         <div className="grid gap-x-10 gap-y-8 md:grid-cols-3">
           <div>
             <p className="font-medium">Progress boards</p>
-            <p className="mt-3 leading-7 text-(--gray-page)">
+            <p className="mt-3 text-(--gray-page)">
               Clear Progress, Table, Feedback, Select and other components for
               fast, easy to understand client-freelancer communication.
             </p>
           </div>
           <div>
             <p className="font-medium">Feedback built in</p>
-            <p className="mt-3 leading-7 text-(--gray-page)">
+            <p className="mt-3 text-(--gray-page)">
               Keep notes, questions, and approvals next to the work.
             </p>
           </div>
           <div>
             <p className="font-medium">Reusable setups</p>
-            <p className="mt-3 leading-7 text-(--gray-page)">
+            <p className="mt-3 text-(--gray-page)">
               Start a project from scratch or pick a suitable one from all kinds
               of templates.
             </p>
@@ -110,7 +110,7 @@ export default function Home() {
             >
               Quick to understand. Easy to keep updated.
             </h2>
-            <p className="mt-4 max-w-2xl leading-8 text-(--gray-page)">
+            <p className="mt-4 max-w-2xl text-(--gray-page)">
               The page is designed for fast first impressions, but the structure
               is practical enough for daily client communication.
             </p>
@@ -130,7 +130,14 @@ export default function Home() {
             >
               How does it work?
             </h2>
-            <p className="mt-4 max-w-3xl leading-8 text-(--gray-page)">
+            <Link
+              href="/tutorial"
+              target="_blank"
+              className="text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover) cursor-pointer"
+            >
+              More in-depth tutorial with videos
+            </Link>
+            <p className="mt-4 max-w-3xl text-(--gray-page)">
               This example shows a page being built with the Select component:
               first you create the page structure, then you tune each
               component&apos;s settings, and finally the client sees the live
@@ -217,20 +224,6 @@ export default function Home() {
       </section>
 
       <section
-        id="reviews"
-        className="mx-auto w-full bg-(--gray)/10 px-4 max-w-7xl scroll-mt-20 py-8 sm:pt-6 lg:pt-8 border-t border-(--gray)"
-      >
-        <p
-          className="max-w-4xl text-xl leading-relaxed font-medium sm:text-2xl"
-          style={{ fontFamily: '"Lexend Variable", sans-serif' }}
-        >
-          “Clients understand the page immediately, and I spend less time
-          explaining status in calls.”
-        </p>
-        <p className="mt-4 text-(--gray-page)">Lukas Jääger</p>
-      </section>
-
-      <section
         id="plans"
         className="mx-auto w-full px-4 max-w-7xl scroll-mt-20 py-8 sm:pt-6 lg:pt-8 border-t border-(--gray)"
       >
@@ -250,7 +243,7 @@ export default function Home() {
             <div className="relative z-10 flex h-full flex-col gap-4">
               <div className="flex flex-1 flex-col gap-4">
                 <p className="font-medium">Free</p>
-                <p className="leading-7 text-(--gray-page)">
+                <p className="text-(--gray-page)">
                   Join projects as a client or co-creator.
                 </p>
 
@@ -261,7 +254,7 @@ export default function Home() {
                   </span>
                 </p>
 
-                <ul className="space-y-2 leading-7 text-(--gray-page)">
+                <ul className="space-y-2 text-(--gray-page)">
                   <li>Join shared projects</li>
                   <li>Co-create in invited projects</li>
                 </ul>
@@ -273,7 +266,7 @@ export default function Home() {
             <div className="relative z-10 flex h-full flex-col gap-4">
               <div className="flex flex-1 flex-col gap-4">
                 <p className="font-medium">Starter</p>
-                <p className="leading-7 text-(--gray-page)">
+                <p className="text-(--gray-page)">
                   For getting started with your own work.
                 </p>
 
@@ -284,7 +277,7 @@ export default function Home() {
                   </span>
                 </p>
 
-                <ul className="space-y-2 leading-7 text-(--gray-page)">
+                <ul className="space-y-2 text-(--gray-page)">
                   <li>Create up to 3 projects</li>
                   <li>Core components included</li>
                   <li>Client sharing and feedback</li>
@@ -317,7 +310,7 @@ export default function Home() {
             <div className="relative z-10 flex h-full flex-col gap-4">
               <div className="flex flex-1 flex-col gap-4">
                 <p className="font-medium">Pro Unlimited</p>
-                <p className="leading-7 text-(--gray-page)">
+                <p className="text-(--gray-page)">
                   For active freelancers and small teams shipping often.
                 </p>
 
@@ -328,7 +321,7 @@ export default function Home() {
                   </span>
                 </p>
 
-                <ul className="space-y-2 leading-7 text-(--gray-page)">
+                <ul className="space-y-2 text-(--gray-page)">
                   <li>Unlimited projects</li>
                   <li>All components included</li>
                   <li>Early access to upcoming features</li>
@@ -340,7 +333,7 @@ export default function Home() {
           </div>
         </div>
 
-        <p className="mt-6 leading-7 text-(--gray-page)">
+        <p className="mt-6 text-(--gray-page)">
           Corporations and teams can get custom pricing, onboarding, and rollout
           support.
           <a
@@ -364,7 +357,7 @@ export default function Home() {
             >
               Start simple. Upgrade later.
             </p>
-            <p className="mt-3 max-w-2xl leading-7 text-(--gray-page)">
+            <p className="mt-3 max-w-2xl text-(--gray-page)">
               Create your account and ship your first client page today.
             </p>
           </div>

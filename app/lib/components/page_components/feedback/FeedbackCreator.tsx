@@ -154,7 +154,8 @@ export const FeedbackCreator = ({
       </p>
       <p className="text-(--gray-page)">
         Here you can accept or decline the ideas proposed by the client and give
-        an explanation to your decision.
+        an explanation to your decision. Live view shows what the client sees
+        and what they have submitted.
       </p>
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
         <button

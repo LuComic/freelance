@@ -241,7 +241,7 @@ export const KanbanCreator = ({
               className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
               onClick={handleNewTask}
             >
-              Add idea
+              Add task
             </button>
           </>
         )}

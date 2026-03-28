@@ -253,7 +253,7 @@ export default function Page() {
         </form>
         <Link
           href="/legal"
-          className="text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover)"
+          className="text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover) cursor-pointer"
         >
           Legal
         </Link>
@@ -276,6 +276,12 @@ export default function Page() {
         <p className="text-(--declined-border)">{upgradeError}</p>
       ) : null}
 
+      <Link
+        href="/tutorial"
+        className="text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover) cursor-pointer"
+      >
+        Tutorial | Demo
+      </Link>
       <div className="w-full flex flex-col items-start justify-start overflow-hidden rounded-md border border-(--gray)">
         <div className="w-full flex items-center justify-start p-2 bg-(--darkest) text-(--gray-page) border-b border-(--gray)">
           Projects

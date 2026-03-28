@@ -462,7 +462,7 @@ export const CalendarSurface = ({
                       >
                         {format(date, "d")}
                       </span>
-                      <div className="-mx-2 px-2 min-h-0 flex-1 overflow-x-hidden overflow-y-auto flex flex-col gap-1">
+                      <div className="-mx-2 px-2 min-h-0 flex-1 overflow-x-hidden overflow-y-auto flex flex-col gap-1 h-full justify-between">
                         {visibleMonthEvents.map((event) => (
                           <CalendarMonthLikeEvent
                             key={`${event.id}-${date.toISOString()}`}
