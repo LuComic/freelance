@@ -22,6 +22,14 @@ import {
   MenubarMenu,
   MenubarTrigger,
 } from "@/components/ui/menubar";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { SaveTemplateModal } from "./SaveTemplateModal";
 import { useSearchBar } from "../searchbar/SearchBarContext";
 
@@ -30,7 +38,7 @@ export const TopBar = () => {
     useEditMode();
   const pageDocument = useOptionalPageDocument();
   const { openTemplateSearch } = useSearchBar();
-  const isConfig = !isEditing && !isLive;
+  const currentMode = isEditing ? "edit" : isLive ? "live" : "config";
   const pathname = usePathname();
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -103,43 +111,63 @@ export const TopBar = () => {
         isHidden ? "hidden" : "flex"
       } items-center justify-start gap-2 px-1.5 h-10`}
     >
-      <button
-        onClick={() => setIsEditing(true)}
-        className={`text-sm gap-1 flex items-center justify-center p-1 @[64rem]:px-2 @[64rem]:py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) ${
-          isEditing
-            ? "bg-(--vibrant)/20 border-(--vibrant) text-(--light)"
-            : "hover:bg-(--gray)/20"
-        }`}
-      >
-        <Pencil size={15} />
-        <span className="hidden @[64rem]:inline">Edit</span>
-      </button>
-      <button
-        onClick={() => {
-          setIsEditing(false);
-          setIsLive(false);
+      <Select
+        value={currentMode}
+        onValueChange={(value) => {
+          if (value === "edit") {
+            setIsEditing(true);
+            return;
+          }
+
+          if (value === "config") {
+            setIsEditing(false);
+            setIsLive(false);
+            return;
+          }
+
+          setIsLive(true);
         }}
-        className={`text-sm gap-1 flex items-center justify-center p-1 @[64rem]:px-2 @[64rem]:py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) ${
-          isConfig
-            ? "bg-(--vibrant)/20 border-(--vibrant) text-(--light)"
-            : "hover:bg-(--gray)/20"
-        }`}
       >
-        <Cog size={15} />
-        <span className="hidden @[64rem]:inline">Config</span>
-      </button>
-      <button
-        onClick={() => setIsLive(true)}
-        className={`text-sm gap-1 flex items-center justify-center p-1 @[64rem]:px-2 @[64rem]:py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) ${
-          isLive
-            ? "bg-(--vibrant)/20 border-(--vibrant) text-(--light)"
-            : "hover:bg-(--gray)/20"
-        } ${isLive && "mr-auto"}`}
-      >
-        <Radio size={15} />
-        <span className="hidden @[64rem]:inline">Live</span>
-      </button>
-      {!isLive && <div className="w-px h-2/3 bg-(--gray)" />}
+        <SelectTrigger
+          className={`w-28 text-sm px-2 h-6.5! bg-(--darkest) border-(--gray-page) text-(--gray-page) ${isLive ? "mr-auto" : ""}`}
+        >
+          <SelectValue placeholder="Mode" className="text-sm" />
+        </SelectTrigger>
+        <SelectContent className="bg-(--darkest) border-none text-(--gray-page)">
+          <SelectGroup className="bg-(--darkest)">
+            <SelectItem
+              value="edit"
+              className="data-highlighted:bg-(--dim) data-highlighted:text-(--light)! text-sm"
+            >
+              <div className="flex items-center gap-2">
+                <Pencil size={14} className="hover:text-(--light)" />
+                Edit
+              </div>
+            </SelectItem>
+            <SelectItem
+              value="config"
+              className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) text-sm"
+            >
+              <div className="flex items-center gap-2">
+                <Cog size={14} className="hover:text-(--light)" />
+                Config
+              </div>
+            </SelectItem>
+            <SelectItem
+              value="live"
+              className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) text-sm"
+            >
+              <div className="flex items-center gap-2">
+                <Radio size={14} className="hover:text-(--light)" />
+                Live
+              </div>
+            </SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+      {!isLive && (
+        <div className="w-px h-2/3 bg-(--gray) hidden @[35rem]:inline" />
+      )}
       {!isLive || pageDocument?.saveError ? (
         <div className="mr-auto flex min-w-0 items-center gap-2">
           {!isLive && pageDocument?.saveStatus ? (
