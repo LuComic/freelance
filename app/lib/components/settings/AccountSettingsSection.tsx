@@ -110,7 +110,7 @@ export function AccountSettingsSection({
               <input
                 type="text"
                 placeholder="Enter a new username..."
-                className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
+                className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
                 value={nameDraft}
                 onChange={(e) => setNameDraft(e.target.value)}
                 disabled={isProfileLoading || isSavingName}
@@ -138,7 +138,7 @@ export function AccountSettingsSection({
               <input
                 type="text"
                 placeholder="Enter a new bio..."
-                className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
+                className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
                 value={bioDraft}
                 onChange={(e) => setBioDraft(e.target.value)}
                 disabled={isProfileLoading || isSavingBio}

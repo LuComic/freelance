@@ -55,7 +55,7 @@ export const PageLinkCreator = ({
           }))
         }
         placeholder="Link text..."
-        className="w-full rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
+        className="w-full rounded-md bg-(--dim) px-2 py-1.5 outline-none"
       />
 
       <Select

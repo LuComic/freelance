@@ -170,7 +170,7 @@ export const FeedbackCreator = ({
             <input
               type="text"
               placeholder="Add a new tag..."
-              className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
+              className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={(e) => {

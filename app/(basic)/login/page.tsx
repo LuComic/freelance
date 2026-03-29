@@ -94,7 +94,7 @@ export default function Page() {
             type="email"
             value={emailDraft}
             placeholder="Enter your email..."
-            className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none w-full"
+            className="rounded-md bg-(--dim) px-2 py-1.5 outline-none w-full"
             onChange={(event) => {
               setAuthDeniedMessage(null);
               setEmailDraft(event.target.value);

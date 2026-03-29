@@ -133,7 +133,7 @@ export const CalendarCreator = ({
             <input
               type="text"
               placeholder="Creating the MVP..."
-              className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
+              className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
               value={titleInput}
               onChange={(changeEvent) => {
                 setTitleInput(changeEvent.target.value);

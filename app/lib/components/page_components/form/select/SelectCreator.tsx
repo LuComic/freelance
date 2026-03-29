@@ -84,7 +84,7 @@ export const SelectCreator = ({
             <input
               type="text"
               placeholder="Field title..."
-              className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
+              className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
               value={config.title}
               onChange={(e) =>
                 onChangeConfig((currentConfig) => ({
@@ -96,7 +96,7 @@ export const SelectCreator = ({
             <input
               type="text"
               placeholder="Field description..."
-              className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
+              className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
               value={config.description}
               onChange={(e) =>
                 onChangeConfig((currentConfig) => ({
@@ -108,7 +108,7 @@ export const SelectCreator = ({
             <input
               type="text"
               placeholder="Add a new option..."
-              className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
+              className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
               value={optionInput}
               onChange={(e) => setOptionInput(e.target.value)}
               onKeyDown={(e) => {

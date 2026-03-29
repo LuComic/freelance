@@ -392,7 +392,7 @@ export const PersonModal = ({
               </button>
               <button
                 type="button"
-                className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm w-full border border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20 text-(--light) disabled:opacity-60"
+                className="gap-1 w-full text-(--gray-page) underline underline-offset-4 disabled:opacity-60 hover:text-(--gray)"
                 onClick={() => void handleAction("blockUser")}
                 disabled={isPending}
               >
@@ -411,7 +411,7 @@ export const PersonModal = ({
               </button>
               <button
                 type="button"
-                className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm w-full border border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20 text-(--light) disabled:opacity-60"
+                className="gap-1 w-full text-(--gray-page) underline underline-offset-4 disabled:opacity-60 hover:text-(--gray)"
                 onClick={() => void handleAction("blockUser")}
                 disabled={isPending}
               >
@@ -438,7 +438,7 @@ export const PersonModal = ({
               </button>
               <button
                 type="button"
-                className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm w-full border border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20 text-(--light) disabled:opacity-60"
+                className="gap-1 w-full text-(--gray-page) underline underline-offset-4 disabled:opacity-60 hover:text-(--gray)"
                 onClick={() => void handleAction("blockUser")}
                 disabled={isPending}
               >
@@ -457,7 +457,7 @@ export const PersonModal = ({
               </button>
               <button
                 type="button"
-                className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm w-full border border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20 text-(--light) disabled:opacity-60"
+                className="gap-1 w-full text-(--gray-page) underline underline-offset-4 disabled:opacity-60 hover:text-(--gray)"
                 onClick={() => void handleAction("blockUser")}
                 disabled={isPending}
               >

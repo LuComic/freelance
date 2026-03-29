@@ -42,7 +42,7 @@ export const EditableTextField = ({
           value={text}
           onChange={(event) => handleChange(event.target.value)}
           placeholder={placeholder}
-          className="w-full rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
+          className="w-full rounded-md bg-(--dim) px-2 py-1.5 outline-none"
         />
       )}
     </div>

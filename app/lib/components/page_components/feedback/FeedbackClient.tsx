@@ -149,7 +149,7 @@ export const FeedbackClient = ({
             <input
               type="text"
               placeholder="I'd like this feature added..."
-              className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
+              className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
               onChange={(e) => setIdeaInput(e.target.value)}
               value={ideaInput}
               onKeyDown={(e) => {

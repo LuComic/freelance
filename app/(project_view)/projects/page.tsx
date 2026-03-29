@@ -209,7 +209,7 @@ export default function Page() {
         <p className="@[40rem]:text-3xl text-xl font-medium">Welcome back!</p>
       </div>
 
-      <div className="flex @[64rem]:flex-row flex-col items-start @[64rem]:items-center justify-center gap-2">
+      <div className="flex @[50rem]:flex-row flex-col items-start @[50rem]:items-center justify-center gap-2">
         {!isAnonymous ? (
           <CreateProjectModal
             trigger={<span>Create project</span>}
@@ -217,9 +217,9 @@ export default function Page() {
           />
         ) : null}
         {!isAnonymous ? (
-          <span className="text-(--gray-page) @[64rem]:inline hidden">or</span>
+          <span className="text-(--gray-page) @[50rem]:inline hidden">or</span>
         ) : null}
-        <span className="font-medium @[64rem]:mt-0 mt-4">Join via code</span>
+        <span className="font-medium @[50rem]:mt-0 mt-4">Join via code</span>
         <form onSubmit={(event) => void handleJoinSubmit(event)}>
           <input
             type="text"
@@ -227,7 +227,7 @@ export default function Page() {
             placeholder={
               validatedJoinTarget ? "Enter your name" : "project code"
             }
-            className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
+            className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
             onChange={(event) => {
               if (validatedJoinTarget) {
                 setGuestNameDraft(event.target.value);

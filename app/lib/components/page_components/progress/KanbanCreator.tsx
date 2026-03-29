@@ -180,7 +180,7 @@ export const KanbanCreator = ({
             <input
               type="text"
               placeholder="Add a task to the board..."
-              className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
+              className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
               onChange={(e) => setTaskInput(e.target.value)}
               value={taskInput}
               onKeyDown={(e) => {
@@ -260,7 +260,7 @@ export const KanbanCreator = ({
             <input
               type="text"
               placeholder="Add a new tag..."
-              className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
+              className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={(e) => {

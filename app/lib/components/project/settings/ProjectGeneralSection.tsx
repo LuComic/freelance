@@ -53,7 +53,7 @@ export function ProjectGeneralSection({
           <input
             type="text"
             placeholder="Enter a new project name..."
-            className="rounded-md bg-(--darkest) px-2 py-1.5 outline-none"
+            className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
             value={nameDraft}
             onChange={(e) => setNameDraft(e.target.value)}
             disabled={isLoading || isUnavailable || isSavingName}
