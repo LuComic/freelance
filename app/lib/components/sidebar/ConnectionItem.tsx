@@ -188,7 +188,7 @@ export const ConnectionItem = ({
 
     return (
       <span
-        className="pl-8 flex w-full items-center  justify-start gap-2 hover:bg-(--darkest-hover) rounded-lg md:text-base text-sm p-1"
+        className="pl-8 flex w-full items-center  justify-start gap-2 hover:bg-(--darkest-hover) rounded-lg text-base p-1"
         key={isInvite ? item.inviteId : item.userId}
       >
         <ConnectionAvatar item={item} />
@@ -426,7 +426,7 @@ export const ConnectionItem = ({
   return (
     <>
       <button
-        className="rounded-lg p-1 px-1.5 gap-2 hover:bg-(--darkest-hover) w-full text-(--gray) flex items-center justify-start  md:text-base text-sm"
+        className="rounded-lg p-1 px-1.5 gap-2 hover:bg-(--darkest-hover) w-full text-(--gray) flex items-center justify-start text-base"
         onClick={() => {
           if (requestedOpenToken > handledOpenToken) {
             setHandledOpenToken(requestedOpenToken);

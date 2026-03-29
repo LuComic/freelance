@@ -14,7 +14,7 @@ export const SettingsItem = ({ title, items }: SidebarItemProps) => {
   return (
     <>
       <button
-        className="rounded-lg p-1 px-1.5 gap-2 hover:bg-(--darkest-hover) w-full text-(--gray) flex items-center justify-start  md:text-base text-sm"
+        className="rounded-lg p-1 px-1.5 gap-2 hover:bg-(--darkest-hover) w-full text-(--gray) flex items-center justify-start text-base"
         onClick={() => setItemExpanded(!itemExpanded)}
       >
         <ChevronRight className={`${itemExpanded ? "rotate-90" : ""}`} />
@@ -23,7 +23,7 @@ export const SettingsItem = ({ title, items }: SidebarItemProps) => {
       {itemExpanded
         ? items.map((item, index) => (
             <Link
-              className="pl-8 flex w-full items-center  justify-start gap-2 hover:bg-(--darkest-hover) rounded-lg p-1 md:text-base text-sm"
+              className="pl-8 flex w-full items-center  justify-start gap-2 hover:bg-(--darkest-hover) rounded-lg p-1 text-base"
               key={index}
               href={"/settings?section=" + title.toLowerCase()}
             >

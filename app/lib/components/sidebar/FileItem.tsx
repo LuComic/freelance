@@ -60,18 +60,13 @@ export const FileItem = ({
 
   return (
     <>
-      <div className="rounded-lg p-1 px-1.5 gap-2 hover:bg-(--darkest-hover) w-full text-(--gray) flex items-center justify-start md:text-base text-sm">
+      <div className="rounded-lg p-1 px-1.5 gap-2 hover:bg-(--darkest-hover) w-full text-(--gray) flex items-center justify-start text-base">
         <button onClick={onToggleExpanded}>
           <ChevronRight className={`${isExpanded ? "rotate-90" : ""}`} />
         </button>
-        <Link href={projectBasePath} className="w-full md:inline hidden">
+        <Link href={projectBasePath} className="w-full">
           {project.name.length > 20
             ? project.name.slice(0, 20) + "..."
-            : project.name}
-        </Link>
-        <Link href={projectBasePath} className="w-full md:hidden inline">
-          {project.name.length > 30
-            ? project.name.slice(0, 30) + "..."
             : project.name}
         </Link>
         <Menubar className="ml-auto h-auto bg-transparent border-none shadow-none p-0">
@@ -148,7 +143,7 @@ export const FileItem = ({
           {project.pages.map((page) => (
             <Link
               key={page.id}
-              className={`pl-8 flex w-full items-center justify-start gap-2 rounded-lg p-1 md:text-base text-sm ${
+              className={`pl-8 flex w-full items-center justify-start gap-2 rounded-lg p-1 text-base ${
                 page.id === currentPageId
                   ? "bg-(--darkest-hover) text-(--light)"
                   : "hover:bg-(--darkest-hover)"
@@ -156,16 +151,9 @@ export const FileItem = ({
               href={getProjectPagePath(project.id, page.id)}
             >
               <File size={18} />
-              <span className="hidden md:inline">
-                {page.title.length > 20
-                  ? page.title.slice(0, 20) + "..."
-                  : page.title}
-              </span>
-              <span className="inline md:hidden">
-                {page.title.length > 30
-                  ? page.title.slice(0, 30) + "..."
-                  : page.title}
-              </span>
+              {page.title.length > 20
+                ? page.title.slice(0, 20) + "..."
+                : page.title}
             </Link>
           ))}
         </>

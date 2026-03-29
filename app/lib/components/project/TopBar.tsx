@@ -129,7 +129,7 @@ export const TopBar = () => {
         }}
       >
         <SelectTrigger
-          className={`w-28 text-sm px-2 h-6.5! bg-(--darkest) border-(--gray-page) text-(--gray-page) ${isLive ? "mr-auto" : ""}`}
+          className={`w-28 text-sm px-2 h-6.5! bg-(--darkest) border-(--vibrant) text-(--gray-page) ${isLive ? "mr-auto" : ""}`}
         >
           <SelectValue placeholder="Mode" className="text-sm" />
         </SelectTrigger>
