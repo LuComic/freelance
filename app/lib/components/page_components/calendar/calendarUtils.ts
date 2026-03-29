@@ -42,6 +42,15 @@ export const DAY_HOURS = Array.from(
 
 const MINUTES_IN_DAY = 24 * 60;
 
+function getWallClockMinutes(date: Date) {
+  return (
+    date.getHours() * 60 +
+    date.getMinutes() +
+    date.getSeconds() / 60 +
+    date.getMilliseconds() / 60000
+  );
+}
+
 const EVENT_COLOR_CLASSES: Record<
   CalendarEventColor,
   {
@@ -249,8 +258,11 @@ export function getDayPosition(event: CalendarEvent, date: Date) {
   const dayEnd = endOfDay(date).getTime();
   const startAt = Math.max(dayStart, event.startAt);
   const endAt = Math.min(dayEnd, event.endAt);
-  const startMinutes = (startAt - dayStart) / 60000;
-  const endMinutes = Math.max(startMinutes + 15, (endAt - dayStart) / 60000);
+  const startMinutes =
+    startAt === dayStart ? 0 : getWallClockMinutes(new Date(startAt));
+  const unclampedEndMinutes =
+    endAt === dayEnd ? MINUTES_IN_DAY : getWallClockMinutes(new Date(endAt));
+  const endMinutes = Math.max(startMinutes + 15, unclampedEndMinutes);
 
   return {
     startMinutes,
