@@ -119,8 +119,8 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
           >
             <PanelRightOpen size={20} />
           </button>
-          <div className="flex flex-col bg-(--dim) rounded-lg justify-center p-1 h-max gap-4">
-            {!componentsLocked ? (
+          {!componentsLocked ? (
+            <div className="flex flex-col bg-(--dim) rounded-lg justify-center p-1 h-max gap-4">
               <button
                 className="h-full p-1 rounded-md bg-(--quite-dark) text-(--vibrant) hover:bg-(--quite-dark) w-full"
                 onClick={() => {
@@ -129,8 +129,8 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
               >
                 <LayoutGrid size={20} className="mx-auto" />
               </button>
-            ) : null}
-          </div>
+            </div>
+          ) : null}
         </div>
       )}
     </div>
