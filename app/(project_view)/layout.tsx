@@ -52,8 +52,8 @@ export default async function ProjectViewLayout({
                   {children}
                 </div>
               </div>
+              <Chat initialChatOpen={initialChatOpen} />
             </PageDocumentProvider>
-            <Chat initialChatOpen={initialChatOpen} />
           </EditModeProvider>
         </SidebarControllerProvider>
       </SearchBarProvider>

@@ -1,6 +1,7 @@
 "use client";
 
 import { usePageComponentState } from "@/app/lib/components/project/PageDocumentContext";
+import { useLiveComponentConfigActivator } from "@/app/lib/components/page_components/useLiveComponentConfigActivator";
 import { EditableTextField } from "./EditableTextField";
 import { TEXT_DEFAULTS } from "./textDefaults";
 
@@ -10,25 +11,31 @@ type SectionHeaderProps = {
 };
 
 function PersistedSectionHeader({ instanceId }: { instanceId: string }) {
+  const liveConfigActivator = useLiveComponentConfigActivator(instanceId);
   const { component, updateConfig } = usePageComponentState(
     instanceId,
     "SectionHeader",
   );
 
   return (
-    <EditableTextField
-      value={component.config.text}
-      placeholder="Section header"
-      onChange={(value) =>
-        updateConfig((config) => ({
-          ...config,
-          text: value,
-        }))
-      }
-      renderClient={(value) => (
-        <p className="@[40rem]:text-xl text-lg font-medium">{value}</p>
-      )}
-    />
+    <div
+      className={`w-full ${liveConfigActivator.className}`}
+      onClickCapture={liveConfigActivator.onClickCapture}
+    >
+      <EditableTextField
+        value={component.config.text}
+        placeholder="Section header"
+        onChange={(value) =>
+          updateConfig((config) => ({
+            ...config,
+            text: value,
+          }))
+        }
+        renderClient={(value) => (
+          <p className="@[40rem]:text-xl text-lg font-medium">{value}</p>
+        )}
+      />
+    </div>
   );
 }
 

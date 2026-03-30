@@ -160,23 +160,29 @@ export const FeedbackClient = ({
             />
 
             <div className="flex items-center justify-start gap-2 w-full">
-              {config.tags.map((tag) => (
-                <button
-                  key={tag}
-                  className={`px-1.5 py-0.5 rounded-md border ${!selectedTags.includes(tag) && "border-(--gray-page) text-(--gray-page)"} `}
-                  onClick={() => {
-                    if (selectedTags.includes(tag)) {
-                      setSelectedTags((prev) =>
-                        prev.filter((prevTag) => prevTag !== tag),
-                      );
-                    } else {
-                      setSelectedTags((prev) => [...prev, tag]);
-                    }
-                  }}
-                >
-                  {tag}
-                </button>
-              ))}
+              {config.tags.length > 0 ? (
+                config.tags.map((tag) => (
+                  <button
+                    key={tag}
+                    className={`px-1.5 py-0.5 rounded-md border ${!selectedTags.includes(tag) && "border-(--gray-page) text-(--gray-page)"} `}
+                    onClick={() => {
+                      if (selectedTags.includes(tag)) {
+                        setSelectedTags((prev) =>
+                          prev.filter((prevTag) => prevTag !== tag),
+                        );
+                      } else {
+                        setSelectedTags((prev) => [...prev, tag]);
+                      }
+                    }}
+                  >
+                    {tag}
+                  </button>
+                ))
+              ) : (
+                <span className="text-(--gray-page)">
+                  Creator hasn't setup any tags
+                </span>
+              )}
             </div>
 
             <button
@@ -301,7 +307,7 @@ export const FeedbackClient = ({
         </div>
       ) : (
         <div className="w-full max-w-full min-w-0 overflow-x-auto border rounded-md border-(--gray)">
-          <div className="min-w-[900px] flex flex-col">
+          <div className="min-w-225 flex flex-col">
             <div
               className={`w-full text-(--gray-page) ${visibleData.length > 0 && "border-b"} border-(--gray) text-left grid justify-between items-start grid-cols-13 bg-(--darkest)`}
             >

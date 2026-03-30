@@ -10,7 +10,7 @@ export const FEEDBACK_CREATOR_LAYOUT_COOKIE =
 export function setCookie(name: string, value: string): void {
   if (typeof document === "undefined") return;
   document.cookie = `${name}=${encodeURIComponent(
-    value
+    value,
   )}; path=/; max-age=${MAX_AGE}; SameSite=Lax`;
 }
 

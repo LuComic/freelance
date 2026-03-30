@@ -97,6 +97,10 @@ export function PageDocumentProvider({
   const pendingDeleteRedirectPathRef = useRef<string | null>(null);
   const documentRef = useRef<PageDocumentV1 | null>(null);
   const localRevisionRef = useRef(0);
+  const configRevisionRef = useRef(0);
+  const liveRevisionRef = useRef(0);
+  const savedConfigRevisionRef = useRef(0);
+  const savedLiveRevisionRef = useRef(0);
   const currentDocumentSnapshot = document ? JSON.stringify(document) : null;
   const hasUnsavedChanges =
     activePage !== null &&
@@ -167,6 +171,24 @@ export function PageDocumentProvider({
     documentRef.current = document;
   }, [document]);
 
+  const resetLocalRevisionTracking = useCallback(() => {
+    localRevisionRef.current = 0;
+    configRevisionRef.current = 0;
+    liveRevisionRef.current = 0;
+    savedConfigRevisionRef.current = 0;
+    savedLiveRevisionRef.current = 0;
+  }, []);
+
+  const markConfigChange = useCallback(() => {
+    localRevisionRef.current += 1;
+    configRevisionRef.current += 1;
+  }, []);
+
+  const markLiveStateChange = useCallback(() => {
+    localRevisionRef.current += 1;
+    liveRevisionRef.current += 1;
+  }, []);
+
   useEffect(() => {
     if (route === null || pageData !== undefined || canUseActivePageFallback) {
       return;
@@ -184,8 +206,9 @@ export function PageDocumentProvider({
       setSavedDocumentSnapshot(null);
       setViewerRole(null);
     });
+    resetLocalRevisionTracking();
     lastHydratedPageKeyRef.current = null;
-  }, [canUseActivePageFallback, pageData, route]);
+  }, [canUseActivePageFallback, pageData, resetLocalRevisionTracking, route]);
 
   useEffect(() => {
     if (!route || pageData === undefined) {
@@ -202,6 +225,7 @@ export function PageDocumentProvider({
           setSavedDocumentSnapshot(null);
           setViewerRole(null);
         });
+        resetLocalRevisionTracking();
         lastHydratedPageKeyRef.current = null;
       }
       return;
@@ -224,6 +248,7 @@ export function PageDocumentProvider({
           router.replace("/projects");
         }
       });
+      resetLocalRevisionTracking();
       lastHydratedPageKeyRef.current = null;
       return;
     }
@@ -262,12 +287,14 @@ export function PageDocumentProvider({
       setSavedDocumentSnapshot(serverDocumentSnapshot);
       setViewerRole(pageData.viewerRole);
     });
+    resetLocalRevisionTracking();
   }, [
     activePage,
     currentDocumentSnapshot,
     document,
     hasUnsavedChanges,
     pageData,
+    resetLocalRevisionTracking,
     router,
     route,
     viewerRole,
@@ -305,7 +332,7 @@ export function PageDocumentProvider({
 
   const setPageTitle = useCallback(
     (title: string) => {
-      localRevisionRef.current += 1;
+      markConfigChange();
       setActivePage((prev) =>
         prev
           ? {
@@ -319,12 +346,12 @@ export function PageDocumentProvider({
       );
       setSaveError(null);
     },
-    [setActivePage, setSaveError],
+    [markConfigChange, setActivePage, setSaveError],
   );
 
   const updateEditorText = useCallback(
     (value: string) => {
-      localRevisionRef.current += 1;
+      markConfigChange();
       setDocument((prev) =>
         prev
           ? {
@@ -335,7 +362,7 @@ export function PageDocumentProvider({
       );
       setSaveError(null);
     },
-    [setDocument, setSaveError],
+    [markConfigChange, setDocument, setSaveError],
   );
 
   const updateComponentConfig = useCallback(
@@ -343,7 +370,7 @@ export function PageDocumentProvider({
       instanceId: string,
       updater: (component: PageComponentDocument) => PageComponentDocument,
     ) => {
-      localRevisionRef.current += 1;
+      markConfigChange();
       setDocument((prev) => {
         if (!prev || !prev.components[instanceId]) {
           return prev;
@@ -359,7 +386,7 @@ export function PageDocumentProvider({
       });
       setSaveError(null);
     },
-    [setDocument, setSaveError],
+    [markConfigChange, setDocument, setSaveError],
   );
 
   const updateComponentLiveState = useCallback(
@@ -367,7 +394,7 @@ export function PageDocumentProvider({
       instanceId: string,
       updater: (liveState: PageComponentLiveState) => PageComponentLiveState,
     ) => {
-      localRevisionRef.current += 1;
+      markLiveStateChange();
       setDocument((prev) => {
         if (!prev || !prev.components[instanceId]) {
           return prev;
@@ -392,7 +419,7 @@ export function PageDocumentProvider({
       });
       setSaveError(null);
     },
-    [setDocument, setSaveError],
+    [markLiveStateChange, setDocument, setSaveError],
   );
 
   const insertComponentAtRange = useCallback(
@@ -408,7 +435,7 @@ export function PageDocumentProvider({
       end?: number;
     }) => {
       if (command === DROPDOWN_SLASH_COMMAND) {
-        localRevisionRef.current += 1;
+        markConfigChange();
         const scaffold = createDropdownScaffold();
         const nextValue = `${value.slice(0, start)}${scaffold}${value.slice(
           end ?? start,
@@ -448,7 +475,7 @@ export function PageDocumentProvider({
         end ?? start,
       )}`;
 
-      localRevisionRef.current += 1;
+      markConfigChange();
       setDocument((prev) =>
         prev
           ? {
@@ -471,12 +498,17 @@ export function PageDocumentProvider({
         nextCursor: start + token.length,
       };
     },
-    [canUseLimitedComponents, setDocument, setSaveError],
+    [canUseLimitedComponents, markConfigChange, setDocument, setSaveError],
   );
 
   const persistDocument = useCallback(
     async (currentPage: ActivePageState, currentDocument: PageDocumentV1) => {
-      const shouldSaveLiveState = isLive;
+      const hasUnsavedConfigChanges =
+        configRevisionRef.current !== savedConfigRevisionRef.current;
+      const hasUnsavedLiveStateChanges =
+        liveRevisionRef.current !== savedLiveRevisionRef.current;
+      const shouldSaveLiveState =
+        isLive && !hasUnsavedConfigChanges && hasUnsavedLiveStateChanges;
       const baseTitle = savedTitleSnapshot ?? currentPage.page.title;
       const baseDocument =
         savedDocumentSnapshot !== null
@@ -502,6 +534,8 @@ export function PageDocumentProvider({
       }
 
       const submittedRevision = localRevisionRef.current;
+      const submittedConfigRevision = configRevisionRef.current;
+      const submittedLiveRevision = liveRevisionRef.current;
       setSaveStatus("saving");
       setSaveError(null);
 
@@ -532,6 +566,7 @@ export function PageDocumentProvider({
 
           setSavedTitleSnapshot(result.title);
           setSavedDocumentSnapshot(JSON.stringify(result.document));
+          savedLiveRevisionRef.current = submittedLiveRevision;
           setSaveStatus("idle");
           return;
         }
@@ -563,6 +598,8 @@ export function PageDocumentProvider({
 
         setSavedTitleSnapshot(result.title);
         setSavedDocumentSnapshot(JSON.stringify(result.document));
+        savedConfigRevisionRef.current = submittedConfigRevision;
+        savedLiveRevisionRef.current = submittedLiveRevision;
         setSaveStatus("idle");
       } catch (error) {
         setSaveError(
@@ -634,6 +671,7 @@ export function PageDocumentProvider({
 
         setSavedTitleSnapshot(result.title);
         setSavedDocumentSnapshot(JSON.stringify(result.document));
+        resetLocalRevisionTracking();
         setSaveStatus("idle");
       } catch (error) {
         setSaveError(
@@ -647,6 +685,7 @@ export function PageDocumentProvider({
     },
     [
       applyPageTemplateMutation,
+      resetLocalRevisionTracking,
       setActivePage,
       setDocument,
       setSavedDocumentSnapshot,
@@ -675,14 +714,14 @@ export function PageDocumentProvider({
         },
       };
 
-      localRevisionRef.current += 1;
+      markConfigChange();
       activePageRef.current = nextPage;
       setActivePage(nextPage);
       setSaveError(null);
 
       await persistDocument(nextPage, currentDocument);
     },
-    [persistDocument, setActivePage, setSaveError],
+    [markConfigChange, persistDocument, setActivePage, setSaveError],
   );
 
   const commitComponentLiveState = useCallback(
@@ -717,14 +756,14 @@ export function PageDocumentProvider({
         },
       };
 
-      localRevisionRef.current += 1;
+      markLiveStateChange();
       documentRef.current = nextDocument;
       setDocument(nextDocument);
       setSaveError(null);
 
       await persistDocument(currentPage, nextDocument);
     },
-    [persistDocument, setDocument, setSaveError],
+    [markLiveStateChange, persistDocument, setDocument, setSaveError],
   );
 
   const createPageAndOpen = useCallback(async () => {
@@ -797,9 +836,7 @@ export function PageDocumentProvider({
     () => ({
       isActivePage: route !== null,
       isLoading:
-        route !== null &&
-        pageData === undefined &&
-        !canUseActivePageFallback,
+        route !== null && pageData === undefined && !canUseActivePageFallback,
       saveStatus,
       saveError,
       deleteStatus,

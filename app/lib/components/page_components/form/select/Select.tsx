@@ -2,21 +2,20 @@
 
 import { usePageComponentState } from "@/app/lib/components/project/PageDocumentContext";
 import { useEditMode } from "@/app/lib/components/project/EditModeContext";
+import { useLiveComponentConfigActivator } from "@/app/lib/components/page_components/useLiveComponentConfigActivator";
 import { SelectCreator } from "./SelectCreator";
 import { SelectClient } from "./SelectClient";
 
-export const Select = ({
-  instanceId,
-}: {
-  instanceId: string;
-}) => {
+export const Select = ({ instanceId }: { instanceId: string }) => {
   const { isLive } = useEditMode();
+  const liveConfigActivator = useLiveComponentConfigActivator(instanceId);
   const { component, liveState, updateConfig, updateLiveState } =
     usePageComponentState(instanceId, "Select");
 
   return (
     <div
-      className={`w-full flex flex-col gap-2 ${!isLive ? "bg-(--gray)/10" : null}`}
+      className={`w-full flex flex-col rounded-sm gap-2 ${liveConfigActivator.className}`}
+      onClickCapture={liveConfigActivator.onClickCapture}
     >
       {isLive ? (
         <SelectClient

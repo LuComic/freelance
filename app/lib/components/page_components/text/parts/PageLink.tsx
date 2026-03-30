@@ -7,6 +7,7 @@ import {
   usePageComponentState,
   usePageDocument,
 } from "@/app/lib/components/project/PageDocumentContext";
+import { useLiveComponentConfigActivator } from "@/app/lib/components/page_components/useLiveComponentConfigActivator";
 import { PageLinkClient } from "./PageLinkClient";
 import { PageLinkCreator } from "./PageLinkCreator";
 
@@ -17,6 +18,7 @@ export type ProjectPageOption = {
 
 export const PageLink = ({ instanceId }: { instanceId: string }) => {
   const { isLive } = useEditMode();
+  const liveConfigActivator = useLiveComponentConfigActivator(instanceId);
   const { activePage } = usePageDocument();
   const { component, updateConfig } = usePageComponentState(
     instanceId,
@@ -36,7 +38,10 @@ export const PageLink = ({ instanceId }: { instanceId: string }) => {
     ) ?? null;
 
   return (
-    <div className="w-full flex flex-col gap-2">
+    <div
+      className={`w-full flex flex-col gap-2 ${liveConfigActivator.className}`}
+      onClickCapture={liveConfigActivator.onClickCapture}
+    >
       {isLive ? (
         <PageLinkClient
           config={component.config}

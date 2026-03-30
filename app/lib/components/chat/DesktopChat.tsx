@@ -1,14 +1,23 @@
 "use client";
 
 import { startTransition, useEffect, useRef, useState } from "react";
-import { PanelRightClose, PanelRightOpen, LayoutGrid } from "lucide-react";
+import {
+  PanelRightClose,
+  PanelRightOpen,
+  LayoutGrid,
+  Component,
+  Settings2,
+} from "lucide-react";
 import { CHAT_COOKIE, setCookie } from "@/app/lib/cookies";
 import { useEditMode } from "@/app/lib/components/project/EditModeContext";
 import { ComponentLib, type ComponentTag } from "./ComponentLib";
+import { SelectedComponentConfig } from "./SelectedComponentConfig";
 
 type DesktopChatProps = {
   initialOpen?: boolean;
 };
+
+type ChatTab = "components" | "config";
 
 export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
   const {
@@ -16,10 +25,13 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
     modeLock,
     requestComponentInsert,
     componentLibraryOpenRequestNonce,
+    componentConfigOpenRequestNonce,
   } = useEditMode();
   const [chatOpen, setChatOpen] = useState(initialOpen ?? false);
+  const [activeTab, setActiveTab] = useState<ChatTab>("components");
   const [componentFilter, setComponentFilter] = useState<"" | ComponentTag>("");
   const handledComponentLibraryNonceRef = useRef(0);
+  const handledComponentConfigNonceRef = useRef(0);
   const componentsLocked = modeLock === "live";
 
   useEffect(() => {
@@ -53,9 +65,25 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
 
     handledComponentLibraryNonceRef.current = componentLibraryOpenRequestNonce;
     startTransition(() => {
+      setActiveTab("components");
       setChatOpen(true);
     });
   }, [componentLibraryOpenRequestNonce, componentsLocked]);
+
+  useEffect(() => {
+    if (
+      componentConfigOpenRequestNonce === 0 ||
+      componentConfigOpenRequestNonce === handledComponentConfigNonceRef.current
+    ) {
+      return;
+    }
+
+    handledComponentConfigNonceRef.current = componentConfigOpenRequestNonce;
+    startTransition(() => {
+      setActiveTab("config");
+      setChatOpen(true);
+    });
+  }, [componentConfigOpenRequestNonce]);
 
   const changeComponentFilter = (newFilter: ComponentTag) => {
     if (componentFilter === newFilter) {
@@ -77,11 +105,38 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
             >
               <PanelRightClose size={20} />
             </button>
-            <span className="text-(--gray) text-xl">Components</span>
+            <span className="text-(--gray) text-xl">
+              {activeTab === "components" ? "Components" : "Config"}
+            </span>
+          </div>
+
+          <div className="flex items-center justify-around p-1 rounded-xl bg-(--dim) w-full gap-1">
+            <button
+              className={`p-1 rounded-lg hover:bg-(--quite-dark) w-full text-sm ${
+                activeTab === "components"
+                  ? "bg-(--quite-dark) text-(--vibrant)"
+                  : ""
+              }`}
+              onClick={() => setActiveTab("components")}
+              type="button"
+            >
+              <Component size={20} className="mx-auto" />
+            </button>
+            <button
+              className={`p-1 rounded-lg hover:bg-(--quite-dark) w-full text-sm ${
+                activeTab === "config"
+                  ? "bg-(--quite-dark) text-(--vibrant)"
+                  : ""
+              }`}
+              onClick={() => setActiveTab("config")}
+              type="button"
+            >
+              <Settings2 size={20} className="mx-auto" />
+            </button>
           </div>
 
           <div className="w-full flex-1 min-h-0 overflow-y-auto">
-            {!componentsLocked ? (
+            {activeTab === "components" && !componentsLocked ? (
               <>
                 <div className="flex flex-wrap items-center justify-start gap-2 w-full mb-2">
                   {(
@@ -109,6 +164,7 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
                 />
               </>
             ) : null}
+            {activeTab === "config" ? <SelectedComponentConfig /> : null}
           </div>
         </div>
       ) : (

@@ -8,6 +8,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type ReactNode,
 } from "react";
 
 export type { InsertableComponentCommand } from "@/app/lib/components/page_components/componentCatalog";
@@ -18,6 +19,11 @@ type PendingComponentInsert = {
 };
 
 type ModeLock = "live" | null;
+
+type EditModeOverrideValue = {
+  isEditing?: boolean;
+  isLive?: boolean;
+};
 
 type EditModeContextValue = {
   isEditing: boolean;
@@ -33,22 +39,38 @@ type EditModeContextValue = {
   clearPendingComponentInsert: () => void;
   componentLibraryOpenRequestNonce: number;
   requestOpenComponentLibrary: () => void;
+  selectedConfigComponentInstanceId: string | null;
+  clearSelectedConfigComponent: () => void;
+  componentConfigOpenRequestNonce: number;
+  requestOpenComponentConfig: (instanceId: string) => void;
 };
 
 const EditModeContext = createContext<EditModeContextValue | undefined>(
   undefined,
 );
+const EditModeOverrideContext = createContext<EditModeOverrideValue | null>(
+  null,
+);
 
-export function EditModeProvider({ children }: { children: React.ReactNode }) {
+export function EditModeProvider({ children }: { children: ReactNode }) {
   const [rawIsEditing, rawSetIsEditing] = useState(true);
   const [rawIsLive, rawSetIsLive] = useState(false);
   const [modeLock, setModeLock] = useState<ModeLock>(null);
   const [pendingComponentInsert, setPendingComponentInsert] =
     useState<PendingComponentInsert | null>(null);
-  const [componentLibraryOpenRequestNonce, setComponentLibraryOpenRequestNonce] =
+  const [
+    componentLibraryOpenRequestNonce,
+    setComponentLibraryOpenRequestNonce,
+  ] = useState(0);
+  const [
+    selectedConfigComponentInstanceId,
+    setSelectedConfigComponentInstanceId,
+  ] = useState<string | null>(null);
+  const [componentConfigOpenRequestNonce, setComponentConfigOpenRequestNonce] =
     useState(0);
   const insertNonceRef = useRef(0);
   const componentLibraryOpenNonceRef = useRef(0);
+  const componentConfigOpenNonceRef = useRef(0);
   const isEditing = modeLock === "live" ? false : rawIsEditing;
   const isLive = modeLock === "live" ? true : rawIsLive;
 
@@ -144,15 +166,33 @@ export function EditModeProvider({ children }: { children: React.ReactNode }) {
         }
 
         componentLibraryOpenNonceRef.current += 1;
-        setComponentLibraryOpenRequestNonce(componentLibraryOpenNonceRef.current);
+        setComponentLibraryOpenRequestNonce(
+          componentLibraryOpenNonceRef.current,
+        );
+      },
+      selectedConfigComponentInstanceId,
+      clearSelectedConfigComponent: () => {
+        setSelectedConfigComponentInstanceId(null);
+      },
+      componentConfigOpenRequestNonce,
+      requestOpenComponentConfig: (instanceId: string) => {
+        if (modeLock === "live") {
+          return;
+        }
+
+        setSelectedConfigComponentInstanceId(instanceId);
+        componentConfigOpenNonceRef.current += 1;
+        setComponentConfigOpenRequestNonce(componentConfigOpenNonceRef.current);
       },
     }),
     [
       componentLibraryOpenRequestNonce,
+      componentConfigOpenRequestNonce,
       isEditing,
       isLive,
       modeLock,
       pendingComponentInsert,
+      selectedConfigComponentInstanceId,
       setIsEditing,
       setIsLive,
       toggleEditing,
@@ -167,11 +207,46 @@ export function EditModeProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+export function EditModeSubtreeModeProvider({
+  children,
+  isEditing,
+  isLive,
+}: {
+  children: ReactNode;
+  isEditing?: boolean;
+  isLive?: boolean;
+}) {
+  const parentOverride = useContext(EditModeOverrideContext);
+  const value = useMemo<EditModeOverrideValue>(
+    () => ({
+      ...parentOverride,
+      ...(isEditing === undefined ? {} : { isEditing }),
+      ...(isLive === undefined ? {} : { isLive }),
+    }),
+    [isEditing, isLive, parentOverride],
+  );
+
+  return (
+    <EditModeOverrideContext.Provider value={value}>
+      {children}
+    </EditModeOverrideContext.Provider>
+  );
+}
+
 export function useEditMode() {
   const context = useContext(EditModeContext);
+  const override = useContext(EditModeOverrideContext);
   if (!context) {
     throw new Error("useEditMode must be used within EditModeProvider");
   }
 
-  return context;
+  if (!override) {
+    return context;
+  }
+
+  return {
+    ...context,
+    isEditing: override.isEditing ?? context.isEditing,
+    isLive: override.isLive ?? context.isLive,
+  };
 }

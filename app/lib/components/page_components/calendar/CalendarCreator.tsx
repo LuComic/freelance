@@ -213,13 +213,6 @@ export const CalendarCreator = ({
           </>
         ) : null}
       </div>
-
-      <CalendarSurface
-        events={liveState.events}
-        canEdit={true}
-        onEditEvent={setEditingEvent}
-        onDeleteEvent={deleteEvent}
-      />
     </>
   );
 };

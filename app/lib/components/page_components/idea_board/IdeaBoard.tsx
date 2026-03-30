@@ -6,6 +6,7 @@ import {
   usePageComponentState,
   usePageDocument,
 } from "@/app/lib/components/project/PageDocumentContext";
+import { useLiveComponentConfigActivator } from "@/app/lib/components/page_components/useLiveComponentConfigActivator";
 import { useQuery } from "convex/react";
 import { useMemo } from "react";
 import { IdeaBoardClient } from "./IdeaBoardClient";
@@ -13,6 +14,7 @@ import { IdeaBoradCreator } from "./IdeaBoradCreator";
 
 export const IdeaBoard = ({ instanceId }: { instanceId: string }) => {
   const { isLive } = useEditMode();
+  const liveConfigActivator = useLiveComponentConfigActivator(instanceId);
   const { activePage } = usePageDocument();
   const projectMembers = useQuery(api.projects.members.getProjectMembers, {
     projectId: activePage.project.id as never,
@@ -33,7 +35,8 @@ export const IdeaBoard = ({ instanceId }: { instanceId: string }) => {
 
   return (
     <div
-      className={`w-full flex flex-col gap-2 ${!isLive ? "bg-(--gray)/10" : null}`}
+      className={`w-full flex flex-col gap-2 ${liveConfigActivator.className}`}
+      onClickCapture={liveConfigActivator.onClickCapture}
     >
       {isLive ? (
         <IdeaBoardClient

@@ -83,9 +83,11 @@ export const ReviewModal = ({
               <p className="@[40rem]:text-3xl text-xl font-medium capitalize">
                 {action} Client&apos;s idea
               </p>
-              <span className="px-2 py-0.5 border rounded-md border-(--gray-page) text-(--gray-page)">
-                {feature.tags.join(", ")}
-              </span>
+              {feature.tags.length > 0 && (
+                <span className="px-2 py-0.5 border rounded-md border-(--gray-page) text-(--gray-page)">
+                  {feature.tags.join(", ")}
+                </span>
+              )}
             </div>
             <p className="text-(--gray-page)">{feature.feature}</p>
             <p className="@[40rem]:text-xl text-lg font-medium">

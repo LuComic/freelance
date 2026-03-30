@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Cog,
   FilePlusCorner,
   LayoutTemplate,
   Pencil,
@@ -34,11 +33,10 @@ import { SaveTemplateModal } from "./SaveTemplateModal";
 import { useSearchBar } from "../searchbar/SearchBarContext";
 
 export const TopBar = () => {
-  const { isEditing, isLive, modeLock, setIsEditing, setIsLive } =
-    useEditMode();
+  const { isLive, modeLock, setIsEditing, setIsLive } = useEditMode();
   const pageDocument = useOptionalPageDocument();
   const { openTemplateSearch } = useSearchBar();
-  const currentMode = isEditing ? "edit" : isLive ? "live" : "config";
+  const currentMode = isLive ? "live" : "edit";
   const pathname = usePathname();
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -108,19 +106,15 @@ export const TopBar = () => {
   return (
     <>
       {isLive ? (
-        <div className="mx-auto h-10 px-1.5 flex items-center justify-center shadow-md rounded-lg backdrop-blur-md bg-(--dim)/60 border border-(--gray) gap-2 absolute-center md:w-max w-4/5">
-          <span className="text-sm md:text-base">Client's view</span>
+        <div
+          className={`mx-auto h-10 px-1.5 ${isHidden ? "hidden" : "flex"} items-center justify-center shadow-md rounded-lg backdrop-blur-md bg-(--dim)/60 border border-(--gray) gap-2 absolute-center w-max`}
+        >
+          <span className="text-sm md:text-base">Client&apos;s view</span>
           <Select
             value={currentMode}
             onValueChange={(value) => {
               if (value === "edit") {
                 setIsEditing(true);
-                return;
-              }
-
-              if (value === "config") {
-                setIsEditing(false);
-                setIsLive(false);
                 return;
               }
 
@@ -139,15 +133,6 @@ export const TopBar = () => {
                   <div className="flex items-center gap-2">
                     <Pencil size={14} className="hover:text-(--light)" />
                     Edit
-                  </div>
-                </SelectItem>
-                <SelectItem
-                  value="config"
-                  className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) text-sm"
-                >
-                  <div className="flex items-center gap-2">
-                    <Cog size={14} className="hover:text-(--light)" />
-                    Config
                   </div>
                 </SelectItem>
                 <SelectItem
@@ -177,12 +162,6 @@ export const TopBar = () => {
                 return;
               }
 
-              if (value === "config") {
-                setIsEditing(false);
-                setIsLive(false);
-                return;
-              }
-
               setIsLive(true);
             }}
           >
@@ -200,15 +179,6 @@ export const TopBar = () => {
                   <div className="flex items-center gap-2">
                     <Pencil size={14} className="hover:text-(--light)" />
                     Edit
-                  </div>
-                </SelectItem>
-                <SelectItem
-                  value="config"
-                  className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) text-sm"
-                >
-                  <div className="flex items-center gap-2">
-                    <Cog size={14} className="hover:text-(--light)" />
-                    Config
                   </div>
                 </SelectItem>
                 <SelectItem
