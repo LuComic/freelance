@@ -383,7 +383,7 @@ export const CalendarSurface = ({
                       }}
                     >
                       <span
-                        className={`rounded-md @[40rem]:text-base text-sm p-[0.5px] aspect-square text-left w-max flex items-center justify-center ${
+                        className={`rounded-md @[40rem]:text-sm text-xs p-[0.5px] aspect-square text-left w-max flex items-center justify-center ${
                           isToday(date)
                             ? "bg-(--vibrant)/20"
                             : "bg-(--gray)/10 text-(--gray-page)"
@@ -454,7 +454,7 @@ export const CalendarSurface = ({
                       }}
                     >
                       <span
-                        className={`rounded-md @[40rem]:text-base text-sm p-[0.5px] aspect-square text-left w-max flex items-center justify-center ${
+                        className={`rounded-md @[40rem]:text-sm text-xs p-[0.5px] aspect-square text-left w-max flex items-center justify-center ${
                           isToday(date)
                             ? "bg-(--vibrant)/20"
                             : "bg-(--gray)/10 text-(--gray-page)"

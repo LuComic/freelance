@@ -122,7 +122,7 @@ export const CalendarMonthLikeEvent = ({
         ) : null}
         <p className="font-medium text-sm text-left truncate">{event.title}</p>
       </div>
-      {eventCount < 3 ? (
+      {eventCount < 2 ? (
         <button
           type="button"
           className="text-left text-sm text-(--gray-page)"
