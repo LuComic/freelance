@@ -156,7 +156,7 @@ export const Tab = ({ initialTabsState }: TabProps) => {
   };
 
   return (
-    <div className="hidden bg-(--darkest) max-w-full w-full items-center justify-start overflow-x-auto border-b border-(--gray) md:flex overscroll-y-none invis-scroll">
+    <div className="hidden bg-(--dim) max-w-full w-full items-center justify-start overflow-x-auto border-b border-(--gray) md:flex overscroll-y-none invis-scroll">
       {resolvedTabs.length > 0 ? (
         <>
           {resolvedTabs.map((tab) => (
