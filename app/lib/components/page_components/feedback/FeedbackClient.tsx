@@ -180,7 +180,7 @@ export const FeedbackClient = ({
                 ))
               ) : (
                 <span className="text-(--gray-page)">
-                  Creator hasn't setup any tags
+                  Creator hasn&apos;t setup any tags
                 </span>
               )}
             </div>

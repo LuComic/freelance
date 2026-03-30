@@ -122,10 +122,10 @@ export const CalendarMonthLikeEvent = ({
         ) : null}
         <p className="font-medium text-sm text-left truncate">{event.title}</p>
       </div>
-      {eventCount < 2 ? (
+      {eventCount < 3 ? (
         <button
           type="button"
-          className="text-left text-sm text-(--gray-page)"
+          className="text-left text-sm text-(--gray-page) sm:inline hidden"
           onClick={(clickEvent) => {
             clickEvent.stopPropagation();
             onOpenDay(date);
