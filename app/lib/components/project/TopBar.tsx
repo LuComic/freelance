@@ -121,7 +121,7 @@ export const TopBar = () => {
               setIsLive(true);
             }}
           >
-            <SelectTrigger className="w-28 text-sm px-2 h-6.5! bg-(--darkest) border-(--vibrant) text-(--gray-page">
+            <SelectTrigger className="w-28 text-sm px-2 h-6.5! bg-(--darkest) border-(--vibrant) text-(--gray-page)">
               <SelectValue placeholder="Mode" className="text-sm" />
             </SelectTrigger>
             <SelectContent className="bg-(--darkest) border-none text-(--gray-page)">

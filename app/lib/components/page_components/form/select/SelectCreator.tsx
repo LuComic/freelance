@@ -162,7 +162,6 @@ export const SelectCreator = ({
           </div>
         </div>
       ) : null}
-      <div className="h-px w-full border-dashed border border-(--gray)"></div>
     </>
   );
 };

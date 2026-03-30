@@ -68,16 +68,16 @@ export const PageLinkCreator = ({
         }
         disabled={isLoadingPages || pages.length === 0}
       >
-        <SelectTrigger className="w-full @[40rem]:w-52 bg-(--darkest) border-(--gray-page)">
+        <SelectTrigger className="w-full @[40rem]:w-52 bg-(--dim) border-(--gray-page)">
           <SelectValue placeholder={selectPlaceholder} />
         </SelectTrigger>
-        <SelectContent className="bg-(--darkest) border-none text-(--gray-page)">
-          <SelectGroup className="bg-(--darkest)">
+        <SelectContent className="bg-(--dim) border-none text-(--gray-page)">
+          <SelectGroup className="bg-(--dim)">
             {pages.map((page) => (
               <SelectItem
                 key={page.id}
                 value={page.id}
-                className="data-highlighted:bg-(--dim) data-highlighted:text-(--light)"
+                className="data-highlighted:bg-(--darkest) data-highlighted:text-(--light)"
               >
                 {page.title}
               </SelectItem>
@@ -85,7 +85,6 @@ export const PageLinkCreator = ({
           </SelectGroup>
         </SelectContent>
       </Select>
-      <div className="h-px w-full border-dashed border border-(--gray)"></div>
     </>
   );
 };

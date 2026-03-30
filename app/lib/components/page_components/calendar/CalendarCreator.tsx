@@ -176,16 +176,16 @@ export const CalendarCreator = ({
                   setError(null);
                 }}
               >
-                <SelectTrigger className="w-full @[40rem]:w-52 bg-(--darkest) border-(--gray-page)">
+                <SelectTrigger className="w-full @[40rem]:w-52 bg-(--dim) border-(--gray-page)">
                   <SelectValue placeholder="Set the status" />
                 </SelectTrigger>
-                <SelectContent className="bg-(--darkest) border-none text-(--gray-page)">
-                  <SelectGroup className="bg-(--darkest)">
+                <SelectContent className="bg-(--dim) border-none text-(--gray-page)">
+                  <SelectGroup className="bg-(--dim)">
                     {CALENDAR_COLOR_OPTIONS.map((color) => (
                       <SelectItem
                         key={color}
                         value={color}
-                        className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) "
+                        className="data-highlighted:bg-(--darkest) data-highlighted:text-(--light) "
                       >
                         {color !== "none" ? (
                           <div
