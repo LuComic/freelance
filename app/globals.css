@@ -219,4 +219,11 @@
   .invis-scroll {
     scrollbar-color: transparent transparent;
   }
+
+  .absolute-center {
+    position: absolute;
+    top: 7%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
 }

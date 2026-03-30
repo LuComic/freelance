@@ -45,7 +45,7 @@ export default async function ProjectViewLayout({
           <EditModeProvider>
             <PageDocumentProvider>
               <SearchBar />
-              <div className="flex-1 min-w-0 flex flex-col items-start justify-start md:h-full md:min-h-0">
+              <div className="relative flex-1 min-w-0 flex flex-col items-start justify-start md:h-full md:min-h-0">
                 <Tab initialTabsState={initialTabsState} />
                 <TopBar />
                 <div className="@container w-full md:px-4 px-2 pt-4 pb-8 flex flex-col items-start justify-start gap-4 md:flex-1 md:min-h-0 md:overflow-y-auto">
