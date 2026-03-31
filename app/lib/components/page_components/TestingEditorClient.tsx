@@ -160,17 +160,17 @@ export default function TestingEditorClient() {
   }
 
   return (
-    <div className="w-full h-[calc(100dvh-13rem)] min-h-112 border border-transparent rounded-md overflow-hidden">
-      <div className="h-full w-full flex items-start justify-start">
+    <div className="w-full min-h-112 rounded-md border border-transparent overflow-hidden md:min-h-0 md:flex-1 md:self-stretch">
+      <div className="flex h-full min-h-0 w-full items-start justify-start">
         <div
           aria-hidden
-          className="@[35rem]:inline hidden w-11 shrink-0 h-full text-right text-sm text-(--gray-page) select-none overflow-hidden border-r border-(--gray)/40"
+          className="@[35rem]:inline hidden h-full w-11 shrink-0 select-none overflow-hidden border-r border-(--gray)/40 text-right text-(--gray-page) tabular-nums"
         >
           <div style={{ transform: `translateY(-${scrollTop}px)` }}>
             {lines.map((lineNumber) => (
               <div
                 key={lineNumber}
-                className={`px-3 leading-6 ${
+                className={`px-3 text-base leading-6 ${
                   lineNumber === activeLine
                     ? "bg-(--gray)/20 text-(--light)"
                     : ""
@@ -182,7 +182,7 @@ export default function TestingEditorClient() {
           </div>
         </div>
 
-        <div className="relative h-full w-full">
+        <div className="relative h-full min-h-0 w-full">
           <textarea
             ref={textareaRef}
             value={content}
@@ -373,13 +373,14 @@ export default function TestingEditorClient() {
               );
             }}
             spellCheck={false}
-            className="relative z-10 h-full w-full resize-none bg-transparent p-0 pt-2 @[35rem]:pt-0 pl-4 text-base text-(--light) caret-(--light) border-none outline-none focus:ring-0"
+            wrap="off"
+            className="relative z-10 h-full min-h-0 w-full resize-none overflow-auto border-none bg-transparent p-0 pt-2 pl-4 text-base leading-6 text-(--light) caret-(--light) outline-none focus:ring-0 @[35rem]:pt-0"
             placeholder="Start typing..."
           />
           {ghostCompletion ? (
             <span
               aria-hidden
-              className="pointer-events-none absolute z-20 text-base leading-7 text-(--vibrant)/50"
+              className="pointer-events-none absolute z-20 text-base leading-6 text-(--vibrant)/50"
               style={{
                 top: ghostCompletion.top,
                 left: ghostCompletion.left,

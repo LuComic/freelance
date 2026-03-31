@@ -37,8 +37,8 @@ export function getCaretCoordinates(
 
   mirror.style.position = "absolute";
   mirror.style.visibility = "hidden";
-  mirror.style.whiteSpace = "pre-wrap";
-  mirror.style.wordWrap = "break-word";
+  mirror.style.whiteSpace = textarea.wrap === "off" ? "pre" : "pre-wrap";
+  mirror.style.wordWrap = textarea.wrap === "off" ? "normal" : "break-word";
   mirror.style.pointerEvents = "none";
 
   for (const property of propertiesToMirror) {
