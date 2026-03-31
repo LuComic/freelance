@@ -31,7 +31,7 @@ export function LimitsSettingsSection({
   }, [activeSection]);
 
   return (
-    <div className="w-full p-2 flex flex-col gap-2">
+    <div className="w-full p-2 flex flex-col gap-2 bg-(--gray)/10">
       <button
         type="button"
         className="flex font-medium @[40rem]:text-lg text-base items-center justify-start gap-2"
@@ -47,11 +47,9 @@ export function LimitsSettingsSection({
       {open ? (
         <div className="pl-7 flex flex-col gap-2 pb-2">
           <p className="text-(--gray-page)">
-            Although Pro users get a lot more access, there still need to be
-            some limitations. These are for preventing spam, saving storage and
-            keeping up with the user base (if the project will even have that
-            problem). If you find these too limiting, contact support at
-            hello@gmail.com
+            These limits are for preventing spam, saving storage and keeping up
+            with the user base (if the project will even have that problem). If
+            you find these too limiting, contact support at hello@gmail.com
           </p>
           {BILLING_BETA_MODE && BILLING_BETA_OWNED_PROJECT_LIMIT !== null ? (
             <p>

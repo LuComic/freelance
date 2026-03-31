@@ -223,7 +223,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section
+      {/* <section
         id="plans"
         className="mx-auto w-full px-4 max-w-7xl scroll-mt-20 py-8 sm:pt-6 lg:pt-8 border-t border-(--gray)"
       >
@@ -343,11 +343,11 @@ export default function Home() {
             Contact us
           </a>
         </p>
-      </section>
+      </section> */}
 
       <section
         id="create-account"
-        className="mx-auto w-full bg-(--gray)/10 px-4 max-w-7xl scroll-mt-20 pt-8 pb-14 border-t border-(--gray)"
+        className="mx-auto w-full px-4 max-w-7xl scroll-mt-20 pt-8 pb-14 border-t border-(--gray) bg-(--gray)/10"
       >
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>

@@ -23,7 +23,7 @@ export function LegalSettingsSection({
   }, [activeSection]);
 
   return (
-    <div className="w-full p-2 flex flex-col gap-2 bg-(--gray)/10">
+    <div className="w-full p-2 flex flex-col gap-2">
       <button
         type="button"
         className="flex font-medium @[40rem]:text-lg text-base items-center justify-start gap-2"

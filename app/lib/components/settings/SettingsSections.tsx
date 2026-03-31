@@ -58,7 +58,7 @@ export function SettingsSections() {
         isDeletingAccount={isDeletingAccount}
         onDeleteAccount={handleDeleteAccount}
       />
-      <PlanSettingsSection activeSection={section} />
+      {/* <PlanSettingsSection activeSection={section} /> */}
       <LimitsSettingsSection activeSection={section} />
       <LegalSettingsSection activeSection={section} />
     </div>
