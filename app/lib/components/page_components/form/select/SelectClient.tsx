@@ -42,7 +42,7 @@ export const SelectClient = ({
           return (
             <button
               key={option.id}
-              className={`flex items-center gap-2 justify-start w-full @[40rem]:w-1/2  border px-2 py-1.5 ${selected ? "border-(--vibrant) bg-(--vibrant)/10" : "border-(--gray) bg-(--gray)/10"} rounded-sm`}
+              className={`flex items-center gap-2 justify-start w-max @[40rem]:w-1/2  border px-2 py-1.5 ${selected ? "border-(--vibrant) bg-(--vibrant)/10" : "border-(--gray) bg-(--gray)/10"} rounded-sm`}
               onClick={() => toggleOption(option.id)}
             >
               <span className="h-5 flex items-center p-1 justify-center w-auto aspect-square rounded-sm bg-(--darkest)">

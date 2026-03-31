@@ -31,7 +31,7 @@ export const RadioClient = ({
           return (
             <button
               key={option.id}
-              className="flex items-center gap-2 justify-start w-full "
+              className="flex items-center gap-2 justify-start w-max"
               onClick={() =>
                 onChangeLiveState((currentLiveState) => ({
                   ...currentLiveState,

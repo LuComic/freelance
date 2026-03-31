@@ -53,9 +53,7 @@ export const Files = () => {
 
       return {
         scopeProjectId: currentProjectId,
-        expandedProjectIds: nextScopedExpandedProjectIds.includes(
-          projectId,
-        )
+        expandedProjectIds: nextScopedExpandedProjectIds.includes(projectId)
           ? nextScopedExpandedProjectIds.filter(
               (expandedId) => expandedId !== projectId,
             )
@@ -73,8 +71,8 @@ export const Files = () => {
       </p>
       {projects === undefined ? (
         <>
-          <div className="bg-(--gray)/60 w-full mt-2 h-[22px] rounded-md animate-pulse"></div>
-          <div className="bg-(--gray)/60 w-2/3 mt-2 h-[22px] rounded-md animate-pulse"></div>
+          <div className="bg-(--gray)/60 w-full mt-2 h-5.5 rounded-md animate-pulse"></div>
+          <div className="bg-(--gray)/60 w-2/3 mt-2 h-5.5 rounded-md animate-pulse"></div>
         </>
       ) : projects.length > 0 ? (
         projects.map((project) => (
