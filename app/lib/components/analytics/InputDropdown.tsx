@@ -32,7 +32,9 @@ export const InputDropdown = ({
       {isOpen ? (
         <div className="pl-7 flex flex-col gap-2 pb-2">
           {item.components.length === 0 ? (
-            <p className="text-(--gray-page)">No input components on this page.</p>
+            <p className="text-(--gray-page)">
+              No input components on this page.
+            </p>
           ) : (
             item.components.map((comp, compIndex) => (
               <div
@@ -42,16 +44,17 @@ export const InputDropdown = ({
                 <p className="text-(--gray-page)">{comp.title}</p>
                 {comp.kind === "values" ? (
                   <div className="flex flex-col gap-2">
-                    {(comp.values.length > 0 ? comp.values : [comp.emptyLabel]).map(
-                      (value, valueIndex) => (
-                        <div
-                          key={`${value}-${valueIndex}`}
-                          className="w-full rounded-md border border-(--gray) px-2 py-1"
-                        >
-                          {value}
-                        </div>
-                      ),
-                    )}
+                    {(comp.values.length > 0
+                      ? comp.values
+                      : [comp.emptyLabel]
+                    ).map((value, valueIndex) => (
+                      <div
+                        key={`${value}-${valueIndex}`}
+                        className="w-full rounded-md border border-(--gray) px-2 py-1"
+                      >
+                        {value}
+                      </div>
+                    ))}
                   </div>
                 ) : (
                   <KanbanBoard items={comp.items} />

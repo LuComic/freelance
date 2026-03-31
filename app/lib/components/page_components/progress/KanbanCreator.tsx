@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronRight, TimerReset, Trash, X } from "lucide-react";
+import { ChevronRight, Trash } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -41,7 +41,9 @@ export const KanbanCreator = ({
 }: KanbanCreatorProps) => {
   const [tagInput, setTagInput] = useState("");
   const [editingTags, setEditingTags] = useState(false);
-  const [filter, setFilter] = useState<"" | "dismissed">("");
+  const [editingTodo, setEditingTodo] = useState(false);
+  const [editingProgress, setEditingProgress] = useState(false);
+  const [editingDone, setEditingDone] = useState(false);
   const [adding, setAdding] = useState(false);
   const [taskInput, setTaskInput] = useState("");
   const [newTaskStatus, setNewTaskStatus] =
@@ -100,11 +102,11 @@ export const KanbanCreator = ({
     setSelectedTags([]);
   };
 
-  const handleDismissing = (itemId: number) => {
+  const handleStatusChange = (id: number, status: KanbanItem["status"]) => {
     onChangeLiveState((currentLiveState) => ({
       ...currentLiveState,
       items: currentLiveState.items.map((item) =>
-        item.id === itemId ? { ...item, dismissed: !item.dismissed } : item,
+        item.id === id ? { ...item, status } : item,
       ),
     }));
   };
@@ -116,45 +118,12 @@ export const KanbanCreator = ({
     }));
   };
 
-  const handleStatusChange = (id: number, status: KanbanItem["status"]) => {
-    onChangeLiveState((currentLiveState) => ({
-      ...currentLiveState,
-      items: currentLiveState.items.map((item) =>
-        item.id === id ? { ...item, status } : item,
-      ),
-    }));
-  };
-
-  const changeFilter = () => {
-    if (filter === "dismissed") {
-      setFilter("");
-      return;
-    }
-
-    setFilter("dismissed");
-  };
-
-  const visibleData = liveState.items.filter((item) => {
-    if (filter === "dismissed") {
-      return item.dismissed;
-    }
-    return !item.dismissed;
-  });
-
-  const getTableData = (): (KanbanItem | undefined)[][] => {
-    const todos = visibleData.filter((t) => t.status === "Todo");
-    const progress = visibleData.filter((t) => t.status === "In Progress");
-    const done = visibleData.filter((t) => t.status === "Done");
-    const longest = Math.max(todos.length, progress.length, done.length);
-    const tableList: (KanbanItem | undefined)[][] = [];
-
-    for (let i = 0; i < longest; i++) {
-      tableList.push([todos[i], progress[i], done[i]]);
-    }
-    return tableList;
-  };
-
-  const tableRows = getTableData();
+  const visibleData = liveState.items.filter((item) => !item.dismissed);
+  const todoItems = visibleData.filter((item) => item.status === "Todo");
+  const progressItems = visibleData.filter(
+    (item) => item.status === "In Progress",
+  );
+  const doneItems = visibleData.filter((item) => item.status === "Done");
 
   return (
     <>
@@ -169,7 +138,7 @@ export const KanbanCreator = ({
       </p>
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
         <button
-          className="@[40rem]:text-lg text-base font-medium flex items-center justify-start gap-2 w-max"
+          className="@[40rem]:text-lg text-base font-medium flex items-center justify-start gap-2 w-full"
           onClick={() => setAdding((prev) => !prev)}
         >
           New Task
@@ -196,16 +165,16 @@ export const KanbanCreator = ({
                 setNewTaskStatus(value as KanbanItem["status"])
               }
             >
-              <SelectTrigger className="w-full @[40rem]:w-52 bg-(--darkest) border-(--gray-page)">
+              <SelectTrigger className="w-full @[40rem]:w-52 bg-(--dim) border-(--gray-page)">
                 <SelectValue placeholder="Set the status" />
               </SelectTrigger>
-              <SelectContent className="bg-(--darkest) border-none text-(--gray-page)">
-                <SelectGroup className="bg-(--darkest)">
+              <SelectContent className="bg-(--dim) border-none text-(--gray-page)">
+                <SelectGroup className="bg-(--dim)">
                   {STATUS_OPTIONS.map((status) => (
                     <SelectItem
                       key={status}
                       value={status}
-                      className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) "
+                      className="data-highlighted:bg-(--darkest) data-highlighted:text-(--light) "
                     >
                       {status}
                     </SelectItem>
@@ -249,7 +218,7 @@ export const KanbanCreator = ({
         <div className="w-full h-px bg-(--gray)" />
 
         <button
-          className="@[40rem]:text-lg text-base font-medium flex items-center justify-start gap-2 w-max"
+          className="@[40rem]:text-lg text-base font-medium flex items-center justify-start gap-2 w-full"
           onClick={() => setEditingTags((prev) => !prev)}
         >
           Tags
@@ -292,6 +261,174 @@ export const KanbanCreator = ({
             >
               Add tag
             </button>
+          </>
+        )}
+
+        <div className="w-full h-px bg-(--gray)" />
+
+        <button
+          className="@[40rem]:text-lg text-(--declined-border) text-base font-medium flex items-center justify-start gap-2 w-full"
+          onClick={() => setEditingTodo((prev) => !prev)}
+        >
+          Todo
+          <ChevronRight size={18} className={`${editingTodo && "rotate-90"}`} />
+        </button>
+        {editingTodo && (
+          <>
+            {todoItems.length > 0 ? (
+              todoItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="w-full flex items-center justify-start gap-2"
+                >
+                  <Select
+                    value={item.status}
+                    onValueChange={(value) =>
+                      handleStatusChange(item.id, value as KanbanItem["status"])
+                    }
+                  >
+                    <SelectTrigger className="w-max bg-(--dim) border-(--gray-page) h-6.5!">
+                      <SelectValue placeholder="Set the status" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-(--dim) border-none text-(--gray-page)">
+                      <SelectGroup className="bg-(--dim)">
+                        {STATUS_OPTIONS.map((status) => (
+                          <SelectItem
+                            key={status}
+                            value={status}
+                            className="data-highlighted:bg-(--darkest) data-highlighted:text-(--light) h-6.5!"
+                          >
+                            {status}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <button
+                    className="h-6.5 flex items-center justify-center aspect-square rounded-md hover:bg-(--darkest)/10 bg-(--dim) border-(--gray-page) border"
+                    onClick={() => handleDeleteTask(item.id)}
+                  >
+                    <Trash size={16} />
+                  </button>
+                  <span>{item.feature}</span>
+                </div>
+              ))
+            ) : (
+              <span className="text-(--gray-page)">No tasks setup</span>
+            )}
+          </>
+        )}
+
+        <div className="w-full h-px bg-(--gray)" />
+
+        <button
+          className="@[40rem]:text-lg text-(--gray-page) text-base font-medium flex items-center justify-start gap-2 w-full"
+          onClick={() => setEditingProgress((prev) => !prev)}
+        >
+          In Progress
+          <ChevronRight
+            size={18}
+            className={`${editingProgress && "rotate-90"}`}
+          />
+        </button>
+        {editingProgress && (
+          <>
+            {progressItems.length > 0 ? (
+              progressItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="w-full flex items-center justify-start gap-2"
+                >
+                  <Select
+                    value={item.status}
+                    onValueChange={(value) =>
+                      handleStatusChange(item.id, value as KanbanItem["status"])
+                    }
+                  >
+                    <SelectTrigger className="w-max bg-(--dim) border-(--gray-page) h-6.5!">
+                      <SelectValue placeholder="Set the status" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-(--dim) border-none text-(--gray-page)">
+                      <SelectGroup className="bg-(--dim)">
+                        {STATUS_OPTIONS.map((status) => (
+                          <SelectItem
+                            key={status}
+                            value={status}
+                            className="data-highlighted:bg-(--darkest) data-highlighted:text-(--light) h-6.5!"
+                          >
+                            {status}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <button
+                    className="h-6.5 flex items-center justify-center aspect-square rounded-md hover:bg-(--darkest)/10 bg-(--dim) border-(--gray-page) border"
+                    onClick={() => handleDeleteTask(item.id)}
+                  >
+                    <Trash size={16} />
+                  </button>
+                  <span>{item.feature}</span>
+                </div>
+              ))
+            ) : (
+              <span className="text-(--gray-page)">No tasks setup</span>
+            )}
+          </>
+        )}
+
+        <div className="w-full h-px bg-(--gray)" />
+
+        <button
+          className="@[40rem]:text-lg text-(--accepted-border) text-base font-medium flex items-center justify-start gap-2 w-full"
+          onClick={() => setEditingDone((prev) => !prev)}
+        >
+          Done
+          <ChevronRight size={18} className={`${editingDone && "rotate-90"}`} />
+        </button>
+        {editingDone && (
+          <>
+            {doneItems.length > 0 ? (
+              doneItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="w-full flex items-center justify-start gap-2"
+                >
+                  <Select
+                    value={item.status}
+                    onValueChange={(value) =>
+                      handleStatusChange(item.id, value as KanbanItem["status"])
+                    }
+                  >
+                    <SelectTrigger className="w-max bg-(--dim) border-(--gray-page) h-6.5!">
+                      <SelectValue placeholder="Set the status" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-(--dim) border-none text-(--gray-page)">
+                      <SelectGroup className="bg-(--dim)">
+                        {STATUS_OPTIONS.map((status) => (
+                          <SelectItem
+                            key={status}
+                            value={status}
+                            className="data-highlighted:bg-(--darkest) data-highlighted:text-(--light) h-6.5!"
+                          >
+                            {status}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <button
+                    className="h-6.5 flex items-center justify-center aspect-square rounded-md hover:bg-(--darkest)/10 bg-(--dim) border-(--gray-page) border"
+                    onClick={() => handleDeleteTask(item.id)}
+                  >
+                    <Trash size={16} />
+                  </button>
+                  <span>{item.feature}</span>
+                </div>
+              ))
+            ) : (
+              <span className="text-(--gray-page)">No tasks setup</span>
+            )}
           </>
         )}
       </div>

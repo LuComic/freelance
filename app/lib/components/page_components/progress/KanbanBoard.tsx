@@ -26,7 +26,7 @@ export const KanbanBoard = ({ items }: { items: KanbanBoardItem[] }) => {
 
   return (
     <div className="w-full max-w-full min-w-0 overflow-x-auto border rounded-md border-(--gray)">
-      <div className="min-w-[900px] flex flex-col">
+      <div className="min-w-225 flex flex-col">
         <div
           className={`w-full text-(--gray-page) ${tableRows.length > 0 && "border-b"} border-(--gray) text-left grid justify-between items-start grid-cols-3 bg-(--darkest)`}
         >

@@ -128,7 +128,7 @@ export const TopBar = () => {
               <SelectGroup className="bg-(--darkest)">
                 <SelectItem
                   value="edit"
-                  className="data-highlighted:bg-(--dim) data-highlighted:text-(--light)! text-sm"
+                  className="data-highlighted:bg-(--dim) data-highlighted:text-(--light)! text-sm h-6.5!"
                 >
                   <div className="flex items-center gap-2">
                     <Pencil size={14} className="hover:text-(--light)" />

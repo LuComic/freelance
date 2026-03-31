@@ -6,14 +6,8 @@ import type {
   PageComponentLiveStateByType,
 } from "@/lib/pageDocument";
 import { useState } from "react";
-import { ChevronRight, Heart, List, Medal, Trash } from "lucide-react";
-import {
-  createIdea,
-  getIdeaAuthorName,
-  getIdeaVoteCount,
-  hasIdeaVoteFromUser,
-  toggleIdeaVote,
-} from "./ideaBoardVotes";
+import { ChevronRight } from "lucide-react";
+import { createIdea } from "./ideaBoardVotes";
 
 type IdeaBoardCreatorProps = {
   authorNames: Record<string, string>;
@@ -42,13 +36,7 @@ export const IdeaBoradCreator = ({
 }: IdeaBoardCreatorProps) => {
   const [adding, setAdding] = useState(false);
   const [addingInput, setAddingInput] = useState("");
-  const [filter, setFilter] = useState<"all" | "rankings">("all");
   const [clientEditing, setClientEditing] = useState(false);
-
-  const visibleIdeas = liveState.ideas;
-  const rankedIdeas = [...liveState.ideas].sort((firstIdea, secondIdea) => {
-    return getIdeaVoteCount(secondIdea) - getIdeaVoteCount(firstIdea);
-  });
 
   const handleNewIdea = () => {
     const nextIdea = addingInput.trim();
@@ -61,26 +49,6 @@ export const IdeaBoradCreator = ({
     }));
 
     setAddingInput("");
-  };
-
-  const handleDeleteIdea = (ideaId: string) => {
-    onChangeLiveState((currentState) => ({
-      ...currentState,
-      ideas: currentState.ideas.filter((idea) => idea.id !== ideaId),
-    }));
-  };
-
-  const handleLikeOrDislikeIdea = (ideaId: string) => {
-    if (currentUserId === null) {
-      return;
-    }
-
-    onChangeLiveState((currentState) => ({
-      ...currentState,
-      ideas: currentState.ideas.map((idea) =>
-        idea.id === ideaId ? toggleIdeaVote(idea, currentUserId) : idea,
-      ),
-    }));
   };
 
   const handleClientAddingPermissions = (index: number) => {

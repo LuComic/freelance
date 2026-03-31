@@ -18,7 +18,6 @@ import type {
 } from "@/lib/pageDocument";
 import { DatePicker } from "../DatePicker";
 import { CalendarModal } from "./CalendarModal";
-import { CalendarSurface } from "./CalendarSurface";
 import {
   CALENDAR_COLOR_OPTIONS,
   buildEventRange,
@@ -26,7 +25,6 @@ import {
 } from "./calendarUtils";
 
 type CalendarCreatorProps = {
-  liveState: PageComponentLiveStateByType<"Calendar">["state"];
   onCommitLiveState: (
     updater: (
       state: PageComponentLiveStateByType<"Calendar">["state"],
@@ -35,7 +33,6 @@ type CalendarCreatorProps = {
 };
 
 export const CalendarCreator = ({
-  liveState,
   onCommitLiveState,
 }: CalendarCreatorProps) => {
   const [adding, setAdding] = useState(false);
@@ -89,17 +86,6 @@ export const CalendarCreator = ({
         ),
       ),
     }));
-  };
-
-  const deleteEvent = async (eventId: string) => {
-    await onCommitLiveState((currentState) => ({
-      ...currentState,
-      events: currentState.events.filter((event) => event.id !== eventId),
-    }));
-
-    if (editingEvent?.id === eventId) {
-      setEditingEvent(null);
-    }
   };
 
   return (

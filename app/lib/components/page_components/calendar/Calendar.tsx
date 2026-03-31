@@ -22,10 +22,7 @@ export const Calendar = ({ instanceId }: { instanceId: string }) => {
       {isLive ? (
         <CalendarClient liveState={liveState.state} />
       ) : (
-        <CalendarCreator
-          liveState={liveState.state}
-          onCommitLiveState={commitLiveState}
-        />
+        <CalendarCreator onCommitLiveState={commitLiveState} />
       )}
     </div>
   );
