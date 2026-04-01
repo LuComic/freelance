@@ -229,6 +229,34 @@ export const renameProject = mutation({
   },
 });
 
+export const updateProjectDescription = mutation({
+  args: {
+    projectId: v.id("projects"),
+    description: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const { userId } = await requireCurrentAuth(ctx);
+    const trimmedDescription = args.description.trim();
+
+    const project = await ctx.db.get(args.projectId);
+    if (!project || project.isArchived) {
+      throw notFound(`Project ${args.projectId} was not found.`);
+    }
+
+    await requireProjectEditor(ctx, project._id, userId);
+
+    await ctx.db.patch(project._id, {
+      description: trimmedDescription || undefined,
+      updatedAt: Date.now(),
+    });
+
+    return {
+      projectId: project._id,
+      description: trimmedDescription || null,
+    };
+  },
+});
+
 export const deleteProject = mutation({
   args: {
     projectId: v.id("projects"),

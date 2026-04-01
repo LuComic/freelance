@@ -5,26 +5,40 @@ import { useState } from "react";
 
 type ProjectGeneralSectionProps = {
   currentProjectName: string;
+  currentProjectDescription: string;
   isLoading: boolean;
   isUnavailable: boolean;
   nameDraft: string;
   setNameDraft: (value: string) => void;
+  descriptionDraft: string;
+  setDescriptionDraft: (value: string) => void;
   canSaveName: boolean;
+  canSaveDescription: boolean;
   renameError: string | null;
+  descriptionError: string | null;
   isSavingName: boolean;
+  isSavingDescription: boolean;
   onRename: () => Promise<void>;
+  onSaveDescription: () => Promise<void>;
 };
 
 export function ProjectGeneralSection({
   currentProjectName,
+  currentProjectDescription,
   isLoading,
   isUnavailable,
   nameDraft,
   setNameDraft,
+  descriptionDraft,
+  setDescriptionDraft,
   canSaveName,
+  canSaveDescription,
   renameError,
+  descriptionError,
   isSavingName,
+  isSavingDescription,
   onRename,
+  onSaveDescription,
 }: ProjectGeneralSectionProps) {
   const [open, setOpen] = useState(false);
 
@@ -73,6 +87,33 @@ export function ProjectGeneralSection({
           </button>
           {renameError ? (
             <p className="text-sm text-(--declined-border)">{renameError}</p>
+          ) : null}
+          <p className="text-(--gray-page)">Project description</p>
+          <div className="w-max rounded-md border px-2 py-1 border-(--gray)">
+            {isLoading ? "Loading..." : currentProjectDescription || "Not set"}
+          </div>
+
+          <p className="text-(--gray-page)">Change the description</p>
+          <textarea
+            rows={3}
+            placeholder="Enter a project description..."
+            className="rounded-md bg-(--dim) px-2 py-1.5 outline-none resize-none"
+            value={descriptionDraft}
+            onChange={(e) => setDescriptionDraft(e.target.value)}
+            disabled={isLoading || isUnavailable || isSavingDescription}
+          />
+          <button
+            type="button"
+            className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-(--vibrant)"
+            onClick={() => void onSaveDescription()}
+            disabled={!canSaveDescription}
+          >
+            {isSavingDescription ? "Saving..." : "Save"}
+          </button>
+          {descriptionError ? (
+            <p className="text-sm text-(--declined-border)">
+              {descriptionError}
+            </p>
           ) : null}
         </div>
       ) : null}

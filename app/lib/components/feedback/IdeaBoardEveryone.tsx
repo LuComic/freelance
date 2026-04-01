@@ -402,8 +402,6 @@ export const IdeaBoradEveryone = () => {
           )}
         </div>
       </div>
-
-      <div className="h-px w-full border-dashed border border-(--gray)"></div>
     </div>
   );
 };

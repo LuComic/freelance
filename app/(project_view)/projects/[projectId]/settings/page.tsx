@@ -20,16 +20,23 @@ export default function SettingsPage() {
     isJoinCodeLoading,
     isRegeneratingJoinCode,
     currentProjectName,
+    currentProjectDescription,
     canManageMembers,
     canRemoveMembers,
     canDeleteProject,
     canLeaveProject,
     nameDraft,
     setNameDraft,
+    descriptionDraft,
+    setDescriptionDraft,
     canSaveName,
+    canSaveDescription,
     renameError,
+    descriptionError,
     isSavingName,
+    isSavingDescription,
     handleProjectRename,
+    handleProjectDescriptionSave,
     deleteError,
     isDeleteConfirming,
     isDeletingProject,
@@ -74,14 +81,21 @@ export default function SettingsPage() {
       <div className="flex flex-col items-start justify-start w-full">
         <ProjectGeneralSection
           currentProjectName={currentProjectName}
+          currentProjectDescription={currentProjectDescription}
           isLoading={projectData === undefined}
           isUnavailable={projectData === null}
           nameDraft={nameDraft}
           setNameDraft={setNameDraft}
+          descriptionDraft={descriptionDraft}
+          setDescriptionDraft={setDescriptionDraft}
           canSaveName={canSaveName}
+          canSaveDescription={canSaveDescription}
           renameError={renameError}
+          descriptionError={descriptionError}
           isSavingName={isSavingName}
+          isSavingDescription={isSavingDescription}
           onRename={handleProjectRename}
+          onSaveDescription={handleProjectDescriptionSave}
         />
         <ProjectEmailListSection
           title="Clients"

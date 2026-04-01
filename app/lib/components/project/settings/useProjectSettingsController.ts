@@ -7,19 +7,28 @@ import { useEffect, useRef, useState } from "react";
 
 export function useProjectSettingsController(projectId: string) {
   const [nameDraft, setNameDraft] = useState("");
-  const [savedNameSnapshot, setSavedNameSnapshot] = useState<string | null>(null);
+  const [savedNameSnapshot, setSavedNameSnapshot] = useState<string | null>(
+    null,
+  );
+  const [descriptionDraft, setDescriptionDraft] = useState("");
+  const [savedDescriptionSnapshot, setSavedDescriptionSnapshot] = useState<
+    string | null
+  >(null);
   const [renameError, setRenameError] = useState<string | null>(null);
+  const [descriptionError, setDescriptionError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [leaveError, setLeaveError] = useState<string | null>(null);
-  const [memberActionError, setMemberActionError] = useState<string | null>(null);
+  const [memberActionError, setMemberActionError] = useState<string | null>(
+    null,
+  );
   const [isSavingName, setIsSavingName] = useState(false);
+  const [isSavingDescription, setIsSavingDescription] = useState(false);
   const [isDeleteConfirming, setIsDeleteConfirming] = useState(false);
   const [isDeletingProject, setIsDeletingProject] = useState(false);
   const [isLeaveConfirming, setIsLeaveConfirming] = useState(false);
   const [isLeavingProject, setIsLeavingProject] = useState(false);
-  const [pendingMemberRemovalUserId, setPendingMemberRemovalUserId] = useState<
-    Id<"users"> | null
-  >(null);
+  const [pendingMemberRemovalUserId, setPendingMemberRemovalUserId] =
+    useState<Id<"users"> | null>(null);
   const ensuredJoinCodeProjectIdRef = useRef<string | null>(null);
   const [joinCodeSnapshot, setJoinCodeSnapshot] = useState<string | null>(null);
   const [joinCodeError, setJoinCodeError] = useState<string | null>(null);
@@ -35,22 +44,39 @@ export function useProjectSettingsController(projectId: string) {
     projectId ? { projectId: projectId as never } : "skip",
   );
   const renameProject = useMutation(api.projects.mutations.renameProject);
+  const updateProjectDescription = useMutation(
+    api.projects.mutations.updateProjectDescription,
+  );
   const deleteProject = useMutation(api.projects.mutations.deleteProject);
   const leaveProject = useMutation(api.projects.mutations.leaveProject);
-  const removeProjectMember = useMutation(api.projects.members.removeProjectMember);
-  const ensureProjectJoinCode = useMutation(api.projects.join.ensureProjectJoinCode);
+  const removeProjectMember = useMutation(
+    api.projects.members.removeProjectMember,
+  );
+  const ensureProjectJoinCode = useMutation(
+    api.projects.join.ensureProjectJoinCode,
+  );
   const regenerateProjectJoinCode = useMutation(
     api.projects.join.regenerateProjectJoinCode,
   );
   const currentProjectName = projectData?.project.name ?? "";
+  const currentProjectDescription = projectData?.project.description ?? "";
   const isNameDirty =
     savedNameSnapshot !== null && nameDraft.trim() !== savedNameSnapshot;
+  const isDescriptionDirty =
+    savedDescriptionSnapshot !== null &&
+    descriptionDraft.trim() !== savedDescriptionSnapshot;
   const canSaveName =
     projectData !== undefined &&
     projectData !== null &&
     !isSavingName &&
     nameDraft.trim().length > 0 &&
     nameDraft.trim() !== (savedNameSnapshot ?? currentProjectName);
+  const canSaveDescription =
+    projectData !== undefined &&
+    projectData !== null &&
+    !isSavingDescription &&
+    descriptionDraft.trim() !==
+      (savedDescriptionSnapshot ?? currentProjectDescription);
 
   useEffect(() => {
     if (projectData === null) {
@@ -69,8 +95,20 @@ export function useProjectSettingsController(projectId: string) {
         setNameDraft(projectData.project.name);
         setSavedNameSnapshot(projectData.project.name);
       }
+
+      if (savedDescriptionSnapshot === null || !isDescriptionDirty) {
+        const nextDescription = projectData.project.description ?? "";
+        setDescriptionDraft(nextDescription);
+        setSavedDescriptionSnapshot(nextDescription);
+      }
     });
-  }, [isNameDirty, projectData, savedNameSnapshot]);
+  }, [
+    isDescriptionDirty,
+    isNameDirty,
+    projectData,
+    savedDescriptionSnapshot,
+    savedNameSnapshot,
+  ]);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -91,7 +129,8 @@ export function useProjectSettingsController(projectId: string) {
     });
   }, [projectData?.project.id]);
 
-  const currentProjectId = projectData === null ? null : (projectData?.project.id ?? projectId);
+  const currentProjectId =
+    projectData === null ? null : (projectData?.project.id ?? projectId);
   const projectMembers = useQuery(
     api.projects.members.getProjectMembers,
     currentProjectId ? { projectId: currentProjectId as never } : "skip",
@@ -195,6 +234,44 @@ export function useProjectSettingsController(projectId: string) {
       );
     } finally {
       setIsSavingName(false);
+    }
+  };
+
+  const handleProjectDescriptionSave = async () => {
+    if (!currentProjectId || isSavingDescription || !canRenameProject) {
+      return;
+    }
+
+    const trimmedDescription = descriptionDraft.trim();
+    if (
+      trimmedDescription ===
+      (savedDescriptionSnapshot ?? currentProjectDescription)
+    ) {
+      setDescriptionError(null);
+      setDescriptionDraft(
+        savedDescriptionSnapshot ?? currentProjectDescription,
+      );
+      return;
+    }
+
+    setIsSavingDescription(true);
+    setDescriptionError(null);
+
+    try {
+      const result = await updateProjectDescription({
+        projectId: currentProjectId as never,
+        description: descriptionDraft,
+      });
+      setDescriptionDraft(result.description ?? "");
+      setSavedDescriptionSnapshot(result.description ?? "");
+    } catch (error) {
+      setDescriptionError(
+        error instanceof Error
+          ? error.message
+          : "Could not update project description.",
+      );
+    } finally {
+      setIsSavingDescription(false);
     }
   };
 
@@ -323,10 +400,17 @@ export function useProjectSettingsController(projectId: string) {
     canLeaveProject,
     nameDraft,
     setNameDraft,
+    currentProjectDescription,
+    descriptionDraft,
+    setDescriptionDraft,
     canSaveName: canSaveName && canRenameProject,
+    canSaveDescription: canSaveDescription && canRenameProject,
     renameError,
+    descriptionError,
     isSavingName,
+    isSavingDescription,
     handleProjectRename,
+    handleProjectDescriptionSave,
     deleteError,
     isDeleteConfirming,
     isDeletingProject,

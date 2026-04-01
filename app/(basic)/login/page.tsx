@@ -3,7 +3,6 @@
 import { LoginPageButtons } from "@/app/lib/components/landing/login/LoginPageButtons";
 import { api } from "@/convex/_generated/api";
 import { useConvexAuth, useQuery } from "convex/react";
-import { Check, LoaderCircle, Minus, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -13,28 +12,10 @@ export default function Page() {
   const searchParams = useSearchParams();
   const { isLoading: isAuthLoading } = useConvexAuth();
   const [agree, setAgree] = useState(false);
-  const [emailDraft, setEmailDraft] = useState("");
   const [authDeniedMessage, setAuthDeniedMessage] = useState<string | null>(
     null,
   );
   const currentProfile = useQuery(api.users.queries.currentProfile);
-
-  const trimmedEmail = emailDraft.trim();
-  const hasValidEmailFormat =
-    trimmedEmail.length > 0 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail);
-  const betaAccessResult = useQuery(
-    api.betaAccess.queries.isEmailAllowedForSignup,
-    hasValidEmailFormat ? { email: trimmedEmail } : "skip",
-  );
-  const betaEmailStatus =
-    !trimmedEmail || !hasValidEmailFormat
-      ? "idle"
-      : betaAccessResult === undefined
-        ? "checking"
-        : betaAccessResult
-          ? "allowed"
-          : "denied";
-  const canContinueWithGoogle = agree && betaEmailStatus === "allowed";
   const didReturnFromGoogle = searchParams.get("betaAuthAttempt") === "google";
 
   useEffect(() => {
@@ -53,23 +34,6 @@ export default function Page() {
     router.replace("/login");
   }, [currentProfile, didReturnFromGoogle, isAuthLoading, router]);
 
-  const emailIndicator =
-    betaEmailStatus === "allowed" ? (
-      <Check size={18} />
-    ) : betaEmailStatus === "denied" ? (
-      <X size={18} />
-    ) : betaEmailStatus === "checking" ? (
-      <LoaderCircle size={18} className="animate-spin" />
-    ) : (
-      <Minus size={18} />
-    );
-  const emailIndicatorClassName =
-    betaEmailStatus === "allowed"
-      ? "border-(--accepted-border) bg-(--accepted-bg)/10"
-      : betaEmailStatus === "denied"
-        ? "border-(--declined-border) bg-(--declined-border)/10"
-        : "border-(--gray) bg-(--gray)/10";
-
   return (
     <div className="w-full mx-auto flex flex-col gap-2 md:max-w-2xl px-4 pt-20 pb-12 sm:px-6 lg:px-8">
       <div className="w-full border-b border-(--gray) pb-2 flex flex-col gap-2">
@@ -86,26 +50,6 @@ export default function Page() {
             {authDeniedMessage}
           </p>
         ) : null}
-        <p className="text-(--gray-page)">
-          Check if your email is in the beta list
-        </p>
-        <div className="w-full flex items-center justify-between gap-2">
-          <input
-            type="email"
-            value={emailDraft}
-            placeholder="Enter your email..."
-            className="rounded-md bg-(--dim) px-2 py-1.5 outline-none w-full"
-            onChange={(event) => {
-              setAuthDeniedMessage(null);
-              setEmailDraft(event.target.value);
-            }}
-          />
-          <span
-            className={`h-8.5 aspect-square flex items-center justify-center rounded-md border ${emailIndicatorClassName}`}
-          >
-            {emailIndicator}
-          </span>
-        </div>
         <button
           type="button"
           className={`flex w-full items-start gap-2 border px-2 py-1.5 text-left @[40rem]:w-1/2 ${
@@ -152,7 +96,7 @@ export default function Page() {
         </button>
         <LoginPageButtons
           type={"google"}
-          disabled={!canContinueWithGoogle}
+          disabled={!agree}
           redirectTo="/login?betaAuthAttempt=google"
         />
         {/* <LoginPageButtons type={"apple"} /> */}
