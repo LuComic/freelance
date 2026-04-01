@@ -131,11 +131,18 @@ export const MobileSidebar = ({
             Feedback and ideas
           </Link>
 
-          {resolvedActiveTab === "files" ? <Files /> : null}
-          {!isAnonymous && resolvedActiveTab === "friends" ? (
-            <Connections connections={connections} />
+          {resolvedActiveTab === "files" ? (
+            <Files setSidebarOpen={setSidebarOpen} />
           ) : null}
-          {resolvedActiveTab === "settings" ? <SidebarSettings /> : null}
+          {!isAnonymous && resolvedActiveTab === "friends" ? (
+            <Connections
+              connections={connections}
+              setSidebarOpen={setSidebarOpen}
+            />
+          ) : null}
+          {resolvedActiveTab === "settings" ? (
+            <SidebarSettings setSidebarOpen={setSidebarOpen} />
+          ) : null}
           <div className="mt-auto w-full h-max flex items-center">
             <SidebarUserInfo profile={userProfile} />
             <Authenticated>

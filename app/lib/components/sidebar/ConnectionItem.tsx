@@ -19,7 +19,12 @@ import {
   MenubarSeparator,
   MenubarTrigger,
 } from "@/components/ui/menubar";
-import { useState, type ReactNode } from "react";
+import {
+  useState,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+} from "react";
 import { useConnectionActions } from "../connections/useConnectionActions";
 import { useProjectInviteActions } from "../connections/useProjectInviteActions";
 import type {
@@ -34,6 +39,7 @@ type UserConnectionItemProps = {
   items: ConnectionPerson[];
   type: "friends" | "collabs" | "sent" | "got" | "blocked";
   requestedOpenToken?: number;
+  setSidebarOpen?: Dispatch<SetStateAction<boolean>>;
 };
 
 type InviteConnectionItemProps = {
@@ -41,6 +47,7 @@ type InviteConnectionItemProps = {
   items: SidebarProjectInvite[];
   type: "invites";
   requestedOpenToken?: number;
+  setSidebarOpen?: Dispatch<SetStateAction<boolean>>;
 };
 
 type ConnectionItemProps = UserConnectionItemProps | InviteConnectionItemProps;
@@ -122,6 +129,7 @@ export const ConnectionItem = ({
   items,
   type,
   requestedOpenToken = 0,
+  setSidebarOpen,
 }: ConnectionItemProps) => {
   const [itemExpanded, setItemExpanded] = useState(false);
   const [handledOpenToken, setHandledOpenToken] = useState(0);
@@ -138,6 +146,7 @@ export const ConnectionItem = ({
     clearError: clearInviteError,
   } = useProjectInviteActions();
   const { openPersonModal } = useSearchBar();
+  const closeSidebar = () => setSidebarOpen?.(false);
   const hasExternalOpenRequest =
     items.length > 0 && requestedOpenToken > handledOpenToken;
   const isExpanded =
@@ -242,10 +251,12 @@ export const ConnectionItem = ({
                       "default",
                       false,
                       pendingForUser,
-                      () =>
+                      () => {
                         openPersonModal(item, {
                           expandInviteSection: true,
-                        }),
+                        });
+                        closeSidebar();
+                      },
                     )}
                     <MenubarSeparator className="bg-(--gray)" />
                     {renderActionItem(
@@ -321,10 +332,12 @@ export const ConnectionItem = ({
                       "default",
                       false,
                       pendingForUser,
-                      () =>
+                      () => {
                         openPersonModal(item, {
                           expandInviteSection: true,
-                        }),
+                        });
+                        closeSidebar();
+                      },
                     )}
                     {renderActionItem(
                       "Forget",

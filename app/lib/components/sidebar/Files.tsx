@@ -3,7 +3,7 @@
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import { FileItem } from "./FileItem";
 
 type ExpansionState = {
@@ -11,7 +11,11 @@ type ExpansionState = {
   expandedProjectIds: string[];
 };
 
-export const Files = () => {
+type FilesProps = {
+  setSidebarOpen?: Dispatch<SetStateAction<boolean>>;
+};
+
+export const Files = ({ setSidebarOpen }: FilesProps) => {
   const projects = useQuery(api.projects.queries.listCurrentUserProjects);
   const pathname = usePathname();
   const segments = pathname.split("/").filter(Boolean);
@@ -82,6 +86,7 @@ export const Files = () => {
             currentPageId={currentPageId}
             isExpanded={expandedProjectIds.includes(project.id)}
             onToggleExpanded={() => toggleProjectExpanded(project.id)}
+            setSidebarOpen={setSidebarOpen}
           />
         ))
       ) : (

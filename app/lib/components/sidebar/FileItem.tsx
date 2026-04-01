@@ -10,7 +10,7 @@ import {
 import { api } from "@/convex/_generated/api";
 import { currentEntitlementsQuery } from "@/lib/convexFunctionReferences";
 import { useMutation, useQuery } from "convex/react";
-import { useState } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -41,6 +41,7 @@ interface SidebarItemProps {
   currentPageId?: string | null;
   isExpanded: boolean;
   onToggleExpanded: () => void;
+  setSidebarOpen?: Dispatch<SetStateAction<boolean>>;
 }
 
 export const FileItem = ({
@@ -48,6 +49,7 @@ export const FileItem = ({
   currentPageId,
   isExpanded,
   onToggleExpanded,
+  setSidebarOpen,
 }: SidebarItemProps) => {
   const router = useRouter();
   const createPage = useMutation(api.pages.mutations.createPage);
@@ -57,6 +59,7 @@ export const FileItem = ({
   const isCreatePageDisabled =
     isCreatingPage || project.viewerRole === "client";
   const canAccessAnalytics = entitlements?.canAccessAnalytics === true;
+  const closeSidebar = () => setSidebarOpen?.(false);
 
   return (
     <>
@@ -64,7 +67,7 @@ export const FileItem = ({
         <button onClick={onToggleExpanded}>
           <ChevronRight className={`${isExpanded ? "rotate-90" : ""}`} />
         </button>
-        <Link href={projectBasePath} className="w-full">
+        <Link href={projectBasePath} className="w-full" onClick={closeSidebar}>
           {project.name.length > 20
             ? project.name.slice(0, 20) + "..."
             : project.name}
@@ -83,6 +86,7 @@ export const FileItem = ({
                   <Link
                     href={getProjectSettingsPath(project.id)}
                     className="flex items-center justify-start gap-2"
+                    onClick={closeSidebar}
                   >
                     <Cog />
                     Settings
@@ -96,6 +100,7 @@ export const FileItem = ({
                     <Link
                       href={getProjectAnalyticsPath(project.id)}
                       className="flex items-center justify-start gap-2"
+                      onClick={closeSidebar}
                     >
                       <ChartNoAxesCombined />
                       Analytics
@@ -128,6 +133,7 @@ export const FileItem = ({
               const result = await createPage({
                 projectId: project.id as never,
               });
+              closeSidebar();
               router.push(getProjectPagePath(project.id, result.pageId));
             } finally {
               setIsCreatingPage(false);
@@ -149,6 +155,7 @@ export const FileItem = ({
                   : "hover:bg-(--darkest-hover)"
               }`}
               href={getProjectPagePath(project.id, page.id)}
+              onClick={closeSidebar}
             >
               <File size={18} />
               {page.title.length > 20

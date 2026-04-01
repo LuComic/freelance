@@ -1,3 +1,4 @@
+import type { Dispatch, SetStateAction } from "react";
 import { ConnectionItem } from "./ConnectionItem";
 import { useSearchBar } from "../searchbar/SearchBarContext";
 import type { SidebarConnectionsData } from "../connections/types";
@@ -5,9 +6,13 @@ import { useSidebarController } from "./SidebarControllerContext";
 
 type ConnectionsProps = {
   connections: SidebarConnectionsData | undefined;
+  setSidebarOpen?: Dispatch<SetStateAction<boolean>>;
 };
 
-export const Connections = ({ connections }: ConnectionsProps) => {
+export const Connections = ({
+  connections,
+  setSidebarOpen,
+}: ConnectionsProps) => {
   const { openTaggedSearch } = useSearchBar();
   const { requestedConnectionsSection, requestVersion } =
     useSidebarController();
@@ -35,11 +40,13 @@ export const Connections = ({ connections }: ConnectionsProps) => {
         requestedOpenToken={
           requestedConnectionsSection === "friends" ? requestVersion : 0
         }
+        setSidebarOpen={setSidebarOpen}
       />
       <ConnectionItem
         title="Collaborations"
         items={connections?.collaborators ?? []}
         type="collabs"
+        setSidebarOpen={setSidebarOpen}
       />
       <ConnectionItem
         title="Invites"
@@ -48,11 +55,13 @@ export const Connections = ({ connections }: ConnectionsProps) => {
         requestedOpenToken={
           requestedConnectionsSection === "invites" ? requestVersion : 0
         }
+        setSidebarOpen={setSidebarOpen}
       />
       <ConnectionItem
         title="Sent requests"
         items={connections?.sentRequests ?? []}
         type="sent"
+        setSidebarOpen={setSidebarOpen}
       />
       <ConnectionItem
         title="Received requests"
@@ -61,11 +70,13 @@ export const Connections = ({ connections }: ConnectionsProps) => {
         requestedOpenToken={
           requestedConnectionsSection === "got" ? requestVersion : 0
         }
+        setSidebarOpen={setSidebarOpen}
       />
       <ConnectionItem
         title="Blocked"
         items={connections?.blocked ?? []}
         type="blocked"
+        setSidebarOpen={setSidebarOpen}
       />
     </div>
   );

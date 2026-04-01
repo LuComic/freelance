@@ -1,16 +1,23 @@
 "use client";
 
 import { ChevronRight, Settings } from "lucide-react";
-import { useState } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import Link from "next/link";
 
 interface SidebarItemProps {
   title: string;
   items: string[];
+  setSidebarOpen?: Dispatch<SetStateAction<boolean>>;
 }
 
-export const SettingsItem = ({ title, items }: SidebarItemProps) => {
+export const SettingsItem = ({
+  title,
+  items,
+  setSidebarOpen,
+}: SidebarItemProps) => {
   const [itemExpanded, setItemExpanded] = useState(false);
+  const closeSidebar = () => setSidebarOpen?.(false);
+
   return (
     <>
       <button
@@ -26,6 +33,7 @@ export const SettingsItem = ({ title, items }: SidebarItemProps) => {
               className="pl-8 flex w-full items-center  justify-start gap-2 hover:bg-(--darkest-hover) rounded-lg p-1 text-base"
               key={index}
               href={"/settings?section=" + title.toLowerCase()}
+              onClick={closeSidebar}
             >
               <Settings size={20} />
               {item}
