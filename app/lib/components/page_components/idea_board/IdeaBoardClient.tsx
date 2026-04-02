@@ -248,8 +248,6 @@ export const IdeaBoardClient = ({
           )}
         </div>
       </div>
-
-      <div className="h-px w-full border-dashed border border-(--gray)"></div>
     </>
   );
 };
