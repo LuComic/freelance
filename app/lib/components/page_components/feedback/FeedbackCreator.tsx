@@ -45,7 +45,7 @@ export const FeedbackCreator = ({
   const [tagInput, setTagInput] = useState("");
   const [editing, setEditing] = useState(false);
   const [filter, setFilter] = useState<
-    "" | "accepted" | "declined" | "pending" | "dismissed"
+    "" | "accepted" | "declined" | "dismissed"
   >("");
 
   const handleNewTag = () => {
@@ -105,7 +105,7 @@ export const FeedbackCreator = ({
   ).length;
 
   const changeFilter = (
-    newFilter: "accepted" | "declined" | "pending" | "dismissed",
+    newFilter: "accepted" | "declined" | "dismissed",
   ) => {
     if (filter === newFilter) {
       setFilter("");

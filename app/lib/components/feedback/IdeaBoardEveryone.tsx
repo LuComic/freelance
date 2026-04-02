@@ -200,7 +200,7 @@ export const IdeaBoradEveryone = () => {
 
             <button
               type="button"
-              className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover) disabled:cursor-not-allowed"
+              className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
               onClick={() => void handleNewIdea()}
               disabled={submitPending || addingInput.trim() === ""}
             >

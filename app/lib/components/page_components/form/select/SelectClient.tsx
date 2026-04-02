@@ -33,28 +33,34 @@ export const SelectClient = ({
 
   return (
     <>
-      <p className="@[40rem]:text-xl text-lg font-medium">{config.title}</p>
-      <p className="text-(--gray-page)">{config.description}</p>
-      <div className="w-full flex flex-col gap-2">
-        {config.options.map((option) => {
-          const selected = liveState.selectedOptionIds.includes(option.id);
+      {config.options.length > 0 || config.title || config.description ? (
+        <>
+          <p className="@[40rem]:text-xl text-lg font-medium">{config.title}</p>
+          <p className="text-(--gray-page)">{config.description}</p>
+          <div className="w-full flex flex-col gap-2">
+            {config.options.map((option) => {
+              const selected = liveState.selectedOptionIds.includes(option.id);
 
-          return (
-            <button
-              key={option.id}
-              className={`flex items-center gap-2 justify-start w-max @[40rem]:w-1/2  border px-2 py-1.5 ${selected ? "border-(--vibrant) bg-(--vibrant)/10" : "border-(--gray) bg-(--gray)/10"} rounded-sm`}
-              onClick={() => toggleOption(option.id)}
-            >
-              <span className="h-5 flex items-center p-1 justify-center w-auto aspect-square rounded-sm bg-(--darkest)">
-                {selected && (
-                  <span className="bg-(--vibrant) aspect-square h-full rounded-xs" />
-                )}
-              </span>
-              {option.label}
-            </button>
-          );
-        })}
-      </div>
+              return (
+                <button
+                  key={option.id}
+                  className={`flex items-center gap-2 justify-start w-max @[40rem]:w-1/2  border px-2 py-1.5 ${selected ? "border-(--vibrant) bg-(--vibrant)/10" : "border-(--gray) bg-(--gray)/10"} rounded-sm`}
+                  onClick={() => toggleOption(option.id)}
+                >
+                  <span className="h-5 flex items-center p-1 justify-center w-auto aspect-square rounded-sm bg-(--darkest)">
+                    {selected && (
+                      <span className="bg-(--vibrant) aspect-square h-full rounded-xs" />
+                    )}
+                  </span>
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        </>
+      ) : (
+        <p className="text-(--gray-page)">Select component (no value)</p>
+      )}
     </>
   );
 };

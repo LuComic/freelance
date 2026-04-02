@@ -86,6 +86,7 @@ export const SearchBar = () => {
   });
   const tagGhostCompletion =
     activeTag === null ? getTagGhostCompletion(searchQuery) : null;
+  const [commandSuggestions, setCommandSuggestions] = useState(false);
 
   useEffect(() => {
     if (activeTag !== null) {
@@ -234,6 +235,10 @@ export const SearchBar = () => {
         setSelectedIndex(0);
       }
 
+      if (e.metaKey || e.ctrlKey) {
+        setCommandSuggestions(true);
+      }
+
       if (!isOpen) return;
 
       if (e.key === "Escape") {
@@ -260,8 +265,24 @@ export const SearchBar = () => {
       }
     };
 
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (!e.metaKey && !e.ctrlKey) {
+        setCommandSuggestions(false);
+      }
+    };
+
+    const handleWindowBlur = () => {
+      setCommandSuggestions(false);
+    };
+
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+    window.addEventListener("blur", handleWindowBlur);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener("blur", handleWindowBlur);
+    };
   }, [closeSearch, isOpen, openSearch, searchItems, selectedSearchItemIndex]);
 
   useEffect(() => {
@@ -286,6 +307,19 @@ export const SearchBar = () => {
 
   return (
     <>
+      {commandSuggestions && (
+        <div className="rounded-lg bg-(--darkest) text-(--gray-page) border border-(--gray) fixed z-10 bottom-5 right-5 flex-col hidden md:flex items-start justify-start px-2 py-1 w-max opacity-50 text-sm">
+          <span>
+            cmd/ctrl + k for <strong>Searchbar</strong>
+          </span>
+          <span>
+            cmd/ctrl + b for <strong>Left Sidebar</strong>
+          </span>
+          <span>
+            cmd/ctrl + shift + L for <strong>Right Sidebar</strong>
+          </span>
+        </div>
+      )}
       {personModalPerson ? (
         <PersonModal
           key={personModalKey}
