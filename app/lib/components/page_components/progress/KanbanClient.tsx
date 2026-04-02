@@ -14,10 +14,10 @@ export const KanbanClient = ({ liveState }: KanbanClientProps) => {
     <>
       <p className="@[40rem]:text-xl text-lg font-medium">Current Progress</p>
       <p className="text-(--gray-page)">
-        Here you can display the progress of your work as a kanban list. The
-        table is divided into &quot;Todo&quot; (features/things to do or fix),
-        &quot;In progress&quot; (things that are currently being developed or
-        fixed) and &quot;Done&quot; (list of the completed tasks).
+        Here is the progress displayed as a kanban list. The table is divided
+        into &quot;Todo&quot; (features/things to do or fix), &quot;In
+        progress&quot; (things that are currently being developed or fixed) and
+        &quot;Done&quot; (list of the completed tasks).
       </p>
       <KanbanBoard items={visibleData} />
     </>
