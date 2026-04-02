@@ -1,13 +1,23 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   useEditMode,
   type InsertableComponentCommand,
 } from "@/app/lib/components/project/EditModeContext";
 import { useOptionalPageDocument } from "@/app/lib/components/project/PageDocumentContext";
 import { useSearchBar } from "@/app/lib/components/searchbar/SearchBarContext";
-import { getCaretCoordinates } from "@/app/lib/components/page_components/testing_editor/caret";
+import {
+  getCaretCoordinates,
+  measureWrappedLineHeights,
+} from "@/app/lib/components/page_components/testing_editor/caret";
 import {
   completeSlashCommand,
   consumeSlashActionCommand,
@@ -32,6 +42,7 @@ export default function TestingEditorClient() {
   const { openTaggedSearch } = useSearchBar();
   const pageDocument = useOptionalPageDocument();
   const [activeLine, setActiveLine] = useState(1);
+  const [lineHeights, setLineHeights] = useState<number[]>([24]);
   const [scrollTop, setScrollTop] = useState(0);
   const [ghostCompletion, setGhostCompletion] = useState<{
     suffix: string;
@@ -57,6 +68,25 @@ export default function TestingEditorClient() {
     () => renderContentWithComponents(content),
     [content],
   );
+
+  const recalculateLineHeights = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (!textarea || !isEditing || isLive) {
+      return;
+    }
+
+    const nextLineHeights = measureWrappedLineHeights(textarea);
+    setLineHeights((currentLineHeights) => {
+      if (
+        currentLineHeights.length === nextLineHeights.length &&
+        currentLineHeights.every((height, index) => height === nextLineHeights[index])
+      ) {
+        return currentLineHeights;
+      }
+
+      return nextLineHeights;
+    });
+  }, [isEditing, isLive]);
 
   const updateActiveLine = () => {
     const textarea = textareaRef.current;
@@ -90,6 +120,25 @@ export default function TestingEditorClient() {
     },
     [allowedInsertableCommands, isEditing, isLive],
   );
+
+  useLayoutEffect(() => {
+    recalculateLineHeights();
+  }, [content, recalculateLineHeights]);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea || !isEditing || isLive || typeof ResizeObserver === "undefined") {
+      return;
+    }
+
+    const observer = new ResizeObserver(() => {
+      recalculateLineHeights();
+      updateGhostCompletion(textarea.value, textarea.selectionStart);
+    });
+
+    observer.observe(textarea);
+    return () => observer.disconnect();
+  }, [isEditing, isLive, recalculateLineHeights, updateGhostCompletion]);
 
   const setCaretPosition = useCallback(
     (position: number) => {
@@ -175,6 +224,7 @@ export default function TestingEditorClient() {
                     ? "bg-(--gray)/20 text-(--light)"
                     : ""
                 }`}
+                style={{ height: `${lineHeights[lineNumber - 1] ?? 24}px` }}
               >
                 {lineNumber}
               </div>
