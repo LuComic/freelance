@@ -101,9 +101,10 @@ export function AccountSettingsSection({
           ) : null}
           {!isAnonymous ? (
             <>
-              <p className="text-(--gray-page)">Username</p>
-              <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
-                {isProfileLoading ? "Loading..." : currentName || "Not set"}
+              <div className="w-full font-medium wrap-break-word">
+                {isProfileLoading
+                  ? "Loading..."
+                  : currentName || "Name not set"}
               </div>
 
               <p className="text-(--gray-page)">Change username</p>
@@ -129,9 +130,8 @@ export function AccountSettingsSection({
                 {isSavingName ? "Saving..." : "Save"}
               </button>
 
-              <p className="text-(--gray-page)">Bio/Description</p>
-              <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
-                {isProfileLoading ? "Loading..." : currentBio || "Not set"}
+              <div className="w-full font-medium wrap-break-word">
+                {isProfileLoading ? "Loading..." : currentBio || "Bio not set"}
               </div>
 
               <p className="text-(--gray-page)">Change bio</p>
@@ -157,9 +157,10 @@ export function AccountSettingsSection({
                 {isSavingBio ? "Saving..." : "Save"}
               </button>
 
-              <p className="text-(--gray-page)">Email</p>
-              <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
-                {isProfileLoading ? "Loading..." : currentEmail || "Not set"}
+              <div className="w-full font-medium wrap-break-word">
+                {isProfileLoading
+                  ? "Loading..."
+                  : currentEmail || "Email not set"}
               </div>
               <p className="text-(--gray-page)">Delete account</p>
               <button

@@ -58,8 +58,7 @@ export function ProjectGeneralSection({
 
       {open ? (
         <div className="pl-7 flex flex-col gap-2 pb-2">
-          <p className="text-(--gray-page)">Project name</p>
-          <div className="w-max rounded-md border px-2 py-1 border-(--gray)">
+          <div className="w-max font-medium">
             {isLoading ? "Loading..." : currentProjectName || "Not set"}
           </div>
 
@@ -88,8 +87,7 @@ export function ProjectGeneralSection({
           {renameError ? (
             <p className="text-sm text-(--declined-border)">{renameError}</p>
           ) : null}
-          <p className="text-(--gray-page)">Project description</p>
-          <div className="w-max rounded-md border px-2 py-1 border-(--gray)">
+          <div className="w-max font-medium">
             {isLoading ? "Loading..." : currentProjectDescription || "Not set"}
           </div>
 
