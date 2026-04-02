@@ -130,9 +130,11 @@ export const RadioCreator = ({
               {config.options.map((option) => (
                 <div
                   key={option.id}
-                  className="pl-1.5 pr-0.5 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) flex items-center gap-1"
+                  className="max-w-full min-w-0 pl-1.5 pr-0.5 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) flex items-center gap-1 wrap-break-word"
                 >
-                  {option.label}
+                  <span className="min-w-0 wrap-break-word">
+                    {option.label}
+                  </span>
                   <button
                     type="button"
                     className=" hover:bg-(--gray)/20 p-1 rounded-sm"
@@ -155,14 +157,16 @@ export const RadioCreator = ({
       </div>
 
       {config.title || config.description || config.options.length > 0 ? (
-        <div className="w-full flex flex-col gap-2">
-          <p className="font-medium">{config.title}</p>
-          <p className="text-(--gray-page)">{config.description}</p>
-          <div className="w-full flex items-center justify-start gap-2">
+        <div className="w-full max-w-full min-w-0 flex flex-col gap-2">
+          <p className="min-w-0 wrap-break-word font-medium">{config.title}</p>
+          <p className="min-w-0 wrap-break-word text-(--gray-page)">
+            {config.description}
+          </p>
+          <div className="w-full min-w-0 flex flex-wrap items-center justify-start gap-2">
             {config.options.map((option) => (
               <div
                 key={option.id}
-                className="rounded-md border border-(--gray-page) text-(--gray-page) w-max px-1.5 py-0.5"
+                className="max-w-full min-w-0 rounded-md border border-(--gray-page) px-1.5 py-0.5 text-(--gray-page) wrap-break-word"
               >
                 {option.label}
               </div>
