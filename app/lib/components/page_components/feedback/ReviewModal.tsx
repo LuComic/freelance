@@ -76,11 +76,11 @@ export const ReviewModal = ({
           }}
         >
           <div
-            className="w-full max-h-1/2 h-auto flex flex-col items-start justify-start gap-2 p-3 @[40rem]:max-w-xl bg-(--darkest) rounded-xl overflow-y-auto border border-(--gray)"
+            className="w-full max-h-1/2 h-auto flex flex-col items-start justify-start gap-2 p-3 md:max-w-xl bg-(--darkest) rounded-xl overflow-y-auto border border-(--gray)"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-start gap-4">
-              <p className="@[40rem]:text-3xl text-xl font-medium capitalize">
+              <p className="md:text-3xl text-xl font-medium capitalize">
                 {action} Client&apos;s idea
               </p>
               {feature.tags.length > 0 && (
@@ -90,7 +90,7 @@ export const ReviewModal = ({
               )}
             </div>
             <p className="text-(--gray-page)">{feature.feature}</p>
-            <p className="@[40rem]:text-xl text-lg font-medium">
+            <p className="md:text-xl text-lg font-medium">
               Description for {action === "accept" ? "accepting" : "declining"}
             </p>
             <textarea
