@@ -182,12 +182,12 @@ export const KanbanCreator = ({
                 </SelectGroup>
               </SelectContent>
             </Select>
-            <div className="flex items-center justify-start gap-2 w-full">
+            <div className="flex items-center justify-start gap-2 w-full flex-wrap">
               {config.tags.length > 0 ? (
                 config.tags.map((tag) => (
                   <button
                     key={tag}
-                    className={`px-1.5 py-0.5 rounded-md border ${!selectedTags.includes(tag) && "border-(--gray-page) text-(--gray-page)"} `}
+                    className={`max-w-full min-w-0 px-1.5 py-0.5 rounded-md border wrap-break-word ${!selectedTags.includes(tag) && "border-(--gray-page) text-(--gray-page)"} `}
                     onClick={() => {
                       if (selectedTags.includes(tag)) {
                         setSelectedTags((prev) =>
@@ -238,13 +238,13 @@ export const KanbanCreator = ({
                 }
               }}
             />
-            <div className="flex items-center justify-start gap-2 w-full">
+            <div className="flex items-center justify-start gap-2 w-full flex-wrap">
               {config.tags.map((tag) => (
                 <div
                   key={tag}
-                  className="pl-1.5 pr-0.5 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) flex items-center gap-1"
+                  className="max-w-full min-w-0 pl-1.5 pr-0.5 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) flex items-center gap-1 wrap-break-word"
                 >
-                  {tag}
+                  <span className="min-w-0 wrap-break-word">{tag}</span>
                   <button
                     type="button"
                     className="hover:bg-(--gray)/20 p-1 rounded-sm"
@@ -279,7 +279,7 @@ export const KanbanCreator = ({
               todoItems.map((item) => (
                 <div
                   key={item.id}
-                  className="w-full flex items-center justify-start gap-2"
+                  className="w-full min-w-0 flex items-center justify-start gap-2 flex-wrap"
                 >
                   <Select
                     value={item.status}
@@ -310,7 +310,9 @@ export const KanbanCreator = ({
                   >
                     <Trash size={16} />
                   </button>
-                  <span>{item.feature}</span>
+                  <span className="min-w-0 wrap-break-word">
+                    {item.feature}
+                  </span>
                 </div>
               ))
             ) : (
@@ -337,7 +339,7 @@ export const KanbanCreator = ({
               progressItems.map((item) => (
                 <div
                   key={item.id}
-                  className="w-full flex items-center justify-start gap-2"
+                  className="w-full min-w-0 flex items-center justify-start gap-2 flex-wrap"
                 >
                   <Select
                     value={item.status}
@@ -368,7 +370,9 @@ export const KanbanCreator = ({
                   >
                     <Trash size={16} />
                   </button>
-                  <span>{item.feature}</span>
+                  <span className="min-w-0 wrap-break-word">
+                    {item.feature}
+                  </span>
                 </div>
               ))
             ) : (
@@ -392,7 +396,7 @@ export const KanbanCreator = ({
               doneItems.map((item) => (
                 <div
                   key={item.id}
-                  className="w-full flex items-center justify-start gap-2"
+                  className="w-full min-w-0 flex items-center justify-start gap-2 flex-wrap"
                 >
                   <Select
                     value={item.status}
@@ -423,7 +427,9 @@ export const KanbanCreator = ({
                   >
                     <Trash size={16} />
                   </button>
-                  <span>{item.feature}</span>
+                  <span className="min-w-0 wrap-break-word">
+                    {item.feature}
+                  </span>
                 </div>
               ))
             ) : (
