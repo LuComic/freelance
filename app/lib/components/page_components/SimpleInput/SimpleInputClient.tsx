@@ -39,10 +39,10 @@ export const SimpleInputClient = ({
         Submit a short written response for the creator to review.
       </p>
 
-      <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
+      <div className="border-(--gray) border-t pt-2 w-full flex flex-col gap-2">
         <input
           type="text"
-          placeholder="I'd like this feature added..."
+          placeholder="This is what i think..."
           className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
           value={inputValue}
           onChange={(event) => setInputValue(event.target.value)}
