@@ -305,7 +305,7 @@ export const KanbanCreator = ({
                     </SelectContent>
                   </Select>
                   <button
-                    className="h-6.5 flex items-center justify-center aspect-square rounded-md hover:bg-(--darkest)/10 bg-(--dim) border-(--gray-page) border"
+                    className="h-6.5 flex items-center justify-center aspect-square rounded-md hover:bg-(--darkest-hover) bg-(--dim) border-(--gray-page) border"
                     onClick={() => handleDeleteTask(item.id)}
                   >
                     <Trash size={16} />

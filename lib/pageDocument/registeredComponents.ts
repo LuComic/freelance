@@ -1,7 +1,9 @@
 import { IdeaBoardDefinition } from "./registered/IdeaBoard.definition";
+import { SimpleInputDefinition } from "./registered/SimpleInput.definition";
 
 export const REGISTERED_PAGE_COMPONENT_DEFINITIONS = [
   IdeaBoardDefinition,
+  SimpleInputDefinition,
 ] as const;
 
 function collectDefinitionTypes<

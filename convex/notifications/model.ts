@@ -12,6 +12,7 @@ export const NOTIFICATION_COMPONENT_TYPES = [
   "Radio",
   "Feedback",
   "Kanban",
+  "SimpleInput",
 ] as const;
 
 export type NotificationComponentType =
@@ -177,6 +178,8 @@ function getComponentLabel(component: PageComponentDocument) {
       return "Feedback";
     case "Kanban":
       return "Kanban";
+    case "SimpleInput":
+      return "Simple Input";
     default:
       return component.type;
   }

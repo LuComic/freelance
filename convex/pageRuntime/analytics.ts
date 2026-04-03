@@ -18,7 +18,12 @@ import {
   type PageDocumentV1,
 } from "../../lib/pageDocument";
 
-type AnalyticsComponentType = "Select" | "Radio" | "Feedback" | "Kanban";
+type AnalyticsComponentType =
+  | "Select"
+  | "Radio"
+  | "Feedback"
+  | "Kanban"
+  | "SimpleInput";
 
 type AnalyticsActivityChange = {
   componentInstanceId: string;
@@ -68,6 +73,10 @@ type SelectDocument = Extract<PageComponentDocument, { type: "Select" }>;
 type RadioDocument = Extract<PageComponentDocument, { type: "Radio" }>;
 type FeedbackDocument = Extract<PageComponentDocument, { type: "Feedback" }>;
 type KanbanDocument = Extract<PageComponentDocument, { type: "Kanban" }>;
+type SimpleInputDocument = Extract<
+  PageComponentDocument,
+  { type: "SimpleInput" }
+>;
 
 function isAnalyticsComponentType(
   type: PageComponentDocument["type"],
@@ -76,7 +85,8 @@ function isAnalyticsComponentType(
     type === "Select" ||
     type === "Radio" ||
     type === "Feedback" ||
-    type === "Kanban"
+    type === "Kanban" ||
+    type === "SimpleInput"
   );
 }
 
@@ -136,6 +146,8 @@ function getComponentLabel(component: PageComponentDocument) {
       return "Feedback";
     case "Kanban":
       return "Kanban";
+    case "SimpleInput":
+      return "Simple Input";
     default:
       return component.type;
   }
@@ -265,6 +277,13 @@ function toAnalyticsInputComponent(
           status: item.status,
           ...(item.dismissed === true ? { dismissed: true } : {}),
         })),
+      };
+    case "SimpleInput":
+      return {
+        kind: "values",
+        title: "Simple Input",
+        values: component.state.inputs.map((input) => input.value),
+        emptyLabel: "No inputs yet.",
       };
     default:
       return null;
@@ -399,6 +418,26 @@ export function getAnalyticsActivityChanges(
               newValue: formatKanbanValue(item),
             });
           }
+        }
+        break;
+      }
+      case "SimpleInput": {
+        const nextSimpleInputComponent = nextComponent as SimpleInputDocument;
+        const currentInputIds = new Set(
+          currentComponent.state.inputs.map((input) => input.id),
+        );
+
+        for (const input of nextSimpleInputComponent.state.inputs) {
+          if (currentInputIds.has(input.id)) {
+            continue;
+          }
+
+          changes.push({
+            componentInstanceId: instanceId,
+            componentType: currentComponent.type,
+            componentLabelSnapshot,
+            newValue: "added an input",
+          });
         }
         break;
       }
