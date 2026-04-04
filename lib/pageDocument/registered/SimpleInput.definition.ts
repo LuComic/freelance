@@ -53,7 +53,7 @@ export const SimpleInputDefinition = defineRegisteredPageComponentDefinition({
     name: "Simple Input",
     description:
       "A simple input field for client-written responses. Commands: /input, /simpleinput",
-    previewSrc: "/component-previews/idea-board.svg",
+    previewSrc: "/component-previews/simple-input.svg",
     tag: "input",
     limited: true,
   },

@@ -41,7 +41,9 @@ export const RadioClient = ({
                     }))
                   }
                 >
-                  <span className="h-5 flex items-center p-1 justify-center w-auto aspect-square rounded-full bg-(--darkest)">
+                  <span
+                    className={`h-5 flex items-center p-1 justify-center w-auto aspect-square rounded-full bg-(--darkest) ${selected ? "border-(--vibrant) bg-(--vibrant)/10" : "border-(--gray) bg-(--gray)/10"} border`}
+                  >
                     {selected && (
                       <span className="bg-(--vibrant) aspect-square h-full rounded-full" />
                     )}

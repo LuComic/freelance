@@ -118,26 +118,6 @@ export const SelectCreator = ({
               }}
             />
 
-            <div className="flex items-center justify-start gap-2 w-full flex-wrap">
-              {config.options.map((option) => (
-                <div
-                  key={option.id}
-                  className="max-w-full min-w-0 pl-1.5 pr-0.5 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) flex items-center gap-1 wrap-break-word"
-                >
-                  <span className="min-w-0 wrap-break-word">
-                    {option.label}
-                  </span>
-                  <button
-                    type="button"
-                    className=" hover:bg-(--gray)/20 p-1 rounded-sm"
-                    onClick={() => deleteOption(option.id)}
-                  >
-                    <Trash size={16} />
-                  </button>
-                </div>
-              ))}
-            </div>
-
             <button
               className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
               onClick={handleNewOption}
@@ -158,9 +138,16 @@ export const SelectCreator = ({
             {config.options.map((option) => (
               <div
                 key={option.id}
-                className="max-w-full min-w-0 rounded-md border border-(--gray-page) px-1.5 py-0.5 text-(--gray-page) wrap-break-word"
+                className="max-w-full min-w-0 pl-1.5 pr-0.5 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) flex items-center gap-1 wrap-break-word"
               >
-                {option.label}
+                <span className="min-w-0 wrap-break-word">{option.label}</span>
+                <button
+                  type="button"
+                  className=" hover:bg-(--gray)/20 p-1 rounded-sm"
+                  onClick={() => deleteOption(option.id)}
+                >
+                  <Trash size={16} />
+                </button>
               </div>
             ))}
           </div>
