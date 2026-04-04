@@ -3,7 +3,10 @@
 import Link from "next/link";
 import type { PageComponentInstanceByType } from "@/lib/pageDocument";
 import { getProjectPagePath } from "@/app/lib/components/project/paths";
-import type { ProjectPageOption } from "./PageLink";
+import {
+  getPageLinkFallbackText,
+  type ProjectPageOption,
+} from "./PageLink.shared";
 
 type PageLinkClientProps = {
   config: PageComponentInstanceByType<"PageLink">["config"];
@@ -16,16 +19,13 @@ export const PageLinkClient = ({
   projectId,
   targetPage,
 }: PageLinkClientProps) => {
-  const trimmedText = config.text.trim();
-
-  if (!trimmedText) {
-    return null;
-  }
+  const displayText =
+    config.text.trim() || getPageLinkFallbackText(targetPage?.title);
 
   if (!targetPage) {
     return (
       <span className="mb-1 w-max text-(--gray-page) underline underline-offset-4">
-        {trimmedText}
+        {displayText}
       </span>
     );
   }
@@ -35,7 +35,7 @@ export const PageLinkClient = ({
       href={getProjectPagePath(projectId, targetPage.id)}
       className="w-max text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover) page-link-selected"
     >
-      {trimmedText}
+      {displayText}
     </Link>
   );
 };

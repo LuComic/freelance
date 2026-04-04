@@ -9,10 +9,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { ProjectPageOption } from "./PageLink";
+import {
+  getPageLinkFallbackText,
+  shouldSyncPageLinkText,
+  type ProjectPageOption,
+} from "./PageLink.shared";
 
 type PageLinkCreatorProps = {
   config: PageComponentInstanceByType<"PageLink">["config"];
+  instanceId: string;
   pages: ProjectPageOption[];
   isLoadingPages: boolean;
   onChangeConfig: (
@@ -24,15 +29,14 @@ type PageLinkCreatorProps = {
 
 export const PageLinkCreator = ({
   config,
+  instanceId,
   pages,
   isLoadingPages,
   onChangeConfig,
 }: PageLinkCreatorProps) => {
-  const selectedTargetPageId = pages.some(
-    (page) => page.id === config.targetPageId,
-  )
-    ? (config.targetPageId ?? undefined)
-    : undefined;
+  const selectedTargetPage =
+    pages.find((page) => page.id === config.targetPageId) ?? null;
+  const selectedTargetPageId = selectedTargetPage?.id ?? "";
   const selectPlaceholder = isLoadingPages
     ? "Loading pages..."
     : pages.length === 0
@@ -56,15 +60,40 @@ export const PageLinkCreator = ({
         }
         placeholder="Link text..."
         className="w-full rounded-md bg-(--dim) px-2 py-1.5 outline-none"
+        onBlur={() => {
+          if (config.text.trim()) {
+            return;
+          }
+
+          onChangeConfig((currentConfig) => ({
+            ...currentConfig,
+            text: getPageLinkFallbackText(selectedTargetPage?.title),
+          }));
+        }}
       />
 
       <Select
+        key={`${instanceId}:${selectedTargetPageId || "empty"}`}
         value={selectedTargetPageId}
         onValueChange={(value) =>
-          onChangeConfig((currentConfig) => ({
-            ...currentConfig,
-            targetPageId: value,
-          }))
+          onChangeConfig((currentConfig) => {
+            const currentTargetPage =
+              pages.find((page) => page.id === currentConfig.targetPageId) ??
+              null;
+            const nextTargetPage =
+              pages.find((page) => page.id === value) ?? null;
+
+            return {
+              ...currentConfig,
+              targetPageId: value,
+              text: shouldSyncPageLinkText(
+                currentConfig.text,
+                currentTargetPage?.title,
+              )
+                ? getPageLinkFallbackText(nextTargetPage?.title)
+                : currentConfig.text,
+            };
+          })
         }
         disabled={isLoadingPages || pages.length === 0}
       >

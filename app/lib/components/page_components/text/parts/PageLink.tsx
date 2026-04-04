@@ -10,11 +10,7 @@ import {
 import { useLiveComponentConfigActivator } from "@/app/lib/components/page_components/useLiveComponentConfigActivator";
 import { PageLinkClient } from "./PageLinkClient";
 import { PageLinkCreator } from "./PageLinkCreator";
-
-export type ProjectPageOption = {
-  id: string;
-  title: string;
-};
+import type { ProjectPageOption } from "./PageLink.shared";
 
 export const PageLink = ({ instanceId }: { instanceId: string }) => {
   const { isLive } = useEditMode();
@@ -51,6 +47,7 @@ export const PageLink = ({ instanceId }: { instanceId: string }) => {
       ) : (
         <PageLinkCreator
           config={component.config}
+          instanceId={instanceId}
           pages={selectablePages}
           isLoadingPages={projectData === undefined}
           onChangeConfig={updateConfig}
