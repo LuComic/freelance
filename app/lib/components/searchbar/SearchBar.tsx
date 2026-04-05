@@ -2,6 +2,7 @@
 
 import { api } from "@/convex/_generated/api";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
+import { getCookie, SHOW_SUGGESTIONS_COOKIE } from "@/app/lib/cookies";
 import type {
   PageTemplateBlueprint,
   ProjectTemplateBlueprint,
@@ -236,7 +237,7 @@ export const SearchBar = () => {
       }
 
       if (e.metaKey || e.ctrlKey) {
-        setCommandSuggestions(true);
+        setCommandSuggestions(getCookie(SHOW_SUGGESTIONS_COOKIE) !== "false");
       }
 
       if (!isOpen) return;

@@ -14,6 +14,11 @@ export const SidebarSettings = ({ setSidebarOpen }: SidebarSettingsProps) => {
         items={["Username", "Bio", "Email", "Delete account"]}
         setSidebarOpen={setSidebarOpen}
       />
+      <SettingsItem
+        title="Preferences"
+        items={["Suggestions"]}
+        setSidebarOpen={setSidebarOpen}
+      />
       {/* <SettingsItem title="Plan" items={["Free", "Starter", "Pro Unlimited"]} /> */}
       <SettingsItem
         title="Limits"
