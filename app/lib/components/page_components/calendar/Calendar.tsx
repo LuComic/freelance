@@ -20,7 +20,10 @@ export const Calendar = ({ instanceId }: { instanceId: string }) => {
       onClickCapture={liveConfigActivator.onClickCapture}
     >
       {isLive ? (
-        <CalendarClient liveState={liveState.state} />
+        <CalendarClient
+          liveState={liveState.state}
+          onCommitLiveState={commitLiveState}
+        />
       ) : (
         <CalendarCreator onCommitLiveState={commitLiveState} />
       )}

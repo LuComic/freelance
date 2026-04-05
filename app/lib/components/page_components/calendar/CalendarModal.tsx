@@ -92,11 +92,11 @@ export const CalendarModal = ({
       onClick={() => onOpenChange(false)}
     >
       <div
-        className="w-full max-h-1/2 h-auto flex flex-col items-start justify-start gap-2 p-3 @[40rem]:max-w-xl bg-(--darkest) rounded-xl overflow-y-auto border border-(--gray)"
+        className="w-full max-h-1/2 h-auto flex flex-col items-start justify-start gap-2 p-3 md:max-w-xl bg-(--darkest) rounded-xl overflow-y-auto border border-(--gray)"
         onClick={(clickEvent) => clickEvent.stopPropagation()}
       >
         <div className="flex items-center justify-start gap-4">
-          <p className="@[40rem]:text-3xl text-xl font-medium capitalize">
+          <p className="md:text-3xl text-xl font-medium capitalize">
             {event.title}
           </p>
           <span className="px-2 py-0.5 border text-nowrap rounded-md border-(--gray-page) text-(--gray-page)">
@@ -146,7 +146,7 @@ export const CalendarModal = ({
               setError(null);
             }}
           >
-            <SelectTrigger className="w-full @[40rem]:w-52 bg-(--dim) border-(--gray-page)">
+            <SelectTrigger className="w-full md:w-52 bg-(--dim) border-(--gray-page)">
               <SelectValue placeholder="Set the status" />
             </SelectTrigger>
             <SelectContent className="bg-(--darkest) border-none text-(--gray-page)">
