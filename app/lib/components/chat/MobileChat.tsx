@@ -1,7 +1,13 @@
 "use client";
 
 import { startTransition, useEffect, useRef, useState } from "react";
-import { PanelRightClose, LayoutGrid, LibraryBig } from "lucide-react";
+import {
+  PanelRightClose,
+  LayoutGrid,
+  LibraryBig,
+  Component,
+  Settings2,
+} from "lucide-react";
 import { useEditMode } from "@/app/lib/components/project/EditModeContext";
 import { ComponentLib, type ComponentTag } from "./ComponentLib";
 import { SelectedComponentConfig } from "./SelectedComponentConfig";
@@ -65,7 +71,7 @@ export const MobileChat = () => {
   }, [componentConfigOpenRequestNonce]);
 
   return (
-    <div className="block md:hidden">
+    <div>
       {chatOpen ? (
         <nav className="w-[90%] h-dvh max-h-dvh bg-(--darkest) border-l border-(--gray) flex flex-col items-start justify-start p-2 gap-4 fixed z-30 top-0 right-0 overflow-hidden">
           <div className="flex items-center justify-start gap-2 w-full">
@@ -90,7 +96,7 @@ export const MobileChat = () => {
               onClick={() => setActiveTab("components")}
               type="button"
             >
-              Components
+              <Component size={20} className="mx-auto" />
             </button>
             <button
               className={`p-1 rounded-lg hover:bg-(--quite-dark) w-full text-sm ${
@@ -101,7 +107,7 @@ export const MobileChat = () => {
               onClick={() => setActiveTab("config")}
               type="button"
             >
-              Config
+              <Settings2 size={20} className="mx-auto" />
             </button>
           </div>
 
