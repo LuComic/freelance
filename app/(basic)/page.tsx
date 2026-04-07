@@ -449,7 +449,13 @@ export default function Home() {
 
           <div className="lg:text-right">
             <p className="text-sm text-(--gray-page)">Project repo</p>
-            <p className="mt-2 text-lg font-medium">freelance-app</p>
+            <a
+              className="mt-2 text-lg font-medium"
+              target="_blank"
+              href="https://github.com/LuComic/freelance"
+            >
+              freelance-app
+            </a>
           </div>
         </div>
       </footer>
