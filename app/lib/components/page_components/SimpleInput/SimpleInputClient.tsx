@@ -34,11 +34,6 @@ export const SimpleInputClient = ({
 
   return (
     <>
-      <p className="@[40rem]:text-xl text-lg font-medium">Simple Input</p>
-      <p className="text-(--gray-page)">
-        Submit a short written response for the creator to review.
-      </p>
-
       <div className="border-(--gray) border-t pt-2 w-full flex flex-col gap-2">
         <input
           type="text"

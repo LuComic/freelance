@@ -124,16 +124,18 @@ export const MobileSidebar = ({
             ) : null}
           </div>
 
-          <Link
-            href="/feedback"
-            onClick={() => {
-              acknowledgeConnectionsRequest();
-              setSidebarOpen(false);
-            }}
-            className="px-1.5 py-0.5 rounded-md border border-(--vibrant) bg-(--vibrant)/20 hover:bg-(--vibrant-hover)/20 text-sm"
-          >
-            Feedback and ideas
-          </Link>
+          {userProfile ? (
+            <Link
+              href="/feedback"
+              onClick={() => {
+                acknowledgeConnectionsRequest();
+                setSidebarOpen(false);
+              }}
+              className="px-1.5 py-0.5 rounded-md border border-(--vibrant) bg-(--vibrant)/20 hover:bg-(--vibrant-hover)/20 text-sm"
+            >
+              Feedback and ideas
+            </Link>
+          ) : null}
 
           {resolvedActiveTab === "files" ? (
             <Files setSidebarOpen={setSidebarOpen} />
