@@ -9,7 +9,7 @@ import type {
 } from "@/lib/templateBlueprint";
 import { useConvex } from "convex/react";
 import { Search } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { getProjectPagePath } from "../project/paths";
 import { PersonModal } from "./PersonModal";
@@ -42,6 +42,7 @@ type SearchItem = {
 export const SearchBar = () => {
   const convex = useConvex();
   const router = useRouter();
+  const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [selectedTemplate, setSelectedTemplate] =
@@ -88,6 +89,22 @@ export const SearchBar = () => {
   const tagGhostCompletion =
     activeTag === null ? getTagGhostCompletion(searchQuery) : null;
   const [commandSuggestions, setCommandSuggestions] = useState(false);
+  const pathnameSegments = pathname.split("/").filter(Boolean);
+  const currentProjectId =
+    pathnameSegments[0] === "projects" ? (pathnameSegments[1] ?? null) : null;
+  const prioritizedPageSearchResults =
+    activeTag === null &&
+    normalizedSearchQuery.length === 0 &&
+    currentProjectId !== null
+      ? [
+          ...visiblePageSearchResults.filter(
+            (page) => page.projectId === currentProjectId,
+          ),
+          ...visiblePageSearchResults.filter(
+            (page) => page.projectId !== currentProjectId,
+          ),
+        ]
+      : visiblePageSearchResults;
 
   useEffect(() => {
     if (activeTag !== null) {
@@ -208,7 +225,7 @@ export const SearchBar = () => {
               },
             }),
           )
-        : visiblePageSearchResults.map((page: SearchPageResult) => ({
+        : prioritizedPageSearchResults.map((page: SearchPageResult) => ({
             key: `${page.projectId}:${page.pageId}`,
             title: page.pageTitle,
             subtitle: page.projectName,
