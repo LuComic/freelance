@@ -85,6 +85,8 @@
   --second-place: #a5f3fc;
   --third-place: #9a3412;
 
+  --erle: #818cf8;
+
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -240,5 +242,10 @@
 
   .code-snippet-font {
     font-family: "Fira Code Variable", monospace;
+  }
+
+  .erle {
+    color: var(--erle);
+    text-shadow: 0 0 8px var(--erle);
   }
 }

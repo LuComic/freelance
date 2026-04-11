@@ -20,9 +20,38 @@ import {
 
 const LINE_HEADING_REGEX = /^(#{1,6})\s+(.*)$/;
 const CODE_BLOCK_REGEX = /```([\s\S]*?)```/g;
+const ERLE_WORD_REGEX = /\berle\b/gi;
 
 function normalizeFencedCodeBlock(code: string) {
   return code.replace(/^\r?\n/, "").replace(/\r?\n$/, "");
+}
+
+function renderSpecialText(value: string, keyStart: number) {
+  const nodes: ReactNode[] = [];
+  let key = keyStart;
+  let lastIndex = 0;
+
+  for (const match of value.matchAll(ERLE_WORD_REGEX)) {
+    const index = match.index ?? 0;
+    const matchedText = match[0];
+
+    if (index > lastIndex) {
+      nodes.push(value.slice(lastIndex, index));
+    }
+
+    nodes.push(
+      <span className="erle" key={`erle-${key++}`}>
+        {matchedText}
+      </span>,
+    );
+    lastIndex = index + matchedText.length;
+  }
+
+  if (lastIndex < value.length) {
+    nodes.push(value.slice(lastIndex));
+  }
+
+  return { nodes, nextKey: key };
 }
 
 function renderInlineMarkdown(text: string, keyStart: number) {
@@ -35,7 +64,9 @@ function renderInlineMarkdown(text: string, keyStart: number) {
       return;
     }
 
-    nodes.push(value);
+    const renderedText = renderSpecialText(value, key);
+    nodes.push(...renderedText.nodes);
+    key = renderedText.nextKey;
   };
 
   while (index < text.length) {
@@ -44,7 +75,11 @@ function renderInlineMarkdown(text: string, keyStart: number) {
       const boldText = endIndex === -1 ? "" : text.slice(index + 2, endIndex);
 
       if (boldText && !boldText.includes("\n")) {
-        nodes.push(<strong key={`bold-${key++}`}>{boldText}</strong>);
+        const renderedBoldText = renderSpecialText(boldText, key);
+        key = renderedBoldText.nextKey;
+        nodes.push(
+          <strong key={`bold-${key++}`}>{renderedBoldText.nodes}</strong>,
+        );
         index = endIndex + 2;
         continue;
       }
@@ -55,7 +90,11 @@ function renderInlineMarkdown(text: string, keyStart: number) {
       const italicText = endIndex === -1 ? "" : text.slice(index + 1, endIndex);
 
       if (italicText && !italicText.includes("\n")) {
-        nodes.push(<em key={`italic-${key++}`}>{italicText}</em>);
+        const renderedItalicText = renderSpecialText(italicText, key);
+        key = renderedItalicText.nextKey;
+        nodes.push(
+          <em key={`italic-${key++}`}>{renderedItalicText.nodes}</em>,
+        );
         index = endIndex + 1;
         continue;
       }
