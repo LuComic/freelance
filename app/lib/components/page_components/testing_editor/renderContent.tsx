@@ -19,6 +19,119 @@ import {
 } from "@/lib/pageDocument/componentAccess";
 
 const LINE_HEADING_REGEX = /^(#{1,6})\s+(.*)$/;
+const CODE_BLOCK_REGEX = /```([\s\S]*?)```/g;
+
+function normalizeFencedCodeBlock(code: string) {
+  return code.replace(/^\r?\n/, "").replace(/\r?\n$/, "");
+}
+
+function renderInlineMarkdown(text: string, keyStart: number) {
+  const nodes: ReactNode[] = [];
+  let key = keyStart;
+  let index = 0;
+
+  const pushPlainText = (value: string) => {
+    if (!value) {
+      return;
+    }
+
+    nodes.push(value);
+  };
+
+  while (index < text.length) {
+    if (text.startsWith("**", index)) {
+      const endIndex = text.indexOf("**", index + 2);
+      const boldText = endIndex === -1 ? "" : text.slice(index + 2, endIndex);
+
+      if (boldText && !boldText.includes("\n")) {
+        nodes.push(<strong key={`bold-${key++}`}>{boldText}</strong>);
+        index = endIndex + 2;
+        continue;
+      }
+    }
+
+    if (text[index] === "*") {
+      const endIndex = text.indexOf("*", index + 1);
+      const italicText = endIndex === -1 ? "" : text.slice(index + 1, endIndex);
+
+      if (italicText && !italicText.includes("\n")) {
+        nodes.push(<em key={`italic-${key++}`}>{italicText}</em>);
+        index = endIndex + 1;
+        continue;
+      }
+    }
+
+    const nextBoldIndex = text.indexOf("**", index);
+    const nextItalicIndex = text.indexOf("*", index);
+    const nextMarkerIndex = [nextBoldIndex, nextItalicIndex]
+      .filter((value) => value >= 0)
+      .sort((left, right) => left - right)[0];
+
+    if (nextMarkerIndex === index) {
+      pushPlainText(text[index] ?? "");
+      index += 1;
+      continue;
+    }
+
+    const endIndex =
+      typeof nextMarkerIndex === "number" ? nextMarkerIndex : text.length;
+    pushPlainText(text.slice(index, endIndex));
+    index = endIndex;
+  }
+
+  return { nodes, nextKey: key };
+}
+
+function renderMarkdownText(text: string, keyStart: number) {
+  const nodes: ReactNode[] = [];
+  let key = keyStart;
+  let lastIndex = 0;
+
+  const pushInlineBlock = (value: string) => {
+    if (!value) {
+      return;
+    }
+
+    const renderedInline = renderInlineMarkdown(value, key);
+    key = renderedInline.nextKey;
+    nodes.push(
+      <div className="whitespace-pre-wrap" key={`text-${key++}`}>
+        {renderedInline.nodes}
+      </div>,
+    );
+  };
+
+  for (const match of text.matchAll(CODE_BLOCK_REGEX)) {
+    const index = match.index ?? 0;
+    const code = normalizeFencedCodeBlock(match[1] ?? "");
+
+    if (index > lastIndex) {
+      pushInlineBlock(text.slice(lastIndex, index).replace(/\n$/g, ""));
+    }
+
+    nodes.push(
+      <div
+        className="code-snippet-font rounded-xl bg-(--dim) p-2 whitespace-pre-wrap"
+        key={`code-${key++}`}
+      >
+        {code}
+      </div>,
+    );
+
+    lastIndex = index + match[0].length;
+    if (text[lastIndex] === "\r" && text[lastIndex + 1] === "\n") {
+      lastIndex += 2;
+    } else if (text[lastIndex] === "\n") {
+      lastIndex += 1;
+    }
+  }
+
+  if (lastIndex < text.length) {
+    pushInlineBlock(text.slice(lastIndex));
+  }
+
+  return { nodes, nextKey: key };
+}
 
 function RenderedComponentInstance({
   type,
@@ -68,11 +181,9 @@ function renderPlainTextSegment(segment: string, keyStart: number) {
       return;
     }
 
-    nodes.push(
-      <span className="whitespace-pre-wrap" key={`text-${key++}`}>
-        {text}
-      </span>,
-    );
+    const renderedText = renderMarkdownText(text, key);
+    nodes.push(...renderedText.nodes);
+    key = renderedText.nextKey;
   };
 
   const renderBlankLines = (count: number) => {

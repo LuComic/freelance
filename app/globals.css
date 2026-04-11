@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "@fontsource-variable/lexend";
 @import "@fontsource-variable/work-sans";
+@import "@fontsource-variable/fira-code/wght.css";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
@@ -235,5 +236,9 @@
       left: 50%;
       transform: translate(-50%, -50%);
     }
+  }
+
+  .code-snippet-font {
+    font-family: "Fira Code Variable", monospace;
   }
 }
