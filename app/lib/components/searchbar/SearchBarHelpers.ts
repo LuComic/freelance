@@ -129,6 +129,7 @@ export const useSearchBarResults = ({
   isOpen,
   activeTag,
   searchQuery,
+  currentProjectId,
   searchInviteDefaults,
   templateSearchTypes,
   setTemplateActionError,
@@ -136,6 +137,7 @@ export const useSearchBarResults = ({
   isOpen: boolean;
   activeTag: SearchTag | null;
   searchQuery: string;
+  currentProjectId: string | null;
   searchInviteDefaults: PersonInviteDefaults | null;
   templateSearchTypes: SearchTemplateType[] | null;
   setTemplateActionError: (value: string | null) => void;
@@ -166,7 +168,10 @@ export const useSearchBarResults = ({
     isOpen && activeTag === null
       ? {
           query: deferredSearchQuery.trim(),
-          limit: 10,
+          limit:
+            currentProjectId !== null && deferredSearchQuery.trim().length === 0
+              ? 100
+              : 10,
         }
       : "skip";
   const templateSearchArgs =

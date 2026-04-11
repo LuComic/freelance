@@ -53,6 +53,9 @@ export const SearchBar = () => {
     null,
   );
   const selectedItemRef = useRef<HTMLButtonElement>(null);
+  const pathnameSegments = pathname.split("/").filter(Boolean);
+  const currentProjectId =
+    pathnameSegments[0] === "projects" ? (pathnameSegments[1] ?? null) : null;
   const {
     isOpen,
     activeTag,
@@ -82,6 +85,7 @@ export const SearchBar = () => {
     isOpen,
     activeTag,
     searchQuery,
+    currentProjectId,
     searchInviteDefaults,
     templateSearchTypes,
     setTemplateActionError,
@@ -89,9 +93,6 @@ export const SearchBar = () => {
   const tagGhostCompletion =
     activeTag === null ? getTagGhostCompletion(searchQuery) : null;
   const [commandSuggestions, setCommandSuggestions] = useState(false);
-  const pathnameSegments = pathname.split("/").filter(Boolean);
-  const currentProjectId =
-    pathnameSegments[0] === "projects" ? (pathnameSegments[1] ?? null) : null;
   const prioritizedPageSearchResults =
     activeTag === null &&
     normalizedSearchQuery.length === 0 &&
@@ -103,7 +104,7 @@ export const SearchBar = () => {
           ...visiblePageSearchResults.filter(
             (page) => page.projectId !== currentProjectId,
           ),
-        ]
+        ].slice(0, 10)
       : visiblePageSearchResults;
 
   useEffect(() => {
