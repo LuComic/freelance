@@ -29,6 +29,7 @@ export function PageNavigationLink({
     <Link
       {...props}
       href={getProjectPagePath(projectId, pageId)}
+      prefetch={false}
       onMouseEnter={(event) => {
         onMouseEnter?.(event);
         prewarm();
@@ -39,11 +40,9 @@ export function PageNavigationLink({
       }}
       onTouchStart={(event) => {
         onTouchStart?.(event);
-        prewarm();
       }}
       onClick={(event) => {
         onClick?.(event);
-        prewarm();
       }}
     />
   );

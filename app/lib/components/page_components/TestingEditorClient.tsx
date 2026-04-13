@@ -79,7 +79,9 @@ export default function TestingEditorClient() {
     setLineHeights((currentLineHeights) => {
       if (
         currentLineHeights.length === nextLineHeights.length &&
-        currentLineHeights.every((height, index) => height === nextLineHeights[index])
+        currentLineHeights.every(
+          (height, index) => height === nextLineHeights[index],
+        )
       ) {
         return currentLineHeights;
       }
@@ -127,7 +129,12 @@ export default function TestingEditorClient() {
 
   useEffect(() => {
     const textarea = textareaRef.current;
-    if (!textarea || !isEditing || isLive || typeof ResizeObserver === "undefined") {
+    if (
+      !textarea ||
+      !isEditing ||
+      isLive ||
+      typeof ResizeObserver === "undefined"
+    ) {
       return;
     }
 

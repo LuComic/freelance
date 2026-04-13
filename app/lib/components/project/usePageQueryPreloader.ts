@@ -29,14 +29,28 @@ export function usePageQueryPreloader() {
       }
 
       recentPagePrewarmTimestamps.set(cacheKey, now);
-      convex.prewarmQuery({
-        query: api.pages.queries.getPageEditor,
-        args: {
-          projectId: projectId as never,
-          pageId: pageId as never,
-        },
-        extendSubscriptionFor: PAGE_QUERY_PREWARM_MS,
-      });
+      const prewarmPageQuery = () => {
+        convex.prewarmQuery({
+          query: api.pages.queries.getPageEditor,
+          args: {
+            projectId: projectId as never,
+            pageId: pageId as never,
+          },
+          extendSubscriptionFor: PAGE_QUERY_PREWARM_MS,
+        });
+      };
+
+      if (typeof window === "undefined") {
+        prewarmPageQuery();
+        return;
+      }
+
+      if ("requestIdleCallback" in window) {
+        window.requestIdleCallback(prewarmPageQuery, { timeout: 250 });
+        return;
+      }
+
+      setTimeout(prewarmPageQuery, 0);
     },
     [convex, router],
   );

@@ -76,7 +76,7 @@ export function PageDocumentProvider({
   const { isLive, setModeLock } = useEditMode();
   const pathname = usePathname();
   const router = useRouter();
-  const route = getPageRoute(pathname);
+  const route = useMemo(() => getPageRoute(pathname), [pathname]);
   const [activePage, setActivePage] = useState<ActivePageState | null>(null);
   const [viewerRole, setViewerRole] = useState<ViewerProjectRole | null>(null);
   const [document, setDocument] = useState<PageDocumentV1 | null>(null);
@@ -101,7 +101,10 @@ export function PageDocumentProvider({
   const liveRevisionRef = useRef(0);
   const savedConfigRevisionRef = useRef(0);
   const savedLiveRevisionRef = useRef(0);
-  const currentDocumentSnapshot = document ? JSON.stringify(document) : null;
+  const currentDocumentSnapshot = useMemo(
+    () => (document ? JSON.stringify(document) : null),
+    [document],
+  );
   const hasUnsavedChanges =
     activePage !== null &&
     document !== null &&
@@ -111,19 +114,32 @@ export function PageDocumentProvider({
     route,
     activePage,
   });
-  const pageQueryArgs =
-    route === null
-      ? "skip"
-      : {
-          projectId: route.projectId as never,
-          pageId: route.pageId as never,
-        };
+  const pageQueryArgs = useMemo(
+    () =>
+      route === null
+        ? "skip"
+        : {
+            projectId: route.projectId as never,
+            pageId: route.pageId as never,
+          },
+    [route],
+  );
   const pageData = useQuery(api.pages.queries.getPageEditor, pageQueryArgs);
   const entitlements = useQuery(currentEntitlementsQuery, {});
   const projects = useQuery(api.projects.queries.listCurrentUserProjects);
+  const activeProjectId = activePage?.project.id ?? null;
+  const activeProjectMembersArgs = useMemo(
+    () =>
+      activeProjectId
+        ? {
+            projectId: activeProjectId as never,
+          }
+        : "skip",
+    [activeProjectId],
+  );
   const activeProjectMembers = useQuery(
     api.projects.members.getProjectMembers,
-    activePage ? { projectId: activePage.project.id as never } : "skip",
+    activeProjectMembersArgs,
   );
   const activeClientUserIds = useMemo(
     () =>
