@@ -92,9 +92,7 @@ function renderInlineMarkdown(text: string, keyStart: number) {
       if (italicText && !italicText.includes("\n")) {
         const renderedItalicText = renderSpecialText(italicText, key);
         key = renderedItalicText.nextKey;
-        nodes.push(
-          <em key={`italic-${key++}`}>{renderedItalicText.nodes}</em>,
-        );
+        nodes.push(<em key={`italic-${key++}`}>{renderedItalicText.nodes}</em>);
         index = endIndex + 1;
         continue;
       }

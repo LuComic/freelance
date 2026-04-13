@@ -3,19 +3,14 @@
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { usePathname } from "next/navigation";
-import { useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useState } from "react";
 import { FileItem } from "./FileItem";
 
-type ExpansionState = {
-  scopeProjectId: string | null;
-  expandedProjectIds: string[];
-};
-
 type FilesProps = {
-  setSidebarOpen?: Dispatch<SetStateAction<boolean>>;
+  closeSidebar?: () => void;
 };
 
-export const Files = ({ setSidebarOpen }: FilesProps) => {
+export const Files = ({ closeSidebar }: FilesProps) => {
   const projects = useQuery(api.projects.queries.listCurrentUserProjects);
   const pathname = usePathname();
   const segments = pathname.split("/").filter(Boolean);
@@ -28,42 +23,26 @@ export const Files = ({ setSidebarOpen }: FilesProps) => {
   const currentProject =
     projects?.find((project) => project.id === currentProjectId) ?? null;
   const projectTitle = currentProject?.name ?? "Projects";
-  const [expansionState, setExpansionState] = useState<ExpansionState>({
-    scopeProjectId: currentProjectId,
-    expandedProjectIds: currentProjectId ? [currentProjectId] : [],
-  });
-  const scopedExpandedProjectIds =
-    expansionState.scopeProjectId === currentProjectId
-      ? expansionState.expandedProjectIds
-      : currentProjectId
-        ? [currentProjectId]
-        : [];
-  const expandedProjectIds = Array.from(
-    new Set(
-      currentPageId && currentProjectId
-        ? [...scopedExpandedProjectIds, currentProjectId]
-        : scopedExpandedProjectIds,
-    ),
+  const [expandedProjectIds, setExpandedProjectIds] = useState<string[]>(() =>
+    currentProjectId && currentPageId ? [currentProjectId] : [],
   );
 
-  const toggleProjectExpanded = (projectId: string) => {
-    setExpansionState((prev) => {
-      const nextScopedExpandedProjectIds =
-        prev.scopeProjectId === currentProjectId
-          ? prev.expandedProjectIds
-          : currentProjectId
-            ? [currentProjectId]
-            : [];
+  useEffect(() => {
+    if (!currentProjectId || !currentPageId) {
+      return;
+    }
 
-      return {
-        scopeProjectId: currentProjectId,
-        expandedProjectIds: nextScopedExpandedProjectIds.includes(projectId)
-          ? nextScopedExpandedProjectIds.filter(
-              (expandedId) => expandedId !== projectId,
-            )
-          : [...nextScopedExpandedProjectIds, projectId],
-      };
-    });
+    setExpandedProjectIds((prev) =>
+      prev.includes(currentProjectId) ? prev : [...prev, currentProjectId],
+    );
+  }, [currentPageId, currentProjectId]);
+
+  const toggleProjectExpanded = (projectId: string) => {
+    setExpandedProjectIds((prev) =>
+      prev.includes(projectId)
+        ? prev.filter((expandedId) => expandedId !== projectId)
+        : [...prev, projectId],
+    );
   };
 
   return (
@@ -86,7 +65,7 @@ export const Files = ({ setSidebarOpen }: FilesProps) => {
             currentPageId={currentPageId}
             isExpanded={expandedProjectIds.includes(project.id)}
             onToggleExpanded={() => toggleProjectExpanded(project.id)}
-            setSidebarOpen={setSidebarOpen}
+            closeSidebar={closeSidebar}
           />
         ))
       ) : (

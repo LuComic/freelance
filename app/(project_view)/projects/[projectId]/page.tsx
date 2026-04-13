@@ -2,10 +2,9 @@
 
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { getProjectPagePath } from "@/app/lib/components/project/paths";
+import { PageNavigationLink } from "@/app/lib/components/project/PageNavigationLink";
 
 export default function ProjectPage() {
   const params = useParams<{ projectId: string }>();
@@ -44,13 +43,14 @@ export default function ProjectPage() {
           <>
             <p className="font-medium">Pages</p>
             {data.pages.map((page) => (
-              <Link
+              <PageNavigationLink
                 key={page.id}
-                href={getProjectPagePath(data.project.id, page.id)}
+                projectId={data.project.id}
+                pageId={page.id}
                 className="text-(--gray-page) hover:text-(--vibrant)"
               >
                 {page.title}
-              </Link>
+              </PageNavigationLink>
             ))}
           </>
         ) : (

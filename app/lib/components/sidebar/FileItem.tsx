@@ -1,4 +1,5 @@
 "use client";
+
 import {
   ChartNoAxesCombined,
   ChevronRight,
@@ -10,7 +11,7 @@ import {
 import { api } from "@/convex/_generated/api";
 import { currentEntitlementsQuery } from "@/lib/convexFunctionReferences";
 import { useMutation, useQuery } from "convex/react";
-import { useState, type Dispatch, type SetStateAction } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -27,6 +28,7 @@ import {
   getProjectPath,
   getProjectSettingsPath,
 } from "../project/paths";
+import { PageNavigationLink } from "../project/PageNavigationLink";
 
 interface SidebarItemProps {
   project: {
@@ -41,7 +43,7 @@ interface SidebarItemProps {
   currentPageId?: string | null;
   isExpanded: boolean;
   onToggleExpanded: () => void;
-  setSidebarOpen?: Dispatch<SetStateAction<boolean>>;
+  closeSidebar?: () => void;
 }
 
 export const FileItem = ({
@@ -49,7 +51,7 @@ export const FileItem = ({
   currentPageId,
   isExpanded,
   onToggleExpanded,
-  setSidebarOpen,
+  closeSidebar,
 }: SidebarItemProps) => {
   const router = useRouter();
   const createPage = useMutation(api.pages.mutations.createPage);
@@ -59,7 +61,6 @@ export const FileItem = ({
   const isCreatePageDisabled =
     isCreatingPage || project.viewerRole === "client";
   const canAccessAnalytics = entitlements?.canAccessAnalytics === true;
-  const closeSidebar = () => setSidebarOpen?.(false);
 
   return (
     <>
@@ -133,7 +134,7 @@ export const FileItem = ({
               const result = await createPage({
                 projectId: project.id as never,
               });
-              closeSidebar();
+              closeSidebar?.();
               router.push(getProjectPagePath(project.id, result.pageId));
             } finally {
               setIsCreatingPage(false);
@@ -147,21 +148,22 @@ export const FileItem = ({
       {isExpanded && (
         <>
           {project.pages.map((page) => (
-            <Link
+            <PageNavigationLink
               key={page.id}
+              projectId={project.id}
+              pageId={page.id}
               className={`pl-8 flex w-full items-center justify-start gap-2 rounded-lg p-1 text-base ${
                 page.id === currentPageId
                   ? "bg-(--darkest-hover) text-(--light)"
                   : "hover:bg-(--darkest-hover)"
               }`}
-              href={getProjectPagePath(project.id, page.id)}
               onClick={closeSidebar}
             >
               <File size={18} />
               {page.title.length > 20
                 ? page.title.slice(0, 20) + "..."
                 : page.title}
-            </Link>
+            </PageNavigationLink>
           ))}
         </>
       )}

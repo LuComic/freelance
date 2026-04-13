@@ -190,27 +190,6 @@ export function PageDocumentProvider({
   }, []);
 
   useEffect(() => {
-    if (route === null || pageData !== undefined || canUseActivePageFallback) {
-      return;
-    }
-
-    queueMicrotask(() => {
-      pendingDeleteRedirectPathRef.current = null;
-      setActivePage(null);
-      setDocument(null);
-      setSaveStatus("idle");
-      setSaveError(null);
-      setDeleteStatus("idle");
-      setDeleteError(null);
-      setSavedTitleSnapshot(null);
-      setSavedDocumentSnapshot(null);
-      setViewerRole(null);
-    });
-    resetLocalRevisionTracking();
-    lastHydratedPageKeyRef.current = null;
-  }, [canUseActivePageFallback, pageData, resetLocalRevisionTracking, route]);
-
-  useEffect(() => {
     if (!route || pageData === undefined) {
       if (!route) {
         pendingDeleteRedirectPathRef.current = null;

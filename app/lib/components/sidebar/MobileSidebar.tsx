@@ -138,7 +138,7 @@ export const MobileSidebar = ({
           ) : null}
 
           {resolvedActiveTab === "files" ? (
-            <Files setSidebarOpen={setSidebarOpen} />
+            <Files closeSidebar={() => setSidebarOpen(false)} />
           ) : null}
           {!isAnonymous && resolvedActiveTab === "friends" ? (
             <Connections

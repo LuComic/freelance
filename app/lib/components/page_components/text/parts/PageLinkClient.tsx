@@ -1,12 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import type { PageComponentInstanceByType } from "@/lib/pageDocument";
-import { getProjectPagePath } from "@/app/lib/components/project/paths";
 import {
   getPageLinkFallbackText,
   type ProjectPageOption,
 } from "./PageLink.shared";
+import { PageNavigationLink } from "@/app/lib/components/project/PageNavigationLink";
 
 type PageLinkClientProps = {
   config: PageComponentInstanceByType<"PageLink">["config"];
@@ -31,11 +30,12 @@ export const PageLinkClient = ({
   }
 
   return (
-    <Link
-      href={getProjectPagePath(projectId, targetPage.id)}
+    <PageNavigationLink
+      projectId={projectId}
+      pageId={targetPage.id}
       className="w-max text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover) page-link-selected"
     >
       {displayText}
-    </Link>
+    </PageNavigationLink>
   );
 };
