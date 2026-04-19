@@ -28,6 +28,16 @@ type ProjectEmailListSectionProps = {
   shaded?: boolean;
 };
 
+function buildProjectJoinLink(joinCode: string) {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const url = new URL("/projects", window.location.origin);
+  url.searchParams.set("joinCode", joinCode);
+  return url.toString();
+}
+
 export function ProjectEmailListSection({
   title,
   currentLabel,
@@ -47,8 +57,11 @@ export function ProjectEmailListSection({
   shaded = false,
 }: ProjectEmailListSectionProps) {
   const [open, setOpen] = useState(false);
-  const [codeCopied, setCodeCopied] = useState(false);
+  const [copiedTarget, setCopiedTarget] = useState<"code" | "link" | null>(
+    null,
+  );
   const [hoverCode, setHoverCode] = useState(false);
+  const [hoverLink, setHoverLink] = useState(false);
 
   return (
     <div
@@ -70,43 +83,87 @@ export function ProjectEmailListSection({
         <div className="pl-7 flex flex-col gap-2 pb-2">
           <p className="text-(--gray-page)">{currentLabel}</p>
           {title === "Clients" && (
-            <div className="flex items-center justify-start gap-2 h-auto">
-              <p className="text-(--gray-page)">Join code (click to copy):</p>
-              <button
-                type="button"
-                disabled={!joinCode || !canCopyJoinCode}
-                className="font-medium"
-                onClick={async () => {
-                  if (!joinCode || !canCopyJoinCode) {
-                    return;
-                  }
+            <>
+              <div className="flex items-center justify-start gap-2 h-auto">
+                <p className="text-(--gray-page)">Join code (click to copy):</p>
+                <button
+                  type="button"
+                  disabled={!joinCode || !canCopyJoinCode}
+                  className="font-medium"
+                  onClick={async () => {
+                    if (!joinCode || !canCopyJoinCode) {
+                      return;
+                    }
 
-                  await navigator.clipboard.writeText(joinCode);
-                  setCodeCopied(true);
-                  setTimeout(() => {
-                    setCodeCopied(false);
-                  }, 1500);
-                }}
-                onMouseEnter={() => setHoverCode(true)}
-                onMouseLeave={() => setHoverCode(false)}
-              >
-                <span className="italic">
-                  {codeCopied
-                    ? "Copied"
-                    : hoverCode
-                      ? (joinCode ?? "Loading...")
-                      : "******"}
-                </span>
-              </button>
-              <button
-                type="button"
-                disabled={!canRegenerateJoinCode || isRegeneratingJoinCode}
-                className="p-1 rounded-md hover:bg-(--gray-page)/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-                onClick={() => onRegenerateJoinCode?.()}
-              >
-                <Dices size={18} />
-              </button>
-            </div>
+                    await navigator.clipboard.writeText(joinCode);
+                    setCopiedTarget("code");
+                    setTimeout(() => {
+                      setCopiedTarget((target) =>
+                        target === "code" ? null : target,
+                      );
+                    }, 1500);
+                  }}
+                  onMouseEnter={() => setHoverCode(true)}
+                  onMouseLeave={() => setHoverCode(false)}
+                >
+                  <span className="italic">
+                    {copiedTarget === "code"
+                      ? "Copied"
+                      : hoverCode
+                        ? (joinCode ?? "Loading...")
+                        : "******"}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  disabled={!canRegenerateJoinCode || isRegeneratingJoinCode}
+                  className="p-1 rounded-md hover:bg-(--gray-page)/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                  onClick={() => onRegenerateJoinCode?.()}
+                >
+                  <Dices size={18} />
+                </button>
+              </div>
+
+              <div className="flex items-center justify-start gap-2 h-auto">
+                <p className="text-(--gray-page)">Join link (click to copy):</p>
+                <button
+                  type="button"
+                  disabled={!joinCode || !canCopyJoinCode}
+                  className="font-medium"
+                  onClick={async () => {
+                    if (!joinCode || !canCopyJoinCode) {
+                      return;
+                    }
+
+                    const joinLink = buildProjectJoinLink(joinCode);
+
+                    if (!joinLink) {
+                      return;
+                    }
+
+                    await navigator.clipboard.writeText(joinLink);
+                    setCopiedTarget("link");
+                    setTimeout(() => {
+                      setCopiedTarget((target) =>
+                        target === "link" ? null : target,
+                      );
+                    }, 1500);
+                  }}
+                  onMouseEnter={() => setHoverLink(true)}
+                  onMouseLeave={() => setHoverLink(false)}
+                >
+                  <span className="italic">
+                    {copiedTarget === "link"
+                      ? "Copied"
+                      : hoverLink
+                        ? joinCode
+                          ? (buildProjectJoinLink(joinCode) ?? "Loading...")
+                          : "Loading..."
+                        : "************"}
+                  </span>
+                </button>
+              </div>
+            </>
           )}
           <div className="flex items-center justify-start gap-2 w-full flex-wrap">
             {members.map((member) => (

@@ -39,6 +39,7 @@ export default function Page() {
     api.projects.join.joinCurrentUserByCode,
   );
   const completedUpgradeTokenRef = useRef<string | null>(null);
+  const attemptedLinkJoinCodeRef = useRef<string | null>(null);
   const [joinCodeDraft, setJoinCodeDraft] = useState("");
   const [guestNameDraft, setGuestNameDraft] = useState("");
   const [validatedJoinTarget, setValidatedJoinTarget] =
@@ -53,6 +54,7 @@ export default function Page() {
     profile !== undefined && profile !== null && profile.isAnonymous !== true;
   const didReturnFromGuestUpgrade =
     searchParams.get("betaUpgradeAttempt") === "google";
+  const joinCodeFromLink = searchParams.get("joinCode");
 
   useEffect(() => {
     if (
@@ -106,6 +108,89 @@ export default function Page() {
         setIsCompletingUpgrade(false);
       });
   }, [completeGuestUpgrade, profile, router]);
+
+  useEffect(() => {
+    const trimmedJoinCode = joinCodeFromLink?.trim() ?? "";
+
+    if (!trimmedJoinCode || isAuthLoading || profile === undefined) {
+      return;
+    }
+
+    if (attemptedLinkJoinCodeRef.current === trimmedJoinCode) {
+      return;
+    }
+
+    attemptedLinkJoinCodeRef.current = trimmedJoinCode;
+    setJoinCodeDraft(trimmedJoinCode);
+
+    if (isAnonymous) {
+      setJoinError("This guest account is already tied to a project.");
+      return;
+    }
+
+    setJoinError(null);
+
+    if (isSignedInRealUser) {
+      setIsJoining(true);
+
+      void joinCurrentUserByCode({
+        joinCode: trimmedJoinCode,
+      })
+        .then((result) => {
+          router.replace(result.redirectPath);
+          router.refresh();
+        })
+        .catch((error) => {
+          setJoinError(
+            error instanceof Error
+              ? error.message
+              : "Could not join this project.",
+          );
+        })
+        .finally(() => {
+          setIsJoining(false);
+        });
+
+      return;
+    }
+
+    setIsVerifyingCode(true);
+
+    void convex
+      .query(api.projects.join.validateJoinCode, {
+        joinCode: trimmedJoinCode,
+      })
+      .then((result) => {
+        if (!result) {
+          setValidatedJoinTarget(null);
+          setJoinError("That project code is not valid.");
+          return;
+        }
+
+        setJoinCodeDraft(result.joinCode);
+        setValidatedJoinTarget(result as JoinTarget);
+        setGuestNameDraft("");
+      })
+      .catch((error) => {
+        setJoinError(
+          error instanceof Error
+            ? error.message
+            : "Could not validate that project code.",
+        );
+      })
+      .finally(() => {
+        setIsVerifyingCode(false);
+      });
+  }, [
+    convex,
+    isAnonymous,
+    isAuthLoading,
+    isSignedInRealUser,
+    joinCurrentUserByCode,
+    joinCodeFromLink,
+    profile,
+    router,
+  ]);
 
   const handleJoinSubmit = async (
     event: React.SubmitEvent<HTMLFormElement>,
@@ -206,7 +291,7 @@ export default function Page() {
   return (
     <div className="h-max @[40rem]:max-w-2/3 mx-auto w-full flex flex-col gap-4 items-start justify-center">
       <div className="w-full border-b border-(--gray) pb-2 flex flex-col gap-2">
-        <p className="@[40rem]:text-3xl text-xl font-medium">Welcome back!</p>
+        <p className="@[40rem]:text-3xl text-xl font-medium">Welcome!</p>
       </div>
 
       <div className="flex @[50rem]:flex-row flex-col items-start @[50rem]:items-center justify-center gap-2">
