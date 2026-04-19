@@ -206,6 +206,40 @@ const schema = defineSchema({
     updatedAt: v.number(),
   }).index("by_project_created", ["projectId", "createdAt"]),
 
+  formSubmissions: defineTable({
+    projectId: v.id("projects"),
+    pageId: v.id("pages"),
+    formInstanceId: v.string(),
+    submittedByUserId: v.id("users"),
+    submitterNameSnapshot: v.string(),
+    submitterImageSnapshot: v.optional(v.string()),
+    pageTitleSnapshot: v.string(),
+    formTitleSnapshot: v.optional(v.string()),
+    answers: v.array(
+      v.object({
+        fieldId: v.string(),
+        fieldTypeSnapshot: v.union(
+          v.literal("Select"),
+          v.literal("Radio"),
+          v.literal("SimpleInput"),
+        ),
+        fieldLabelSnapshot: v.string(),
+        value: v.union(v.string(), v.array(v.string()), v.null()),
+        displayValue: v.string(),
+      }),
+    ),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_project", ["projectId"])
+    .index("by_page_form", ["pageId", "formInstanceId"])
+    .index("by_page_form_user", [
+      "pageId",
+      "formInstanceId",
+      "submittedByUserId",
+    ])
+    .index("by_project_updated", ["projectId", "updatedAt"]),
+
   pages: defineTable({
     projectId: v.id("projects"),
     title: v.string(),

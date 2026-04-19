@@ -29,6 +29,30 @@ export type DropdownItem = {
   components: AnalyticsInputComponent[];
 };
 
+export type AnalyticsFormAnswer = {
+  fieldId: string;
+  fieldType: "Select" | "Radio" | "SimpleInput";
+  fieldLabel: string;
+  displayValue: string;
+};
+
+export type AnalyticsFormSubmission = {
+  id: string;
+  clientName: string;
+  submittedAt: number;
+  answers: AnalyticsFormAnswer[];
+};
+
+export type AnalyticsFormItem = {
+  instanceId: string;
+  submissions: AnalyticsFormSubmission[];
+};
+
+export type AnalyticsFormsPageItem = {
+  page: string;
+  forms: AnalyticsFormItem[];
+};
+
 export type LatestChange = {
   id: Id<"projectActivity">;
   page: string;
@@ -48,4 +72,5 @@ export type AnalyticsPageData = {
   };
   latestChanges: LatestChange[];
   inputs: DropdownItem[];
+  forms: AnalyticsFormsPageItem[];
 };

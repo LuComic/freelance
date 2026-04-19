@@ -1,5 +1,6 @@
 "use client";
 
+import { FormSubmissionsDropdown } from "@/app/lib/components/analytics/FormSubmissionsDropdown";
 import { InputDropdown } from "@/app/lib/components/analytics/InputDropdown";
 import type { AnalyticsPageData } from "@/app/lib/components/analytics/types";
 import { api } from "@/convex/_generated/api";
@@ -32,8 +33,8 @@ export default function AnalyticsPage() {
       </div>
       <p className="text-(--gray-page)">
         Here you can see the most recent live-mode changes project members have
-        made and what options are currently selected. All of these come from
-        Input components.
+        made, what options are currently selected, and individual form
+        submissions from clients. All of these come from Input components.
       </p>
 
       <div className="w-full border-b border-(--gray) pb-2">
@@ -49,6 +50,27 @@ export default function AnalyticsPage() {
         ) : (
           data.inputs.map((item, index) => (
             <InputDropdown
+              key={`${item.page}-${index}`}
+              item={item}
+              index={index}
+            />
+          ))
+        )}
+      </div>
+
+      <div className="w-full border-b border-(--gray) pb-2">
+        <p className="@[40rem]:text-xl text-lg font-medium">Forms</p>
+      </div>
+      <div className="flex flex-col items-start justify-start w-full">
+        {data === undefined ? (
+          <p className="text-(--gray-page)">Loading form submissions...</p>
+        ) : data === null ? (
+          <p className="text-(--gray-page)">Redirecting to projects...</p>
+        ) : data.forms.length === 0 ? (
+          <p className="text-(--gray-page)">No form submissions yet.</p>
+        ) : (
+          data.forms.map((item, index) => (
+            <FormSubmissionsDropdown
               key={`${item.page}-${index}`}
               item={item}
               index={index}

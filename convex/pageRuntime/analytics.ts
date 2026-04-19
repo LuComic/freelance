@@ -77,6 +77,7 @@ type SimpleInputDocument = Extract<
   PageComponentDocument,
   { type: "SimpleInput" }
 >;
+type FormDocument = Extract<PageComponentDocument, { type: "Form" }>;
 
 function isAnalyticsComponentType(
   type: PageComponentDocument["type"],
@@ -123,6 +124,48 @@ function getOrderedAnalyticsComponents(document: PageDocumentV1) {
       seenComponentIds.has(instanceId) ||
       !isAnalyticsComponentType(component.type)
     ) {
+      continue;
+    }
+
+    orderedComponents.push({
+      instanceId,
+      component,
+    });
+  }
+
+  return orderedComponents;
+}
+
+function getOrderedFormComponents(document: PageDocumentV1) {
+  const seenComponentIds = new Set<string>();
+  const orderedComponents: Array<{
+    instanceId: string;
+    component: FormDocument;
+  }> = [];
+
+  for (const match of document.editorText.matchAll(
+    PAGE_COMPONENT_TOKEN_REGEX,
+  )) {
+    const instanceId = match[2];
+    const component = document.components[instanceId];
+
+    if (
+      !component ||
+      component.type !== "Form" ||
+      seenComponentIds.has(instanceId)
+    ) {
+      continue;
+    }
+
+    seenComponentIds.add(instanceId);
+    orderedComponents.push({
+      instanceId,
+      component,
+    });
+  }
+
+  for (const [instanceId, component] of Object.entries(document.components)) {
+    if (seenComponentIds.has(instanceId) || component.type !== "Form") {
       continue;
     }
 
@@ -517,6 +560,79 @@ function groupLatestActivity(
   }));
 }
 
+function getFormSubmissionGroupKey(
+  pageId: Doc<"pages">["_id"],
+  formInstanceId: string,
+) {
+  return `${pageId}:${formInstanceId}`;
+}
+
+function groupFormSubmissionsByForm(submissions: Doc<"formSubmissions">[]) {
+  const groupedSubmissions = new Map<string, Doc<"formSubmissions">[]>();
+
+  for (const submission of submissions) {
+    const key = getFormSubmissionGroupKey(
+      submission.pageId,
+      submission.formInstanceId,
+    );
+    const group = groupedSubmissions.get(key) ?? [];
+    group.push(submission);
+    groupedSubmissions.set(key, group);
+  }
+
+  for (const group of groupedSubmissions.values()) {
+    group.sort((left, right) => right.updatedAt - left.updatedAt);
+  }
+
+  return groupedSubmissions;
+}
+
+function getAnalyticsForms(
+  pages: Doc<"pages">[],
+  submissions: Doc<"formSubmissions">[],
+) {
+  const submissionsByForm = groupFormSubmissionsByForm(submissions);
+
+  return pages
+    .map((page) => {
+      const document = parsePageDocument(page.contentJson);
+      const forms = getOrderedFormComponents(document);
+
+      if (forms.length === 0) {
+        return null;
+      }
+
+      return {
+        page: page.title,
+        forms: forms.map(({ instanceId }) => {
+          const formSubmissions =
+            submissionsByForm.get(
+              getFormSubmissionGroupKey(page._id, instanceId),
+            ) ?? [];
+
+          return {
+            instanceId,
+            submissions: formSubmissions.map((submission) => ({
+              id: submission._id,
+              clientName: submission.submitterNameSnapshot,
+              submittedAt: submission.updatedAt,
+              answers: submission.answers.map((answer) => ({
+                fieldId: answer.fieldId,
+                fieldType: answer.fieldTypeSnapshot,
+                fieldLabel: answer.fieldLabelSnapshot,
+                displayValue: answer.displayValue,
+              })),
+            })),
+          };
+        }),
+      };
+    })
+    .filter(
+      (page): page is NonNullable<typeof page> =>
+        page !== null && page.forms.length > 0,
+    );
+}
+
 export const getProjectAnalytics = query({
   args: {
     projectId: v.id("projects"),
@@ -533,7 +649,7 @@ export const getProjectAnalytics = query({
         return null;
       }
 
-      const [pages, latestActivity] = await Promise.all([
+      const [pages, latestActivity, formSubmissions] = await Promise.all([
         getOrderedProjectPages(ctx, project),
         ctx.db
           .query("projectActivity")
@@ -542,6 +658,12 @@ export const getProjectAnalytics = query({
           )
           .order("desc")
           .take(50),
+        ctx.db
+          .query("formSubmissions")
+          .withIndex("by_project", (query) =>
+            query.eq("projectId", project._id),
+          )
+          .collect(),
       ]);
 
       return {
@@ -556,6 +678,7 @@ export const getProjectAnalytics = query({
             parsePageDocument(page.contentJson),
           ),
         })),
+        forms: getAnalyticsForms(pages, formSubmissions),
       };
     } catch (error) {
       if (
