@@ -35,6 +35,7 @@ const FILTER_BUTTON_CLASS_NAME =
 
 export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
   const [openFieldIds, setOpenFieldIds] = useState<Set<string>>(new Set());
+  const [addingField, setAddingField] = useState(false);
   const [fieldTypeToAdd, setFieldTypeToAdd] = useState<FormFieldType>("Select");
   const [optionInputs, setOptionInputs] = useState<Record<string, string>>({});
 
@@ -138,6 +139,54 @@ export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
       </p>
 
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
+        <button
+          type="button"
+          className="@[40rem]:text-lg text-base font-medium flex items-center justify-start gap-2 w-full"
+          onClick={() => setAddingField((prev) => !prev)}
+        >
+          Add Field
+          <ChevronRight
+            size={18}
+            className={addingField ? "rotate-90" : ""}
+          />
+        </button>
+        {addingField ? (
+          <>
+            <Select
+              value={fieldTypeToAdd}
+              onValueChange={(value) =>
+                setFieldTypeToAdd(value as FormFieldType)
+              }
+            >
+              <SelectTrigger className="w-full @[40rem]:w-52 bg-(--dim) border-(--gray-page)">
+                <SelectValue placeholder="Select field type" />
+              </SelectTrigger>
+              <SelectContent className="bg-(--dim) border-none text-(--gray-page)">
+                <SelectGroup className="bg-(--dim)">
+                  {FORM_FIELD_TYPE_OPTIONS.map((option) => (
+                    <SelectItem
+                      key={option.type}
+                      value={option.type}
+                      className="data-highlighted:bg-(--darkest) data-highlighted:text-(--light)"
+                    >
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            <button
+              type="button"
+              className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
+              onClick={handleAddField}
+            >
+              Add field
+            </button>
+          </>
+        ) : null}
+
+        <div className="w-full h-px bg-(--gray)" />
+
         {config.fields.length > 0 ? (
           config.fields.map((field, index) => {
             const fieldOpen = openFieldIds.has(field.id);
@@ -157,10 +206,10 @@ export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
                       size={18}
                       className={fieldOpen ? "rotate-90" : ""}
                     />
-                    <span className="min-w-0 wrap-break-word">
+                    <span className="min-w-0 wrap-break-word text-left">
                       {getFormFieldLabel(field)}
                     </span>
-                    <span className="text-(--gray-page)">
+                    <span className="text-(--gray-page) font-normal">
                       {getFormFieldTypeLabel(field.type)}
                     </span>
                   </button>
@@ -298,38 +347,6 @@ export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
         ) : (
           <span className="text-(--gray-page)">No fields setup</span>
         )}
-
-        <div className="w-full h-px bg-(--gray)" />
-        <div className="flex items-center justify-start gap-2 w-full flex-wrap">
-          <Select
-            value={fieldTypeToAdd}
-            onValueChange={(value) => setFieldTypeToAdd(value as FormFieldType)}
-          >
-            <SelectTrigger className="w-full @[40rem]:w-52 bg-(--dim) border-(--gray-page)">
-              <SelectValue placeholder="Select field type" />
-            </SelectTrigger>
-            <SelectContent className="bg-(--dim) border-none text-(--gray-page)">
-              <SelectGroup className="bg-(--dim)">
-                {FORM_FIELD_TYPE_OPTIONS.map((option) => (
-                  <SelectItem
-                    key={option.type}
-                    value={option.type}
-                    className="data-highlighted:bg-(--darkest) data-highlighted:text-(--light)"
-                  >
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          <button
-            type="button"
-            className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
-            onClick={handleAddField}
-          >
-            Add field
-          </button>
-        </div>
       </div>
     </>
   );

@@ -21,6 +21,9 @@ function FieldShell({
     <div className="w-full flex flex-col gap-2">
       <p className="@[40rem]:text-xl text-lg font-medium">
         {field.label || "Untitled field"}
+        {field.required ? (
+          <span className="text-(--declined-border)"> *</span>
+        ) : null}
       </p>
       {field.description ? (
         <p className="text-(--gray-page)">{field.description}</p>
