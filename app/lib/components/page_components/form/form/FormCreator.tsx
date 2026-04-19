@@ -147,7 +147,7 @@ export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
           Add Field
           <ChevronRight
             size={18}
-            className={addingField ? "rotate-90" : ""}
+            className={`shrink-0 ${addingField ? "rotate-90" : ""}`}
           />
         </button>
         {addingField ? (
@@ -199,23 +199,23 @@ export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
                 <div className="flex items-center justify-between gap-2">
                   <button
                     type="button"
-                    className="@[40rem]:text-lg text-base font-medium flex items-center justify-start gap-2 min-w-0"
+                    className="@[40rem]:text-lg text-base font-medium flex flex-1 items-center justify-start gap-2 min-w-0"
                     onClick={() => toggleFieldOpen(field.id)}
                   >
-                    <ChevronRight
-                      size={18}
-                      className={fieldOpen ? "rotate-90" : ""}
-                    />
                     <span className="min-w-0 wrap-break-word text-left">
                       {getFormFieldLabel(field)}
                     </span>
-                    <span className="text-(--gray-page) font-normal">
+                    <span className="shrink-0 text-(--gray-page) font-normal">
                       {getFormFieldTypeLabel(field.type)}
                     </span>
+                    <ChevronRight
+                      size={18}
+                      className={`shrink-0 ${fieldOpen ? "rotate-90" : ""}`}
+                    />
                   </button>
                   <button
                     type="button"
-                    className="h-6.5 flex items-center justify-center aspect-square rounded-md hover:bg-(--darkest-hover) bg-(--dim) border-(--gray-page) border"
+                    className="h-6.5 flex shrink-0 items-center justify-center aspect-square rounded-md hover:bg-(--darkest-hover) bg-(--dim) border-(--gray-page) border"
                     onClick={() => deleteField(field.id)}
                   >
                     <Trash size={16} />
