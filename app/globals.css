@@ -2,6 +2,7 @@
 @import "@fontsource-variable/lexend";
 @import "@fontsource-variable/work-sans";
 @import "@fontsource-variable/fira-code/wght.css";
+@import "@fontsource-variable/jetbrains-mono/wght.css";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
@@ -242,6 +243,10 @@
 
   .code-snippet-font {
     font-family: "Fira Code Variable", monospace;
+  }
+
+  .text-editor-font {
+    font-family: "JetBrains Mono Variable", monospace;
   }
 
   .erle {
