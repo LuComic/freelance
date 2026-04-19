@@ -210,13 +210,8 @@ export default function Page() {
       </div>
 
       <div className="flex @[50rem]:flex-row flex-col items-start @[50rem]:items-center justify-center gap-2">
-        {!isAnonymous ? (
-          <CreateProjectModal
-            trigger={<span>Create project</span>}
-            buttonClassName="rounded-md bg-(--vibrant) px-2 py-1 hover:bg-(--vibrant-hover)"
-          />
-        ) : null}
-        {!isAnonymous ? (
+        {isSignedInRealUser ? <CreateProjectModal ui="projects" /> : null}
+        {isSignedInRealUser ? (
           <span className="text-(--gray-page) @[50rem]:inline hidden">or</span>
         ) : null}
         <span className="font-medium @[50rem]:mt-0 mt-4">Join via code</span>

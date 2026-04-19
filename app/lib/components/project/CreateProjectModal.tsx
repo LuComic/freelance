@@ -4,21 +4,19 @@ import { api } from "@/convex/_generated/api";
 import { currentEntitlementsQuery } from "@/lib/convexFunctionReferences";
 import { ChevronRight, Plus, Search, Trash } from "lucide-react";
 import { useMutation, useQuery } from "convex/react";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getProjectPagePath } from "./paths";
 import type { SearchPerson, SearchTemplate } from "../searchbar/SearchBarData";
 import { useSearchBar } from "../searchbar/SearchBarContext";
 
 type CreateProjectModalProps = {
-  trigger?: ReactNode;
-  buttonClassName?: string;
+  ui?: "sidebar" | "projects";
   redirectWhenBlocked?: string;
 };
 
 export const CreateProjectModal = ({
-  trigger,
-  buttonClassName,
+  ui = "sidebar",
   redirectWhenBlocked,
 }: CreateProjectModalProps) => {
   const router = useRouter();
@@ -150,31 +148,41 @@ export const CreateProjectModal = ({
     }
   };
 
+  const openButtonProps = {
+    type: "button" as const,
+    disabled: !canCreateOwnedProjects && !redirectWhenBlocked,
+    title: !canCreateOwnedProjects ? createProjectMessage : undefined,
+    onClick: () => {
+      if (!canCreateOwnedProjects) {
+        if (redirectWhenBlocked) {
+          router.push(redirectWhenBlocked);
+        }
+        return;
+      }
+
+      setOpen(true);
+    },
+  };
+
   return (
     <>
-      <button
-        type="button"
-        className={
-          buttonClassName ??
-          `p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
+      {ui === "projects" ? (
+        <button
+          {...openButtonProps}
+          className="rounded-md bg-(--vibrant) px-2 py-1 hover:bg-(--vibrant-hover)"
+        >
+          Create project
+        </button>
+      ) : (
+        <button
+          {...openButtonProps}
+          className={`p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
             open ? "bg-(--quite-dark) text-(--vibrant)" : ""
-          }`
-        }
-        disabled={!canCreateOwnedProjects && !redirectWhenBlocked}
-        title={!canCreateOwnedProjects ? createProjectMessage : undefined}
-        onClick={() => {
-          if (!canCreateOwnedProjects) {
-            if (redirectWhenBlocked) {
-              router.push(redirectWhenBlocked);
-            }
-            return;
-          }
-
-          setOpen(true);
-        }}
-      >
-        {trigger ?? <Plus size={20} className="mx-auto" />}
-      </button>
+          }`}
+        >
+          <Plus size={20} className="mx-auto" />
+        </button>
+      )}
 
       {open ? (
         <div

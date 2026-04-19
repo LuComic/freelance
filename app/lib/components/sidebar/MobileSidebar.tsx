@@ -120,7 +120,10 @@ export const MobileSidebar = ({
               <Settings size={20} className="mx-auto" />
             </button>
             {!isAnonymous ? (
-              <CreateProjectModal redirectWhenBlocked="/settings?section=plan" />
+              <CreateProjectModal
+                ui="sidebar"
+                redirectWhenBlocked="/settings?section=plan"
+              />
             ) : null}
           </div>
 

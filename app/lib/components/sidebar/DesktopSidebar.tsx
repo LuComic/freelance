@@ -143,7 +143,10 @@ export const DesktopSidebar = ({
               <Settings size={20} className="mx-auto" />
             </button>
             {!isAnonymous ? (
-              <CreateProjectModal redirectWhenBlocked="/settings?section=plan" />
+              <CreateProjectModal
+                ui="sidebar"
+                redirectWhenBlocked="/settings?section=plan"
+              />
             ) : null}
           </div>
           {userProfile ? (
@@ -226,7 +229,10 @@ export const DesktopSidebar = ({
               <Settings size={20} className="mx-auto" />
             </button>
             {!isAnonymous ? (
-              <CreateProjectModal redirectWhenBlocked="/settings?section=plan" />
+              <CreateProjectModal
+                ui="sidebar"
+                redirectWhenBlocked="/settings?section=plan"
+              />
             ) : null}
           </div>
           <div className="flex flex-col gap-2 items-center justify-center mt-auto w-full">
