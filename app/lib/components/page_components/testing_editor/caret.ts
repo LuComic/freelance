@@ -65,6 +65,12 @@ function createTextareaMirror(
   return mirror;
 }
 
+function createLineStartMarker() {
+  const marker = document.createElement("span");
+  marker.textContent = "\u200b";
+  return marker;
+}
+
 export function getCaretCoordinates(
   textarea: HTMLTextAreaElement,
   position: number,
@@ -103,22 +109,25 @@ export function measureWrappedLineHeights(textarea: HTMLTextAreaElement) {
   mirror.style.border = "0";
   mirror.style.overflow = "visible";
 
-  const blocks = textarea.value.split("\n").map((line) => {
-    const block = document.createElement("div");
-    block.style.whiteSpace = mirror.style.whiteSpace;
-    block.style.wordWrap = mirror.style.wordWrap;
-    block.style.overflowWrap = mirror.style.overflowWrap;
-    block.style.minHeight = `${lineHeight}px`;
-    block.textContent = line === "" ? "\u00a0" : line;
-    mirror.appendChild(block);
-    return block;
+  const markers = textarea.value.split("\n").map((line, index) => {
+    if (index > 0) {
+      mirror.appendChild(document.createTextNode("\n"));
+    }
+
+    const marker = createLineStartMarker();
+    mirror.appendChild(marker);
+    mirror.appendChild(document.createTextNode(line === "" ? "\u00a0" : line));
+    return marker;
   });
 
   document.body.appendChild(mirror);
 
-  const lineHeights = blocks.map((block) =>
-    Math.max(block.getBoundingClientRect().height, lineHeight),
-  );
+  const mirrorHeight = mirror.getBoundingClientRect().height;
+  const lineHeights = markers.map((marker, index) => {
+    const nextMarker = markers[index + 1];
+    const nextTop = nextMarker ? nextMarker.offsetTop : mirrorHeight;
+    return Math.max(nextTop - marker.offsetTop, lineHeight);
+  });
 
   document.body.removeChild(mirror);
   return lineHeights.length > 0 ? lineHeights : [lineHeight];

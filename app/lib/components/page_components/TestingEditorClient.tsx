@@ -147,6 +147,46 @@ export default function TestingEditorClient() {
     return () => observer.disconnect();
   }, [isEditing, isLive, recalculateLineHeights, updateGhostCompletion]);
 
+  useEffect(() => {
+    if (!isEditing || isLive || typeof document === "undefined") {
+      return;
+    }
+
+    const fonts = document.fonts;
+    if (!fonts) {
+      return;
+    }
+
+    let isCancelled = false;
+    const refreshMeasurements = () => {
+      if (isCancelled) {
+        return;
+      }
+
+      requestAnimationFrame(() => {
+        if (isCancelled) {
+          return;
+        }
+
+        recalculateLineHeights();
+        const textarea = textareaRef.current;
+        if (!textarea) {
+          return;
+        }
+
+        updateGhostCompletion(textarea.value, textarea.selectionStart);
+      });
+    };
+
+    void fonts.ready.then(refreshMeasurements);
+    fonts.addEventListener("loadingdone", refreshMeasurements);
+
+    return () => {
+      isCancelled = true;
+      fonts.removeEventListener("loadingdone", refreshMeasurements);
+    };
+  }, [isEditing, isLive, recalculateLineHeights, updateGhostCompletion]);
+
   const setCaretPosition = useCallback(
     (position: number) => {
       lastCursorRef.current = position;
@@ -220,7 +260,7 @@ export default function TestingEditorClient() {
       <div className="h-full w-full flex items-start justify-start">
         <div
           aria-hidden
-          className="@[35rem]:inline hidden w-11 shrink-0 h-full text-right text-sm text-(--gray-page) select-none overflow-hidden border-r border-(--gray)/40"
+          className="@[35rem]:block hidden w-11 shrink-0 h-full text-right text-sm text-(--gray-page) select-none overflow-hidden border-r border-(--gray)/40"
         >
           <div style={{ transform: `translateY(-${scrollTop}px)` }}>
             {lines.map((lineNumber) => (
@@ -299,6 +339,7 @@ export default function TestingEditorClient() {
 
               updateEditorText(nextValue);
               setActiveLine(getActiveLineFromCursor(nextValue, cursorPosition));
+              recalculateLineHeights();
               updateGhostCompletion(nextValue, cursorPosition);
             }}
             onKeyDown={(event) => {
@@ -430,7 +471,7 @@ export default function TestingEditorClient() {
               );
             }}
             spellCheck={false}
-            className="relative z-10 h-full w-full resize-none bg-transparent p-0 pt-2 @[35rem]:pt-0 pl-4 text-base text-(--light) caret-(--light) border-none outline-none focus:ring-0 text-editor-font"
+            className="relative z-10 h-full w-full resize-none bg-transparent p-0 pt-2 @[35rem]:pt-0 pl-4 text-base leading-6 text-(--light) caret-(--light) border-none outline-none focus:ring-0 text-editor-font"
             placeholder="Start typing..."
           />
           {ghostCompletion ? (
