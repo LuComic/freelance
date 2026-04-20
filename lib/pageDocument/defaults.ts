@@ -76,9 +76,7 @@ export function createDefaultComponentInstance(
       return {
         id,
         type,
-        config: {
-          tags: [],
-        },
+        config: {},
       };
     case "MainHeadline":
       return {

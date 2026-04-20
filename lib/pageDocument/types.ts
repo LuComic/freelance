@@ -87,7 +87,6 @@ export type KanbanItem = {
   id: number;
   feature: string;
   status: "Todo" | "In Progress" | "Done";
-  tags: string[];
   dismissed?: boolean;
 };
 
@@ -128,9 +127,7 @@ export type FeedbackComponentInstance = {
 export type KanbanComponentInstance = {
   id: string;
   type: "Kanban";
-  config: {
-    tags: string[];
-  };
+  config: Record<string, never>;
 };
 
 export type MainHeadlineComponentInstance = {

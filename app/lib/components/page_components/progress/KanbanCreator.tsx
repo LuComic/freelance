@@ -12,18 +12,11 @@ import {
 } from "@/components/ui/select";
 import type {
   KanbanItem,
-  PageComponentInstanceByType,
   PageComponentLiveStateByType,
 } from "@/lib/pageDocument";
 
 type KanbanCreatorProps = {
-  config: PageComponentInstanceByType<"Kanban">["config"];
   liveState: PageComponentLiveStateByType<"Kanban">["state"];
-  onChangeConfig: (
-    updater: (
-      config: PageComponentInstanceByType<"Kanban">["config"],
-    ) => PageComponentInstanceByType<"Kanban">["config"],
-  ) => void;
   onChangeLiveState: (
     updater: (
       state: PageComponentLiveStateByType<"Kanban">["state"],
@@ -34,13 +27,9 @@ type KanbanCreatorProps = {
 const STATUS_OPTIONS: KanbanItem["status"][] = ["Todo", "In Progress", "Done"];
 
 export const KanbanCreator = ({
-  config,
   liveState,
-  onChangeConfig,
   onChangeLiveState,
 }: KanbanCreatorProps) => {
-  const [tagInput, setTagInput] = useState("");
-  const [editingTags, setEditingTags] = useState(false);
   const [editingTodo, setEditingTodo] = useState(false);
   const [editingProgress, setEditingProgress] = useState(false);
   const [editingDone, setEditingDone] = useState(false);
@@ -48,34 +37,6 @@ export const KanbanCreator = ({
   const [taskInput, setTaskInput] = useState("");
   const [newTaskStatus, setNewTaskStatus] =
     useState<KanbanItem["status"]>("Todo");
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-
-  const handleNewTag = () => {
-    if (tagInput.trim() === "") return;
-    if (config.tags.includes(tagInput.trim())) return;
-    onChangeConfig((currentConfig) => ({
-      ...currentConfig,
-      tags: [tagInput.trim(), ...currentConfig.tags],
-    }));
-    setTagInput("");
-  };
-
-  const deleteTag = (tag: string) => {
-    onChangeConfig((currentConfig) => ({
-      ...currentConfig,
-      tags: currentConfig.tags.filter((t) => t !== tag),
-    }));
-    setSelectedTags((prev) =>
-      prev.filter((selectedTag) => selectedTag !== tag),
-    );
-    onChangeLiveState((currentLiveState) => ({
-      ...currentLiveState,
-      items: currentLiveState.items.map((item) => ({
-        ...item,
-        tags: item.tags.filter((itemTag) => itemTag !== tag),
-      })),
-    }));
-  };
 
   const handleNewTask = () => {
     if (taskInput.trim() === "") return;
@@ -92,14 +53,12 @@ export const KanbanCreator = ({
           id: highestId + 1,
           feature: taskInput.trim(),
           status: newTaskStatus,
-          tags: selectedTags,
         },
         ...currentLiveState.items,
       ],
     }));
     setTaskInput("");
     setNewTaskStatus("Todo");
-    setSelectedTags([]);
   };
 
   const handleStatusChange = (id: number, status: KanbanItem["status"]) => {
@@ -182,84 +141,12 @@ export const KanbanCreator = ({
                 </SelectGroup>
               </SelectContent>
             </Select>
-            <div className="flex items-center justify-start gap-2 w-full flex-wrap">
-              {config.tags.length > 0 ? (
-                config.tags.map((tag) => (
-                  <button
-                    key={tag}
-                    className={`max-w-full min-w-0 px-1.5 py-0.5 rounded-md border wrap-break-word ${!selectedTags.includes(tag) && "border-(--gray-page) text-(--gray-page)"} `}
-                    onClick={() => {
-                      if (selectedTags.includes(tag)) {
-                        setSelectedTags((prev) =>
-                          prev.filter((prevTag) => prevTag !== tag),
-                        );
-                      } else {
-                        setSelectedTags((prev) => [...prev, tag]);
-                      }
-                    }}
-                  >
-                    {tag}
-                  </button>
-                ))
-              ) : (
-                <span className="text-(--gray-page)">No tags setup</span>
-              )}
-            </div>
 
             <button
               className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
               onClick={handleNewTask}
             >
               Add task
-            </button>
-          </>
-        )}
-
-        <div className="w-full h-px bg-(--gray)" />
-
-        <button
-          className="@[40rem]:text-lg text-base font-medium flex items-center justify-start gap-2 w-full"
-          onClick={() => setEditingTags((prev) => !prev)}
-        >
-          Tags
-          <ChevronRight size={18} className={`${editingTags && "rotate-90"}`} />
-        </button>
-        {editingTags && (
-          <>
-            <input
-              type="text"
-              placeholder="Add a new tag..."
-              className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleNewTag();
-                }
-              }}
-            />
-            <div className="flex items-center justify-start gap-2 w-full flex-wrap">
-              {config.tags.map((tag) => (
-                <div
-                  key={tag}
-                  className="max-w-full min-w-0 pl-1.5 pr-0.5 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) flex items-center gap-1 wrap-break-word"
-                >
-                  <span className="min-w-0 wrap-break-word">{tag}</span>
-                  <button
-                    type="button"
-                    className="hover:bg-(--gray)/20 p-1 rounded-sm"
-                    onClick={() => deleteTag(tag)}
-                  >
-                    <Trash size={16} />
-                  </button>
-                </div>
-              ))}
-            </div>
-            <button
-              className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
-              onClick={handleNewTag}
-            >
-              Add tag
             </button>
           </>
         )}

@@ -9,8 +9,10 @@ import { KanbanClient } from "./KanbanClient";
 export const Kanban = ({ instanceId }: { instanceId: string }) => {
   const { isLive } = useEditMode();
   const liveConfigActivator = useLiveComponentConfigActivator(instanceId);
-  const { component, liveState, updateConfig, updateLiveState } =
-    usePageComponentState(instanceId, "Kanban");
+  const { liveState, updateLiveState } = usePageComponentState(
+    instanceId,
+    "Kanban",
+  );
 
   return (
     <div
@@ -21,9 +23,7 @@ export const Kanban = ({ instanceId }: { instanceId: string }) => {
         <KanbanClient liveState={liveState.state} />
       ) : (
         <KanbanCreator
-          config={component.config}
           liveState={liveState.state}
-          onChangeConfig={updateConfig}
           onChangeLiveState={updateLiveState}
         />
       )}

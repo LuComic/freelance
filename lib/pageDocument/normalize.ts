@@ -118,15 +118,10 @@ function normalizeKanbanItems(value: unknown) {
         typeof item.id === "number" && Number.isFinite(item.id)
           ? item.id
           : index + 1;
-      const tags = Array.isArray(item.tags)
-        ? item.tags.filter((tag): tag is string => typeof tag === "string")
-        : [];
-
       const result: KanbanItem = {
         id,
         feature: item.feature,
         status,
-        tags,
         ...(item.dismissed === true ? { dismissed: true } : {}),
       };
 
@@ -371,13 +366,7 @@ function normalizeComponentInstance(
       return {
         id,
         type,
-        config: {
-          tags: Array.isArray(value.config.tags)
-            ? value.config.tags.filter(
-                (tag): tag is string => typeof tag === "string",
-              )
-            : fallback.config.tags,
-        },
+        config: fallback.config,
       };
     }
     case "MainHeadline":
@@ -698,10 +687,10 @@ export function mergePageConfigDocument(
     }
 
     nextComponents[id] = baseComponent
-      ? {
+      ? ({
           ...component,
           state: baseComponent.state,
-        } as PageComponentDocument
+        } as PageComponentDocument)
       : component;
   }
 
