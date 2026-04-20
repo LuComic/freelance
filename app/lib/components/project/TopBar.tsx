@@ -46,6 +46,7 @@ export const TopBar = () => {
   const { openTemplateSearch } = useSearchBar();
   const currentMode = isLive ? "live" : "edit";
   const pathname = usePathname();
+  const [hasHydrated, setHasHydrated] = useState(false);
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [isDeleteConfirming, setIsDeleteConfirming] = useState(false);
@@ -97,6 +98,12 @@ export const TopBar = () => {
     });
   }, [pageDocument?.activePage?.page.id]);
 
+  useEffect(() => {
+    queueMicrotask(() => {
+      setHasHydrated(true);
+    });
+  }, []);
+
   const handleDeletePage = async () => {
     if (!pageDocument || pageDocument.deleteStatus === "deleting") {
       return;
@@ -110,6 +117,10 @@ export const TopBar = () => {
     await pageDocument.deletePage();
     setIsDeleteConfirming(false);
   };
+
+  if (!hasHydrated) {
+    return null;
+  }
 
   return (
     <>

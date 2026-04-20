@@ -392,7 +392,7 @@ export const PersonModal = ({
               </button>
               <button
                 type="button"
-                className="gap-1 w-full text-(--gray-page) underline underline-offset-4 disabled:opacity-60 hover:text-(--gray)"
+                className="gap-1 text-(--gray-page) underline underline-offset-4 disabled:opacity-60 hover:text-(--gray) mr-auto"
                 onClick={() => void handleAction("blockUser")}
                 disabled={isPending}
               >
@@ -411,7 +411,7 @@ export const PersonModal = ({
               </button>
               <button
                 type="button"
-                className="gap-1 w-full text-(--gray-page) underline underline-offset-4 disabled:opacity-60 hover:text-(--gray)"
+                className="gap-1 text-(--gray-page) underline underline-offset-4 disabled:opacity-60 hover:text-(--gray) mr-auto"
                 onClick={() => void handleAction("blockUser")}
                 disabled={isPending}
               >
@@ -438,7 +438,7 @@ export const PersonModal = ({
               </button>
               <button
                 type="button"
-                className="gap-1 w-full text-(--gray-page) underline underline-offset-4 disabled:opacity-60 hover:text-(--gray)"
+                className="gap-1 text-(--gray-page) underline underline-offset-4 disabled:opacity-60 hover:text-(--gray) mr-auto"
                 onClick={() => void handleAction("blockUser")}
                 disabled={isPending}
               >
@@ -457,7 +457,7 @@ export const PersonModal = ({
               </button>
               <button
                 type="button"
-                className="gap-1 w-full text-(--gray-page) underline underline-offset-4 disabled:opacity-60 hover:text-(--gray)"
+                className="gap-1 text-(--gray-page) underline underline-offset-4 disabled:opacity-60 hover:text-(--gray) mr-auto"
                 onClick={() => void handleAction("blockUser")}
                 disabled={isPending}
               >
