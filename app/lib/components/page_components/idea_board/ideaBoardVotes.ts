@@ -1,5 +1,7 @@
 import type { PageComponentLiveStateByType } from "@/lib/pageDocument";
 
+export const MAX_IDEA_LENGTH = 400;
+
 type IdeaBoardIdea =
   PageComponentLiveStateByType<"IdeaBoard">["state"]["ideas"][number];
 type IdeaBoardUserId = string;

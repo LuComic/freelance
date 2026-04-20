@@ -34,7 +34,7 @@ export const SimpleInputClient = ({
 
   return (
     <>
-      <div className="border-(--gray) border-t pt-2 w-full flex flex-col gap-2">
+      <div className="border-(--gray) w-full flex flex-col gap-2">
         <input
           type="text"
           placeholder="This is what i think..."

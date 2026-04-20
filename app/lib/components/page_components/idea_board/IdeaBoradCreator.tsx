@@ -7,7 +7,11 @@ import type {
 } from "@/lib/pageDocument";
 import { useState } from "react";
 import { ChevronRight, Trash } from "lucide-react";
-import { createIdea, getIdeaAuthorName } from "./ideaBoardVotes";
+import {
+  createIdea,
+  getIdeaAuthorName,
+  MAX_IDEA_LENGTH,
+} from "./ideaBoardVotes";
 
 type IdeaBoardCreatorProps = {
   authorNames: Record<string, string>;
@@ -100,6 +104,7 @@ export const IdeaBoradCreator = ({
               placeholder="Add a new tag..."
               className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
               value={addingInput}
+              maxLength={MAX_IDEA_LENGTH}
               onChange={(e) => setAddingInput(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {

@@ -1,10 +1,17 @@
-<svg width="640" height="360" viewBox="0 0 640 360" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="640" height="360" rx="28" fill="#141414"/>
-  <rect x="72" y="56" width="496" height="248" rx="18" fill="#1E1E1E" stroke="#3D3D3D" stroke-width="2"/>
-  <rect x="108" y="92" width="188" height="20" rx="10" fill="#F4F0E8"/>
-  <rect x="108" y="126" width="310" height="14" rx="7" fill="#77736B"/>
-  <rect x="108" y="166" width="424" height="42" rx="10" fill="#141414" stroke="#3D3D3D" stroke-width="2"/>
-  <rect x="128" y="180" width="126" height="14" rx="7" fill="#77736B"/>
-  <rect x="108" y="224" width="198" height="34" rx="10" fill="#D7FF63"/>
-  <rect x="128" y="234" width="98" height="14" rx="7" fill="#141414"/>
+<svg width="320" height="180" viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="320" height="180" fill="#171717"/>
+  <text x="10" y="20" font-size="10" fill="#E8E8E8" font-family="Arial, sans-serif">Form setup</text>
+  <rect x="10" y="28" width="188" height="5" rx="2.5" fill="#777"/>
+  <line x1="10" y1="40" x2="310" y2="40" stroke="#454545"/>
+  <rect x="10" y="48" width="92" height="6" rx="3" fill="#EAEAEA"/>
+  <rect x="10" y="61" width="184" height="5" rx="2.5" fill="#8A8A8A"/>
+  <rect x="10" y="76" width="300" height="22" rx="4" fill="#0C0C0C" stroke="#454545"/>
+  <rect x="18" y="84" width="108" height="6" rx="3" fill="#6F6F6F"/>
+  <rect x="10" y="108" width="116" height="6" rx="3" fill="#EAEAEA"/>
+  <circle cx="17" cy="126" r="4.5" fill="#2563EB"/>
+  <text x="28" y="129" font-size="7" fill="#D8D8D8" font-family="Arial, sans-serif">Required option</text>
+  <circle cx="17" cy="144" r="6" fill="#0A0A0A" stroke="#454545"/>
+  <text x="28" y="147" font-size="7" fill="#D8D8D8" font-family="Arial, sans-serif">Optional option</text>
+  <rect x="250" y="140" width="60" height="20" rx="6" fill="#2563EB"/>
+  <text x="269" y="153" font-size="8" fill="#F2F6FF" font-family="Arial, sans-serif">Submit</text>
 </svg>

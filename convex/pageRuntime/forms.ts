@@ -8,7 +8,7 @@ import { buildProjectMemberDisplayName } from "../projects/model";
 import { parsePageDocument } from "../pages/content";
 import type { FormFieldConfig } from "../../lib/pageDocument/registered/Form.definition";
 
-const MAX_TEXT_ANSWER_LENGTH = 5000;
+const MAX_TEXT_ANSWER_LENGTH = 1000;
 const NO_ANSWER_DISPLAY_VALUE = "No answer.";
 
 type FormSubmissionAnswerValue = string | string[] | null;

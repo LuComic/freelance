@@ -114,7 +114,7 @@ const LEGACY_PAGE_COMPONENT_CATALOG = [
       name: "Page Link",
       description:
         "Link to another page in the current project. Command: /pagelink",
-      previewSrc: "/component-previews/text-h3.svg",
+      previewSrc: "/component-previews/page-link.svg",
       tag: "text",
       limited: false,
     },

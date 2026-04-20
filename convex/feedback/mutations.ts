@@ -3,7 +3,7 @@ import { mutation } from "../_generated/server";
 import { requireCurrentAuth } from "../lib/auth";
 import { invalidState, notFound, unauthorized } from "../lib/errors";
 
-const MAX_IDEA_LENGTH = 280;
+const MAX_IDEA_LENGTH = 400;
 const FALLBACK_AUTHOR_NAME = "Anonymous";
 const ALLOWED_TAGS = ["Bug", "Critical", "Feature", "UI/UX"] as const;
 

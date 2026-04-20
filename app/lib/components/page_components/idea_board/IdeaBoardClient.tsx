@@ -12,6 +12,7 @@ import {
   getIdeaAuthorName,
   getIdeaVoteCount,
   hasIdeaVoteFromUser,
+  MAX_IDEA_LENGTH,
   toggleIdeaVote,
 } from "./ideaBoardVotes";
 
@@ -96,6 +97,7 @@ export const IdeaBoardClient = ({
                 placeholder="Share a new idea..."
                 className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
                 value={addingInput}
+                maxLength={MAX_IDEA_LENGTH}
                 onChange={(e) => setAddingInput(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {

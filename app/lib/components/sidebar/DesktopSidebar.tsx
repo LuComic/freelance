@@ -140,7 +140,7 @@ export const DesktopSidebar = ({
                 acknowledgeConnectionsRequest();
                 setSidebarOpen(false);
               }}
-              className=" p-1 rounded-lg hover:bg-(--darkest-hover)"
+              className="p-1 rounded-lg hover:bg-(--darkest-hover)"
             >
               <PanelLeftClose size={20} />
             </button>

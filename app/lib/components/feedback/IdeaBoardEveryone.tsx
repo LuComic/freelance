@@ -35,6 +35,8 @@ type FeedbackIdea = {
 
 type FeedbackTag = "Bug" | "Critical" | "Feature" | "UI/UX";
 
+const MAX_IDEA_LENGTH = 400;
+
 const UNSELECTED_TAG_CLASS_NAME =
   "pl-2 pr-1.5 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) flex items-center gap-1";
 
@@ -136,9 +138,10 @@ export const IdeaBoradEveryone = () => {
           <>
             <input
               type="text"
-              placeholder="Add a new tag..."
+              placeholder="Give some feedback..."
               className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
               value={addingInput}
+              maxLength={MAX_IDEA_LENGTH}
               onChange={(e) => setAddingInput(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !submitPending) {
