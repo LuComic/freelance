@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 import {
+  EditModeSubtreeModeProvider,
   useEditMode,
   type InsertableComponentCommand,
 } from "@/app/lib/components/project/EditModeContext";
@@ -30,11 +31,18 @@ import {
 import { listAllowedInsertableCommands } from "@/app/lib/components/page_components/componentCatalog";
 import { INITIAL_TEXT } from "@/app/lib/components/page_components/testing_editor/constants";
 import { renderContentWithComponents } from "@/app/lib/components/page_components/testing_editor/renderContent";
+import { EDITOR_SPLIT_RATIO_COOKIE } from "@/app/lib/cookies";
+import { useResizableSplitRatio } from "@/app/lib/hooks/useResizableSplitRatio";
+
+const SPLIT_MIN_RATIO = 1 / 3;
+const SPLIT_DEFAULT_RATIO = 1 / 2;
+const SPLIT_MAX_RATIO = 2 / 3;
 
 export default function TestingEditorClient() {
   const {
     isEditing,
     isLive,
+    isSplitView,
     pendingComponentInsert,
     clearPendingComponentInsert,
     requestOpenComponentLibrary,
@@ -49,6 +57,19 @@ export default function TestingEditorClient() {
     top: number;
     left: number;
   } | null>(null);
+  const {
+    containerRef: splitContainerRef,
+    ratio: splitRatio,
+    leftPaneStyle,
+    rightPaneStyle,
+    startResize,
+    resizeByKeyboard,
+  } = useResizableSplitRatio({
+    cookieName: EDITOR_SPLIT_RATIO_COOKIE,
+    defaultRatio: SPLIT_DEFAULT_RATIO,
+    minRatio: SPLIT_MIN_RATIO,
+    maxRatio: SPLIT_MAX_RATIO,
+  });
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lastCursorRef = useRef(0);
   const content = pageDocument?.document?.editorText ?? INITIAL_TEXT;
@@ -255,53 +276,120 @@ export default function TestingEditorClient() {
     return <div className="w-full flex flex-col gap-1">{renderedContent}</div>;
   }
 
-  return (
-    <div className="w-full h-[calc(100dvh-6rem)] min-h-112 border border-transparent rounded-md overflow-hidden">
-      <div className="h-full w-full flex items-start justify-start">
-        <div
-          aria-hidden
-          className="@[35rem]:block hidden w-11 shrink-0 h-full text-right text-sm text-(--gray-page) select-none overflow-hidden border-r border-(--gray)/40"
-        >
-          <div style={{ transform: `translateY(-${scrollTop}px)` }}>
-            {lines.map((lineNumber) => (
-              <div
-                key={lineNumber}
-                className={`px-3 text-editor-font leading-6 ${
-                  lineNumber === activeLine
-                    ? "bg-(--gray)/20 text-(--light)"
-                    : ""
-                }`}
-                style={{ height: `${lineHeights[lineNumber - 1] ?? 24}px` }}
-              >
-                {lineNumber}
-              </div>
-            ))}
-          </div>
+  const editorPane = (
+    <div className="h-full w-full flex items-start justify-start">
+      <div
+        aria-hidden
+        className="@[35rem]:block hidden w-11 shrink-0 h-full text-right text-sm text-(--gray-page) select-none overflow-hidden border-r border-(--gray)/40"
+      >
+        <div style={{ transform: `translateY(-${scrollTop}px)` }}>
+          {lines.map((lineNumber) => (
+            <div
+              key={lineNumber}
+              className={`px-3 text-editor-font leading-6 ${
+                lineNumber === activeLine ? "bg-(--gray)/20 text-(--light)" : ""
+              }`}
+              style={{ height: `${lineHeights[lineNumber - 1] ?? 24}px` }}
+            >
+              {lineNumber}
+            </div>
+          ))}
         </div>
+      </div>
 
-        <div className="relative h-full w-full">
-          <textarea
-            ref={textareaRef}
-            value={content}
-            onChange={(event) => {
-              const nextValue = event.target.value;
-              const cursorPosition = event.target.selectionStart;
-              lastCursorRef.current = cursorPosition;
+      <div className="relative h-full w-full">
+        <textarea
+          ref={textareaRef}
+          value={content}
+          onChange={(event) => {
+            const nextValue = event.target.value;
+            const cursorPosition = event.target.selectionStart;
+            lastCursorRef.current = cursorPosition;
 
-              const slashRange = getSlashCommandTokenRange(
-                nextValue,
-                cursorPosition,
+            const slashRange = getSlashCommandTokenRange(
+              nextValue,
+              cursorPosition,
+            );
+            const command = slashRange?.token.slice(1).toLowerCase() as
+              | InsertableComponentCommand
+              | undefined;
+            const structuralReplacement =
+              replaceSlashCommandWithStructuralBlock(nextValue, cursorPosition);
+
+            if (structuralReplacement) {
+              updateEditorText(structuralReplacement.nextValue);
+              setActiveLine(
+                getActiveLineFromCursor(
+                  structuralReplacement.nextValue,
+                  structuralReplacement.nextCursor,
+                ),
               );
-              const command = slashRange?.token.slice(1).toLowerCase() as
-                | InsertableComponentCommand
-                | undefined;
+              setCaretPosition(structuralReplacement.nextCursor);
+              return;
+            }
+
+            const replacement =
+              slashRange &&
+              command &&
+              allowedInsertableCommands.includes(command) &&
+              resolveComponentTypeFromCommand(command)
+                ? insertComponentAtRange({
+                    command,
+                    value: nextValue,
+                    start: slashRange.start,
+                    end: slashRange.end,
+                  })
+                : null;
+
+            if (replacement) {
+              setActiveLine(
+                getActiveLineFromCursor(
+                  replacement.nextValue,
+                  replacement.nextCursor,
+                ),
+              );
+              setCaretPosition(replacement.nextCursor);
+              return;
+            }
+
+            updateEditorText(nextValue);
+            setActiveLine(getActiveLineFromCursor(nextValue, cursorPosition));
+            recalculateLineHeights();
+            updateGhostCompletion(nextValue, cursorPosition);
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              const textarea = event.currentTarget;
+              const slashAction = consumeSlashActionCommand(
+                textarea.value,
+                textarea.selectionStart,
+              );
+              if (slashAction) {
+                event.preventDefault();
+                event.stopPropagation();
+                if (slashAction.action.type === "open-component-library") {
+                  requestOpenComponentLibrary();
+                } else if (slashAction.action.type === "open-tagged-search") {
+                  openTaggedSearch(slashAction.action.tag);
+                }
+                updateEditorText(slashAction.nextValue);
+                setActiveLine(
+                  getActiveLineFromCursor(
+                    slashAction.nextValue,
+                    slashAction.nextCursor,
+                  ),
+                );
+                setCaretPosition(slashAction.nextCursor);
+                return;
+              }
+
               const structuralReplacement =
                 replaceSlashCommandWithStructuralBlock(
-                  nextValue,
-                  cursorPosition,
+                  textarea.value,
+                  textarea.selectionStart,
                 );
-
               if (structuralReplacement) {
+                event.preventDefault();
                 updateEditorText(structuralReplacement.nextValue);
                 setActiveLine(
                   getActiveLineFromCursor(
@@ -313,6 +401,13 @@ export default function TestingEditorClient() {
                 return;
               }
 
+              const slashRange = getSlashCommandTokenRange(
+                textarea.value,
+                textarea.selectionStart,
+              );
+              const command = slashRange?.token.slice(1).toLowerCase() as
+                | InsertableComponentCommand
+                | undefined;
               const replacement =
                 slashRange &&
                 command &&
@@ -320,173 +415,144 @@ export default function TestingEditorClient() {
                 resolveComponentTypeFromCommand(command)
                   ? insertComponentAtRange({
                       command,
-                      value: nextValue,
+                      value: textarea.value,
                       start: slashRange.start,
                       end: slashRange.end,
                     })
                   : null;
-
-              if (replacement) {
-                setActiveLine(
-                  getActiveLineFromCursor(
-                    replacement.nextValue,
-                    replacement.nextCursor,
-                  ),
-                );
-                setCaretPosition(replacement.nextCursor);
-                return;
-              }
-
-              updateEditorText(nextValue);
-              setActiveLine(getActiveLineFromCursor(nextValue, cursorPosition));
-              recalculateLineHeights();
-              updateGhostCompletion(nextValue, cursorPosition);
-            }}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                const textarea = event.currentTarget;
-                const slashAction = consumeSlashActionCommand(
-                  textarea.value,
-                  textarea.selectionStart,
-                );
-                if (slashAction) {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  if (slashAction.action.type === "open-component-library") {
-                    requestOpenComponentLibrary();
-                  } else if (slashAction.action.type === "open-tagged-search") {
-                    openTaggedSearch(slashAction.action.tag);
-                  }
-                  updateEditorText(slashAction.nextValue);
-                  setActiveLine(
-                    getActiveLineFromCursor(
-                      slashAction.nextValue,
-                      slashAction.nextCursor,
-                    ),
-                  );
-                  setCaretPosition(slashAction.nextCursor);
-                  return;
-                }
-
-                const structuralReplacement =
-                  replaceSlashCommandWithStructuralBlock(
-                    textarea.value,
-                    textarea.selectionStart,
-                  );
-                if (structuralReplacement) {
-                  event.preventDefault();
-                  updateEditorText(structuralReplacement.nextValue);
-                  setActiveLine(
-                    getActiveLineFromCursor(
-                      structuralReplacement.nextValue,
-                      structuralReplacement.nextCursor,
-                    ),
-                  );
-                  setCaretPosition(structuralReplacement.nextCursor);
-                  return;
-                }
-
-                const slashRange = getSlashCommandTokenRange(
-                  textarea.value,
-                  textarea.selectionStart,
-                );
-                const command = slashRange?.token.slice(1).toLowerCase() as
-                  | InsertableComponentCommand
-                  | undefined;
-                const replacement =
-                  slashRange &&
-                  command &&
-                  allowedInsertableCommands.includes(command) &&
-                  resolveComponentTypeFromCommand(command)
-                    ? insertComponentAtRange({
-                        command,
-                        value: textarea.value,
-                        start: slashRange.start,
-                        end: slashRange.end,
-                      })
-                    : null;
-                if (!replacement) {
-                  return;
-                }
-
-                event.preventDefault();
-                const nextValue = `${replacement.nextValue.slice(
-                  0,
-                  replacement.nextCursor,
-                )}\n${replacement.nextValue.slice(replacement.nextCursor)}`;
-                const nextCursor = replacement.nextCursor + 1;
-                updateEditorText(nextValue);
-                setActiveLine(getActiveLineFromCursor(nextValue, nextCursor));
-                setCaretPosition(nextCursor);
-                return;
-              }
-
-              if (event.key !== "Tab") {
-                return;
-              }
-
-              const textarea = event.currentTarget;
-              const completion = completeSlashCommand(
-                textarea.value,
-                textarea.selectionStart,
-                allowedInsertableCommands,
-              );
-              if (!completion) {
+              if (!replacement) {
                 return;
               }
 
               event.preventDefault();
-              updateEditorText(completion.nextValue);
-              setActiveLine(
-                getActiveLineFromCursor(
-                  completion.nextValue,
-                  completion.nextCursor,
-                ),
-              );
-              setCaretPosition(completion.nextCursor);
+              const nextValue = `${replacement.nextValue.slice(
+                0,
+                replacement.nextCursor,
+              )}\n${replacement.nextValue.slice(replacement.nextCursor)}`;
+              const nextCursor = replacement.nextCursor + 1;
+              updateEditorText(nextValue);
+              setActiveLine(getActiveLineFromCursor(nextValue, nextCursor));
+              setCaretPosition(nextCursor);
+              return;
+            }
+
+            if (event.key !== "Tab") {
+              return;
+            }
+
+            const textarea = event.currentTarget;
+            const completion = completeSlashCommand(
+              textarea.value,
+              textarea.selectionStart,
+              allowedInsertableCommands,
+            );
+            if (!completion) {
+              return;
+            }
+
+            event.preventDefault();
+            updateEditorText(completion.nextValue);
+            setActiveLine(
+              getActiveLineFromCursor(
+                completion.nextValue,
+                completion.nextCursor,
+              ),
+            );
+            setCaretPosition(completion.nextCursor);
+          }}
+          onClick={() => {
+            updateActiveLine();
+            const textarea = textareaRef.current;
+            if (!textarea) return;
+            updateGhostCompletion(textarea.value, textarea.selectionStart);
+          }}
+          onKeyUp={() => {
+            updateActiveLine();
+            const textarea = textareaRef.current;
+            if (!textarea) return;
+            updateGhostCompletion(textarea.value, textarea.selectionStart);
+          }}
+          onSelect={() => {
+            updateActiveLine();
+            const textarea = textareaRef.current;
+            if (!textarea) return;
+            updateGhostCompletion(textarea.value, textarea.selectionStart);
+          }}
+          onScroll={(event) => {
+            setScrollTop(event.currentTarget.scrollTop);
+            updateGhostCompletion(
+              event.currentTarget.value,
+              event.currentTarget.selectionStart,
+            );
+          }}
+          spellCheck={false}
+          className="relative z-10 h-full w-full resize-none bg-transparent p-0 pt-2 @[35rem]:pt-0 pl-4 text-base leading-6 text-(--light) caret-(--light) border-none outline-none focus:ring-0 text-editor-font"
+          placeholder="Start typing..."
+        />
+        {ghostCompletion ? (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute z-20 text-base leading-7 text-(--vibrant)/50"
+            style={{
+              top: ghostCompletion.top,
+              left: ghostCompletion.left,
+              transform: "translateY(-4.8px)",
             }}
-            onClick={() => {
-              updateActiveLine();
-              const textarea = textareaRef.current;
-              if (!textarea) return;
-              updateGhostCompletion(textarea.value, textarea.selectionStart);
-            }}
-            onKeyUp={() => {
-              updateActiveLine();
-              const textarea = textareaRef.current;
-              if (!textarea) return;
-              updateGhostCompletion(textarea.value, textarea.selectionStart);
-            }}
-            onSelect={() => {
-              updateActiveLine();
-              const textarea = textareaRef.current;
-              if (!textarea) return;
-              updateGhostCompletion(textarea.value, textarea.selectionStart);
-            }}
-            onScroll={(event) => {
-              setScrollTop(event.currentTarget.scrollTop);
-              updateGhostCompletion(
-                event.currentTarget.value,
-                event.currentTarget.selectionStart,
-              );
-            }}
-            spellCheck={false}
-            className="relative z-10 h-full w-full resize-none bg-transparent p-0 pt-2 @[35rem]:pt-0 pl-4 text-base leading-6 text-(--light) caret-(--light) border-none outline-none focus:ring-0 text-editor-font"
-            placeholder="Start typing..."
-          />
-          {ghostCompletion ? (
-            <span
-              aria-hidden
-              className="pointer-events-none absolute z-20 text-base leading-7 text-(--vibrant)/50"
-              style={{
-                top: ghostCompletion.top,
-                left: ghostCompletion.left,
-                transform: "translateY(-4.8px)",
-              }}
-            >
-              {ghostCompletion.suffix}
-            </span>
-          ) : null}
+          >
+            {ghostCompletion.suffix}
+          </span>
+        ) : null}
+      </div>
+    </div>
+  );
+
+  const livePreviewPane = (
+    <EditModeSubtreeModeProvider isEditing={false} isLive={true}>
+      <div className="w-full flex flex-col gap-1">{renderedContent}</div>
+    </EditModeSubtreeModeProvider>
+  );
+
+  if (!isSplitView) {
+    return (
+      <div className="w-full h-[calc(100dvh-6rem)] min-h-112 border border-transparent rounded-md overflow-hidden">
+        {editorPane}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      ref={splitContainerRef}
+      className="@container w-full h-[calc(100dvh-6rem)] min-h-112 border border-transparent rounded-md overflow-hidden"
+    >
+      <div className="h-full w-full flex flex-col @[55rem]:flex-row items-stretch justify-start">
+        <div
+          className="min-w-0 h-full w-full flex-1 @[55rem]:w-auto @[55rem]:grow-0 @[55rem]:shrink-0"
+          style={leftPaneStyle}
+        >
+          {editorPane}
+        </div>
+
+        <div
+          role="separator"
+          aria-label="Resize split view"
+          aria-orientation="vertical"
+          aria-valuemin={Math.round(SPLIT_MIN_RATIO * 100)}
+          aria-valuemax={Math.round(SPLIT_MAX_RATIO * 100)}
+          aria-valuenow={Math.round(splitRatio * 100)}
+          tabIndex={0}
+          onPointerDown={startResize}
+          onKeyDown={resizeByKeyboard}
+          className="hidden @[55rem]:block h-full w-2 shrink-0 cursor-ew-resize touch-none bg-transparent"
+        >
+          <div className="mx-auto h-full w-px bg-(--gray)" />
+        </div>
+
+        <div
+          className="hidden @[55rem]:block min-w-0 h-full overflow-y-auto pl-4"
+          style={rightPaneStyle}
+        >
+          {livePreviewPane}
         </div>
       </div>
     </div>

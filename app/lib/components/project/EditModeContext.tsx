@@ -32,6 +32,9 @@ type EditModeContextValue = {
   isLive: boolean;
   setIsLive: (value: boolean) => void;
   toggleLive: () => void;
+  isSplitView: boolean;
+  setIsSplitView: (value: boolean) => void;
+  toggleSplitView: () => void;
   modeLock: ModeLock;
   setModeLock: (value: ModeLock) => void;
   pendingComponentInsert: PendingComponentInsert | null;
@@ -55,6 +58,7 @@ const EditModeOverrideContext = createContext<EditModeOverrideValue | null>(
 export function EditModeProvider({ children }: { children: ReactNode }) {
   const [rawIsEditing, rawSetIsEditing] = useState(true);
   const [rawIsLive, rawSetIsLive] = useState(false);
+  const [isSplitView, setIsSplitView] = useState(false);
   const [modeLock, setModeLock] = useState<ModeLock>(null);
   const [pendingComponentInsert, setPendingComponentInsert] =
     useState<PendingComponentInsert | null>(null);
@@ -136,6 +140,10 @@ export function EditModeProvider({ children }: { children: ReactNode }) {
     });
   }, [modeLock]);
 
+  const toggleSplitView = useCallback(() => {
+    setIsSplitView((prev) => !prev);
+  }, []);
+
   const value = useMemo(
     () => ({
       isEditing,
@@ -144,6 +152,9 @@ export function EditModeProvider({ children }: { children: ReactNode }) {
       isLive,
       setIsLive,
       toggleLive,
+      isSplitView,
+      setIsSplitView,
+      toggleSplitView,
       modeLock,
       setModeLock,
       pendingComponentInsert,
@@ -190,6 +201,7 @@ export function EditModeProvider({ children }: { children: ReactNode }) {
       componentConfigOpenRequestNonce,
       isEditing,
       isLive,
+      isSplitView,
       modeLock,
       pendingComponentInsert,
       selectedConfigComponentInstanceId,
@@ -197,6 +209,7 @@ export function EditModeProvider({ children }: { children: ReactNode }) {
       setIsLive,
       toggleEditing,
       toggleLive,
+      toggleSplitView,
     ],
   );
 

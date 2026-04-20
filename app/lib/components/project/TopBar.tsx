@@ -6,6 +6,7 @@ import {
   Pencil,
   Radio,
   Search,
+  SeparatorVertical,
   Share,
   Trash,
 } from "lucide-react";
@@ -33,7 +34,14 @@ import { SaveTemplateModal } from "./SaveTemplateModal";
 import { useSearchBar } from "../searchbar/SearchBarContext";
 
 export const TopBar = () => {
-  const { isLive, modeLock, setIsEditing, setIsLive } = useEditMode();
+  const {
+    isLive,
+    modeLock,
+    setIsEditing,
+    setIsLive,
+    isSplitView,
+    toggleSplitView,
+  } = useEditMode();
   const pageDocument = useOptionalPageDocument();
   const { openTemplateSearch } = useSearchBar();
   const currentMode = isLive ? "live" : "edit";
@@ -246,10 +254,16 @@ export const TopBar = () => {
             </p>
           )}
           <button
-            className="text-sm gap-1 hidden @[55rem]:flex items-center justify-center p-1 @[48rem]:px-2 @[48rem]:py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) hover:bg-(--gray)/20 ml-auto"
-            onClick={() => void pageDocument?.createPageAndOpen()}
+            type="button"
+            aria-pressed={isSplitView}
+            className={`text-sm gap-1 hidden @[55rem]:flex items-center justify-center p-1 @[48rem]:px-2 @[48rem]:py-0.5 rounded-md border ml-auto ${
+              isSplitView
+                ? "border-(--vibrant) bg-(--vibrant)/20 text-(--light) hover:bg-(--vibrant-hover)/20"
+                : "border-(--gray-page) text-(--gray-page) hover:bg-(--gray)/20"
+            }`}
+            onClick={toggleSplitView}
           >
-            <FilePlusCorner size={15} />
+            <SeparatorVertical size={15} />
             <span>Split view</span>
           </button>
           <button
