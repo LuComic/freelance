@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import { cookies } from "next/headers";
+import { ConvexClientProvider } from "../ConvexClientProvider";
 import { Sidebar } from "../lib/components/sidebar/Sidebar";
 import { Chat } from "../lib/components/chat/Chat";
 import { SearchBar } from "../lib/components/searchbar/SearchBar";
@@ -61,37 +63,41 @@ export default async function ProjectViewLayout({
   const initialTabsState = parseTabsCookie(tabsValue);
 
   return (
-    <div
-      className="antialiased min-h-dvh h-auto w-screen flex items-start justify-start md:h-dvh md:items-stretch md:overflow-hidden"
-      style={{
-        scrollbarColor: "gray transparent",
-        scrollbarWidth: "thin",
-      }}
-    >
-      <SearchBarProvider>
-        <SidebarControllerProvider>
-          <Sidebar
-            initialSidebarOpen={initialSidebarOpen}
-            initialSidebarWidth={initialSidebarWidth}
-          />
-          <EditModeProvider>
-            <PageDocumentProvider>
-              <SearchBar />
-              <div className="relative flex-1 min-w-0 flex flex-col items-start justify-start md:h-full md:min-h-0">
-                <Tab initialTabsState={initialTabsState} />
-                <TopBar />
-                <div className="@container w-full md:px-4 px-2 pt-4 pb-8 flex flex-col items-start justify-start gap-4 md:flex-1 md:min-h-0 md:overflow-y-auto">
-                  {children}
-                </div>
-              </div>
-              <Chat
-                initialChatOpen={initialChatOpen}
-                initialChatWidth={initialChatWidth}
+    <ConvexAuthNextjsServerProvider>
+      <ConvexClientProvider>
+        <div
+          className="antialiased min-h-dvh h-auto w-screen flex items-start justify-start md:h-dvh md:items-stretch md:overflow-hidden"
+          style={{
+            scrollbarColor: "gray transparent",
+            scrollbarWidth: "thin",
+          }}
+        >
+          <SearchBarProvider>
+            <SidebarControllerProvider>
+              <Sidebar
+                initialSidebarOpen={initialSidebarOpen}
+                initialSidebarWidth={initialSidebarWidth}
               />
-            </PageDocumentProvider>
-          </EditModeProvider>
-        </SidebarControllerProvider>
-      </SearchBarProvider>
-    </div>
+              <EditModeProvider>
+                <PageDocumentProvider>
+                  <SearchBar />
+                  <div className="relative flex-1 min-w-0 flex flex-col items-start justify-start md:h-full md:min-h-0">
+                    <Tab initialTabsState={initialTabsState} />
+                    <TopBar />
+                    <div className="@container w-full md:px-4 px-2 pt-4 pb-8 flex flex-col items-start justify-start gap-4 md:flex-1 md:min-h-0 md:overflow-y-auto">
+                      {children}
+                    </div>
+                  </div>
+                  <Chat
+                    initialChatOpen={initialChatOpen}
+                    initialChatWidth={initialChatWidth}
+                  />
+                </PageDocumentProvider>
+              </EditModeProvider>
+            </SidebarControllerProvider>
+          </SearchBarProvider>
+        </div>
+      </ConvexClientProvider>
+    </ConvexAuthNextjsServerProvider>
   );
 }

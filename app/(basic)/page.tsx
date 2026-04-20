@@ -48,9 +48,10 @@ export default function Home() {
               <Image
                 src="/landing/landing_image.webp"
                 alt="Project workspace preview"
-                width={1600}
-                height={920}
-                priority
+                width={3024}
+                height={1830}
+                preload
+                sizes="(min-width: 1280px) 1192px, (min-width: 1024px) calc(100vw - 88px), (min-width: 640px) calc(100vw - 72px), calc(100vw - 48px)"
                 className="h-auto w-full"
               />
             </div>

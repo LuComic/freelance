@@ -3,7 +3,7 @@
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FileItem } from "./FileItem";
 
 type FilesProps = {
@@ -23,23 +23,32 @@ export const Files = ({ closeSidebar }: FilesProps) => {
   const currentProject =
     projects?.find((project) => project.id === currentProjectId) ?? null;
   const projectTitle = currentProject?.name ?? "Projects";
-  const [expandedProjectIds, setExpandedProjectIds] = useState<string[]>(() =>
-    currentProjectId && currentPageId ? [currentProjectId] : [],
-  );
+  const [expandedProjectIds, setExpandedProjectIds] = useState<string[]>([]);
+  const [collapsedAutoExpansionKey, setCollapsedAutoExpansionKey] = useState<
+    string | null
+  >(null);
+  const autoExpandedProjectId =
+    currentProjectId && currentPageId ? currentProjectId : null;
+  const autoExpansionKey =
+    currentProjectId && currentPageId
+      ? `${currentProjectId}/${currentPageId}`
+      : null;
+  const effectiveExpandedProjectIds =
+    autoExpandedProjectId &&
+    autoExpansionKey !== collapsedAutoExpansionKey &&
+    !expandedProjectIds.includes(autoExpandedProjectId)
+      ? [...expandedProjectIds, autoExpandedProjectId]
+      : expandedProjectIds;
 
-  useEffect(() => {
-    if (!currentProjectId || !currentPageId) {
-      return;
+  const toggleProjectExpanded = (projectId: string) => {
+    const isExpanded = effectiveExpandedProjectIds.includes(projectId);
+
+    if (projectId === autoExpandedProjectId) {
+      setCollapsedAutoExpansionKey(isExpanded ? autoExpansionKey : null);
     }
 
     setExpandedProjectIds((prev) =>
-      prev.includes(currentProjectId) ? prev : [...prev, currentProjectId],
-    );
-  }, [currentPageId, currentProjectId]);
-
-  const toggleProjectExpanded = (projectId: string) => {
-    setExpandedProjectIds((prev) =>
-      prev.includes(projectId)
+      isExpanded
         ? prev.filter((expandedId) => expandedId !== projectId)
         : [...prev, projectId],
     );
@@ -63,7 +72,7 @@ export const Files = ({ closeSidebar }: FilesProps) => {
             key={project.id}
             project={project}
             currentPageId={currentPageId}
-            isExpanded={expandedProjectIds.includes(project.id)}
+            isExpanded={effectiveExpandedProjectIds.includes(project.id)}
             onToggleExpanded={() => toggleProjectExpanded(project.id)}
             closeSidebar={closeSidebar}
           />
