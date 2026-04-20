@@ -3,6 +3,7 @@
 import { useGuestAccountUpgrade } from "@/app/lib/hooks/useGuestAccountUpgrade";
 import { ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
+import { MAX_BIO_LENGTH, MAX_NAME_LENGTH } from "@/lib/inputLimits";
 
 type AccountSettingsSectionProps = {
   activeSection: string | null;
@@ -113,6 +114,7 @@ export function AccountSettingsSection({
                 placeholder="Enter a new username..."
                 className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
                 value={nameDraft}
+                maxLength={MAX_NAME_LENGTH}
                 onChange={(e) => setNameDraft(e.target.value)}
                 disabled={isProfileLoading || isSavingName}
                 onKeyDown={(e) => {
@@ -140,6 +142,7 @@ export function AccountSettingsSection({
                 placeholder="Enter a new bio..."
                 className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
                 value={bioDraft}
+                maxLength={MAX_BIO_LENGTH}
                 onChange={(e) => setBioDraft(e.target.value)}
                 disabled={isProfileLoading || isSavingBio}
                 onKeyDown={(e) => {

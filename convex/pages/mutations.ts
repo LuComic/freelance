@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation } from "../_generated/server";
 import { requireCurrentAuth } from "../lib/auth";
 import { invalidState, notFound } from "../lib/errors";
+import { assertMaxLength } from "../lib/inputValidation";
 import {
   requirePageAccess,
   requireProjectMember,
@@ -28,6 +29,7 @@ import {
 import { createInitialPage, parsePageDocument } from "./content";
 import { getCurrentEntitlementsForUser } from "../billing/model";
 import { findLimitedComponentAccessViolation } from "../../lib/pageDocument/componentAccess";
+import { MAX_SHORT_TITLE_LENGTH } from "../../lib/inputLimits";
 
 function buildProjectActorSnapshot(
   user: Parameters<typeof buildProjectMemberDisplayName>[0] & {
@@ -150,6 +152,7 @@ export const renamePage = mutation({
     if (!trimmedTitle) {
       throw invalidState("Page title cannot be empty.");
     }
+    assertMaxLength(trimmedTitle, MAX_SHORT_TITLE_LENGTH, "Page title");
 
     const page = await requirePageAccess(ctx, args.pageId, userId);
     await requireProjectEditor(ctx, page.projectId, userId);
@@ -185,6 +188,7 @@ export const savePage = mutation({
     if (!trimmedTitle) {
       throw invalidState("Page title cannot be empty.");
     }
+    assertMaxLength(trimmedTitle, MAX_SHORT_TITLE_LENGTH, "Page title");
 
     try {
       assertPageDocumentV1(args.document);
@@ -198,7 +202,9 @@ export const savePage = mutation({
       assertPageDocumentV1(args.baseDocument);
     } catch (error) {
       throw invalidState(
-        error instanceof Error ? error.message : "Page base document is invalid.",
+        error instanceof Error
+          ? error.message
+          : "Page base document is invalid.",
       );
     }
 
@@ -279,6 +285,7 @@ export const savePageLiveState = mutation({
     if (!trimmedTitle) {
       throw invalidState("Page title cannot be empty.");
     }
+    assertMaxLength(trimmedTitle, MAX_SHORT_TITLE_LENGTH, "Page title");
 
     try {
       assertPageDocumentV1(args.document);

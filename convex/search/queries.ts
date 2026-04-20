@@ -9,6 +9,7 @@ import { requireCurrentAuth } from "../lib/auth";
 import { assertNonAnonymousUser, isAnonymousUser } from "../lib/guests";
 import { APP_ERROR_CODES, ConvexDomainError } from "../lib/errors";
 import { getOrderedProjectPages } from "../lib/projectRecords";
+import { truncateInput, MAX_SEARCH_QUERY_LENGTH } from "../../lib/inputLimits";
 
 type ProjectSearchOrder = {
   projectId: Doc<"projects">["_id"];
@@ -127,7 +128,9 @@ export const searchPagesAcrossProjects = query({
   handler: async (ctx, args) => {
     try {
       const { userId, user } = await requireCurrentAuth(ctx);
-      const normalizedQuery = normalizeSearchQuery(args.query);
+      const normalizedQuery = normalizeSearchQuery(
+        truncateInput(args.query, MAX_SEARCH_QUERY_LENGTH),
+      );
       const limit = Math.max(1, Math.floor(args.limit ?? 10));
       const memberships = await ctx.db
         .query("projectMembers")
@@ -233,7 +236,9 @@ export const searchPeople = query({
     try {
       const { userId, user } = await requireCurrentAuth(ctx);
       assertNonAnonymousUser(user, "Guest accounts can't search for people.");
-      const normalizedQuery = normalizeSearchQuery(args.query);
+      const normalizedQuery = normalizeSearchQuery(
+        truncateInput(args.query, MAX_SEARCH_QUERY_LENGTH),
+      );
 
       if (normalizedQuery.length < 2) {
         return [];

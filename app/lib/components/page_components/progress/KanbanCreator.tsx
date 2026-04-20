@@ -14,6 +14,7 @@ import type {
   KanbanItem,
   PageComponentLiveStateByType,
 } from "@/lib/pageDocument";
+import { MAX_KANBAN_TASK_LENGTH } from "@/lib/inputLimits";
 
 type KanbanCreatorProps = {
   liveState: PageComponentLiveStateByType<"Kanban">["state"];
@@ -111,6 +112,7 @@ export const KanbanCreator = ({
               className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
               onChange={(e) => setTaskInput(e.target.value)}
               value={taskInput}
+              maxLength={MAX_KANBAN_TASK_LENGTH}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   handleNewTask();

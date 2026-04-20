@@ -4,6 +4,7 @@ import { usePageComponentState } from "@/app/lib/components/project/PageDocument
 import { useLiveComponentConfigActivator } from "@/app/lib/components/page_components/useLiveComponentConfigActivator";
 import { EditableTextField } from "./EditableTextField";
 import { TEXT_DEFAULTS } from "./textDefaults";
+import { MAX_SHORT_TITLE_LENGTH } from "@/lib/inputLimits";
 
 type SectionHeaderProps = {
   instanceId?: string;
@@ -25,6 +26,7 @@ function PersistedSectionHeader({ instanceId }: { instanceId: string }) {
       <EditableTextField
         value={component.config.text}
         placeholder="Section header"
+        maxLength={MAX_SHORT_TITLE_LENGTH}
         onChange={(value) =>
           updateConfig((config) => ({
             ...config,

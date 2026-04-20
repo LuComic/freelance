@@ -2,6 +2,7 @@
 
 import { ChevronRight } from "lucide-react";
 import { useState } from "react";
+import { MAX_DESCRIPTION_LENGTH, MAX_NAME_LENGTH } from "@/lib/inputLimits";
 
 type ProjectGeneralSectionProps = {
   currentProjectName: string;
@@ -68,6 +69,7 @@ export function ProjectGeneralSection({
             placeholder="Enter a new project name..."
             className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
             value={nameDraft}
+            maxLength={MAX_NAME_LENGTH}
             onChange={(e) => setNameDraft(e.target.value)}
             disabled={isLoading || isUnavailable || isSavingName}
             onKeyDown={(e) => {
@@ -97,6 +99,7 @@ export function ProjectGeneralSection({
             placeholder="Enter a project description..."
             className="rounded-md bg-(--dim) px-2 py-1.5 outline-none resize-none"
             value={descriptionDraft}
+            maxLength={MAX_DESCRIPTION_LENGTH}
             onChange={(e) => setDescriptionDraft(e.target.value)}
             disabled={isLoading || isUnavailable || isSavingDescription}
           />

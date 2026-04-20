@@ -6,6 +6,12 @@ import type {
   PageComponentInstanceByType,
   PageComponentLiveStateByType,
 } from "@/lib/pageDocument";
+import {
+  MAX_DESCRIPTION_LENGTH,
+  MAX_OPTIONS_PER_FIELD,
+  MAX_OPTION_LABEL_LENGTH,
+  MAX_SHORT_TITLE_LENGTH,
+} from "@/lib/inputLimits";
 
 type RadioCreatorProps = {
   config: PageComponentInstanceByType<"Radio">["config"];
@@ -33,6 +39,7 @@ export const RadioCreator = ({
 
   const handleNewOption = () => {
     if (optionInput.trim() === "") return;
+    if (config.options.length >= MAX_OPTIONS_PER_FIELD) return;
 
     const highestId = config.options.reduce(
       (max, option) => Math.max(max, option.id),
@@ -94,6 +101,7 @@ export const RadioCreator = ({
               placeholder="Field title..."
               className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
               value={config.title}
+              maxLength={MAX_SHORT_TITLE_LENGTH}
               onChange={(e) =>
                 onChangeConfig((currentConfig) => ({
                   ...currentConfig,
@@ -106,6 +114,7 @@ export const RadioCreator = ({
               placeholder="Field description..."
               className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
               value={config.description}
+              maxLength={MAX_DESCRIPTION_LENGTH}
               onChange={(e) =>
                 onChangeConfig((currentConfig) => ({
                   ...currentConfig,
@@ -118,6 +127,7 @@ export const RadioCreator = ({
               placeholder="Add a new option..."
               className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
               value={optionInput}
+              maxLength={MAX_OPTION_LABEL_LENGTH}
               onChange={(e) => setOptionInput(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -129,6 +139,7 @@ export const RadioCreator = ({
             <button
               className="w-max rounded-md px-2.5 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
               onClick={handleNewOption}
+              disabled={config.options.length >= MAX_OPTIONS_PER_FIELD}
             >
               Add
             </button>

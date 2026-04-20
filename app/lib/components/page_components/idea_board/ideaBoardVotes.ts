@@ -1,6 +1,6 @@
 import type { PageComponentLiveStateByType } from "@/lib/pageDocument";
 
-export const MAX_IDEA_LENGTH = 400;
+export { MAX_IDEA_LENGTH } from "@/lib/inputLimits";
 
 type IdeaBoardIdea =
   PageComponentLiveStateByType<"IdeaBoard">["state"]["ideas"][number];

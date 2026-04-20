@@ -8,6 +8,7 @@ import {
   isAnonymousUser,
 } from "../lib/guests";
 import { invalidState, notFound } from "../lib/errors";
+import { assertMaxLength } from "../lib/inputValidation";
 import {
   assertProjectRole,
   requireProjectEditor,
@@ -25,6 +26,7 @@ import {
 import { requireReadableTemplate } from "../templates/model";
 import type { ProjectTemplateBlueprint } from "../../lib/templateBlueprint";
 import { getCurrentEntitlementsForUser } from "../billing/model";
+import { MAX_DESCRIPTION_LENGTH, MAX_NAME_LENGTH } from "../../lib/inputLimits";
 
 export const createProject = mutation({
   args: {
@@ -70,6 +72,14 @@ export const createProject = mutation({
 
     if (!trimmedName) {
       throw invalidState("Project name cannot be empty.");
+    }
+    assertMaxLength(trimmedName, MAX_NAME_LENGTH, "Project name");
+    if (trimmedDescription) {
+      assertMaxLength(
+        trimmedDescription,
+        MAX_DESCRIPTION_LENGTH,
+        "Project description",
+      );
     }
 
     const joinCode = await generateUniqueJoinCode(ctx);
@@ -209,6 +219,7 @@ export const renameProject = mutation({
     if (!trimmedName) {
       throw invalidState("Project name cannot be empty.");
     }
+    assertMaxLength(trimmedName, MAX_NAME_LENGTH, "Project name");
 
     const project = await ctx.db.get(args.projectId);
     if (!project || project.isArchived) {
@@ -237,6 +248,11 @@ export const updateProjectDescription = mutation({
   handler: async (ctx, args) => {
     const { userId } = await requireCurrentAuth(ctx);
     const trimmedDescription = args.description.trim();
+    assertMaxLength(
+      trimmedDescription,
+      MAX_DESCRIPTION_LENGTH,
+      "Project description",
+    );
 
     const project = await ctx.db.get(args.projectId);
     if (!project || project.isArchived) {

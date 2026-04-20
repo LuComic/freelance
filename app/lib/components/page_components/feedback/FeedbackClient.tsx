@@ -22,6 +22,7 @@ import type {
   PageComponentInstanceByType,
   PageComponentLiveStateByType,
 } from "@/lib/pageDocument";
+import { MAX_IDEA_LENGTH } from "@/lib/inputLimits";
 
 type FeedbackClientProps = {
   config: PageComponentInstanceByType<"Feedback">["config"];
@@ -152,6 +153,7 @@ export const FeedbackClient = ({
               className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
               onChange={(e) => setIdeaInput(e.target.value)}
               value={ideaInput}
+              maxLength={MAX_IDEA_LENGTH}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   handleNewIdea();

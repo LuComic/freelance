@@ -30,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { MAX_SHORT_TITLE_LENGTH } from "@/lib/inputLimits";
 import { SaveTemplateModal } from "./SaveTemplateModal";
 import { useSearchBar } from "../searchbar/SearchBarContext";
 
@@ -245,6 +246,7 @@ export const TopBar = () => {
               id="edit_field"
               autoFocus
               value={titleDraft}
+              maxLength={MAX_SHORT_TITLE_LENGTH}
               onChange={(e) => setTitleDraft(e.target.value)}
               onBlur={saveTitle}
               onKeyDown={(e) => {

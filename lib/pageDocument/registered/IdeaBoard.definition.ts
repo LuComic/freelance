@@ -1,5 +1,6 @@
 import { defineRegisteredPageComponentDefinition } from "../registeredDefinitions";
 import { isRecord } from "../utils";
+import { MAX_IDEA_LENGTH, truncateInput } from "../../inputLimits";
 
 function normalizeVotes(value: unknown): string[] {
   if (!Array.isArray(value)) {
@@ -57,7 +58,7 @@ export const IdeaBoardDefinition = defineRegisteredPageComponentDefinition({
             return null;
           }
 
-          const nextIdea = idea.idea.trim();
+          const nextIdea = truncateInput(idea.idea.trim(), MAX_IDEA_LENGTH);
 
           if (nextIdea.length === 0) {
             return null;

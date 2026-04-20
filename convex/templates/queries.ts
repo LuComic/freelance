@@ -7,6 +7,7 @@ import { getOrderedProjectPages } from "../lib/projectRecords";
 import { templateTypeValidator } from "../lib/validators";
 import { parsePageDocument } from "../pages/content";
 import { requireProjectEditor } from "../lib/permissions";
+import { truncateInput, MAX_SEARCH_QUERY_LENGTH } from "../../lib/inputLimits";
 import { getOrderedTemplateItemLabels } from "../../lib/templateBlueprint";
 import { buildTemplateAuthorName } from "./model";
 
@@ -85,7 +86,9 @@ export const searchVisibleTemplates = query({
   handler: async (ctx, args) => {
     try {
       const { userId } = await requireCurrentAuth(ctx);
-      const normalizedQuery = normalizeSearchQuery(args.query);
+      const normalizedQuery = normalizeSearchQuery(
+        truncateInput(args.query, MAX_SEARCH_QUERY_LENGTH),
+      );
       const limit = Math.max(1, Math.floor(args.limit ?? 10));
       const typeFilter =
         args.types && args.types.length > 0 ? new Set(args.types) : null;

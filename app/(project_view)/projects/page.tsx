@@ -15,6 +15,7 @@ import {
   getProjectPagePath,
   getProjectPath,
 } from "@/app/lib/components/project/paths";
+import { MAX_NAME_LENGTH } from "@/lib/inputLimits";
 
 type JoinTarget = {
   joinCode: string;
@@ -304,6 +305,7 @@ export default function Page() {
           <input
             type="text"
             value={validatedJoinTarget ? guestNameDraft : joinCodeDraft}
+            maxLength={validatedJoinTarget ? MAX_NAME_LENGTH : 16}
             placeholder={
               validatedJoinTarget ? "Enter your name" : "project code"
             }

@@ -23,6 +23,7 @@ import {
   buildEventRange,
   sortCalendarEvents,
 } from "./calendarUtils";
+import { MAX_CALENDAR_EVENT_TITLE_LENGTH } from "@/lib/inputLimits";
 
 type CalendarCreatorProps = {
   onCommitLiveState: (
@@ -121,6 +122,7 @@ export const CalendarCreator = ({
               placeholder="Creating the MVP..."
               className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
               value={titleInput}
+              maxLength={MAX_CALENDAR_EVENT_TITLE_LENGTH}
               onChange={(changeEvent) => {
                 setTitleInput(changeEvent.target.value);
                 setError(null);

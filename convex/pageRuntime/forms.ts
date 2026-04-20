@@ -3,12 +3,17 @@ import type { Doc } from "../_generated/dataModel";
 import { mutation, query } from "../_generated/server";
 import { requireCurrentAuth } from "../lib/auth";
 import { invalidState } from "../lib/errors";
+import { assertMaxLength } from "../lib/inputValidation";
 import { requirePageAccess, requireProjectMember } from "../lib/permissions";
 import { buildProjectMemberDisplayName } from "../projects/model";
 import { parsePageDocument } from "../pages/content";
 import type { FormFieldConfig } from "../../lib/pageDocument/registered/Form.definition";
+import {
+  MAX_FORM_FIELDS,
+  MAX_FORM_TEXT_ANSWER_LENGTH,
+  MAX_OPTIONS_PER_FIELD,
+} from "../../lib/inputLimits";
 
-const MAX_TEXT_ANSWER_LENGTH = 1000;
 const NO_ANSWER_DISPLAY_VALUE = "No answer.";
 
 type FormSubmissionAnswerValue = string | string[] | null;
@@ -51,9 +56,7 @@ function buildSimpleInputAnswer(
 ): FormSubmissionAnswer {
   const answerValue = typeof value === "string" ? value.trim() : "";
 
-  if (answerValue.length > MAX_TEXT_ANSWER_LENGTH) {
-    throw invalidState("Text answers must be 5000 characters or less.");
-  }
+  assertMaxLength(answerValue, MAX_FORM_TEXT_ANSWER_LENGTH, "Text answers");
 
   if (field.required && !answerValue) {
     throw invalidState(`Please answer ${getFieldLabel(field)}.`);
@@ -77,6 +80,12 @@ function buildSelectAnswer(
     : typeof value === "string"
       ? [value]
       : [];
+  if (submittedOptionIds.length > MAX_OPTIONS_PER_FIELD) {
+    throw invalidState(
+      `Select answers can include up to ${MAX_OPTIONS_PER_FIELD} options.`,
+    );
+  }
+
   const optionsById = new Map(
     field.options.map((option) => [option.id, option]),
   );
@@ -139,6 +148,10 @@ function buildSubmissionAnswers(
   fields: FormFieldConfig[],
   submittedAnswers: SubmittedAnswer[],
 ) {
+  if (submittedAnswers.length > MAX_FORM_FIELDS) {
+    throw invalidState(`Forms can submit up to ${MAX_FORM_FIELDS} answers.`);
+  }
+
   validateNoUnknownFields(fields, submittedAnswers);
 
   const submittedAnswersByFieldId = normalizeSubmittedAnswers(submittedAnswers);

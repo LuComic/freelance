@@ -8,6 +8,17 @@ import {
   type RegisteredPageComponentType,
 } from "./registeredComponents";
 import {
+  MAX_CALENDAR_EVENT_TITLE_LENGTH,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_IDEA_LENGTH,
+  MAX_KANBAN_TASK_LENGTH,
+  MAX_OPTIONS_PER_FIELD,
+  MAX_OPTION_LABEL_LENGTH,
+  MAX_SHORT_TITLE_LENGTH,
+  MAX_TAG_LENGTH,
+  truncateInput,
+} from "../inputLimits";
+import {
   createComponentToken,
   DEFAULT_PAGE_EDITOR_TEXT,
   LEGACY_COMPONENT_TAG_REGEX,
@@ -37,6 +48,7 @@ function normalizeOptions(value: unknown, fallback: PageOption[]) {
   }
 
   const options = value
+    .slice(0, MAX_OPTIONS_PER_FIELD)
     .map((item, index) => {
       if (!isRecord(item)) {
         return null;
@@ -48,7 +60,7 @@ function normalizeOptions(value: unknown, fallback: PageOption[]) {
           : index + 1;
       const label =
         typeof item.label === "string" && item.label.trim()
-          ? item.label.trim()
+          ? truncateInput(item.label.trim(), MAX_OPTION_LABEL_LENGTH)
           : null;
 
       if (!label) {
@@ -73,6 +85,12 @@ function normalizeFeedbackItems(value: unknown) {
         return null;
       }
 
+      const feature = truncateInput(item.feature.trim(), MAX_IDEA_LENGTH);
+
+      if (!feature) {
+        return null;
+      }
+
       const status =
         item.status === "pending" ||
         item.status === "accepted" ||
@@ -81,14 +99,25 @@ function normalizeFeedbackItems(value: unknown) {
           : "pending";
 
       const tags = Array.isArray(item.tags)
-        ? item.tags.filter((tag): tag is string => typeof tag === "string")
+        ? item.tags
+            .slice(0, MAX_OPTIONS_PER_FIELD)
+            .map((tag) =>
+              typeof tag === "string"
+                ? truncateInput(tag.trim(), MAX_TAG_LENGTH)
+                : "",
+            )
+            .filter((tag): tag is string => tag.length > 0)
         : [];
 
       const result: FeedbackItem = {
-        feature: item.feature,
+        feature,
         status,
         tags,
-        ...(typeof item.reason === "string" ? { reason: item.reason } : {}),
+        ...(typeof item.reason === "string"
+          ? {
+              reason: truncateInput(item.reason.trim(), MAX_DESCRIPTION_LENGTH),
+            }
+          : {}),
         ...(item.dismissed === true ? { dismissed: true } : {}),
       };
 
@@ -108,6 +137,15 @@ function normalizeKanbanItems(value: unknown) {
         return null;
       }
 
+      const feature = truncateInput(
+        item.feature.trim(),
+        MAX_KANBAN_TASK_LENGTH,
+      );
+
+      if (!feature) {
+        return null;
+      }
+
       const status =
         item.status === "Todo" ||
         item.status === "In Progress" ||
@@ -120,7 +158,7 @@ function normalizeKanbanItems(value: unknown) {
           : index + 1;
       const result: KanbanItem = {
         id,
-        feature: item.feature,
+        feature,
         status,
         ...(item.dismissed === true ? { dismissed: true } : {}),
       };
@@ -170,7 +208,10 @@ function normalizeCalendarEvents(value: unknown) {
           typeof item.id === "string" && item.id.trim().length > 0
             ? item.id
             : crypto.randomUUID(),
-        title: item.title.trim(),
+        title: truncateInput(
+          item.title.trim(),
+          MAX_CALENDAR_EVENT_TITLE_LENGTH,
+        ),
         color,
         startAt,
         endAt,
@@ -289,11 +330,14 @@ function normalizeComponentInstance(
         config: {
           title:
             typeof value.config.title === "string"
-              ? value.config.title
+              ? truncateInput(value.config.title.trim(), MAX_SHORT_TITLE_LENGTH)
               : fallback.config.title,
           description:
             typeof value.config.description === "string"
-              ? value.config.description
+              ? truncateInput(
+                  value.config.description.trim(),
+                  MAX_DESCRIPTION_LENGTH,
+                )
               : fallback.config.description,
           options: normalizeOptions(
             value.config.options,
@@ -318,11 +362,14 @@ function normalizeComponentInstance(
         config: {
           title:
             typeof value.config.title === "string"
-              ? value.config.title
+              ? truncateInput(value.config.title.trim(), MAX_SHORT_TITLE_LENGTH)
               : fallback.config.title,
           description:
             typeof value.config.description === "string"
-              ? value.config.description
+              ? truncateInput(
+                  value.config.description.trim(),
+                  MAX_DESCRIPTION_LENGTH,
+                )
               : fallback.config.description,
           options: normalizeOptions(
             value.config.options,
@@ -346,9 +393,14 @@ function normalizeComponentInstance(
         type,
         config: {
           tags: Array.isArray(value.config.tags)
-            ? value.config.tags.filter(
-                (tag): tag is string => typeof tag === "string",
-              )
+            ? value.config.tags
+                .slice(0, MAX_OPTIONS_PER_FIELD)
+                .map((tag) =>
+                  typeof tag === "string"
+                    ? truncateInput(tag.trim(), MAX_TAG_LENGTH)
+                    : "",
+                )
+                .filter((tag): tag is string => tag.length > 0)
             : fallback.config.tags,
         },
       };
@@ -390,7 +442,12 @@ function normalizeComponentInstance(
         config: {
           text:
             typeof value.config.text === "string"
-              ? value.config.text
+              ? truncateInput(
+                  value.config.text.trim(),
+                  type === "Subheader"
+                    ? MAX_DESCRIPTION_LENGTH
+                    : MAX_SHORT_TITLE_LENGTH,
+                )
               : fallback.config.text,
         },
       };
@@ -414,7 +471,7 @@ function normalizeComponentInstance(
         config: {
           text:
             typeof value.config.text === "string"
-              ? value.config.text
+              ? truncateInput(value.config.text.trim(), MAX_SHORT_TITLE_LENGTH)
               : fallback.config.text,
           targetPageId:
             typeof value.config.targetPageId === "string" ||

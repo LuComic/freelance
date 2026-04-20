@@ -21,6 +21,7 @@ import { SavePageTemplate } from "./SavePageTemplate";
 import { SaveProjectTemplate } from "./SaveProjectTemplate";
 import type { TemplatePage } from "../searchbar/SearchBarData";
 import { useOptionalPageDocument } from "./PageDocumentContext";
+import { MAX_DESCRIPTION_LENGTH, MAX_NAME_LENGTH } from "@/lib/inputLimits";
 
 type SaveTemplateModalProps = {
   open: boolean;
@@ -215,6 +216,7 @@ export const SaveTemplateModal = ({
             className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
             placeholder="Template name..."
             value={templateName}
+            maxLength={MAX_NAME_LENGTH}
             onChange={(e) => setTemplateName(e.target.value)}
           />
 
@@ -224,6 +226,7 @@ export const SaveTemplateModal = ({
             className="rounded-md bg-(--dim) px-2 py-1.5 outline-none resize-none"
             placeholder="Template description..."
             value={templateDescription}
+            maxLength={MAX_DESCRIPTION_LENGTH}
             onChange={(event) => setTemplateDescription(event.target.value)}
           />
 

@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { getProjectPagePath } from "./paths";
 import type { SearchPerson, SearchTemplate } from "../searchbar/SearchBarData";
 import { useSearchBar } from "../searchbar/SearchBarContext";
+import { MAX_DESCRIPTION_LENGTH, MAX_NAME_LENGTH } from "@/lib/inputLimits";
 
 type CreateProjectModalProps = {
   ui?: "sidebar" | "projects";
@@ -207,6 +208,7 @@ export const CreateProjectModal = ({
                 className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
                 placeholder="Project name..."
                 value={projectName}
+                maxLength={MAX_NAME_LENGTH}
                 onChange={(event) => setProjectName(event.target.value)}
                 onKeyDown={(event) => {
                   if (event.key === "Enter") {
@@ -221,6 +223,7 @@ export const CreateProjectModal = ({
                 className="rounded-md bg-(--dim) px-2 py-1.5 outline-none resize-none"
                 placeholder="Project description..."
                 value={projectDescription}
+                maxLength={MAX_DESCRIPTION_LENGTH}
                 onChange={(event) => setProjectDescription(event.target.value)}
               />
             </div>

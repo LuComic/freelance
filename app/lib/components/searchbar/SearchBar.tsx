@@ -11,6 +11,7 @@ import { useConvex } from "convex/react";
 import { Search } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { MAX_SEARCH_QUERY_LENGTH } from "@/lib/inputLimits";
 import { getProjectPagePath } from "../project/paths";
 import { PersonModal } from "./PersonModal";
 import {
@@ -392,6 +393,7 @@ export const SearchBar = () => {
                 <input
                   type="text"
                   value={searchQuery}
+                  maxLength={MAX_SEARCH_QUERY_LENGTH}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
                     setSelectedIndex(0);

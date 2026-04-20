@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { ThumbsDown, ThumbsUp, X } from "lucide-react";
+import { MAX_DESCRIPTION_LENGTH } from "@/lib/inputLimits";
 
 export const ReviewModal = ({
   action,
@@ -99,6 +100,7 @@ export const ReviewModal = ({
               className="rounded-md bg-(--dim) w-full px-2 py-1.5 outline-none resize-none overflow-hidden"
               style={{ minHeight: "2.5rem" }}
               value={reviewInput}
+              maxLength={MAX_DESCRIPTION_LENGTH}
               onChange={(e) => {
                 setReviewInput(e.target.value);
                 adjustTextareaHeight();

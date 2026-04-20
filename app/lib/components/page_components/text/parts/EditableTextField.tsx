@@ -9,6 +9,7 @@ type EditableTextFieldProps = {
   placeholder: string;
   onChange?: (value: string) => void;
   editable?: boolean;
+  maxLength?: number;
   renderClient: (text: string) => ReactNode;
 };
 
@@ -18,6 +19,7 @@ export const EditableTextField = ({
   placeholder,
   onChange,
   editable = true,
+  maxLength,
   renderClient,
 }: EditableTextFieldProps) => {
   const { isLive } = useEditMode();
@@ -42,6 +44,7 @@ export const EditableTextField = ({
           value={text}
           onChange={(event) => handleChange(event.target.value)}
           placeholder={placeholder}
+          maxLength={maxLength}
           className="w-full rounded-md bg-(--dim) px-2 py-1.5 outline-none"
         />
       )}

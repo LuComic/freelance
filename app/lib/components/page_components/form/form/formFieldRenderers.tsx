@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import type { FormFieldConfig, FormDraftValue } from "./formFieldTypes";
+import { MAX_FORM_TEXT_ANSWER_LENGTH } from "@/lib/inputLimits";
 
 type FormFieldRendererProps = {
   field: FormFieldConfig;
@@ -149,6 +150,7 @@ export function FormSimpleInputField({
           placeholder={field.placeholder || "This is what i think..."}
           className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
           value={typeof value === "string" ? value : ""}
+          maxLength={MAX_FORM_TEXT_ANSWER_LENGTH}
           onChange={(event) => {
             if (disabled) {
               return;

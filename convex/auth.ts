@@ -6,6 +6,7 @@ import {
 import { ConvexCredentials } from "@convex-dev/auth/providers/ConvexCredentials";
 import Google from "@auth/core/providers/google";
 import { api, internal } from "./_generated/api";
+import { MAX_NAME_LENGTH } from "../lib/inputLimits";
 import type { Doc } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
 import { isBetaAllowlistedEmail } from "./lib/betaAccess";
@@ -52,6 +53,9 @@ const projectGuest = ConvexCredentials({
 
     if (!name) {
       throw new Error("Enter your name.");
+    }
+    if (name.length > MAX_NAME_LENGTH) {
+      throw new Error(`Name must be ${MAX_NAME_LENGTH} characters or less.`);
     }
 
     const joinTarget = await ctx.runQuery(api.projects.join.validateJoinCode, {

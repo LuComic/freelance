@@ -3,6 +3,7 @@
 import type { PageComponentLiveStateByType } from "@/lib/pageDocument";
 import { useState } from "react";
 import { createSimpleInputEntry } from "./simpleInputEntries";
+import { MAX_FORM_TEXT_ANSWER_LENGTH } from "@/lib/inputLimits";
 
 type SimpleInputClientProps = {
   liveState: PageComponentLiveStateByType<"SimpleInput">["state"];
@@ -40,6 +41,7 @@ export const SimpleInputClient = ({
           placeholder="This is what i think..."
           className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
           value={inputValue}
+          maxLength={MAX_FORM_TEXT_ANSWER_LENGTH}
           onChange={(event) => setInputValue(event.target.value)}
           onKeyDown={(event) => {
             if (event.key === "Enter") {

@@ -4,7 +4,9 @@ import { internalMutation, mutation } from "../_generated/server";
 import { requireCurrentAuth } from "../lib/auth";
 import { deleteGuestUser, isAnonymousUser } from "../lib/guests";
 import { invalidState } from "../lib/errors";
+import { assertMaxLength } from "../lib/inputValidation";
 import { buildUserSearchText } from "./model";
+import { MAX_BIO_LENGTH, MAX_NAME_LENGTH } from "../../lib/inputLimits";
 
 export const updateProfile = mutation({
   args: {
@@ -30,6 +32,7 @@ export const updateProfile = mutation({
       if (!nextName) {
         throw invalidState("Name cannot be empty.");
       }
+      assertMaxLength(nextName, MAX_NAME_LENGTH, "Name");
 
       if (user.name !== nextName) {
         patch.name = nextName;
@@ -37,6 +40,10 @@ export const updateProfile = mutation({
     }
 
     if (args.bio !== undefined) {
+      if (nextBio) {
+        assertMaxLength(nextBio, MAX_BIO_LENGTH, "Bio");
+      }
+
       if (user.bio !== nextBio) {
         patch.bio = nextBio;
       }
@@ -184,7 +191,9 @@ export const deleteAccount = mutation({
       }
     }
 
-    const projectActivityEntries = await ctx.db.query("projectActivity").collect();
+    const projectActivityEntries = await ctx.db
+      .query("projectActivity")
+      .collect();
     for (const activityEntry of projectActivityEntries) {
       if (
         activityEntry.actorUserId === userId ||

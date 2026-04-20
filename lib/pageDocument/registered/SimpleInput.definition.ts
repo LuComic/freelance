@@ -1,5 +1,6 @@
 import { defineRegisteredPageComponentDefinition } from "../registeredDefinitions";
 import { isRecord } from "../utils";
+import { MAX_FORM_TEXT_ANSWER_LENGTH, truncateInput } from "../../inputLimits";
 
 export const SimpleInputDefinition = defineRegisteredPageComponentDefinition({
   type: "SimpleInput",
@@ -30,7 +31,10 @@ export const SimpleInputDefinition = defineRegisteredPageComponentDefinition({
             return null;
           }
 
-          const nextValue = input.value.trim();
+          const nextValue = truncateInput(
+            input.value.trim(),
+            MAX_FORM_TEXT_ANSWER_LENGTH,
+          );
 
           if (nextValue.length === 0) {
             return null;

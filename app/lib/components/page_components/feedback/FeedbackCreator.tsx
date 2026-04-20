@@ -14,6 +14,7 @@ import type {
   PageComponentInstanceByType,
   PageComponentLiveStateByType,
 } from "@/lib/pageDocument";
+import { MAX_OPTIONS_PER_FIELD, MAX_TAG_LENGTH } from "@/lib/inputLimits";
 
 type FeedbackCreatorProps = {
   config: PageComponentInstanceByType<"Feedback">["config"];
@@ -50,6 +51,7 @@ export const FeedbackCreator = ({
 
   const handleNewTag = () => {
     if (tagInput.trim() === "") return;
+    if (config.tags.length >= MAX_OPTIONS_PER_FIELD) return;
     onChangeConfig((currentConfig) => ({
       ...currentConfig,
       tags: [tagInput.trim(), ...currentConfig.tags],
@@ -152,6 +154,7 @@ export const FeedbackCreator = ({
               placeholder="Add a new tag..."
               className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
               value={tagInput}
+              maxLength={MAX_TAG_LENGTH}
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -185,6 +188,7 @@ export const FeedbackCreator = ({
             <button
               className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
               onClick={handleNewTag}
+              disabled={config.tags.length >= MAX_OPTIONS_PER_FIELD}
             >
               Add tag
             </button>

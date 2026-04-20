@@ -12,6 +12,7 @@ import {
   FormSelectField,
   FormSimpleInputField,
 } from "./formFieldRenderers";
+import { MAX_FORM_TEXT_ANSWER_LENGTH } from "@/lib/inputLimits";
 import {
   getEmptyDraftValue,
   getFormFieldLabel,
@@ -111,8 +112,8 @@ function validateDraft(
     if (field.type === "SimpleInput") {
       const textValue = typeof value === "string" ? value.trim() : "";
 
-      if (textValue.length > 5000) {
-        return "Text answers must be 5000 characters or less.";
+      if (textValue.length > MAX_FORM_TEXT_ANSWER_LENGTH) {
+        return `Text answers must be ${MAX_FORM_TEXT_ANSWER_LENGTH} characters or less.`;
       }
 
       if (field.required && !textValue) {

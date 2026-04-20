@@ -1,5 +1,13 @@
 import { defineRegisteredPageComponentDefinition } from "../registeredDefinitions";
 import { isRecord } from "../utils";
+import {
+  MAX_DESCRIPTION_LENGTH,
+  MAX_FORM_FIELDS,
+  MAX_OPTIONS_PER_FIELD,
+  MAX_OPTION_LABEL_LENGTH,
+  MAX_SHORT_TITLE_LENGTH,
+  truncateInput,
+} from "../../inputLimits";
 
 export const FORM_FIELD_TYPES = ["Select", "Radio", "SimpleInput"] as const;
 
@@ -39,12 +47,13 @@ function normalizeFormFieldOptions(
   }
 
   return value
+    .slice(0, MAX_OPTIONS_PER_FIELD)
     .map((option, index) => {
       if (!isRecord(option) || typeof option.label !== "string") {
         return null;
       }
 
-      const label = option.label.trim();
+      const label = truncateInput(option.label.trim(), MAX_OPTION_LABEL_LENGTH);
 
       if (!label) {
         return null;
@@ -67,6 +76,7 @@ function normalizeFormFields(value: unknown, fallback: FormFieldConfig[]) {
   }
 
   return value
+    .slice(0, MAX_FORM_FIELDS)
     .map((field, index) => {
       if (!isRecord(field) || !isFormFieldType(field.type)) {
         return null;
@@ -78,11 +88,18 @@ function normalizeFormFields(value: unknown, fallback: FormFieldConfig[]) {
             ? field.id.trim()
             : `field_${index + 1}`,
         type: field.type,
-        label: typeof field.label === "string" ? field.label : "",
+        label:
+          typeof field.label === "string"
+            ? truncateInput(field.label.trim(), MAX_SHORT_TITLE_LENGTH)
+            : "",
         description:
-          typeof field.description === "string" ? field.description : "",
+          typeof field.description === "string"
+            ? truncateInput(field.description.trim(), MAX_DESCRIPTION_LENGTH)
+            : "",
         placeholder:
-          typeof field.placeholder === "string" ? field.placeholder : "",
+          typeof field.placeholder === "string"
+            ? truncateInput(field.placeholder.trim(), MAX_SHORT_TITLE_LENGTH)
+            : "",
         required: field.required === true,
         options: normalizeFormFieldOptions(field.options, field.type),
       };

@@ -20,6 +20,13 @@ import {
   type FormFieldConfig,
   type FormFieldType,
 } from "./formFieldTypes";
+import {
+  MAX_DESCRIPTION_LENGTH,
+  MAX_FORM_FIELDS,
+  MAX_OPTIONS_PER_FIELD,
+  MAX_OPTION_LABEL_LENGTH,
+  MAX_SHORT_TITLE_LENGTH,
+} from "@/lib/inputLimits";
 
 type FormCreatorProps = {
   config: PageComponentInstanceByType<"Form">["config"];
@@ -78,6 +85,10 @@ export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
   };
 
   const handleAddField = () => {
+    if (config.fields.length >= MAX_FORM_FIELDS) {
+      return;
+    }
+
     const nextField = createDefaultFormField(fieldTypeToAdd);
 
     onChangeConfig((currentConfig) => ({
@@ -100,6 +111,9 @@ export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
     const nextLabel = optionInputs[field.id]?.trim() ?? "";
 
     if (!nextLabel) {
+      return;
+    }
+    if (field.options.length >= MAX_OPTIONS_PER_FIELD) {
       return;
     }
 
@@ -179,6 +193,7 @@ export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
               type="button"
               className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
               onClick={handleAddField}
+              disabled={config.fields.length >= MAX_FORM_FIELDS}
             >
               Add field
             </button>
@@ -229,6 +244,7 @@ export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
                       placeholder="Field title..."
                       className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
                       value={field.label}
+                      maxLength={MAX_SHORT_TITLE_LENGTH}
                       onChange={(event) =>
                         updateField(field.id, (currentField) => ({
                           ...currentField,
@@ -241,6 +257,7 @@ export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
                       placeholder="Field description..."
                       className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
                       value={field.description}
+                      maxLength={MAX_DESCRIPTION_LENGTH}
                       onChange={(event) =>
                         updateField(field.id, (currentField) => ({
                           ...currentField,
@@ -254,6 +271,7 @@ export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
                         placeholder="Field placeholder..."
                         className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
                         value={field.placeholder}
+                        maxLength={MAX_SHORT_TITLE_LENGTH}
                         onChange={(event) =>
                           updateField(field.id, (currentField) => ({
                             ...currentField,
@@ -269,6 +287,7 @@ export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
                           placeholder="Add a new option..."
                           className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
                           value={optionInputs[field.id] ?? ""}
+                          maxLength={MAX_OPTION_LABEL_LENGTH}
                           onChange={(event) =>
                             setOptionInput(field.id, event.target.value)
                           }
@@ -283,6 +302,7 @@ export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
                           type="button"
                           className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
                           onClick={() => handleAddOption(field)}
+                          disabled={field.options.length >= MAX_OPTIONS_PER_FIELD}
                         >
                           Add
                         </button>

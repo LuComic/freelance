@@ -21,6 +21,7 @@ import {
   getEventStartTime,
 } from "./calendarUtils";
 import { format, isSameDay } from "date-fns";
+import { MAX_CALENDAR_EVENT_TITLE_LENGTH } from "@/lib/inputLimits";
 
 type CalendarModalProps = {
   event: CalendarEvent | null;
@@ -111,6 +112,7 @@ export const CalendarModal = ({
           className="rounded-md bg-(--dim) px-2 py-1.5 outline-none w-full"
           placeholder="Project name..."
           value={title}
+          maxLength={MAX_CALENDAR_EVENT_TITLE_LENGTH}
           onChange={(changeEvent) => {
             setTitle(changeEvent.target.value);
             setError(null);

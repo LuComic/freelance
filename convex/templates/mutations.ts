@@ -5,6 +5,7 @@ import { requireCurrentAuth } from "../lib/auth";
 import { invalidState, notFound } from "../lib/errors";
 import { assertNonAnonymousUser } from "../lib/guests";
 import { serializePageDocumentWithLimits } from "../lib/pageLimits";
+import { assertMaxLength } from "../lib/inputValidation";
 import { requirePageAccess, requireProjectEditor } from "../lib/permissions";
 import { templateVisibilityValidator } from "../lib/validators";
 import {
@@ -23,6 +24,11 @@ import {
   getTemplateBlueprint,
 } from "./content";
 import { requireManageableTemplate, requireReadableTemplate } from "./model";
+import { MAX_DESCRIPTION_LENGTH, MAX_NAME_LENGTH } from "../../lib/inputLimits";
+import {
+  MAX_PAGE_CONTENT_BYTES,
+  getUtf8ByteLength,
+} from "../../lib/pageLimits";
 
 type SaveTemplateResult = {
   templateId: Id<"templates">;
@@ -64,6 +70,14 @@ export const saveTemplate = mutation({
     if (!trimmedName) {
       throw invalidState("Template name cannot be empty.");
     }
+    assertMaxLength(trimmedName, MAX_NAME_LENGTH, "Template name");
+    if (trimmedDescription) {
+      assertMaxLength(
+        trimmedDescription,
+        MAX_DESCRIPTION_LENGTH,
+        "Template description",
+      );
+    }
 
     try {
       assertTemplateBlueprintV1(args.blueprint);
@@ -76,13 +90,20 @@ export const saveTemplate = mutation({
     }
 
     const now = Date.now();
+    const contentJson = JSON.stringify(args.blueprint);
+    if (getUtf8ByteLength(contentJson) > MAX_PAGE_CONTENT_BYTES) {
+      throw invalidState(
+        `Template content is too large to save. Limit is ${MAX_PAGE_CONTENT_BYTES / 1024} KB.`,
+      );
+    }
+
     const templateId = await ctx.db.insert("templates", {
       authorUserId: userId,
       name: trimmedName,
       description: trimmedDescription,
       type: args.blueprint.type,
       visibility: args.visibility,
-      contentJson: JSON.stringify(args.blueprint),
+      contentJson,
       createdAt: now,
       updatedAt: now,
     });

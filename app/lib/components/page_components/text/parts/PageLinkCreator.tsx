@@ -14,6 +14,7 @@ import {
   shouldSyncPageLinkText,
   type ProjectPageOption,
 } from "./PageLink.shared";
+import { MAX_SHORT_TITLE_LENGTH } from "@/lib/inputLimits";
 
 type PageLinkCreatorProps = {
   config: PageComponentInstanceByType<"PageLink">["config"];
@@ -59,6 +60,7 @@ export const PageLinkCreator = ({
           }))
         }
         placeholder="Link text..."
+        maxLength={MAX_SHORT_TITLE_LENGTH}
         className="w-full rounded-md bg-(--dim) px-2 py-1.5 outline-none"
         onBlur={() => {
           if (config.text.trim()) {

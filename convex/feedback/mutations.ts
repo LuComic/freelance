@@ -2,8 +2,9 @@ import { v } from "convex/values";
 import { mutation } from "../_generated/server";
 import { requireCurrentAuth } from "../lib/auth";
 import { invalidState, notFound, unauthorized } from "../lib/errors";
+import { assertMaxLength } from "../lib/inputValidation";
+import { MAX_IDEA_LENGTH, MAX_OPTIONS_PER_FIELD } from "../../lib/inputLimits";
 
-const MAX_IDEA_LENGTH = 400;
 const FALLBACK_AUTHOR_NAME = "Anonymous";
 const ALLOWED_TAGS = ["Bug", "Critical", "Feature", "UI/UX"] as const;
 
@@ -35,12 +36,13 @@ export const submitIdea = mutation({
     if (body.length === 0) {
       throw invalidState("Feedback idea cannot be empty.");
     }
-
-    if (body.length > MAX_IDEA_LENGTH) {
+    if (args.tags.length > MAX_OPTIONS_PER_FIELD) {
       throw invalidState(
-        `Feedback idea cannot be longer than ${MAX_IDEA_LENGTH} characters.`,
+        `Feedback ideas can include up to ${MAX_OPTIONS_PER_FIELD} tags.`,
       );
     }
+
+    assertMaxLength(body, MAX_IDEA_LENGTH, "Feedback idea");
 
     const now = Date.now();
 
