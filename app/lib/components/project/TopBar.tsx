@@ -205,7 +205,7 @@ export const TopBar = () => {
                     pageDocument.saveStatus === "saving" ||
                     !pageDocument.hasUnsavedChanges
                   }
-                  className="text-sm gap-1 hidden @[35rem]:flex items-center justify-center p-1 @[48rem]:px-2 @[48rem]:py-0.5 rounded-md border border-(--vibrant) bg-(--vibrant)/20 hover:bg-(--vibrant-hover)/20 disabled:border-(--gray-page) disabled:text-(--gray-page) disabled:bg-transparent disabled:hover:bg-transparent disabled:cursor-not-allowed"
+                  className="text-sm gap-1 hidden @[35rem]:flex items-center justify-center px-2 py-0.5 rounded-md border border-(--vibrant) bg-(--vibrant)/20 hover:bg-(--vibrant-hover)/20 disabled:border-(--gray-page) disabled:text-(--gray-page) disabled:bg-transparent disabled:hover:bg-transparent disabled:cursor-not-allowed"
                 >
                   {pageDocument.saveStatus === "saving" ? "Saving" : "Save"}
                 </button>
@@ -246,33 +246,35 @@ export const TopBar = () => {
             </p>
           )}
           <button
-            className="text-sm gap-1 flex items-center justify-center p-1 @[48rem]:px-2 @[48rem]:py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) hover:bg-(--gray)/20 ml-auto"
+            className="text-sm gap-1 hidden @[55rem]:flex items-center justify-center p-1 @[48rem]:px-2 @[48rem]:py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) hover:bg-(--gray)/20 ml-auto"
+            onClick={() => void pageDocument?.createPageAndOpen()}
+          >
+            <FilePlusCorner size={15} />
+            <span>Split view</span>
+          </button>
+          <button
+            className="text-sm gap-1 flex items-center justify-center p-1 @[48rem]:px-2 @[48rem]:py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) hover:bg-(--gray)/20 @[55rem]:ml-0 ml-auto"
             onClick={() => void pageDocument?.createPageAndOpen()}
           >
             <FilePlusCorner size={15} />
             <span className="hidden @[48rem]:inline">New Page</span>
           </button>
-          <div className="flex flex-col items-start gap-1">
-            <button
-              className={`text-sm gap-1 flex items-center justify-center p-1 @[48rem]:px-2 @[48rem]:py-0.5 rounded-md border  disabled:cursor-not-allowed disabled:hover:bg-transparent ${isDeleteConfirming ? "border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20 text-(--light)" : "border-(--gray-page) text-(--gray-page) hover:bg-(--gray)/20"}`}
-              onClick={() => void handleDeletePage()}
-              disabled={pageDocument?.deleteStatus === "deleting"}
-            >
-              <Trash size={15} />
-              <span className="hidden @[48rem]:inline">
-                {pageDocument?.deleteStatus === "deleting"
-                  ? "Deleting..."
-                  : isDeleteConfirming
-                    ? "Are you sure?"
+          <button
+            className={`text-sm gap-1 flex items-center justify-center p-1 @[48rem]:px-2 @[48rem]:py-0.5 rounded-md border  disabled:cursor-not-allowed disabled:hover:bg-transparent ${isDeleteConfirming ? "border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20 text-(--light)" : "border-(--gray-page) text-(--gray-page) hover:bg-(--gray)/20"}`}
+            onClick={() => void handleDeletePage()}
+            disabled={pageDocument?.deleteStatus === "deleting"}
+          >
+            <Trash size={15} />
+            <span className="hidden @[48rem]:inline">
+              {pageDocument?.deleteStatus === "deleting"
+                ? "Deleting..."
+                : isDeleteConfirming
+                  ? "Are you sure?"
+                  : pageDocument?.deleteError
+                    ? pageDocument.deleteError
                     : "Delete"}
-              </span>
-            </button>
-            {pageDocument?.deleteError ? (
-              <p className="text-xs text-(--declined-border)">
-                {pageDocument.deleteError}
-              </p>
-            ) : null}
-          </div>
+            </span>
+          </button>
           <Menubar className="h-auto bg-transparent border-none shadow-none p-0">
             <MenubarMenu>
               <MenubarTrigger className="data-highlighted:bg-transparent data-[state=open]:bg-transparent data-highlighted:text-(--gray-page) data-[state=open]:text-(--gray-page) py-0 text-sm flex items-center justify-center p-1 @[48rem]:px-2 @[48rem]:py-0.5 rounded-md border border-(--gray-page) hover:bg-(--gray)/20 gap-1 text-(--gray-page)">
