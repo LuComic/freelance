@@ -9,9 +9,10 @@ import { MobileChat } from "./MobileChat";
 
 type ChatProps = {
   initialChatOpen?: boolean;
+  initialChatWidth?: number;
 };
 
-export const Chat = ({ initialChatOpen }: ChatProps) => {
+export const Chat = ({ initialChatOpen, initialChatWidth }: ChatProps) => {
   const { clearSelectedConfigComponent } = useEditMode();
   const pageDocument = useOptionalPageDocument();
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -32,7 +33,10 @@ export const Chat = ({ initialChatOpen }: ChatProps) => {
   }
 
   return isDesktop ? (
-    <DesktopChat initialOpen={initialChatOpen} />
+    <DesktopChat
+      initialOpen={initialChatOpen}
+      initialWidth={initialChatWidth}
+    />
   ) : (
     <MobileChat />
   );

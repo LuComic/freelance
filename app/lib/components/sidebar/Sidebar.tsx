@@ -8,9 +8,13 @@ import { MobileSidebar } from "./MobileSidebar";
 
 type SidebarProps = {
   initialSidebarOpen?: boolean;
+  initialSidebarWidth?: number;
 };
 
-export const Sidebar = ({ initialSidebarOpen }: SidebarProps) => {
+export const Sidebar = ({
+  initialSidebarOpen,
+  initialSidebarWidth,
+}: SidebarProps) => {
   const userProfile = useQuery(api.users.queries.currentProfile);
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
@@ -21,6 +25,7 @@ export const Sidebar = ({ initialSidebarOpen }: SidebarProps) => {
   return isDesktop ? (
     <DesktopSidebar
       initialOpen={initialSidebarOpen}
+      initialWidth={initialSidebarWidth}
       userProfile={userProfile}
     />
   ) : (

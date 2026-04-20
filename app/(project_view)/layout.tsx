@@ -3,7 +3,14 @@ import { cookies } from "next/headers";
 import { Sidebar } from "../lib/components/sidebar/Sidebar";
 import { Chat } from "../lib/components/chat/Chat";
 import { SearchBar } from "../lib/components/searchbar/SearchBar";
-import { SIDEBAR_COOKIE, CHAT_COOKIE, TABS_COOKIE } from "../lib/cookies";
+import {
+  SIDEBAR_COOKIE,
+  CHAT_COOKIE,
+  SIDEBAR_WIDTH_COOKIE,
+  CHAT_WIDTH_COOKIE,
+  TABS_COOKIE,
+  parsePanelWidthCookie,
+} from "../lib/cookies";
 import { Tab } from "../lib/components/tab/Tab";
 import { parseTabsCookie } from "../lib/components/tab/tabState";
 import { TopBar } from "../lib/components/project/TopBar";
@@ -17,6 +24,14 @@ export const metadata: Metadata = {
   description: "The best platform for client-freelancer communication.",
 };
 
+const SIDEBAR_MIN_WIDTH = 80;
+const SIDEBAR_DEFAULT_WIDTH = 90.75;
+const SIDEBAR_MAX_WIDTH = 130;
+
+const CHAT_MIN_WIDTH = 110;
+const CHAT_DEFAULT_WIDTH = 122.75;
+const CHAT_MAX_WIDTH = 150;
+
 export default async function ProjectViewLayout({
   children,
 }: Readonly<{
@@ -25,10 +40,24 @@ export default async function ProjectViewLayout({
   const cookieStore = await cookies();
   const sidebarValue = cookieStore.get(SIDEBAR_COOKIE)?.value;
   const chatValue = cookieStore.get(CHAT_COOKIE)?.value;
+  const sidebarWidthValue = cookieStore.get(SIDEBAR_WIDTH_COOKIE)?.value;
+  const chatWidthValue = cookieStore.get(CHAT_WIDTH_COOKIE)?.value;
   const tabsValue = cookieStore.get(TABS_COOKIE)?.value;
   const initialSidebarOpen =
     sidebarValue != null ? sidebarValue === "true" : undefined;
   const initialChatOpen = chatValue != null ? chatValue === "true" : undefined;
+  const initialSidebarWidth = parsePanelWidthCookie(
+    sidebarWidthValue,
+    SIDEBAR_MIN_WIDTH,
+    SIDEBAR_MAX_WIDTH,
+    SIDEBAR_DEFAULT_WIDTH,
+  );
+  const initialChatWidth = parsePanelWidthCookie(
+    chatWidthValue,
+    CHAT_MIN_WIDTH,
+    CHAT_MAX_WIDTH,
+    CHAT_DEFAULT_WIDTH,
+  );
   const initialTabsState = parseTabsCookie(tabsValue);
 
   return (
@@ -41,7 +70,10 @@ export default async function ProjectViewLayout({
     >
       <SearchBarProvider>
         <SidebarControllerProvider>
-          <Sidebar initialSidebarOpen={initialSidebarOpen} />
+          <Sidebar
+            initialSidebarOpen={initialSidebarOpen}
+            initialSidebarWidth={initialSidebarWidth}
+          />
           <EditModeProvider>
             <PageDocumentProvider>
               <SearchBar />
@@ -52,7 +84,10 @@ export default async function ProjectViewLayout({
                   {children}
                 </div>
               </div>
-              <Chat initialChatOpen={initialChatOpen} />
+              <Chat
+                initialChatOpen={initialChatOpen}
+                initialChatWidth={initialChatWidth}
+              />
             </PageDocumentProvider>
           </EditModeProvider>
         </SidebarControllerProvider>

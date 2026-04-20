@@ -14,21 +14,32 @@ import {
 import { Files } from "./Files";
 import { Connections } from "./Connections";
 import { SidebarSettings } from "./SidebarSettings";
-import { setCookie, SIDEBAR_COOKIE } from "@/app/lib/cookies";
+import {
+  setCookie,
+  SIDEBAR_COOKIE,
+  SIDEBAR_WIDTH_COOKIE,
+} from "@/app/lib/cookies";
 import { CreateProjectModal } from "@/app/lib/components/project/CreateProjectModal";
 import Link from "next/link";
 import { LogOutButton } from "../LogOutButton";
 import { SidebarUserInfo, type SidebarUserProfile } from "./SidebarUserInfo";
 import { useSidebarController } from "./SidebarControllerContext";
 import { Authenticated } from "convex/react";
+import { useResizablePanelWidth } from "@/app/lib/hooks/useResizablePanelWidth";
 
 type DesktopSidebarProps = {
   initialOpen?: boolean;
+  initialWidth?: number;
   userProfile: SidebarUserProfile;
 };
 
+const SIDEBAR_MIN_WIDTH = 80;
+const SIDEBAR_DEFAULT_WIDTH = 90.75;
+const SIDEBAR_MAX_WIDTH = 130;
+
 export const DesktopSidebar = ({
   initialOpen,
+  initialWidth,
   userProfile,
 }: DesktopSidebarProps) => {
   const isAnonymous = userProfile?.isAnonymous === true;
@@ -80,11 +91,39 @@ export const DesktopSidebar = ({
   const notificationClassName = `ml-auto p-1 flex items-center justify-center aspect-square rounded-lg h-full hover:bg-(--darkest-hover) ${
     hasUnreadNotifications ? "notification relative" : ""
   }`;
+  const {
+    width: sidebarWidth,
+    widthStyle,
+    startResize,
+    resizeByKeyboard,
+  } = useResizablePanelWidth({
+    cookieName: SIDEBAR_WIDTH_COOKIE,
+    defaultWidth: SIDEBAR_DEFAULT_WIDTH,
+    initialWidth,
+    minWidth: SIDEBAR_MIN_WIDTH,
+    maxWidth: SIDEBAR_MAX_WIDTH,
+    resizeEdge: "right",
+  });
 
   return (
     <div className="self-stretch">
       {resolvedSidebarOpen ? (
-        <nav className="w-90.75 h-full min-h-dvh bg-(--darkest) border-r border-(--gray) flex flex-col items-start justify-start p-2 px-3 gap-4 overflow-hidden">
+        <nav
+          className="relative shrink-0 h-full min-h-dvh bg-(--darkest) border-r border-(--gray) flex flex-col items-start justify-start p-2 px-3 gap-4 overflow-hidden"
+          style={widthStyle}
+        >
+          <div
+            role="separator"
+            aria-label="Resize sidebar"
+            aria-orientation="vertical"
+            aria-valuemin={SIDEBAR_MIN_WIDTH}
+            aria-valuemax={SIDEBAR_MAX_WIDTH}
+            aria-valuenow={sidebarWidth}
+            tabIndex={0}
+            onPointerDown={startResize}
+            onKeyDown={resizeByKeyboard}
+            className="absolute top-0 right-0 z-10 h-full w-2 cursor-ew-resize touch-none bg-transparent"
+          />
           <div className="flex items-center justify-between w-full">
             <Link href="/projects" className="text-(--gray) text-xl inline">
               Pageboard

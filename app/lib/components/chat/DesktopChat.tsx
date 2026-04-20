@@ -8,18 +8,27 @@ import {
   Component,
   Settings2,
 } from "lucide-react";
-import { CHAT_COOKIE, setCookie } from "@/app/lib/cookies";
+import { CHAT_COOKIE, CHAT_WIDTH_COOKIE, setCookie } from "@/app/lib/cookies";
 import { useEditMode } from "@/app/lib/components/project/EditModeContext";
+import { useResizablePanelWidth } from "@/app/lib/hooks/useResizablePanelWidth";
 import { ComponentLib, type ComponentTag } from "./ComponentLib";
 import { SelectedComponentConfig } from "./SelectedComponentConfig";
 
 type DesktopChatProps = {
   initialOpen?: boolean;
+  initialWidth?: number;
 };
 
 type ChatTab = "components" | "config";
 
-export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
+const CHAT_MIN_WIDTH = 110;
+const CHAT_DEFAULT_WIDTH = 122.75;
+const CHAT_MAX_WIDTH = 150;
+
+export const DesktopChat = ({
+  initialOpen,
+  initialWidth,
+}: DesktopChatProps) => {
   const {
     isEditing,
     modeLock,
@@ -33,6 +42,19 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
   const handledComponentLibraryNonceRef = useRef(0);
   const handledComponentConfigNonceRef = useRef(0);
   const componentsLocked = modeLock === "live";
+  const {
+    width: chatWidth,
+    widthStyle,
+    startResize,
+    resizeByKeyboard,
+  } = useResizablePanelWidth({
+    cookieName: CHAT_WIDTH_COOKIE,
+    defaultWidth: CHAT_DEFAULT_WIDTH,
+    initialWidth,
+    minWidth: CHAT_MIN_WIDTH,
+    maxWidth: CHAT_MAX_WIDTH,
+    resizeEdge: "left",
+  });
 
   useEffect(() => {
     setCookie(CHAT_COOKIE, String(chatOpen));
@@ -97,7 +119,22 @@ export const DesktopChat = ({ initialOpen }: DesktopChatProps) => {
   return (
     <div className="self-stretch">
       {chatOpen ? (
-        <div className="w-122.75 h-full min-h-dvh bg-(--darkest) border-l border-(--gray) flex flex-col items-start justify-start p-2 px-3 gap-4 overflow-hidden">
+        <div
+          className="relative shrink-0 h-full min-h-dvh bg-(--darkest) border-l border-(--gray) flex flex-col items-start justify-start p-2 px-3 gap-4 overflow-hidden"
+          style={widthStyle}
+        >
+          <div
+            role="separator"
+            aria-label="Resize chat panel"
+            aria-orientation="vertical"
+            aria-valuemin={CHAT_MIN_WIDTH}
+            aria-valuemax={CHAT_MAX_WIDTH}
+            aria-valuenow={chatWidth}
+            tabIndex={0}
+            onPointerDown={startResize}
+            onKeyDown={resizeByKeyboard}
+            className="absolute top-0 left-0 z-10 h-full w-2 cursor-ew-resize touch-none bg-transparent"
+          />
           <div className="flex items-center justify-start gap-2 w-full">
             <button
               onClick={() => setChatOpen(false)}
