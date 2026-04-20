@@ -6,7 +6,9 @@
     "dev": "bun --bun next dev",
     "build": "bun --bun next build",
     "start": "bun --bun next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "cf:build": "convex deploy --cmd-url-env-var-name NEXT_PUBLIC_CONVEX_URL --cmd 'opennextjs-cloudflare build'",
+    "cf:deploy": "opennextjs-cloudflare deploy -- --keep-vars"
   },
   "dependencies": {
     "@auth/core": "0.37.0",
