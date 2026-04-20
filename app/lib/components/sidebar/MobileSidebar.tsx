@@ -26,7 +26,10 @@ export const MobileSidebar = ({
 }: {
   userProfile: SidebarUserProfile;
 }) => {
-  const isAnonymous = userProfile?.isAnonymous === true;
+  const isSignedInRealUser =
+    userProfile !== undefined &&
+    userProfile !== null &&
+    userProfile.isAnonymous !== true;
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [handledRequestVersion, setHandledRequestVersion] = useState(0);
   const [activeTab, setActiveTab] = useState<"files" | "friends" | "settings">(
@@ -39,11 +42,11 @@ export const MobileSidebar = ({
   const { requestedConnectionsSection, requestVersion } =
     useSidebarController();
   const hasPendingConnectionsRequest =
-    !isAnonymous &&
+    isSignedInRealUser &&
     requestedConnectionsSection !== null &&
     requestVersion > handledRequestVersion;
   const resolvedSidebarOpen = hasPendingConnectionsRequest ? true : sidebarOpen;
-  const resolvedActiveTab = isAnonymous
+  const resolvedActiveTab = !isSignedInRealUser
     ? activeTab === "friends"
       ? "files"
       : activeTab
@@ -91,7 +94,7 @@ export const MobileSidebar = ({
             >
               <Folder size={20} className="mx-auto" />
             </button>
-            {!isAnonymous ? (
+            {isSignedInRealUser ? (
               <button
                 className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
                   resolvedActiveTab === "friends"
@@ -119,7 +122,7 @@ export const MobileSidebar = ({
             >
               <Settings size={20} className="mx-auto" />
             </button>
-            {!isAnonymous ? (
+            {isSignedInRealUser ? (
               <CreateProjectModal
                 ui="sidebar"
                 redirectWhenBlocked="/settings?section=plan"
@@ -143,7 +146,7 @@ export const MobileSidebar = ({
           {resolvedActiveTab === "files" ? (
             <Files closeSidebar={() => setSidebarOpen(false)} />
           ) : null}
-          {!isAnonymous && resolvedActiveTab === "friends" ? (
+          {isSignedInRealUser && resolvedActiveTab === "friends" ? (
             <Connections
               connections={connections}
               setSidebarOpen={setSidebarOpen}

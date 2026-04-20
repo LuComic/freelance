@@ -10,6 +10,7 @@ import {
   Settings,
   Bell,
   Folder,
+  Search,
 } from "lucide-react";
 import { Files } from "./Files";
 import { Connections } from "./Connections";
@@ -26,6 +27,7 @@ import { SidebarUserInfo, type SidebarUserProfile } from "./SidebarUserInfo";
 import { useSidebarController } from "./SidebarControllerContext";
 import { Authenticated } from "convex/react";
 import { useResizablePanelWidth } from "@/app/lib/hooks/useResizablePanelWidth";
+import { useSearchBar } from "../searchbar/SearchBarContext";
 
 type DesktopSidebarProps = {
   initialOpen?: boolean;
@@ -42,7 +44,10 @@ export const DesktopSidebar = ({
   initialWidth,
   userProfile,
 }: DesktopSidebarProps) => {
-  const isAnonymous = userProfile?.isAnonymous === true;
+  const isSignedInRealUser =
+    userProfile !== undefined &&
+    userProfile !== null &&
+    userProfile.isAnonymous !== true;
   const [sidebarOpen, setSidebarOpen] = useState(initialOpen ?? true);
   const [handledRequestVersion, setHandledRequestVersion] = useState(0);
   const [activeTab, setActiveTab] = useState<"files" | "friends" | "settings">(
@@ -54,12 +59,13 @@ export const DesktopSidebar = ({
   );
   const { requestedConnectionsSection, requestVersion } =
     useSidebarController();
+  const { isOpen: isSearchOpen, openSearch } = useSearchBar();
   const hasPendingConnectionsRequest =
-    !isAnonymous &&
+    isSignedInRealUser &&
     requestedConnectionsSection !== null &&
     requestVersion > handledRequestVersion;
   const resolvedSidebarOpen = hasPendingConnectionsRequest ? true : sidebarOpen;
-  const resolvedActiveTab = isAnonymous
+  const resolvedActiveTab = !isSignedInRealUser
     ? activeTab === "friends"
       ? "files"
       : activeTab
@@ -153,7 +159,7 @@ export const DesktopSidebar = ({
             >
               <Folder size={20} className="mx-auto" />
             </button>
-            {!isAnonymous ? (
+            {isSignedInRealUser ? (
               <button
                 className={` p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
                   resolvedActiveTab === "friends"
@@ -181,7 +187,15 @@ export const DesktopSidebar = ({
             >
               <Settings size={20} className="mx-auto" />
             </button>
-            {!isAnonymous ? (
+            <button
+              className={`p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
+                isSearchOpen ? "bg-(--quite-dark) text-(--vibrant)" : ""
+              }`}
+              onClick={openSearch}
+            >
+              <Search size={20} className="mx-auto" />
+            </button>
+            {isSignedInRealUser ? (
               <CreateProjectModal
                 ui="sidebar"
                 redirectWhenBlocked="/settings?section=plan"
@@ -197,7 +211,7 @@ export const DesktopSidebar = ({
             </Link>
           ) : null}
           {resolvedActiveTab === "files" ? <Files /> : null}
-          {!isAnonymous && resolvedActiveTab === "friends" ? (
+          {isSignedInRealUser && resolvedActiveTab === "friends" ? (
             <Connections connections={connections} />
           ) : null}
           {resolvedActiveTab === "settings" ? <SidebarSettings /> : null}
@@ -237,7 +251,7 @@ export const DesktopSidebar = ({
             >
               <Folder size={20} className="mx-auto" />
             </button>
-            {!isAnonymous ? (
+            {isSignedInRealUser ? (
               <button
                 className={`h-full  p-1 rounded-md hover:bg-(--quite-dark) w-full ${
                   resolvedActiveTab === "friends"
@@ -267,7 +281,15 @@ export const DesktopSidebar = ({
             >
               <Settings size={20} className="mx-auto" />
             </button>
-            {!isAnonymous ? (
+            <button
+              className={`h-full p-1 rounded-md hover:bg-(--quite-dark) w-full ${
+                isSearchOpen ? "bg-(--quite-dark) text-(--vibrant)" : ""
+              }`}
+              onClick={openSearch}
+            >
+              <Search size={20} className="mx-auto" />
+            </button>
+            {isSignedInRealUser ? (
               <CreateProjectModal
                 ui="sidebar"
                 redirectWhenBlocked="/settings?section=plan"
