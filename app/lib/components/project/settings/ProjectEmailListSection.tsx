@@ -25,6 +25,7 @@ type ProjectEmailListSectionProps = {
   isRegeneratingJoinCode?: boolean;
   canManage?: boolean;
   canRemove?: boolean;
+  showJoinAccess?: boolean;
   shaded?: boolean;
 };
 
@@ -54,6 +55,7 @@ export function ProjectEmailListSection({
   isRegeneratingJoinCode = false,
   canManage = true,
   canRemove = true,
+  showJoinAccess = false,
   shaded = false,
 }: ProjectEmailListSectionProps) {
   const [open, setOpen] = useState(false);
@@ -82,7 +84,7 @@ export function ProjectEmailListSection({
       {open ? (
         <div className="pl-7 flex flex-col gap-2 pb-2">
           <p className="text-(--gray-page)">{currentLabel}</p>
-          {title === "Clients" && (
+          {showJoinAccess ? (
             <>
               <div className="flex items-center justify-start gap-2 h-auto">
                 <p className="text-(--gray-page)">Join code (click to copy):</p>
@@ -164,7 +166,7 @@ export function ProjectEmailListSection({
                 </button>
               </div>
             </>
-          )}
+          ) : null}
           <div className="flex items-center justify-start gap-2 w-full flex-wrap">
             {members.map((member) => (
               <div

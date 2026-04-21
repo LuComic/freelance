@@ -155,7 +155,6 @@ function buildUserData(
     searchText: buildUserSearchText({
       name: nextName,
       bio: nextBio,
-      email: nextEmail,
     }),
   };
 

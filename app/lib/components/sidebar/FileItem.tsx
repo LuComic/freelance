@@ -60,7 +60,9 @@ export const FileItem = ({
   const [isCreatingPage, setIsCreatingPage] = useState(false);
   const isCreatePageDisabled =
     isCreatingPage || project.viewerRole === "client";
-  const canAccessAnalytics = entitlements?.canAccessAnalytics === true;
+  const canAccessAnalytics =
+    entitlements?.canAccessAnalytics === true &&
+    project.viewerRole !== "client";
 
   return (
     <>

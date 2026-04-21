@@ -15,7 +15,7 @@ import {
   invalidState,
   notFound,
 } from "../lib/errors";
-import { requireProjectEditor, requireProjectMember } from "../lib/permissions";
+import { requireProjectEditor } from "../lib/permissions";
 import { getOrderedProjectPages } from "../lib/projectRecords";
 import { createProjectJoinNotifications } from "../notifications/model";
 import {
@@ -26,10 +26,6 @@ import {
 
 type RedirectProject = Pick<Doc<"projects">, "_id" | "pageIds" | "isArchived">;
 type RedirectCtx = QueryCtx | MutationCtx;
-
-function isProjectEditorRole(role: Doc<"projectMembers">["role"]) {
-  return role === "owner" || role === "coCreator";
-}
 
 function resolveTransferredRole(
   existingRole: Doc<"projectMembers">["role"],
@@ -146,11 +142,11 @@ export const getProjectJoinCode = query({
         throw notFound(`Project ${args.projectId} was not found.`);
       }
 
-      const membership = await requireProjectMember(ctx, project._id, userId);
+      await requireProjectEditor(ctx, project._id, userId);
 
       return {
         joinCode: project.joinCode ?? null,
-        canRegenerate: isProjectEditorRole(membership.role),
+        canRegenerate: true,
       };
     } catch (error) {
       if (
@@ -178,7 +174,7 @@ export const ensureProjectJoinCode = mutation({
       throw notFound(`Project ${args.projectId} was not found.`);
     }
 
-    const membership = await requireProjectMember(ctx, project._id, userId);
+    await requireProjectEditor(ctx, project._id, userId);
     let joinCode = project.joinCode ?? null;
 
     if (!joinCode) {
@@ -191,7 +187,7 @@ export const ensureProjectJoinCode = mutation({
 
     return {
       joinCode,
-      canRegenerate: isProjectEditorRole(membership.role),
+      canRegenerate: true,
     };
   },
 });

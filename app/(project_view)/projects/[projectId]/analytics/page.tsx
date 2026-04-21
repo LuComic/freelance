@@ -3,6 +3,7 @@
 import { FormSubmissionsDropdown } from "@/app/lib/components/analytics/FormSubmissionsDropdown";
 import { InputDropdown } from "@/app/lib/components/analytics/InputDropdown";
 import type { AnalyticsPageData } from "@/app/lib/components/analytics/types";
+import { getProjectPath } from "@/app/lib/components/project/paths";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { useParams, useRouter } from "next/navigation";
@@ -20,11 +21,11 @@ export default function AnalyticsPage() {
   useEffect(() => {
     if (data === null) {
       queueMicrotask(() => {
-        router.replace("/projects");
+        router.replace(projectId ? getProjectPath(projectId) : "/projects");
         router.refresh();
       });
     }
-  }, [data, router]);
+  }, [data, projectId, router]);
 
   return (
     <>
@@ -44,7 +45,7 @@ export default function AnalyticsPage() {
         {data === undefined ? (
           <p className="text-(--gray-page)">Loading inputs...</p>
         ) : data === null ? (
-          <p className="text-(--gray-page)">Redirecting to projects...</p>
+          <p className="text-(--gray-page)">Redirecting to project...</p>
         ) : data.inputs.length === 0 ? (
           <p className="text-(--gray-page)">No pages found for this project.</p>
         ) : (
@@ -65,7 +66,7 @@ export default function AnalyticsPage() {
         {data === undefined ? (
           <p className="text-(--gray-page)">Loading form submissions...</p>
         ) : data === null ? (
-          <p className="text-(--gray-page)">Redirecting to projects...</p>
+          <p className="text-(--gray-page)">Redirecting to project...</p>
         ) : data.forms.length === 0 ? (
           <p className="text-(--gray-page)">No form submissions yet.</p>
         ) : (
@@ -86,7 +87,7 @@ export default function AnalyticsPage() {
         {data === undefined ? (
           <p className="text-(--gray-page)">Loading latest changes...</p>
         ) : data === null ? (
-          <p className="text-(--gray-page)">Redirecting to projects...</p>
+          <p className="text-(--gray-page)">Redirecting to project...</p>
         ) : data.latestChanges.length === 0 ? (
           <p className="text-(--gray-page)">No tracked live changes yet.</p>
         ) : (

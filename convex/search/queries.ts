@@ -37,6 +37,15 @@ function normalizeSearchQuery(value: string) {
   return value.trim().toLowerCase();
 }
 
+function matchesPublicPeopleSearchFields(
+  normalizedQuery: string,
+  user: Pick<Doc<"users">, "name" | "bio">,
+) {
+  return [user.name, user.bio]
+    .map((value) => value?.trim().toLowerCase())
+    .some((value) => value?.includes(normalizedQuery));
+}
+
 function compareProjectsForSearch(
   lastOpenedProjectId: Doc<"users">["lastOpenedProjectId"],
   left: ProjectSearchOrder,
@@ -255,6 +264,10 @@ export const searchPeople = query({
 
       for (const result of searchResults) {
         if (result._id === userId || isAnonymousUser(result)) {
+          continue;
+        }
+
+        if (!matchesPublicPeopleSearchFields(normalizedQuery, result)) {
           continue;
         }
 

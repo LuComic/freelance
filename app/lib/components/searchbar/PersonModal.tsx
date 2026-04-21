@@ -252,9 +252,6 @@ export const PersonModal = ({
             </button>
           </div>
         </div>
-        {visiblePerson.email ? (
-          <p className="text-(--gray-page)">{visiblePerson.email}</p>
-        ) : null}
         {visiblePerson.bio ? (
           <p className="text-(--gray-page)">{visiblePerson.bio}</p>
         ) : null}

@@ -642,7 +642,12 @@ export const getProjectAnalytics = query({
       const { userId } = await requireCurrentAuth(ctx);
       const project = await requireProjectById(ctx, args.projectId);
 
-      await requireProjectMember(ctx, project._id, userId);
+      const membership = await requireProjectMember(ctx, project._id, userId);
+
+      if (membership.role === "client") {
+        return null;
+      }
+
       const entitlements = await getCurrentEntitlementsForUser(ctx, userId);
 
       if (!entitlements.canAccessAnalytics) {

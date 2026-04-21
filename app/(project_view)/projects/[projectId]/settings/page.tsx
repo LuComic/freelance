@@ -22,6 +22,7 @@ export default function SettingsPage() {
     currentProjectName,
     currentProjectDescription,
     canManageMembers,
+    canViewClientJoinAccess,
     canRemoveMembers,
     canDeleteProject,
     canLeaveProject,
@@ -108,6 +109,7 @@ export default function SettingsPage() {
           isRegeneratingJoinCode={isRegeneratingJoinCode}
           canManage={canManageMembers}
           canRemove={canRemoveMembers}
+          showJoinAccess={canViewClientJoinAccess}
           pendingRemovalUserId={pendingMemberRemovalUserId}
           error={joinCodeError ?? memberActionError}
           onRemove={(userId) => void handleRemoveProjectMember(userId)}

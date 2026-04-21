@@ -135,13 +135,16 @@ export function useProjectSettingsController(projectId: string) {
     api.projects.members.getProjectMembers,
     currentProjectId ? { projectId: currentProjectId as never } : "skip",
   );
-  const projectJoinCode = useQuery(
-    api.projects.join.getProjectJoinCode,
-    currentProjectId ? { projectId: currentProjectId as never } : "skip",
-  );
   const canManageMembers =
     projectMembers?.viewerRole === "owner" ||
     projectMembers?.viewerRole === "coCreator";
+  const canViewClientJoinAccess = canManageMembers;
+  const projectJoinCode = useQuery(
+    api.projects.join.getProjectJoinCode,
+    currentProjectId && canViewClientJoinAccess
+      ? { projectId: currentProjectId as never }
+      : "skip",
+  );
   const canRemoveMembers = projectMembers?.viewerRole === "owner";
   const canDeleteProject = projectMembers?.viewerRole === "owner";
   const canLeaveProject =
@@ -153,6 +156,16 @@ export function useProjectSettingsController(projectId: string) {
     projectMembers?.viewerRole === "coCreator";
 
   useEffect(() => {
+    if (!canViewClientJoinAccess) {
+      queueMicrotask(() => {
+        setJoinCodeSnapshot(null);
+        setJoinCodeError(null);
+        setIsEnsuringJoinCode(false);
+      });
+      ensuredJoinCodeProjectIdRef.current = null;
+      return;
+    }
+
     if (!currentProjectId || projectJoinCode === undefined) {
       return;
     }
@@ -199,7 +212,12 @@ export function useProjectSettingsController(projectId: string) {
       .finally(() => {
         setIsEnsuringJoinCode(false);
       });
-  }, [currentProjectId, ensureProjectJoinCode, projectJoinCode]);
+  }, [
+    canViewClientJoinAccess,
+    currentProjectId,
+    ensureProjectJoinCode,
+    projectJoinCode,
+  ]);
 
   const handleProjectRename = async () => {
     if (!currentProjectId || isSavingName || !canRenameProject) {
@@ -361,6 +379,7 @@ export function useProjectSettingsController(projectId: string) {
     if (
       !currentProjectId ||
       isRegeneratingJoinCode ||
+      !canViewClientJoinAccess ||
       !projectJoinCode?.canRegenerate
     ) {
       return;
@@ -388,13 +407,19 @@ export function useProjectSettingsController(projectId: string) {
   return {
     projectData,
     projectMembers,
-    joinCode: projectJoinCode?.joinCode ?? joinCodeSnapshot,
-    canRegenerateJoinCode: projectJoinCode?.canRegenerate ?? false,
+    joinCode: canViewClientJoinAccess
+      ? (projectJoinCode?.joinCode ?? joinCodeSnapshot)
+      : null,
+    canRegenerateJoinCode:
+      canViewClientJoinAccess && (projectJoinCode?.canRegenerate ?? false),
     joinCodeError,
-    isJoinCodeLoading: projectJoinCode === undefined || isEnsuringJoinCode,
+    isJoinCodeLoading:
+      canViewClientJoinAccess &&
+      (projectJoinCode === undefined || isEnsuringJoinCode),
     isRegeneratingJoinCode,
     currentProjectName,
     canManageMembers,
+    canViewClientJoinAccess,
     canRemoveMembers,
     canDeleteProject,
     canLeaveProject,

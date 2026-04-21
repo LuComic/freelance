@@ -53,7 +53,6 @@ export const updateProfile = mutation({
       patch.searchText = buildUserSearchText({
         name: nextName,
         bio: nextBio,
-        email: user.email,
       });
       await ctx.db.patch(userId, patch);
     }

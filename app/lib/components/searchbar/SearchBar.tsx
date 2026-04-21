@@ -203,7 +203,6 @@ export const SearchBar = () => {
       ? visiblePeopleSearchResults.map((person: SearchPerson) => ({
           key: String(person.userId),
           title: person.name,
-          subtitle: person.email ?? undefined,
           onSelect: () => {
             if (peopleSearchSelectHandler) {
               peopleSearchSelectHandler(person);
