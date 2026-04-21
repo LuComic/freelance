@@ -19,12 +19,16 @@ export default function Page() {
   const didReturnFromGoogle = searchParams.get("betaAuthAttempt") === "google";
 
   useEffect(() => {
-    if (!didReturnFromGoogle || isAuthLoading || currentProfile === undefined) {
+    if (isAuthLoading || currentProfile === undefined) {
       return;
     }
 
     if (currentProfile && !currentProfile.isAnonymous) {
       router.replace("/projects");
+      return;
+    }
+
+    if (!didReturnFromGoogle) {
       return;
     }
 

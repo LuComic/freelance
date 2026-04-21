@@ -1,6 +1,8 @@
 "use client";
 
 import { useAuthActions } from "@convex-dev/auth/react";
+import { useState } from "react";
+import { Spinner } from "@/components/ui/spinner";
 
 type LoginPageButtonsProps = {
   type: "google" | "apple";
@@ -14,6 +16,7 @@ export const LoginPageButtons = ({
   redirectTo = "/projects",
 }: LoginPageButtonsProps) => {
   const { signIn } = useAuthActions();
+  const [spinner, setSpinner] = useState(false);
 
   return (
     <>
@@ -21,10 +24,13 @@ export const LoginPageButtons = ({
         <button
           type="button"
           disabled={disabled}
-          className="rounded-md px-2 py-1 bg-(--google-bg) text-(--google-text) font-medium w-full hover:bg-(--google-bg)/80 border-2 border-(--google-border) disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-(--google-bg)"
-          onClick={() => void signIn("google", { redirectTo })}
+          className="rounded-md px-2 h-9 bg-(--google-bg) text-(--google-text) font-medium w-full hover:bg-(--google-bg)/80 border-2 border-(--google-border) disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-(--google-bg) flex items-center justify-center"
+          onClick={() => {
+            void signIn("google", { redirectTo });
+            setSpinner(true);
+          }}
         >
-          Continue with Google
+          {spinner ? <Spinner /> : "Continue with Google"}
         </button>
       ) : type === "apple" ? (
         <button
