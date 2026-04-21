@@ -1,42 +1,35 @@
 "use client";
 
 import { LoginPageButtons } from "@/app/lib/components/landing/login/LoginPageButtons";
-import { api } from "@/convex/_generated/api";
-import { useConvexAuth, useQuery } from "convex/react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 
-export default function Page() {
-  const router = useRouter();
+function AuthDeniedMessage() {
   const searchParams = useSearchParams();
-  const { isLoading: isAuthLoading } = useConvexAuth();
-  const [agree, setAgree] = useState(false);
-  const [authDeniedMessage, setAuthDeniedMessage] = useState<string | null>(
-    null,
-  );
-  const currentProfile = useQuery(api.users.queries.currentProfile);
   const didReturnFromGoogle = searchParams.get("betaAuthAttempt") === "google";
 
   useEffect(() => {
-    if (isAuthLoading || currentProfile === undefined) {
-      return;
-    }
-
-    if (currentProfile && !currentProfile.isAnonymous) {
-      router.replace("/projects");
-      return;
-    }
-
     if (!didReturnFromGoogle) {
       return;
     }
 
-    void Promise.resolve().then(() => {
-      setAuthDeniedMessage("This Google account is not approved for beta yet.");
-    });
-    router.replace("/login");
-  }, [currentProfile, didReturnFromGoogle, isAuthLoading, router]);
+    window.history.replaceState(null, "", "/login");
+  }, [didReturnFromGoogle]);
+
+  if (!didReturnFromGoogle) {
+    return null;
+  }
+
+  return (
+    <p className="rounded-md border border-(--declined-border) bg-(--declined-border)/10 px-3 py-2">
+      This Google account is not approved for beta yet.
+    </p>
+  );
+}
+
+export default function Page() {
+  const [agree, setAgree] = useState(false);
 
   return (
     <div className="w-full mx-auto flex flex-col gap-2 md:max-w-2xl px-4 pt-20 pb-12 sm:px-6 lg:px-8">
@@ -49,11 +42,9 @@ export default function Page() {
         In here this component you can login with either Google or Apple
       </p>
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
-        {authDeniedMessage ? (
-          <p className="rounded-md border border-(--declined-border) bg-(--declined-border)/10 px-3 py-2">
-            {authDeniedMessage}
-          </p>
-        ) : null}
+        <Suspense fallback={null}>
+          <AuthDeniedMessage />
+        </Suspense>
         <button
           type="button"
           className={`flex w-full items-start gap-2 border px-2 py-1.5 text-left @[40rem]:w-1/2 ${

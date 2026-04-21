@@ -12,6 +12,15 @@ const isProtectedRoute = createRouteMatcher([
   "/settings",
   "/settings(.*)",
 ]);
+const AUTH_TOKEN_COOKIE = "__convexAuthJWT";
+const SECURE_AUTH_TOKEN_COOKIE = `__Host-${AUTH_TOKEN_COOKIE}`;
+
+function hasAuthTokenCookie(request: NextRequest) {
+  return (
+    request.cookies.has(AUTH_TOKEN_COOKIE) ||
+    request.cookies.has(SECURE_AUTH_TOKEN_COOKIE)
+  );
+}
 
 const authProxy = convexAuthNextjsMiddleware(
   async (request, { convexAuth }) => {
@@ -30,6 +39,10 @@ export default function proxy(request: NextRequest, event: NextFetchEvent) {
 
   // OAuth callbacks still need Convex Auth for the code exchange.
   if (isLoginRoute && !hasOAuthCode) {
+    if (hasAuthTokenCookie(request)) {
+      return nextjsMiddlewareRedirect(request, "/projects");
+    }
+
     return NextResponse.next();
   }
 
