@@ -8,7 +8,7 @@ export default function DashboardLayout({
 }) {
   return (
     <div
-      className="antialiased min-h-dvh h-auto w-screen flex flex-col items-start justify-start"
+      className="antialiased min-h-dvh h-auto w-full flex flex-col items-start justify-start"
       style={{
         scrollbarColor: "gray transparent",
         scrollbarWidth: "thin",

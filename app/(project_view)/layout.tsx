@@ -66,7 +66,7 @@ export default async function ProjectViewLayout({
     <ConvexAuthNextjsServerProvider>
       <ConvexClientProvider>
         <div
-          className="antialiased min-h-dvh h-auto w-screen flex items-start justify-start md:h-dvh md:items-stretch md:overflow-hidden"
+          className="antialiased min-h-dvh h-auto w-full flex items-start justify-start md:h-dvh md:items-stretch md:overflow-hidden"
           style={{
             scrollbarColor: "gray transparent",
             scrollbarWidth: "thin",
