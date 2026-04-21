@@ -363,7 +363,7 @@ export const SearchBar = () => {
       />
       {isOpen ? (
         <div
-          className="fixed inset-0 z-40 flex items-start justify-center pt-[10vh] bg-black/60"
+          className="fixed inset-0 z-40 flex items-start justify-center pt-[10vh] bg-black/40 backdrop-blur-sm"
           onClick={() => {
             closeSearch();
             setSearchQuery("");
