@@ -29,14 +29,12 @@ export default function Home() {
               <Link
                 href="/login"
                 className="inline-flex h-10 items-center justify-center rounded-md bg-(--vibrant) px-1.5 py-0.5 font-medium hover:bg-(--vibrant-hover)"
-                prefetch={false}
               >
                 Create an Account
               </Link>
               <Link
                 href="/projects"
                 className="inline-flex h-10 items-center justify-center rounded-md bg-white/90 px-1.5 py-0.5 font-medium text-(--dim) hover:bg-white"
-                prefetch={false}
               >
                 Join a Project
               </Link>
@@ -170,7 +168,6 @@ export default function Home() {
               href="/tutorial"
               target="_blank"
               className="text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover) cursor-pointer"
-              prefetch={false}
             >
               More in-depth tutorial with videos
             </Link>
@@ -404,7 +401,6 @@ export default function Home() {
             <Link
               href="/login"
               className="inline-flex h-10 items-center justify-center rounded-md bg-(--vibrant) px-2 py-1 font-medium hover:bg-(--vibrant-hover)"
-              prefetch={false}
             >
               Create Account
             </Link>

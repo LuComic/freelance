@@ -1,19 +1,14 @@
-import {
-  convexAuthNextjsMiddleware,
-  createRouteMatcher,
-  nextjsMiddlewareRedirect,
-} from "@convex-dev/auth/nextjs/server";
 import type { NextFetchEvent, NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-const isProtectedRoute = createRouteMatcher([
-  "/projects",
-  "/projects/(.*)",
-  "/settings",
-  "/settings(.*)",
-]);
+type AuthProxy = (
+  request: NextRequest,
+  event: NextFetchEvent,
+) => Response | null | void | Promise<Response | null | void>;
+
 const AUTH_TOKEN_COOKIE = "__convexAuthJWT";
 const SECURE_AUTH_TOKEN_COOKIE = `__Host-${AUTH_TOKEN_COOKIE}`;
+let authProxyPromise: Promise<AuthProxy> | null = null;
 
 function hasAuthTokenCookie(request: NextRequest) {
   return (
@@ -22,29 +17,64 @@ function hasAuthTokenCookie(request: NextRequest) {
   );
 }
 
-const authProxy = convexAuthNextjsMiddleware(
-  async (request, { convexAuth }) => {
-    const token = await convexAuth.getToken();
+function isProtectedRoute(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
 
-    if (isProtectedRoute(request) && !token) {
-      return nextjsMiddlewareRedirect(request, "/login");
-    }
-  },
-  { cookieConfig: { maxAge: 60 * 60 * 24 * 30 } },
-);
+  return (
+    pathname.startsWith("/projects/") ||
+    pathname === "/settings" ||
+    pathname.startsWith("/settings/")
+  );
+}
 
-export default function proxy(request: NextRequest, event: NextFetchEvent) {
+function redirectTo(request: NextRequest, route: string) {
+  const url = request.nextUrl.clone();
+  const parsed = new URL(route, "http://dummy");
+
+  url.pathname = parsed.pathname;
+  url.search = "";
+  parsed.searchParams.forEach((value, key) => {
+    url.searchParams.set(key, value);
+  });
+
+  return NextResponse.redirect(url);
+}
+
+function getAuthProxy() {
+  authProxyPromise ??= import("@convex-dev/auth/nextjs/server").then(
+    ({ convexAuthNextjsMiddleware }) =>
+      convexAuthNextjsMiddleware(
+        async (request, { convexAuth }) => {
+          const token = await convexAuth.getToken();
+
+          if (isProtectedRoute(request) && !token) {
+            return redirectTo(request, "/login");
+          }
+        },
+        { cookieConfig: { maxAge: 60 * 60 * 24 * 30 } },
+      ),
+  );
+
+  return authProxyPromise;
+}
+
+export default async function proxy(
+  request: NextRequest,
+  event: NextFetchEvent,
+) {
   const isLoginRoute = request.nextUrl.pathname === "/login";
   const hasOAuthCode = request.nextUrl.searchParams.has("code");
 
   // OAuth callbacks still need Convex Auth for the code exchange.
   if (isLoginRoute && !hasOAuthCode) {
     if (hasAuthTokenCookie(request)) {
-      return nextjsMiddlewareRedirect(request, "/projects");
+      return redirectTo(request, "/projects");
     }
 
     return NextResponse.next();
   }
+
+  const authProxy = await getAuthProxy();
 
   return authProxy(request, event);
 }
