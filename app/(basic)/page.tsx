@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { CreateAccButton } from "../lib/components/landing/CreateAccButton";
 
 export default function Home() {
   return (
@@ -26,12 +27,7 @@ export default function Home() {
             </p>
 
             <div className="mt-6 flex w-full max-w-md flex-col gap-3 sm:flex-row sm:justify-center">
-              <Link
-                href="/login"
-                className="inline-flex h-10 items-center justify-center rounded-md bg-(--vibrant) px-1.5 py-0.5 font-medium hover:bg-(--vibrant-hover)"
-              >
-                Create an Account
-              </Link>
+              <CreateAccButton />
               <Link
                 href="/projects"
                 className="inline-flex h-10 items-center justify-center rounded-md bg-white/90 px-1.5 py-0.5 font-medium text-(--dim) hover:bg-white"
@@ -398,12 +394,7 @@ export default function Home() {
           </div>
 
           <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-            <Link
-              href="/login"
-              className="inline-flex h-10 items-center justify-center rounded-md bg-(--vibrant) px-2 py-1 font-medium hover:bg-(--vibrant-hover)"
-            >
-              Create Account
-            </Link>
+            <CreateAccButton />
           </div>
         </div>
 
