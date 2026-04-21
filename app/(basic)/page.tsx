@@ -445,13 +445,19 @@ export default function Home() {
         <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:px-8">
           <div>
             <p className="text-sm text-(--gray-page)">Built by</p>
-            <p className="mt-2 text-lg font-medium">Lukas Jääger</p>
+            <a
+              className="mt-2 text-lg font-medium underline underline-offset-4"
+              target="_blank"
+              href="https://jaager.dev/"
+            >
+              Lukas Jääger
+            </a>{" "}
           </div>
 
           <div className="lg:text-right">
             <p className="text-sm text-(--gray-page)">Project repo</p>
             <a
-              className="mt-2 text-lg font-medium"
+              className="mt-2 text-lg font-medium underline underline-offset-4"
               target="_blank"
               href="https://github.com/LuComic/freelance"
             >
