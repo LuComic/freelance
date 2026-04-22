@@ -17,6 +17,7 @@ import { PersonModal } from "./PersonModal";
 import {
   getEmptyMessage,
   getPersonModalKey,
+  getPrioritizedPageSearchResults,
   getSearchPlaceholder,
   getTagCommandMatch,
   getTagGhostCompletion,
@@ -95,17 +96,11 @@ export const SearchBar = () => {
     activeTag === null ? getTagGhostCompletion(searchQuery) : null;
   const [commandSuggestions, setCommandSuggestions] = useState(false);
   const prioritizedPageSearchResults =
-    activeTag === null &&
-    normalizedSearchQuery.length === 0 &&
-    currentProjectId !== null
-      ? [
-          ...visiblePageSearchResults.filter(
-            (page) => page.projectId === currentProjectId,
-          ),
-          ...visiblePageSearchResults.filter(
-            (page) => page.projectId !== currentProjectId,
-          ),
-        ].slice(0, 10)
+    isOpen && activeTag === null && normalizedSearchQuery.length === 0
+      ? getPrioritizedPageSearchResults({
+          currentProjectId,
+          visiblePageSearchResults,
+        })
       : visiblePageSearchResults;
 
   useEffect(() => {

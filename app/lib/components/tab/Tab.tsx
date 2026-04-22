@@ -209,21 +209,21 @@ export const Tab = ({ initialTabsState }: TabProps) => {
   const closeTabsToRight = (tabId: string) => {
     const tabIndex = resolvedTabs.findIndex((tab) => tab.tabId === tabId);
 
-    if (tabIndex === -1) {
+    if (tabIndex === -1 || tabIndex === resolvedTabs.length - 1) {
       return;
     }
 
-    closeTabsById(resolvedTabs.slice(tabIndex + 1).map((tab) => tab.tabId));
+    closeTabsById([resolvedTabs[tabIndex + 1].tabId]);
   };
 
   const closeTabsToLeft = (tabId: string) => {
     const tabIndex = resolvedTabs.findIndex((tab) => tab.tabId === tabId);
 
-    if (tabIndex === -1) {
+    if (tabIndex === -1 || tabIndex === 0) {
       return;
     }
 
-    closeTabsById(resolvedTabs.slice(0, tabIndex).map((tab) => tab.tabId));
+    closeTabsById([resolvedTabs[tabIndex - 1].tabId]);
   };
 
   return (

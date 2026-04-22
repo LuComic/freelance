@@ -1,8 +1,10 @@
 "use client";
 
+import { getCookie, TABS_COOKIE } from "@/app/lib/cookies";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { startTransition, useDeferredValue, useEffect, useState } from "react";
+import { parseTabsCookie } from "../tab/tabState";
 import type { PersonInviteDefaults, SearchTag } from "./SearchBarContext";
 import type {
   SearchPerson,
@@ -23,6 +25,89 @@ export type SearchPageResult = {
   pageDescription: string | null;
   projectUpdatedAt: number;
   pageUpdatedAt: number;
+};
+
+const PAGE_SUGGESTION_LIMIT = 10;
+
+const getPageSearchResultKey = (
+  page: Pick<SearchPageResult, "projectId" | "pageId">,
+) => `${page.projectId}:${page.pageId}`;
+
+const getRecentPageSuggestions = (): SearchPageResult[] => {
+  const tabsState = parseTabsCookie(getCookie(TABS_COOKIE));
+  const tabsById = new Map(tabsState.tabs.map((tab) => [tab.tabId, tab]));
+
+  return [...tabsState.recentTabIds]
+    .reverse()
+    .flatMap((tabId): SearchPageResult[] => {
+      const tab = tabsById.get(tabId);
+
+      if (!tab || tab.kind !== "projectPage" || !tab.projectId || !tab.pageId) {
+        return [];
+      }
+
+      return [
+        {
+          projectId: tab.projectId,
+          projectName: tab.contextLabel,
+          pageId: tab.pageId,
+          pageTitle: tab.title,
+          pageDescription: null,
+          projectUpdatedAt: 0,
+          pageUpdatedAt: 0,
+        },
+      ];
+    });
+};
+
+export const getPrioritizedPageSearchResults = ({
+  currentProjectId,
+  visiblePageSearchResults,
+}: {
+  currentProjectId: string | null;
+  visiblePageSearchResults: SearchPageResult[];
+}) => {
+  const visiblePagesByKey = new Map(
+    visiblePageSearchResults.map(
+      (page) => [getPageSearchResultKey(page), page] as const,
+    ),
+  );
+  const seenPageKeys = new Set<string>();
+  const nextPageResults: SearchPageResult[] = [];
+  const addPages = (pages: SearchPageResult[]) => {
+    for (const page of pages) {
+      const pageKey = getPageSearchResultKey(page);
+
+      if (seenPageKeys.has(pageKey)) {
+        continue;
+      }
+
+      seenPageKeys.add(pageKey);
+      nextPageResults.push(page);
+    }
+  };
+
+  addPages(
+    getRecentPageSuggestions().map(
+      (page) => visiblePagesByKey.get(getPageSearchResultKey(page)) ?? page,
+    ),
+  );
+
+  if (currentProjectId !== null) {
+    addPages(
+      visiblePageSearchResults.filter(
+        (page) => page.projectId === currentProjectId,
+      ),
+    );
+  }
+
+  addPages(
+    visiblePageSearchResults.filter(
+      (page) => page.projectId !== currentProjectId,
+    ),
+  );
+
+  return nextPageResults.slice(0, PAGE_SUGGESTION_LIMIT);
 };
 
 export const getSearchPlaceholder = (activeTag: SearchTag | null) => {
