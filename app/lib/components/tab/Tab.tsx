@@ -108,19 +108,25 @@ export const Tab = ({ initialTabsState }: TabProps) => {
     router.push((resolvedTab ?? { path: resolveTabPath(tab) }).path);
   };
 
-  const closeTab = (tabId: string) => {
-    let nextState = removeTabById(tabsState, tabId);
+  const openNextAvailableTab = (
+    nextState: StoredTabsState,
+    preferredTabId?: string,
+  ) => {
+    const preferredTab = preferredTabId
+      ? nextState.tabs.find((tab) => tab.tabId === preferredTabId)
+      : null;
 
-    if (nextState.tabs.length === 0) {
-      setIsClosingLastTab(true);
-      setCookie(TABS_COOKIE, serializeTabsCookie(nextState));
-      router.replace("/projects");
-      return;
-    }
+    if (preferredTab) {
+      const resolvedTab = resolvedTabsById.get(preferredTab.tabId);
+      const nextPath =
+        resolvedTab?.path ??
+        (projects === undefined ? resolveTabPath(preferredTab) : null);
 
-    if (tabId !== activeTabId) {
-      setTabsState(nextState);
-      return;
+      if (nextPath) {
+        setTabsState(nextState);
+        router.replace(nextPath);
+        return;
+      }
     }
 
     let nextRecentTabId = getNextRecentTabId(nextState);
@@ -155,6 +161,71 @@ export const Tab = ({ initialTabsState }: TabProps) => {
     router.replace("/projects");
   };
 
+  const closeTabsById = (tabIds: string[], preferredTabId?: string) => {
+    const tabIdsToClose = new Set(tabIds);
+
+    if (tabIdsToClose.size === 0) {
+      return;
+    }
+
+    const isActiveTabClosing =
+      activeTabId !== null && tabIdsToClose.has(activeTabId);
+    let nextState = tabsState;
+
+    for (const tabId of tabIdsToClose) {
+      nextState = removeTabById(nextState, tabId);
+    }
+
+    if (nextState.tabs.length === 0) {
+      setIsClosingLastTab(true);
+      setCookie(TABS_COOKIE, serializeTabsCookie(nextState));
+      router.replace("/projects");
+      return;
+    }
+
+    if (!isActiveTabClosing) {
+      setTabsState(nextState);
+      return;
+    }
+
+    openNextAvailableTab(nextState, preferredTabId);
+  };
+
+  const closeTab = (tabId: string) => {
+    closeTabsById([tabId]);
+  };
+
+  const closeAllTabs = () => {
+    closeTabsById(resolvedTabs.map((tab) => tab.tabId));
+  };
+
+  const closeOtherTabs = (tabId: string) => {
+    closeTabsById(
+      resolvedTabs.filter((tab) => tab.tabId !== tabId).map((tab) => tab.tabId),
+      tabId,
+    );
+  };
+
+  const closeTabsToRight = (tabId: string) => {
+    const tabIndex = resolvedTabs.findIndex((tab) => tab.tabId === tabId);
+
+    if (tabIndex === -1) {
+      return;
+    }
+
+    closeTabsById(resolvedTabs.slice(tabIndex + 1).map((tab) => tab.tabId));
+  };
+
+  const closeTabsToLeft = (tabId: string) => {
+    const tabIndex = resolvedTabs.findIndex((tab) => tab.tabId === tabId);
+
+    if (tabIndex === -1) {
+      return;
+    }
+
+    closeTabsById(resolvedTabs.slice(0, tabIndex).map((tab) => tab.tabId));
+  };
+
   return (
     <div className="hidden bg-(--dim) max-w-full w-full items-center justify-start overflow-x-auto border-b border-(--gray) md:flex overscroll-y-none overflow-y-hidden">
       {resolvedTabs.length > 0 ? (
@@ -167,6 +238,10 @@ export const Tab = ({ initialTabsState }: TabProps) => {
               isActive={tab.tabId === activeTabId}
               onSelect={() => openTab(tab)}
               onClose={() => closeTab(tab.tabId)}
+              onCloseAll={closeAllTabs}
+              onCloseOthers={() => closeOtherTabs(tab.tabId)}
+              onCloseRight={() => closeTabsToRight(tab.tabId)}
+              onCloseLeft={() => closeTabsToLeft(tab.tabId)}
             />
           ))}
         </>
