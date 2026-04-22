@@ -84,7 +84,7 @@ export const FileItem = ({
               <MenubarGroup>
                 <MenubarItem
                   asChild
-                  className="hover:bg-(--darkest-hover)! hover:text-(--light)!"
+                  className="hover:bg-(--darkest)! hover:text-(--light)!"
                 >
                   <Link
                     href={getProjectSettingsPath(project.id)}
@@ -98,7 +98,7 @@ export const FileItem = ({
                 {canAccessAnalytics ? (
                   <MenubarItem
                     asChild
-                    className="hover:bg-(--darkest-hover)! hover:text-(--light)! "
+                    className="hover:bg-(--darkest)! hover:text-(--light)! "
                   >
                     <Link
                       href={getProjectAnalyticsPath(project.id)}

@@ -176,8 +176,8 @@ export const ConnectionItem = ({
         onClick={onClick}
         className={`${
           isDanger
-            ? "hover:bg-(--declined-bg)/5! hover:text-(--declined-border)! text-(--declined-border) "
-            : "hover:bg-(--darkest-hover)! hover:text-(--light)! "
+            ? "hover:bg-(--darkest)! hover:text-(--declined-border)! text-(--declined-border) "
+            : "hover:bg-(--darkest)! hover:text-(--light)! "
         }data-disabled:opacity-50 data-disabled:pointer-events-none`}
       >
         {icon}

@@ -24,7 +24,7 @@ export const EditableTextField = ({
 }: EditableTextFieldProps) => {
   const { isLive } = useEditMode();
   const [localText, setLocalText] = useState(initialText ?? "");
-  const text = value ?? localText;
+  const text = value ?? (editable ? localText : (initialText ?? ""));
 
   const handleChange = (nextValue: string) => {
     if (onChange) {
