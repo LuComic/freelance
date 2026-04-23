@@ -6,6 +6,7 @@ import { useOptionalPageDocument } from "@/app/lib/components/project/PageDocume
 import { useQuery } from "convex/react";
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useMediaQuery } from "../../hooks/useMediaQuery";
 import { TabItem } from "./TabItem";
 import {
   EMPTY_TABS_STATE,
@@ -226,30 +227,38 @@ export const Tab = ({ initialTabsState }: TabProps) => {
     closeTabsById([resolvedTabs[tabIndex - 1].tabId]);
   };
 
+  // Check if its desktop. Avoid using hidden for optimization
+
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+
   return (
-    <div className="hidden bg-(--dim) max-w-full w-full items-center justify-start overflow-x-auto border-b border-(--gray) md:flex overscroll-y-none overflow-y-hidden">
-      {resolvedTabs.length > 0 ? (
-        <>
-          {resolvedTabs.map((tab) => (
-            <TabItem
-              key={tab.tabId}
-              title={tab.title}
-              contextLabel={tab.contextLabel}
-              isActive={tab.tabId === activeTabId}
-              onSelect={() => openTab(tab)}
-              onClose={() => closeTab(tab.tabId)}
-              onCloseAll={closeAllTabs}
-              onCloseOthers={() => closeOtherTabs(tab.tabId)}
-              onCloseRight={() => closeTabsToRight(tab.tabId)}
-              onCloseLeft={() => closeTabsToLeft(tab.tabId)}
-            />
-          ))}
-        </>
-      ) : (
-        <span className="text-(--gray-page) h-9 flex items-center justify-center w-full">
-          Communication between freelancers and clients
-        </span>
-      )}
-    </div>
+    <>
+      {isDesktop ? (
+        <div className="bg-(--dim) max-w-full w-full items-center justify-start overflow-x-auto border-b border-(--gray) flex overscroll-y-none overflow-y-hidden">
+          {resolvedTabs.length > 0 ? (
+            <>
+              {resolvedTabs.map((tab) => (
+                <TabItem
+                  key={tab.tabId}
+                  title={tab.title}
+                  contextLabel={tab.contextLabel}
+                  isActive={tab.tabId === activeTabId}
+                  onSelect={() => openTab(tab)}
+                  onClose={() => closeTab(tab.tabId)}
+                  onCloseAll={closeAllTabs}
+                  onCloseOthers={() => closeOtherTabs(tab.tabId)}
+                  onCloseRight={() => closeTabsToRight(tab.tabId)}
+                  onCloseLeft={() => closeTabsToLeft(tab.tabId)}
+                />
+              ))}
+            </>
+          ) : (
+            <span className="text-(--gray-page) h-9 flex items-center justify-center w-full">
+              Communication between freelancers and clients
+            </span>
+          )}
+        </div>
+      ) : null}
+    </>
   );
 };

@@ -1,4 +1,4 @@
-const LAST_UPDATED = "March 27, 2026";
+const LAST_UPDATED = "April 23, 2026";
 
 export default function Page() {
   return (
@@ -87,7 +87,15 @@ export default function Page() {
           9. Disclaimer and limitation of liability. To the maximum extent
           permitted by law, the service is provided &quot;as is&quot; and
           &quot;as available&quot;. We do not guarantee uninterrupted,
-          error-free, or completely secure operation. To the maximum extent
+          error-free, or completely secure operation. Pageboard is operated as a
+          personal hobby project, and you understand that using any online
+          service involves risk. You are responsible for deciding what content
+          and personal data to add to the service and for keeping your own
+          copies of important content. To the maximum extent permitted by law,
+          Lukas Jääger is not responsible for losses, claims, damages, or
+          disputes arising from hacking, unauthorized access, security
+          incidents, service outages, third-party provider failures, bugs, data
+          loss, data corruption, or disclosure of content. To the maximum extent
           permitted by law, we are not liable for indirect or consequential
           damages or for lost profits, revenue, goodwill, or data. Our total
           aggregate liability for claims arising out of or relating to the

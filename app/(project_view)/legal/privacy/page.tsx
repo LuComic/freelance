@@ -1,4 +1,4 @@
-const LAST_UPDATED = "March 27, 2026";
+const LAST_UPDATED = "April 23, 2026";
 
 export default function Page() {
   return (
@@ -102,7 +102,12 @@ export default function Page() {
           does not maintain a standalone password database because local
           password sign-in is not implemented. We apply reasonable technical and
           organizational measures appropriate to the service, but no system can
-          be guaranteed to be completely secure.
+          be guaranteed to be completely secure. Pageboard is a small hobby
+          project, so you should not upload content whose loss, disclosure, or
+          unauthorized access would cause serious harm unless you are
+          comfortable accepting that risk. You are responsible for keeping your
+          own copies of important content. If we become aware of a personal data
+          breach, we will assess and handle it as required by applicable law.
         </p>
         <p className="wrap-break-word">
           9. Your rights. Subject to GDPR, you may request access,
