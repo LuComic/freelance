@@ -20,19 +20,20 @@ import { EditModeProvider } from "../lib/components/project/EditModeContext";
 import { PageDocumentProvider } from "../lib/components/project/PageDocumentContext";
 import { SearchBarProvider } from "../lib/components/searchbar/SearchBarContext";
 import { SidebarControllerProvider } from "../lib/components/sidebar/SidebarControllerContext";
+import { DesktopPanelLayoutProvider } from "../lib/components/project/DesktopPanelLayoutContext";
+import {
+  CHAT_DEFAULT_WIDTH,
+  CHAT_MAX_WIDTH,
+  CHAT_MIN_WIDTH,
+  SIDEBAR_DEFAULT_WIDTH,
+  SIDEBAR_MAX_WIDTH,
+  SIDEBAR_MIN_WIDTH,
+} from "../lib/components/project/desktopPanelSizing";
 
 export const metadata: Metadata = {
   title: "Pageboard",
   description: "The best platform for client-freelancer communication.",
 };
-
-const SIDEBAR_MIN_WIDTH = 80;
-const SIDEBAR_DEFAULT_WIDTH = 90.75;
-const SIDEBAR_MAX_WIDTH = 130;
-
-const CHAT_MIN_WIDTH = 110;
-const CHAT_DEFAULT_WIDTH = 122.75;
-const CHAT_MAX_WIDTH = 150;
 
 export default async function ProjectViewLayout({
   children,
@@ -74,26 +75,31 @@ export default async function ProjectViewLayout({
         >
           <SearchBarProvider>
             <SidebarControllerProvider>
-              <Sidebar
-                initialSidebarOpen={initialSidebarOpen}
+              <DesktopPanelLayoutProvider
                 initialSidebarWidth={initialSidebarWidth}
-              />
-              <EditModeProvider>
-                <PageDocumentProvider>
-                  <SearchBar />
-                  <div className="relative flex-1 min-w-0 flex flex-col items-start justify-start md:h-full md:min-h-0">
-                    <Tab initialTabsState={initialTabsState} />
-                    <TopBar />
-                    <div className="@container w-full md:px-4 px-2 pt-4 pb-8 flex flex-col items-start justify-start gap-4 md:flex-1 md:min-h-0 md:overflow-y-auto">
-                      {children}
+                initialChatWidth={initialChatWidth}
+              >
+                <Sidebar
+                  initialSidebarOpen={initialSidebarOpen}
+                  initialSidebarWidth={initialSidebarWidth}
+                />
+                <EditModeProvider>
+                  <PageDocumentProvider>
+                    <SearchBar />
+                    <div className="relative flex-1 min-w-0 flex flex-col items-start justify-start md:h-full md:min-h-0">
+                      <Tab initialTabsState={initialTabsState} />
+                      <TopBar />
+                      <div className="@container w-full md:px-4 px-2 pt-4 pb-8 flex flex-col items-start justify-start gap-4 md:flex-1 md:min-h-0 md:overflow-y-auto">
+                        {children}
+                      </div>
                     </div>
-                  </div>
-                  <Chat
-                    initialChatOpen={initialChatOpen}
-                    initialChatWidth={initialChatWidth}
-                  />
-                </PageDocumentProvider>
-              </EditModeProvider>
+                    <Chat
+                      initialChatOpen={initialChatOpen}
+                      initialChatWidth={initialChatWidth}
+                    />
+                  </PageDocumentProvider>
+                </EditModeProvider>
+              </DesktopPanelLayoutProvider>
             </SidebarControllerProvider>
           </SearchBarProvider>
         </div>

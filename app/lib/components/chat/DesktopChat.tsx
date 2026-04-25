@@ -11,6 +11,12 @@ import {
 import { CHAT_COOKIE, CHAT_WIDTH_COOKIE, setCookie } from "@/app/lib/cookies";
 import { useEditMode } from "@/app/lib/components/project/EditModeContext";
 import { useResizablePanelWidth } from "@/app/lib/hooks/useResizablePanelWidth";
+import { useDesktopPanelLayout } from "../project/DesktopPanelLayoutContext";
+import {
+  CHAT_DEFAULT_WIDTH,
+  CHAT_MAX_WIDTH,
+  CHAT_MIN_WIDTH,
+} from "../project/desktopPanelSizing";
 import { ComponentLib, type ComponentTag } from "./ComponentLib";
 import { SelectedComponentConfig } from "./SelectedComponentConfig";
 
@@ -20,10 +26,6 @@ type DesktopChatProps = {
 };
 
 type ChatTab = "components" | "config";
-
-const CHAT_MIN_WIDTH = 110;
-const CHAT_DEFAULT_WIDTH = 122.75;
-const CHAT_MAX_WIDTH = 150;
 
 export const DesktopChat = ({
   initialOpen,
@@ -43,22 +45,29 @@ export const DesktopChat = ({
   const handledComponentConfigNonceRef = useRef(0);
   const componentsLocked = modeLock === "live";
   const {
-    width: chatWidth,
-    widthStyle,
-    startResize,
-    resizeByKeyboard,
-  } = useResizablePanelWidth({
-    cookieName: CHAT_WIDTH_COOKIE,
-    defaultWidth: CHAT_DEFAULT_WIDTH,
-    initialWidth,
-    minWidth: CHAT_MIN_WIDTH,
-    maxWidth: CHAT_MAX_WIDTH,
-    resizeEdge: "left",
-  });
+    chatWidth,
+    setChatWidth,
+    setChatOpen: setSharedChatOpen,
+  } = useDesktopPanelLayout();
+  const { width, widthStyle, startResize, resizeByKeyboard } =
+    useResizablePanelWidth({
+      cookieName: CHAT_WIDTH_COOKIE,
+      defaultWidth: CHAT_DEFAULT_WIDTH,
+      initialWidth,
+      minWidth: CHAT_MIN_WIDTH,
+      maxWidth: CHAT_MAX_WIDTH,
+      resizeEdge: "left",
+      width: chatWidth,
+      onWidthChange: setChatWidth,
+    });
 
   useEffect(() => {
     setCookie(CHAT_COOKIE, String(chatOpen));
   }, [chatOpen]);
+
+  useEffect(() => {
+    setSharedChatOpen(chatOpen);
+  }, [chatOpen, setSharedChatOpen]);
 
   useEffect(() => {
     const onKeyDownHandler = (e: KeyboardEvent) => {
@@ -129,7 +138,7 @@ export const DesktopChat = ({
             aria-orientation="vertical"
             aria-valuemin={CHAT_MIN_WIDTH}
             aria-valuemax={CHAT_MAX_WIDTH}
-            aria-valuenow={chatWidth}
+            aria-valuenow={width}
             tabIndex={0}
             onPointerDown={startResize}
             onKeyDown={resizeByKeyboard}

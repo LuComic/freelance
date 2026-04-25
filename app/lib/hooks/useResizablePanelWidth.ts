@@ -21,6 +21,8 @@ type UseResizablePanelWidthOptions = {
   minWidth: number;
   maxWidth: number;
   resizeEdge: ResizeEdge;
+  width?: number;
+  onWidthChange?: (width: number) => void;
 };
 
 type DragState = {
@@ -58,12 +60,27 @@ export function useResizablePanelWidth({
   minWidth,
   maxWidth,
   resizeEdge,
+  width: controlledWidth,
+  onWidthChange,
 }: UseResizablePanelWidthOptions) {
-  const [width, setWidth] = useState(() =>
+  const [internalWidth, setInternalWidth] = useState(() =>
     clampWidth(initialWidth ?? defaultWidth, minWidth, maxWidth),
   );
+  const width = controlledWidth ?? internalWidth;
   const dragStateRef = useRef<DragState | null>(null);
   const cleanupRef = useRef<(() => void) | null>(null);
+
+  const updateWidth = useCallback(
+    (nextWidth: number) => {
+      if (onWidthChange) {
+        onWidthChange(nextWidth);
+        return;
+      }
+
+      setInternalWidth(nextWidth);
+    },
+    [onWidthChange],
+  );
 
   const persistWidth = useCallback(
     (nextWidth: number) => {
@@ -123,7 +140,7 @@ export function useResizablePanelWidth({
         );
 
         dragState.currentWidth = nextWidth;
-        setWidth(nextWidth);
+        updateWidth(nextWidth);
       };
 
       const cleanup = () => {
@@ -141,7 +158,7 @@ export function useResizablePanelWidth({
       window.addEventListener("pointerup", stopResize);
       window.addEventListener("pointercancel", stopResize);
     },
-    [maxWidth, minWidth, resizeEdge, stopResize, width],
+    [maxWidth, minWidth, resizeEdge, stopResize, updateWidth, width],
   );
 
   const resizeByKeyboard = useCallback(
@@ -167,10 +184,10 @@ export function useResizablePanelWidth({
       if (nextWidth == null) return;
 
       event.preventDefault();
-      setWidth(nextWidth);
+      updateWidth(nextWidth);
       persistWidth(nextWidth);
     },
-    [maxWidth, minWidth, persistWidth, resizeEdge, width],
+    [maxWidth, minWidth, persistWidth, resizeEdge, updateWidth, width],
   );
 
   useEffect(() => {

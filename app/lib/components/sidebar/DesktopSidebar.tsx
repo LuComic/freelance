@@ -28,16 +28,18 @@ import { useSidebarController } from "./SidebarControllerContext";
 import { Authenticated } from "convex/react";
 import { useResizablePanelWidth } from "@/app/lib/hooks/useResizablePanelWidth";
 import { useSearchBar } from "../searchbar/SearchBarContext";
+import { useDesktopPanelLayout } from "../project/DesktopPanelLayoutContext";
+import {
+  SIDEBAR_DEFAULT_WIDTH,
+  SIDEBAR_MAX_WIDTH,
+  SIDEBAR_MIN_WIDTH,
+} from "../project/desktopPanelSizing";
 
 type DesktopSidebarProps = {
   initialOpen?: boolean;
   initialWidth?: number;
   userProfile: SidebarUserProfile;
 };
-
-const SIDEBAR_MIN_WIDTH = 80;
-const SIDEBAR_DEFAULT_WIDTH = 90.75;
-const SIDEBAR_MAX_WIDTH = 130;
 
 export const DesktopSidebar = ({
   initialOpen,
@@ -98,18 +100,25 @@ export const DesktopSidebar = ({
     hasUnreadNotifications ? "notification relative" : ""
   }`;
   const {
-    width: sidebarWidth,
-    widthStyle,
-    startResize,
-    resizeByKeyboard,
-  } = useResizablePanelWidth({
-    cookieName: SIDEBAR_WIDTH_COOKIE,
-    defaultWidth: SIDEBAR_DEFAULT_WIDTH,
-    initialWidth,
-    minWidth: SIDEBAR_MIN_WIDTH,
-    maxWidth: SIDEBAR_MAX_WIDTH,
-    resizeEdge: "right",
-  });
+    sidebarWidth,
+    setSidebarWidth,
+    setSidebarOpen: setSharedSidebarOpen,
+  } = useDesktopPanelLayout();
+  const { width, widthStyle, startResize, resizeByKeyboard } =
+    useResizablePanelWidth({
+      cookieName: SIDEBAR_WIDTH_COOKIE,
+      defaultWidth: SIDEBAR_DEFAULT_WIDTH,
+      initialWidth,
+      minWidth: SIDEBAR_MIN_WIDTH,
+      maxWidth: SIDEBAR_MAX_WIDTH,
+      resizeEdge: "right",
+      width: sidebarWidth,
+      onWidthChange: setSidebarWidth,
+    });
+
+  useEffect(() => {
+    setSharedSidebarOpen(resolvedSidebarOpen);
+  }, [resolvedSidebarOpen, setSharedSidebarOpen]);
 
   return (
     <div className="self-stretch">
@@ -124,7 +133,7 @@ export const DesktopSidebar = ({
             aria-orientation="vertical"
             aria-valuemin={SIDEBAR_MIN_WIDTH}
             aria-valuemax={SIDEBAR_MAX_WIDTH}
-            aria-valuenow={sidebarWidth}
+            aria-valuenow={width}
             tabIndex={0}
             onPointerDown={startResize}
             onKeyDown={resizeByKeyboard}
