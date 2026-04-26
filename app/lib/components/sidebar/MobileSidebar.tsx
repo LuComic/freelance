@@ -2,7 +2,7 @@
 
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   PanelLeftClose,
   PanelLeftOpen,
@@ -20,6 +20,11 @@ import { LogOutButton } from "../LogOutButton";
 import { SidebarUserInfo, type SidebarUserProfile } from "./SidebarUserInfo";
 import { useSidebarController } from "./SidebarControllerContext";
 import { Authenticated } from "convex/react";
+import {
+  announceMobileSidebarOpen,
+  listenForMobileChatOpen,
+} from "@/app/lib/components/mobileOverlayEvents";
+import { useMobileOverlayScrollLock } from "@/app/lib/hooks/useMobileOverlayScrollLock";
 
 export const MobileSidebar = ({
   userProfile,
@@ -54,16 +59,33 @@ export const MobileSidebar = ({
       ? "friends"
       : activeTab;
 
+  useMobileOverlayScrollLock(resolvedSidebarOpen);
+
   const acknowledgeConnectionsRequest = () => {
     if (requestVersion > handledRequestVersion) {
       setHandledRequestVersion(requestVersion);
     }
   };
 
+  useEffect(() => {
+    if (!resolvedSidebarOpen) {
+      return;
+    }
+
+    announceMobileSidebarOpen();
+  }, [resolvedSidebarOpen]);
+
+  useEffect(() => {
+    return listenForMobileChatOpen(() => {
+      setHandledRequestVersion(requestVersion);
+      setSidebarOpen(false);
+    });
+  }, [requestVersion]);
+
   return (
     <div>
       {resolvedSidebarOpen ? (
-        <nav className="w-90.75 h-dvh max-h-dvh bg-(--darkest) border-r border-(--gray) flex flex-col items-start justify-start p-2 gap-4 fixed z-30 top-0 left-0 overflow-hidden">
+        <nav className="w-90.75 h-dvh max-h-dvh bg-(--darkest) border-r border-(--gray) flex flex-col items-start justify-start p-2 gap-4 fixed z-30 top-0 left-0 overflow-hidden overscroll-contain">
           <div className="flex items-center justify-between w-full">
             <Link href="/projects" className="text-(--gray) text-xl inline">
               Pageboard

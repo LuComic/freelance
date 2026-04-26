@@ -10,6 +10,11 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { useEditMode } from "@/app/lib/components/project/EditModeContext";
+import {
+  announceMobileChatOpen,
+  listenForMobileSidebarOpen,
+} from "@/app/lib/components/mobileOverlayEvents";
+import { useMobileOverlayScrollLock } from "@/app/lib/hooks/useMobileOverlayScrollLock";
 import { ComponentLib, type ComponentTag } from "./ComponentLib";
 import { ProjectChatPanel } from "./ProjectChatPanel";
 import { SelectedComponentConfig } from "./SelectedComponentConfig";
@@ -31,9 +36,15 @@ export const MobileChat = ({ projectId }: MobileChatProps) => {
   const [chatOpen, setChatOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<ChatTab>("components");
   const [componentFilter, setComponentFilter] = useState<"" | ComponentTag>("");
+  const [visualViewportBounds, setVisualViewportBounds] = useState<{
+    height: number;
+    offsetTop: number;
+  } | null>(null);
   const handledComponentLibraryNonceRef = useRef(0);
   const handledComponentConfigNonceRef = useRef(0);
   const componentsLocked = modeLock === "live";
+
+  useMobileOverlayScrollLock(chatOpen);
 
   const changeComponentFilter = (newFilter: ComponentTag) => {
     if (componentFilter === newFilter) {
@@ -76,10 +87,62 @@ export const MobileChat = ({ projectId }: MobileChatProps) => {
     });
   }, [componentConfigOpenRequestNonce]);
 
+  useEffect(() => {
+    if (!chatOpen || typeof window === "undefined" || !window.visualViewport) {
+      return;
+    }
+
+    const visualViewport = window.visualViewport;
+    let animationFrameId: number | null = null;
+    const updateViewportBounds = () => {
+      setVisualViewportBounds({
+        height: visualViewport.height,
+        offsetTop: visualViewport.offsetTop,
+      });
+    };
+
+    animationFrameId = requestAnimationFrame(updateViewportBounds);
+    visualViewport.addEventListener("resize", updateViewportBounds);
+    visualViewport.addEventListener("scroll", updateViewportBounds);
+
+    return () => {
+      if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
+      }
+      visualViewport.removeEventListener("resize", updateViewportBounds);
+      visualViewport.removeEventListener("scroll", updateViewportBounds);
+    };
+  }, [chatOpen]);
+
+  useEffect(() => {
+    if (!chatOpen) {
+      return;
+    }
+
+    announceMobileChatOpen();
+  }, [chatOpen]);
+
+  useEffect(() => {
+    return listenForMobileSidebarOpen(() => {
+      setChatOpen(false);
+    });
+  }, []);
+
   return (
     <div>
       {chatOpen ? (
-        <nav className="w-[90%] h-dvh max-h-dvh bg-(--darkest) border-l border-(--gray) flex flex-col items-start justify-start p-2 gap-4 fixed z-30 top-0 right-0 overflow-hidden">
+        <nav
+          className="w-[90%] h-dvh max-h-dvh bg-(--darkest) border-l border-(--gray) flex flex-col items-start justify-start p-2 gap-4 fixed z-30 top-0 right-0 overflow-hidden overscroll-contain"
+          style={
+            visualViewportBounds
+              ? {
+                  height: `${visualViewportBounds.height}px`,
+                  maxHeight: `${visualViewportBounds.height}px`,
+                  top: `${visualViewportBounds.offsetTop}px`,
+                }
+              : undefined
+          }
+        >
           <div className="flex items-center justify-start gap-2 w-full">
             <button
               onClick={() => setChatOpen(false)}
@@ -132,7 +195,7 @@ export const MobileChat = ({ projectId }: MobileChatProps) => {
             </button>
           </div>
 
-          <div className="w-full flex-1 min-h-0 overflow-y-auto">
+          <div className="w-full flex-1 min-h-0 overflow-y-auto overscroll-contain">
             {activeTab === "components" && !componentsLocked ? (
               <>
                 <div className="flex flex-wrap items-center justify-start gap-2 w-full mb-2">

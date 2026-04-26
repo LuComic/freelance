@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, usePaginatedQuery } from "convex/react";
 import { Send } from "lucide-react";
 import {
@@ -76,6 +76,8 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
   const [mutationError, setMutationError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const shouldScrollAfterSendRef = useRef(false);
   const trimmedBody = messageBody.trim();
   const queryArgs = useMemo(
     () => (projectId ? { projectId: projectId as never } : "skip"),
@@ -92,6 +94,7 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
     () => [...(results as ProjectChatMessage[])].reverse(),
     [results],
   );
+  const newestMessageId = messages[messages.length - 1]?.id ?? null;
 
   const resizeTextarea = () => {
     const textarea = textareaRef.current;
@@ -102,6 +105,26 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
     textarea.style.height = "auto";
     textarea.style.height = `${textarea.scrollHeight}px`;
   };
+
+  const resetTextareaHeight = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) {
+      return;
+    }
+
+    textarea.style.height = "";
+  };
+
+  useEffect(() => {
+    if (!shouldScrollAfterSendRef.current) {
+      return;
+    }
+
+    shouldScrollAfterSendRef.current = false;
+    requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView({ block: "end" });
+    });
+  }, [newestMessageId]);
 
   const submitMessage = async () => {
     if (!projectId || !trimmedBody || sending) {
@@ -116,8 +139,9 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
         projectId: projectId as never,
         body: messageBody,
       });
+      shouldScrollAfterSendRef.current = true;
       setMessageBody("");
-      requestAnimationFrame(resizeTextarea);
+      requestAnimationFrame(resetTextareaHeight);
     } catch (error) {
       setMutationError(getErrorMessage(error));
     } finally {
@@ -150,7 +174,7 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
 
   return (
     <div className="h-full min-h-0 flex flex-col gap-2">
-      <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-2 pr-1">
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain flex flex-col gap-2 pr-1">
         {status === "LoadingFirstPage" ? (
           <div className="text-(--gray)">Loading messages...</div>
         ) : null}
@@ -209,6 +233,7 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
             </div>
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
 
       {mutationError ? (
@@ -232,7 +257,7 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
             }
           }}
           placeholder="Message"
-          className="rounded-md bg-(--dim) px-2.5 min-h-10 border border-(--gray) w-full resize-none py-1.5 outline-none focus:border-(--vibrant) max-h-32"
+          className="rounded-md bg-(--dim) px-2.5 min-h-10 border border-(--gray) w-full resize-none pt-1.75 pb-1.5 outline-none focus:border-(--vibrant) max-h-32"
         />
         <button
           type="button"
@@ -241,7 +266,7 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
           className="aspect-square rounded-md h-10 bg-(--vibrant) hover:bg-(--vibrant-hover) disabled:opacity-50 disabled:hover:bg-(--vibrant) flex items-center justify-center"
           aria-label="Send message"
         >
-          <Send size={16} />
+          <Send size={18} />
         </button>
       </div>
     </div>

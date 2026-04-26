@@ -55,7 +55,7 @@ export const Files = ({ closeSidebar }: FilesProps) => {
   };
 
   return (
-    <div className="flex flex-col gap-1 items-start justify-start w-full flex-1 min-h-0 overflow-y-auto">
+    <div className="flex flex-col gap-1 items-start justify-start w-full flex-1 min-h-0 overflow-y-auto overscroll-contain">
       <p className="md:text-xl text-lg font-medium">
         {projectTitle.length > 30
           ? projectTitle.slice(0, 30) + "..."

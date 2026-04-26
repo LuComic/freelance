@@ -18,7 +18,7 @@ export const Connections = ({
     useSidebarController();
 
   return (
-    <div className="flex flex-col gap-1 items-start justify-start w-full flex-1 min-h-0 overflow-y-auto">
+    <div className="flex flex-col gap-1 items-start justify-start w-full flex-1 min-h-0 overflow-y-auto overscroll-contain">
       <p className="md:text-xl text-lg font-medium">Connections</p>
       <button
         type="button"
@@ -29,8 +29,8 @@ export const Connections = ({
       </button>
       {connections === undefined ? (
         <>
-          <div className="bg-(--gray)/60 w-full mt-2 h-[22px] rounded-md animate-pulse"></div>
-          <div className="bg-(--gray)/60 w-2/3 mt-2 h-[22px] rounded-md animate-pulse"></div>
+          <div className="bg-(--gray)/60 w-full mt-2 h-5.5 rounded-md animate-pulse"></div>
+          <div className="bg-(--gray)/60 w-2/3 mt-2 h-5.5 rounded-md animate-pulse"></div>
         </>
       ) : null}
       <ConnectionItem

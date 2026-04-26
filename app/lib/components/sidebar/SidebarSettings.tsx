@@ -7,7 +7,7 @@ type SidebarSettingsProps = {
 
 export const SidebarSettings = ({ setSidebarOpen }: SidebarSettingsProps) => {
   return (
-    <div className="flex flex-col gap-1 items-start justify-start w-full flex-1 min-h-0 overflow-y-auto">
+    <div className="flex flex-col gap-1 items-start justify-start w-full flex-1 min-h-0 overflow-y-auto overscroll-contain">
       <p className="md:text-xl text-lg font-medium">Settings</p>
       <SettingsItem
         title="Account"
