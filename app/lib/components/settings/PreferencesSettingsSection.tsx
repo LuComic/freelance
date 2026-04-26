@@ -14,15 +14,20 @@ type PreferencesSectionProps = {
 
 export function PreferencesSection({ activeSection }: PreferencesSectionProps) {
   const [open, setOpen] = useState(activeSection === "preferences");
-  const [showSuggestions, setShowSuggestions] = useState(() => {
+  const [showSuggestions, setShowSuggestions] = useState(true);
+  const [hasLoadedPreference, setHasLoadedPreference] = useState(false);
+
+  useEffect(() => {
     const cookieValue = getCookie(SHOW_SUGGESTIONS_COOKIE);
 
-    if (cookieValue === "false") {
-      return false;
-    }
+    queueMicrotask(() => {
+      if (cookieValue === "false") {
+        setShowSuggestions(false);
+      }
 
-    return true;
-  });
+      setHasLoadedPreference(true);
+    });
+  }, []);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -31,8 +36,10 @@ export function PreferencesSection({ activeSection }: PreferencesSectionProps) {
   }, [activeSection]);
 
   useEffect(() => {
+    if (!hasLoadedPreference) return;
+
     setCookie(SHOW_SUGGESTIONS_COOKIE, String(showSuggestions));
-  }, [showSuggestions]);
+  }, [hasLoadedPreference, showSuggestions]);
 
   return (
     <div className="w-full p-2 flex flex-col gap-2 bg-(--gray)/10">

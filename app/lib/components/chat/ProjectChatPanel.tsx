@@ -196,9 +196,7 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`group flex flex-col gap-1 rounded-md p-2 ${
-              message.isOwn ? "bg-(--vibrant-hover)/75" : "bg-(--quite-dark)"
-            }`}
+            className="group flex flex-col gap-1 rounded-md p-2 bg-(--quite-dark)"
           >
             <div className="flex items-center justify-between gap-2">
               <div className="min-w-0 flex items-center gap-2">
@@ -210,7 +208,9 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
                     className="h-5 w-5 rounded-full object-cover"
                   />
                 ) : null}
-                <span className="truncate text-sm opacity-80">
+                <span
+                  className={`truncate text-sm ${message.isOwn ? "text-(--vibrant)" : "text-(--light) opacity-80"}`}
+                >
                   {message.authorName}
                 </span>
               </div>

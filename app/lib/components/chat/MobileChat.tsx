@@ -36,10 +36,10 @@ export const MobileChat = ({ projectId }: MobileChatProps) => {
   const [chatOpen, setChatOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<ChatTab>("components");
   const [componentFilter, setComponentFilter] = useState<"" | ComponentTag>("");
-  const [visualViewportBounds, setVisualViewportBounds] = useState<{
-    height: number;
-    offsetTop: number;
-  } | null>(null);
+  const [visualViewportHeight, setVisualViewportHeight] = useState<
+    number | null
+  >(null);
+  const lastTouchYRef = useRef<number | null>(null);
   const handledComponentLibraryNonceRef = useRef(0);
   const handledComponentConfigNonceRef = useRef(0);
   const componentsLocked = modeLock === "live";
@@ -95,10 +95,7 @@ export const MobileChat = ({ projectId }: MobileChatProps) => {
     const visualViewport = window.visualViewport;
     let animationFrameId: number | null = null;
     const updateViewportBounds = () => {
-      setVisualViewportBounds({
-        height: visualViewport.height,
-        offsetTop: visualViewport.offsetTop,
-      });
+      setVisualViewportHeight(visualViewport.height);
     };
 
     animationFrameId = requestAnimationFrame(updateViewportBounds);
@@ -128,17 +125,55 @@ export const MobileChat = ({ projectId }: MobileChatProps) => {
     });
   }, []);
 
+  const handleTouchStart = (event: React.TouchEvent<HTMLElement>) => {
+    lastTouchYRef.current = event.touches[0]?.clientY ?? null;
+  };
+
+  const handleTouchMove = (event: React.TouchEvent<HTMLElement>) => {
+    const lastTouchY = lastTouchYRef.current;
+    const nextTouchY = event.touches[0]?.clientY ?? null;
+
+    if (lastTouchY === null || nextTouchY === null) {
+      lastTouchYRef.current = nextTouchY;
+      return;
+    }
+
+    const scrollable = (event.target as HTMLElement | null)?.closest(
+      "[data-mobile-chat-scrollable]",
+    );
+
+    if (!(scrollable instanceof HTMLElement)) {
+      event.preventDefault();
+      lastTouchYRef.current = nextTouchY;
+      return;
+    }
+
+    const deltaY = lastTouchY - nextTouchY;
+    const scrollingDown = deltaY > 0;
+    const scrollingUp = deltaY < 0;
+    const canScrollDown =
+      scrollable.scrollTop + scrollable.clientHeight < scrollable.scrollHeight;
+    const canScrollUp = scrollable.scrollTop > 0;
+
+    if ((scrollingDown && !canScrollDown) || (scrollingUp && !canScrollUp)) {
+      event.preventDefault();
+    }
+
+    lastTouchYRef.current = nextTouchY;
+  };
+
   return (
     <div>
       {chatOpen ? (
         <nav
           className="w-[90%] h-dvh max-h-dvh bg-(--darkest) border-l border-(--gray) flex flex-col items-start justify-start p-2 gap-4 fixed z-30 top-0 right-0 overflow-hidden overscroll-contain"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
           style={
-            visualViewportBounds
+            visualViewportHeight
               ? {
-                  height: `${visualViewportBounds.height}px`,
-                  maxHeight: `${visualViewportBounds.height}px`,
-                  top: `${visualViewportBounds.offsetTop}px`,
+                  height: `${visualViewportHeight}px`,
+                  maxHeight: `${visualViewportHeight}px`,
                 }
               : undefined
           }
@@ -195,7 +230,10 @@ export const MobileChat = ({ projectId }: MobileChatProps) => {
             </button>
           </div>
 
-          <div className="w-full flex-1 min-h-0 overflow-y-auto overscroll-contain">
+          <div
+            className="w-full flex-1 min-h-0 overflow-y-auto overscroll-contain"
+            data-mobile-chat-scrollable
+          >
             {activeTab === "components" && !componentsLocked ? (
               <>
                 <div className="flex flex-wrap items-center justify-start gap-2 w-full mb-2">

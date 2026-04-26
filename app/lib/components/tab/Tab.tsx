@@ -4,7 +4,8 @@ import { api } from "@/convex/_generated/api";
 import { TABS_COOKIE, setCookie } from "@/app/lib/cookies";
 import { useOptionalPageDocument } from "@/app/lib/components/project/PageDocumentContext";
 import { useQuery } from "convex/react";
-import { useEffect, useMemo, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 import { TabItem } from "./TabItem";
@@ -34,6 +35,9 @@ export const Tab = ({ initialTabsState }: TabProps) => {
     initialTabsState ?? EMPTY_TABS_STATE,
   );
   const [isClosingLastTab, setIsClosingLastTab] = useState(false);
+  const tabsContainerRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
   const activeTab = useMemo(
     () =>
       resolveTabForRoute({
@@ -227,6 +231,61 @@ export const Tab = ({ initialTabsState }: TabProps) => {
     closeTabsById([resolvedTabs[tabIndex - 1].tabId]);
   };
 
+  const updateScrollButtons = useCallback(() => {
+    const tabsContainer = tabsContainerRef.current;
+
+    if (!tabsContainer) {
+      setCanScrollLeft(false);
+      setCanScrollRight(false);
+      return;
+    }
+
+    setCanScrollLeft(tabsContainer.scrollLeft > 0);
+    setCanScrollRight(
+      tabsContainer.scrollLeft + tabsContainer.clientWidth <
+        tabsContainer.scrollWidth - 1,
+    );
+  }, []);
+
+  const scrollTabs = (direction: "left" | "right") => {
+    const tabsContainer = tabsContainerRef.current;
+
+    if (!tabsContainer) {
+      return;
+    }
+
+    const tabWidth =
+      tabsContainer.firstElementChild?.getBoundingClientRect().width ??
+      tabsContainer.clientWidth;
+
+    tabsContainer.scrollBy({
+      left: direction === "left" ? -tabWidth : tabWidth,
+      behavior: "smooth",
+    });
+  };
+
+  useEffect(() => {
+    const tabsContainer = tabsContainerRef.current;
+    const animationFrame = window.requestAnimationFrame(updateScrollButtons);
+
+    if (!tabsContainer) {
+      return () => {
+        window.cancelAnimationFrame(animationFrame);
+      };
+    }
+
+    const resizeObserver = new ResizeObserver(updateScrollButtons);
+
+    resizeObserver.observe(tabsContainer);
+    window.addEventListener("resize", updateScrollButtons);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateScrollButtons);
+    };
+  }, [resolvedTabs.length, updateScrollButtons]);
+
   // Check if its desktop. Avoid using hidden for optimization
 
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -234,23 +293,49 @@ export const Tab = ({ initialTabsState }: TabProps) => {
   return (
     <>
       {isDesktop ? (
-        <div className="bg-(--dim) max-w-full w-full items-center justify-start overflow-x-auto border-b border-(--gray) flex overscroll-y-none overflow-y-hidden">
+        <div className="bg-(--dim) max-w-full w-full items-center justify-start border-b border-(--gray) flex overscroll-y-none overflow-y-hidden">
           {resolvedTabs.length > 0 ? (
             <>
-              {resolvedTabs.map((tab) => (
-                <TabItem
-                  key={tab.tabId}
-                  title={tab.title}
-                  contextLabel={tab.contextLabel}
-                  isActive={tab.tabId === activeTabId}
-                  onSelect={() => openTab(tab)}
-                  onClose={() => closeTab(tab.tabId)}
-                  onCloseAll={closeAllTabs}
-                  onCloseOthers={() => closeOtherTabs(tab.tabId)}
-                  onCloseRight={() => closeTabsToRight(tab.tabId)}
-                  onCloseLeft={() => closeTabsToLeft(tab.tabId)}
-                />
-              ))}
+              {canScrollLeft ? (
+                <button
+                  type="button"
+                  className="flex h-9 w-8 shrink-0 items-center justify-center border-r border-(--gray) text-(--gray-page) hover:bg-(--darkest) hover:text-(--light)"
+                  onClick={() => scrollTabs("left")}
+                  aria-label="Scroll tabs left"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+              ) : null}
+              <div
+                ref={tabsContainerRef}
+                className="flex min-w-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-y-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                onScroll={updateScrollButtons}
+              >
+                {resolvedTabs.map((tab) => (
+                  <TabItem
+                    key={tab.tabId}
+                    title={tab.title}
+                    contextLabel={tab.contextLabel}
+                    isActive={tab.tabId === activeTabId}
+                    onSelect={() => openTab(tab)}
+                    onClose={() => closeTab(tab.tabId)}
+                    onCloseAll={closeAllTabs}
+                    onCloseOthers={() => closeOtherTabs(tab.tabId)}
+                    onCloseRight={() => closeTabsToRight(tab.tabId)}
+                    onCloseLeft={() => closeTabsToLeft(tab.tabId)}
+                  />
+                ))}
+              </div>
+              {canScrollRight ? (
+                <button
+                  type="button"
+                  className="flex h-9 w-8 shrink-0 items-center justify-center border-l border-(--gray) text-(--gray-page) hover:bg-(--darkest) hover:text-(--light)"
+                  onClick={() => scrollTabs("right")}
+                  aria-label="Scroll tabs right"
+                >
+                  <ChevronRight size={18} />
+                </button>
+              ) : null}
             </>
           ) : (
             <span className="text-(--gray-page) h-9 flex items-center justify-center w-full">
