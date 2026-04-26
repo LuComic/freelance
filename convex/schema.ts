@@ -206,6 +206,26 @@ const schema = defineSchema({
     updatedAt: v.number(),
   }).index("by_project_created", ["projectId", "createdAt"]),
 
+  projectChatMessages: defineTable({
+    projectId: v.id("projects"),
+    authorUserId: v.id("users"),
+    authorNameSnapshot: v.string(),
+    authorImageSnapshot: v.optional(v.string()),
+    body: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    deletedAt: v.optional(v.number()),
+    deletedByUserId: v.optional(v.id("users")),
+  })
+    .index("by_project_created", ["projectId", "createdAt"])
+    .index("by_project_author", ["projectId", "authorUserId"])
+    .index("by_project_author_created", [
+      "projectId",
+      "authorUserId",
+      "createdAt",
+    ])
+    .index("by_author", ["authorUserId"]),
+
   formSubmissions: defineTable({
     projectId: v.id("projects"),
     pageId: v.id("pages"),

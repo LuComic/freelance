@@ -128,6 +128,16 @@ export const deleteAccount = mutation({
         await ctx.db.delete(invite._id);
       }
 
+      const chatMessages = await ctx.db
+        .query("projectChatMessages")
+        .withIndex("by_project_created", (query) =>
+          query.eq("projectId", project._id),
+        )
+        .collect();
+      for (const message of chatMessages) {
+        await ctx.db.delete(message._id);
+      }
+
       await ctx.db.delete(project._id);
     }
 
@@ -200,6 +210,14 @@ export const deleteAccount = mutation({
       ) {
         await ctx.db.delete(activityEntry._id);
       }
+    }
+
+    const projectChatMessages = await ctx.db
+      .query("projectChatMessages")
+      .withIndex("by_author", (query) => query.eq("authorUserId", userId))
+      .collect();
+    for (const message of projectChatMessages) {
+      await ctx.db.delete(message._id);
     }
 
     const sessions = await ctx.db

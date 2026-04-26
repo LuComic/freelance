@@ -5,7 +5,6 @@ import {
   clearStoredGuestUpgradeToken,
   getStoredGuestUpgradeToken,
 } from "@/app/lib/guestUpgrade";
-import { SearchBarProvider } from "@/app/lib/components/searchbar/SearchBarContext";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useConvex, useConvexAuth, useMutation, useQuery } from "convex/react";
 import dynamic from "next/dynamic";
@@ -22,14 +21,6 @@ const CreateProjectModal = dynamic(
   () =>
     import("@/app/lib/components/project/CreateProjectModal").then(
       (module) => module.CreateProjectModal,
-    ),
-  { ssr: false },
-);
-
-const SearchBar = dynamic(
-  () =>
-    import("@/app/lib/components/searchbar/SearchBar").then(
-      (module) => module.SearchBar,
     ),
   { ssr: false },
 );
@@ -307,121 +298,118 @@ export default function Page() {
   };
 
   return (
-    <SearchBarProvider>
-      <SearchBar />
-      <div className="h-max md:max-w-2/3 mx-auto w-full flex flex-col gap-4 items-start justify-center">
-        <div className="w-full border-b border-(--gray) pb-2 flex flex-col gap-2">
-          <p className="md:text-3xl text-xl font-medium">Welcome!</p>
-        </div>
-
-        <div className="flex lg:flex-row flex-col items-start lg:items-center justify-center gap-2">
-          {isSignedInRealUser ? <CreateProjectModal ui="projects" /> : null}
-          {isSignedInRealUser ? (
-            <span className="text-(--gray-page) lg:inline hidden">or</span>
-          ) : null}
-          <span className="font-medium lg:mt-0 mt-4">Join via code</span>
-          <form onSubmit={(event) => void handleJoinSubmit(event)}>
-            <input
-              type="text"
-              value={validatedJoinTarget ? guestNameDraft : joinCodeDraft}
-              maxLength={validatedJoinTarget ? MAX_NAME_LENGTH : 16}
-              placeholder={
-                validatedJoinTarget ? "Enter your name" : "project code"
-              }
-              className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
-              onChange={(event) => {
-                if (validatedJoinTarget) {
-                  setGuestNameDraft(event.target.value);
-                  return;
-                }
-
-                setJoinCodeDraft(event.target.value);
-              }}
-            />
-            <button
-              type="submit"
-              disabled={isVerifyingCode || isJoining || isCompletingUpgrade}
-              className="ml-2 rounded-md bg-(--vibrant) px-2 py-1 hover:bg-(--vibrant-hover) disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {isVerifyingCode
-                ? "Checking..."
-                : isJoining
-                  ? "Joining..."
-                  : validatedJoinTarget || isSignedInRealUser
-                    ? "Join"
-                    : "Next"}
-            </button>
-          </form>
-        </div>
-        {validatedJoinTarget ? (
-          <p className="text-(--gray-page)">
-            Joining &apos;{validatedJoinTarget.projectName}&apos; as a temporary
-            client.
-          </p>
-        ) : null}
-        {isCompletingUpgrade ? (
-          <p className="text-(--gray-page)">
-            Linking your guest project to this account...
-          </p>
-        ) : null}
-        {joinError ? (
-          <p className="text-(--declined-border)">{joinError}</p>
-        ) : null}
-        {upgradeError ? (
-          <p className="text-(--declined-border)">{upgradeError}</p>
-        ) : null}
-
-        <span className="inline text-wrap">
-          <Link
-            href="/tutorial"
-            className="text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover) cursor-pointer"
-          >
-            Tutorial
-          </Link>
-          <Link
-            href="/legal"
-            className="ml-2 text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover) cursor-pointer"
-          >
-            Legal
-          </Link>
-        </span>
-
-        <div className="w-full flex flex-col items-start justify-start overflow-hidden rounded-md border border-(--gray)">
-          <div className="w-full flex items-center justify-start p-2 bg-(--darkest) text-(--gray-page) border-b border-(--gray)">
-            Projects
-          </div>
-          {projects === undefined ? (
-            <div className="w-full p-4 text-(--gray-page)">
-              Loading projects...
-            </div>
-          ) : projects.length > 0 ? (
-            <div className="w-full flex flex-col">
-              {projects.map((project) => (
-                <Link
-                  key={project.id}
-                  className="w-full p-3 border-b last:border-b-0 border-(--gray) flex flex-col gap-1"
-                  href={
-                    project.pages[0]
-                      ? getProjectPagePath(project.id, project.pages[0].id)
-                      : getProjectPath(project.id)
-                  }
-                >
-                  <p className="font-medium hover:text-(--vibrant)">
-                    {project.name}
-                  </p>
-                  {project.description ? (
-                    <p className="text-(--gray-page)">{project.description}</p>
-                  ) : null}
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <div className="w-full p-4 text-(--gray-page)">
-              No projects yet. Create one to start working.
-            </div>
-          )}
-        </div>
+    <div className="h-max md:max-w-2/3 mx-auto w-full flex flex-col gap-4 items-start justify-center">
+      <div className="w-full border-b border-(--gray) pb-2 flex flex-col gap-2">
+        <p className="md:text-3xl text-xl font-medium">Welcome!</p>
       </div>
-    </SearchBarProvider>
+
+      <div className="flex lg:flex-row flex-col items-start lg:items-center justify-center gap-2">
+        {isSignedInRealUser ? <CreateProjectModal ui="projects" /> : null}
+        {isSignedInRealUser ? (
+          <span className="text-(--gray-page) lg:inline hidden">or</span>
+        ) : null}
+        <span className="font-medium lg:mt-0 mt-4">Join via code</span>
+        <form onSubmit={(event) => void handleJoinSubmit(event)}>
+          <input
+            type="text"
+            value={validatedJoinTarget ? guestNameDraft : joinCodeDraft}
+            maxLength={validatedJoinTarget ? MAX_NAME_LENGTH : 16}
+            placeholder={
+              validatedJoinTarget ? "Enter your name" : "project code"
+            }
+            className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
+            onChange={(event) => {
+              if (validatedJoinTarget) {
+                setGuestNameDraft(event.target.value);
+                return;
+              }
+
+              setJoinCodeDraft(event.target.value);
+            }}
+          />
+          <button
+            type="submit"
+            disabled={isVerifyingCode || isJoining || isCompletingUpgrade}
+            className="ml-2 rounded-md bg-(--vibrant) px-2 py-1 hover:bg-(--vibrant-hover) disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {isVerifyingCode
+              ? "Checking..."
+              : isJoining
+                ? "Joining..."
+                : validatedJoinTarget || isSignedInRealUser
+                  ? "Join"
+                  : "Next"}
+          </button>
+        </form>
+      </div>
+      {validatedJoinTarget ? (
+        <p className="text-(--gray-page)">
+          Joining &apos;{validatedJoinTarget.projectName}&apos; as a temporary
+          client.
+        </p>
+      ) : null}
+      {isCompletingUpgrade ? (
+        <p className="text-(--gray-page)">
+          Linking your guest project to this account...
+        </p>
+      ) : null}
+      {joinError ? (
+        <p className="text-(--declined-border)">{joinError}</p>
+      ) : null}
+      {upgradeError ? (
+        <p className="text-(--declined-border)">{upgradeError}</p>
+      ) : null}
+
+      <span className="inline text-wrap">
+        <Link
+          href="/tutorial"
+          className="text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover) cursor-pointer"
+        >
+          Tutorial
+        </Link>
+        <Link
+          href="/legal"
+          className="text-(--vibrant) ml-2 underline underline-offset-4 hover:text-(--vibrant-hover) cursor-pointer"
+        >
+          Legal
+        </Link>
+      </span>
+
+      <div className="w-full flex flex-col items-start justify-start overflow-hidden rounded-md border border-(--gray)">
+        <div className="w-full flex items-center justify-start p-2 bg-(--darkest) text-(--gray-page) border-b border-(--gray)">
+          Projects
+        </div>
+        {projects === undefined ? (
+          <div className="w-full p-4 text-(--gray-page)">
+            Loading projects...
+          </div>
+        ) : projects.length > 0 ? (
+          <div className="w-full flex flex-col">
+            {projects.map((project) => (
+              <Link
+                key={project.id}
+                className="w-full p-3 border-b last:border-b-0 border-(--gray) flex flex-col gap-1"
+                href={
+                  project.pages[0]
+                    ? getProjectPagePath(project.id, project.pages[0].id)
+                    : getProjectPath(project.id)
+                }
+              >
+                <p className="font-medium hover:text-(--vibrant)">
+                  {project.name}
+                </p>
+                {project.description ? (
+                  <p className="text-(--gray-page)">{project.description}</p>
+                ) : null}
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="w-full p-4 text-(--gray-page)">
+            No projects yet. Create one to start working.
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

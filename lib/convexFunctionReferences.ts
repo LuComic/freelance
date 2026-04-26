@@ -32,3 +32,11 @@ export const cancelCurrentPlanAction = makeFunctionReference<"action">(
 export const reactivateCurrentPlanAction = makeFunctionReference<"action">(
   "billing/actions:reactivateCurrentPlan",
 );
+export const listProjectChatMessagesQuery = makeFunctionReference<"query">(
+  "chat/queries:listProjectMessages",
+);
+export const sendProjectChatMessageMutation = makeFunctionReference<"mutation">(
+  "chat/mutations:sendProjectMessage",
+);
+export const deleteProjectChatMessageMutation =
+  makeFunctionReference<"mutation">("chat/mutations:deleteProjectMessage");

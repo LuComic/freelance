@@ -7,14 +7,20 @@ import {
   LibraryBig,
   Component,
   Settings2,
+  MessageSquare,
 } from "lucide-react";
 import { useEditMode } from "@/app/lib/components/project/EditModeContext";
 import { ComponentLib, type ComponentTag } from "./ComponentLib";
+import { ProjectChatPanel } from "./ProjectChatPanel";
 import { SelectedComponentConfig } from "./SelectedComponentConfig";
 
-type ChatTab = "components" | "config";
+type ChatTab = "components" | "config" | "messages";
 
-export const MobileChat = () => {
+type MobileChatProps = {
+  projectId: string | null;
+};
+
+export const MobileChat = ({ projectId }: MobileChatProps) => {
   const {
     isEditing,
     modeLock,
@@ -82,7 +88,11 @@ export const MobileChat = () => {
               <PanelRightClose size={22} />
             </button>
             <span className="text-(--gray) text-xl">
-              {activeTab === "components" ? "Components" : "Config"}
+              {activeTab === "components"
+                ? "Components"
+                : activeTab === "config"
+                  ? "Config"
+                  : "Messages"}
             </span>
           </div>
 
@@ -108,6 +118,17 @@ export const MobileChat = () => {
               type="button"
             >
               <Settings2 size={20} className="mx-auto" />
+            </button>
+            <button
+              className={`p-1 rounded-lg hover:bg-(--quite-dark) w-full text-sm ${
+                activeTab === "messages"
+                  ? "bg-(--quite-dark) text-(--vibrant)"
+                  : ""
+              }`}
+              onClick={() => setActiveTab("messages")}
+              type="button"
+            >
+              <MessageSquare size={20} className="mx-auto" />
             </button>
           </div>
 
@@ -141,6 +162,9 @@ export const MobileChat = () => {
               </>
             ) : null}
             {activeTab === "config" ? <SelectedComponentConfig /> : null}
+            {activeTab === "messages" ? (
+              <ProjectChatPanel projectId={projectId} />
+            ) : null}
           </div>
         </nav>
       ) : (

@@ -255,7 +255,7 @@ export const PersonModal = ({
         {visiblePerson.bio ? (
           <p className="text-(--gray-page)">{visiblePerson.bio}</p>
         ) : null}
-        <div className="w-full border-t border-(--gray) py-3 flex flex-col gap-2">
+        <div className="w-full border-t border-(--gray) pt-3 flex flex-col gap-2">
           <button
             type="button"
             className="font-medium flex items-center justify-start gap-2 w-max"
@@ -331,24 +331,24 @@ export const PersonModal = ({
               </button>
 
               {inviteableProjects === undefined ? (
-                <p className="pt-2 text-(--gray-page)">Loading projects...</p>
+                <p className="text-(--gray-page)">Loading projects...</p>
               ) : null}
               {inviteableProjects !== undefined &&
               inviteableProjects.length === 0 ? (
-                <p className="pt-2 text-(--gray-page)">
+                <p className="text-(--gray-page)">
                   You can only invite people to projects where you are the owner
                   or a co-creator.
                 </p>
               ) : null}
               {inviteActionMode === "invite" && !canReceiveProjectInvite ? (
-                <p className="pt-2 text-(--gray-page)">
+                <p className="text-(--gray-page)">
                   This account cannot receive a project invite until it has an
                   email address.
                 </p>
               ) : null}
               {inviteActionHelper ? (
                 <p
-                  className={`pt-2 ${
+                  className={`${
                     selectedProjectMembership === undefined
                       ? "text-(--gray-page)"
                       : inviteActionMode === "unavailable"
@@ -360,10 +360,10 @@ export const PersonModal = ({
                 </p>
               ) : null}
               {inviteMessage ? (
-                <p className="pt-2 text-(--gray-page)">{inviteMessage}</p>
+                <p className="text-(--gray-page)">{inviteMessage}</p>
               ) : null}
               {inviteError ? (
-                <p className="pt-2 text-(--declined-border)">{inviteError}</p>
+                <p className="text-(--declined-border)">{inviteError}</p>
               ) : null}
             </div>
           ) : null}

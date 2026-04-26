@@ -7,6 +7,7 @@ import {
   LayoutGrid,
   Component,
   Settings2,
+  MessageSquare,
 } from "lucide-react";
 import { CHAT_COOKIE, CHAT_WIDTH_COOKIE, setCookie } from "@/app/lib/cookies";
 import { useEditMode } from "@/app/lib/components/project/EditModeContext";
@@ -18,18 +19,21 @@ import {
   CHAT_MIN_WIDTH,
 } from "../project/desktopPanelSizing";
 import { ComponentLib, type ComponentTag } from "./ComponentLib";
+import { ProjectChatPanel } from "./ProjectChatPanel";
 import { SelectedComponentConfig } from "./SelectedComponentConfig";
 
 type DesktopChatProps = {
   initialOpen?: boolean;
   initialWidth?: number;
+  projectId: string | null;
 };
 
-type ChatTab = "components" | "config";
+type ChatTab = "components" | "config" | "messages";
 
 export const DesktopChat = ({
   initialOpen,
   initialWidth,
+  projectId,
 }: DesktopChatProps) => {
   const {
     isEditing,
@@ -152,7 +156,11 @@ export const DesktopChat = ({
               <PanelRightClose size={20} />
             </button>
             <span className="text-(--gray) text-xl">
-              {activeTab === "components" ? "Components" : "Config"}
+              {activeTab === "components"
+                ? "Components"
+                : activeTab === "config"
+                  ? "Config"
+                  : "Messages"}
             </span>
           </div>
 
@@ -178,6 +186,17 @@ export const DesktopChat = ({
               type="button"
             >
               <Settings2 size={20} className="mx-auto" />
+            </button>
+            <button
+              className={`p-1 rounded-lg hover:bg-(--quite-dark) w-full text-sm ${
+                activeTab === "messages"
+                  ? "bg-(--quite-dark) text-(--vibrant)"
+                  : ""
+              }`}
+              onClick={() => setActiveTab("messages")}
+              type="button"
+            >
+              <MessageSquare size={20} className="mx-auto" />
             </button>
           </div>
 
@@ -211,6 +230,9 @@ export const DesktopChat = ({
               </>
             ) : null}
             {activeTab === "config" ? <SelectedComponentConfig /> : null}
+            {activeTab === "messages" ? (
+              <ProjectChatPanel projectId={projectId} />
+            ) : null}
           </div>
         </div>
       ) : (
@@ -230,6 +252,15 @@ export const DesktopChat = ({
                 }}
               >
                 <LayoutGrid size={20} className="mx-auto" />
+              </button>
+              <button
+                className="h-full p-1 rounded-md hover:bg-(--quite-dark) w-full"
+                onClick={() => {
+                  setActiveTab("messages");
+                  setChatOpen(true);
+                }}
+              >
+                <MessageSquare size={20} className="mx-auto" />
               </button>
             </div>
           ) : null}

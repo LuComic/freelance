@@ -340,6 +340,16 @@ export const deleteProject = mutation({
       await ctx.db.delete(entry._id);
     }
 
+    const chatMessages = await ctx.db
+      .query("projectChatMessages")
+      .withIndex("by_project_created", (query) =>
+        query.eq("projectId", project._id),
+      )
+      .collect();
+    for (const message of chatMessages) {
+      await ctx.db.delete(message._id);
+    }
+
     const notifications = await ctx.db.query("notifications").collect();
     for (const notification of notifications) {
       if (notification.projectId === project._id) {
