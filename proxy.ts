@@ -27,6 +27,17 @@ function isProtectedRoute(request: NextRequest) {
   );
 }
 
+function shouldRunAuthProxy(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+
+  return (
+    pathname === "/api/auth" ||
+    pathname.startsWith("/api/auth/") ||
+    request.nextUrl.searchParams.has("code") ||
+    isProtectedRoute(request)
+  );
+}
+
 function redirectTo(request: NextRequest, route: string) {
   const url = request.nextUrl.clone();
   const parsed = new URL(route, "http://dummy");
@@ -74,13 +85,17 @@ export default async function proxy(
     return NextResponse.next();
   }
 
+  if (!shouldRunAuthProxy(request)) {
+    return NextResponse.next();
+  }
+
   const authProxy = await getAuthProxy();
 
   return authProxy(request, event);
 }
 
 export const config = {
-  // The following matcher runs middleware on all routes
-  // except static assets and the landing page.
+  // Run the lightweight proxy broadly, but only load Convex Auth for auth,
+  // OAuth callbacks, and protected app paths.
   matcher: ["/((?!$|.*\\..*|_next).*)", "/(api|trpc)(.*)"],
 };
