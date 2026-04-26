@@ -397,24 +397,22 @@ export default function Page() {
           ) : projects.length > 0 ? (
             <div className="w-full flex flex-col">
               {projects.map((project) => (
-                <div
+                <Link
                   key={project.id}
                   className="w-full p-3 border-b last:border-b-0 border-(--gray) flex flex-col gap-1"
+                  href={
+                    project.pages[0]
+                      ? getProjectPagePath(project.id, project.pages[0].id)
+                      : getProjectPath(project.id)
+                  }
                 >
-                  <Link
-                    href={
-                      project.pages[0]
-                        ? getProjectPagePath(project.id, project.pages[0].id)
-                        : getProjectPath(project.id)
-                    }
-                    className="font-medium hover:text-(--vibrant)"
-                  >
+                  <p className="font-medium hover:text-(--vibrant)">
                     {project.name}
-                  </Link>
+                  </p>
                   {project.description ? (
                     <p className="text-(--gray-page)">{project.description}</p>
                   ) : null}
-                </div>
+                </Link>
               ))}
             </div>
           ) : (
