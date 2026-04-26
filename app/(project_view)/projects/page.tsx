@@ -5,9 +5,9 @@ import {
   clearStoredGuestUpgradeToken,
   getStoredGuestUpgradeToken,
 } from "@/app/lib/guestUpgrade";
+import { CreateProjectModal } from "@/app/lib/components/project/CreateProjectModal";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useConvex, useConvexAuth, useMutation, useQuery } from "convex/react";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -16,14 +16,6 @@ import {
   getProjectPath,
 } from "@/app/lib/components/project/paths";
 import { MAX_NAME_LENGTH } from "@/lib/inputLimits";
-
-const CreateProjectModal = dynamic(
-  () =>
-    import("@/app/lib/components/project/CreateProjectModal").then(
-      (module) => module.CreateProjectModal,
-    ),
-  { ssr: false },
-);
 
 type JoinTarget = {
   joinCode: string;
