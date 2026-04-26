@@ -36,9 +36,6 @@ export const MobileChat = ({ projectId }: MobileChatProps) => {
   const [chatOpen, setChatOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<ChatTab>("components");
   const [componentFilter, setComponentFilter] = useState<"" | ComponentTag>("");
-  const [visualViewportHeight, setVisualViewportHeight] = useState<
-    number | null
-  >(null);
   const lastTouchYRef = useRef<number | null>(null);
   const handledComponentLibraryNonceRef = useRef(0);
   const handledComponentConfigNonceRef = useRef(0);
@@ -86,30 +83,6 @@ export const MobileChat = ({ projectId }: MobileChatProps) => {
       setChatOpen(true);
     });
   }, [componentConfigOpenRequestNonce]);
-
-  useEffect(() => {
-    if (!chatOpen || typeof window === "undefined" || !window.visualViewport) {
-      return;
-    }
-
-    const visualViewport = window.visualViewport;
-    let animationFrameId: number | null = null;
-    const updateViewportBounds = () => {
-      setVisualViewportHeight(visualViewport.height);
-    };
-
-    animationFrameId = requestAnimationFrame(updateViewportBounds);
-    visualViewport.addEventListener("resize", updateViewportBounds);
-    visualViewport.addEventListener("scroll", updateViewportBounds);
-
-    return () => {
-      if (animationFrameId !== null) {
-        cancelAnimationFrame(animationFrameId);
-      }
-      visualViewport.removeEventListener("resize", updateViewportBounds);
-      visualViewport.removeEventListener("scroll", updateViewportBounds);
-    };
-  }, [chatOpen]);
 
   useEffect(() => {
     if (!chatOpen) {
@@ -169,14 +142,6 @@ export const MobileChat = ({ projectId }: MobileChatProps) => {
           className="w-[90%] h-dvh max-h-dvh bg-(--darkest) border-l border-(--gray) flex flex-col items-start justify-start p-2 gap-4 fixed z-30 top-0 right-0 overflow-hidden overscroll-contain"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
-          style={
-            visualViewportHeight
-              ? {
-                  height: `${visualViewportHeight}px`,
-                  maxHeight: `${visualViewportHeight}px`,
-                }
-              : undefined
-          }
         >
           <div className="flex items-center justify-start gap-2 w-full">
             <button
