@@ -49,7 +49,8 @@ export function LimitsSettingsSection({
           <p className="text-(--gray-page)">
             These limits are for preventing spam, saving storage and keeping up
             with the user base (if the project will even have that problem). If
-            you find these too limiting, contact support at hello@gmail.com
+            you find these too limiting, contact support at
+            lukasjaager@gmail.com
           </p>
           {BILLING_BETA_MODE && BILLING_BETA_OWNED_PROJECT_LIMIT !== null ? (
             <p>
