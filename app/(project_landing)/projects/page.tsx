@@ -309,19 +309,17 @@ export default function Page() {
   return (
     <SearchBarProvider>
       <SearchBar />
-      <div className="h-max @[40rem]:max-w-2/3 mx-auto w-full flex flex-col gap-4 items-start justify-center">
+      <div className="h-max md:max-w-2/3 mx-auto w-full flex flex-col gap-4 items-start justify-center">
         <div className="w-full border-b border-(--gray) pb-2 flex flex-col gap-2">
-          <p className="@[40rem]:text-3xl text-xl font-medium">Welcome!</p>
+          <p className="md:text-3xl text-xl font-medium">Welcome!</p>
         </div>
 
-        <div className="flex @[50rem]:flex-row flex-col items-start @[50rem]:items-center justify-center gap-2">
+        <div className="flex lg:flex-row flex-col items-start lg:items-center justify-center gap-2">
           {isSignedInRealUser ? <CreateProjectModal ui="projects" /> : null}
           {isSignedInRealUser ? (
-            <span className="text-(--gray-page) @[50rem]:inline hidden">
-              or
-            </span>
+            <span className="text-(--gray-page) lg:inline hidden">or</span>
           ) : null}
-          <span className="font-medium @[50rem]:mt-0 mt-4">Join via code</span>
+          <span className="font-medium lg:mt-0 mt-4">Join via code</span>
           <form onSubmit={(event) => void handleJoinSubmit(event)}>
             <input
               type="text"
