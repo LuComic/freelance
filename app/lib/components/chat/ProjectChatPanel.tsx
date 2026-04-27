@@ -17,6 +17,7 @@ type ProjectChatMessage = {
   id: string;
   authorName: string;
   authorImage: string | null;
+  authorRole: "client" | "coCreator" | "owner" | null;
   body: string | null;
   createdAt: number;
   deletedAt: number | null;
@@ -27,6 +28,14 @@ type ProjectChatMessage = {
 
 const INITIAL_MESSAGE_COUNT = 50;
 const LOAD_MORE_MESSAGE_COUNT = 50;
+const ROLE_LABELS: Record<
+  NonNullable<ProjectChatMessage["authorRole"]>,
+  string
+> = {
+  client: "client",
+  coCreator: "co-creator",
+  owner: "owner",
+};
 
 function getErrorMessage(error: unknown) {
   if (error instanceof Error) {
@@ -213,6 +222,11 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
                 >
                   {message.authorName}
                 </span>
+                {message.authorRole ? (
+                  <span className="border opacity-80 px-0.5 rounded-sm text-xs">
+                    {ROLE_LABELS[message.authorRole]}
+                  </span>
+                ) : null}
               </div>
               {message.canDelete ? (
                 <button

@@ -14,6 +14,7 @@ export type ProjectChatMessageListItem = {
   authorUserId: Id<"users">;
   authorName: string;
   authorImage: string | null;
+  authorRole: Doc<"projectMembers">["role"] | null;
   body: string | null;
   createdAt: number;
   updatedAt: number;
@@ -46,9 +47,25 @@ export function canDeleteProjectChatMessage(
   return message.authorUserId === viewerUserId;
 }
 
+export async function getProjectChatAuthorRole(
+  ctx: ChatCtx,
+  projectId: Id<"projects">,
+  authorUserId: Id<"users">,
+) {
+  const membership = await ctx.db
+    .query("projectMembers")
+    .withIndex("by_project_user", (query) =>
+      query.eq("projectId", projectId).eq("userId", authorUserId),
+    )
+    .unique();
+
+  return membership?.role ?? null;
+}
+
 export function toProjectChatMessageListItem(
   message: Doc<"projectChatMessages">,
   viewerUserId: Id<"users">,
+  authorRole: Doc<"projectMembers">["role"] | null,
 ): ProjectChatMessageListItem {
   const isDeleted = message.deletedAt !== undefined;
 
@@ -58,6 +75,7 @@ export function toProjectChatMessageListItem(
     authorUserId: message.authorUserId,
     authorName: message.authorNameSnapshot,
     authorImage: message.authorImageSnapshot ?? null,
+    authorRole,
     body: isDeleted ? null : message.body,
     createdAt: message.createdAt,
     updatedAt: message.updatedAt,

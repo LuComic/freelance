@@ -3,7 +3,10 @@ import { v } from "convex/values";
 import { query } from "../_generated/server";
 import { requireCurrentAuth } from "../lib/auth";
 import { requireProjectMember } from "../lib/permissions";
-import { toProjectChatMessageListItem } from "./model";
+import {
+  getProjectChatAuthorRole,
+  toProjectChatMessageListItem,
+} from "./model";
 
 export const listProjectMessages = query({
   args: {
@@ -16,16 +19,24 @@ export const listProjectMessages = query({
 
     const messages = await ctx.db
       .query("projectChatMessages")
-      .withIndex("by_project_created", (q) =>
-        q.eq("projectId", args.projectId),
-      )
+      .withIndex("by_project_created", (q) => q.eq("projectId", args.projectId))
       .order("desc")
       .paginate(args.paginationOpts);
 
     return {
       ...messages,
-      page: messages.page.map((message) =>
-        toProjectChatMessageListItem(message, userId),
+      page: await Promise.all(
+        messages.page.map(async (message) =>
+          toProjectChatMessageListItem(
+            message,
+            userId,
+            await getProjectChatAuthorRole(
+              ctx,
+              args.projectId,
+              message.authorUserId,
+            ),
+          ),
+        ),
       ),
     };
   },
