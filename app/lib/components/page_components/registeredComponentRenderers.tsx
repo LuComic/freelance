@@ -5,6 +5,7 @@ import type { PageComponentType } from "@/lib/pageDocument";
 import { IdeaBoard } from "./idea_board/IdeaBoard";
 import { SimpleInput } from "./SimpleInput/SimpleInput";
 import { Form } from "./form/form/Form";
+import { AdvancedInput } from "./advanced_input/AdvancedInput";
 
 export type PageComponentRenderer = {
   type: PageComponentType;
@@ -19,6 +20,10 @@ export const REGISTERED_PAGE_COMPONENT_RENDERERS = [
   {
     type: "SimpleInput",
     Component: SimpleInput,
+  },
+  {
+    type: "AdvancedInput",
+    Component: AdvancedInput,
   },
   {
     type: "Form",

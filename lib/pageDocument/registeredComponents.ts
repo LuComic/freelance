@@ -1,10 +1,12 @@
 import { FormDefinition } from "./registered/Form.definition";
+import { AdvancedInputDefinition } from "./registered/AdvancedInput.definition";
 import { IdeaBoardDefinition } from "./registered/IdeaBoard.definition";
 import { SimpleInputDefinition } from "./registered/SimpleInput.definition";
 
 export const REGISTERED_PAGE_COMPONENT_DEFINITIONS = [
   IdeaBoardDefinition,
   SimpleInputDefinition,
+  AdvancedInputDefinition,
   FormDefinition,
 ] as const;
 

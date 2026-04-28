@@ -3,6 +3,22 @@
 @import "@fontsource-variable/work-sans";
 @import "@fontsource-variable/fira-code/wght.css";
 @import "@fontsource-variable/jetbrains-mono/wght.css";
+@import "@fontsource/inter";
+@import "@fontsource/roboto";
+@import "@fontsource/open-sans";
+@import "@fontsource/montserrat";
+@import "@fontsource/playfair-display";
+@import "@fontsource/merriweather";
+@import "@fontsource/lora";
+@import "@fontsource/poppins";
+@import "@fontsource/raleway";
+@import "@fontsource/nunito";
+@import "@fontsource/bebas-neue";
+@import "@fontsource/oswald";
+@import "@fontsource/anton";
+@import "@fontsource/pacifico";
+@import "@fontsource/quicksand";
+@import "@fontsource/fredoka";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));

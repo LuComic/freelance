@@ -3,7 +3,10 @@ import {
   PRIMARY_INSERTABLE_COMMANDS,
   resolveComponentTypeFromCommand as resolveComponentTypeFromCatalog,
 } from "@/app/lib/components/page_components/componentCatalog";
-import { createComponentToken, type PageComponentType } from "@/lib/pageDocument";
+import {
+  createComponentToken,
+  type PageComponentType,
+} from "@/lib/pageDocument";
 import {
   createDropdownScaffold,
   DROPDOWN_SLASH_COMMAND,
@@ -21,6 +24,32 @@ function getCompletableSlashCommands(
     ...SLASH_INSERTION_COMMANDS,
     ...SLASH_ACTION_COMMANDS,
   ];
+}
+
+function resolveSlashCommandCompletion(
+  partial: string,
+  allowedInsertableCommands: readonly InsertableComponentCommand[],
+) {
+  const matches = getCompletableSlashCommands(allowedInsertableCommands).filter(
+    (command) => command.startsWith(partial),
+  );
+
+  if (matches.length === 1) {
+    return matches[0];
+  }
+
+  const shortestMatch = [...matches].sort(
+    (first, second) => first.length - second.length,
+  )[0];
+
+  if (
+    shortestMatch &&
+    matches.every((command) => command.startsWith(shortestMatch))
+  ) {
+    return shortestMatch;
+  }
+
+  return null;
 }
 
 type SlashAction =
@@ -54,7 +83,9 @@ export function getSlashCommandTokenRange(value: string, cursor: number) {
 }
 
 export function resolveComponentTypeFromCommand(command: string) {
-  return resolveComponentTypeFromCatalog(command) as PageComponentType | undefined;
+  return resolveComponentTypeFromCatalog(command) as
+    | PageComponentType
+    | undefined;
 }
 
 export function getActiveLineFromCursor(value: string, cursor: number) {
@@ -64,8 +95,7 @@ export function getActiveLineFromCursor(value: string, cursor: number) {
 export function completeSlashCommand(
   value: string,
   cursor: number,
-  allowedInsertableCommands: readonly InsertableComponentCommand[] =
-    PRIMARY_INSERTABLE_COMMANDS,
+  allowedInsertableCommands: readonly InsertableComponentCommand[] = PRIMARY_INSERTABLE_COMMANDS,
 ) {
   const { start, end, token } = getTokenRangeAtCursor(value, cursor);
   if (!token.startsWith("/")) {
@@ -81,14 +111,15 @@ export function completeSlashCommand(
     };
   }
 
-  const matches = getCompletableSlashCommands(allowedInsertableCommands).filter(
-    (command) => command.startsWith(partial),
+  const completion = resolveSlashCommandCompletion(
+    partial,
+    allowedInsertableCommands,
   );
-  if (matches.length !== 1) {
+  if (!completion) {
     return null;
   }
 
-  const completedToken = `/${matches[0]}`;
+  const completedToken = `/${completion}`;
   if (token === completedToken) {
     return null;
   }
@@ -102,8 +133,7 @@ export function completeSlashCommand(
 export function getSlashCompletionSuffix(
   value: string,
   cursor: number,
-  allowedInsertableCommands: readonly InsertableComponentCommand[] =
-    PRIMARY_INSERTABLE_COMMANDS,
+  allowedInsertableCommands: readonly InsertableComponentCommand[] = PRIMARY_INSERTABLE_COMMANDS,
 ) {
   const { token } = getTokenRangeAtCursor(value, cursor);
   if (!token.startsWith("/")) {
@@ -115,14 +145,14 @@ export function getSlashCompletionSuffix(
     return "lib for all possible commands";
   }
 
-  const matches = getCompletableSlashCommands(allowedInsertableCommands).filter(
-    (command) => command.startsWith(partial),
+  const completion = resolveSlashCommandCompletion(
+    partial,
+    allowedInsertableCommands,
   );
-  if (matches.length !== 1) {
+  if (!completion) {
     return null;
   }
 
-  const completion = matches[0];
   if (completion === partial) {
     return null;
   }

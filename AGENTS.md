@@ -11,6 +11,7 @@ This file has instructions and an overview of what to do and not to do when prom
 
 - If not said otherwise, opt for using **bun** as the command for checking lint, running servers, build etc
 - after ending a task, use **bunx tsc --noEmit** and **bun lint** and ill run **bunx convex dev** or **bunx convex codegen** myself
+- if asked and you run a dev server or something similar (dev, start etc), make sure to end it at the end of your task
 
 ## UI
 
