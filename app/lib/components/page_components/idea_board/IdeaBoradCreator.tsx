@@ -40,7 +40,6 @@ export const IdeaBoradCreator = ({
 }: IdeaBoardCreatorProps) => {
   const [adding, setAdding] = useState(false);
   const [addingInput, setAddingInput] = useState("");
-  const [editingIdeas, setEditingIdeas] = useState(false);
   const [clientEditing, setClientEditing] = useState(false);
 
   const handleNewIdea = () => {
@@ -190,44 +189,32 @@ export const IdeaBoradCreator = ({
             </div>
           </>
         )}
-        <div className="w-full h-px bg-(--gray)" />
+        {liveState.ideas.length > 0 ? (
+          liveState.ideas.map((idea, index) => (
+            <div
+              key={idea.id}
+              className={`w-full min-w-0 flex items-center border-(--gray) justify-between gap-2 flex-wrap ${index !== 0 ? "border-dashed" : null} border-t pt-2`}
+            >
+              <span className="min-w-0 wrap-break-word">
+                {idea.idea}
+                <span className="text-(--gray-page)">
+                  {" "}
+                  by {getIdeaAuthorName(idea, authorNames)}
+                </span>
+              </span>
 
-        <button
-          type="button"
-          className="@[40rem]:text-lg text-base font-medium flex items-center justify-start gap-2 w-full"
-          onClick={() => setEditingIdeas((prev) => !prev)}
-        >
-          Ideas
-          <ChevronRight size={18} className={editingIdeas ? "rotate-90" : ""} />
-        </button>
-        {editingIdeas && (
-          <>
-            {liveState.ideas.length > 0 ? (
-              liveState.ideas.map((idea) => (
-                <div
-                  key={idea.id}
-                  className="w-full flex items-center justify-start gap-2"
-                >
-                  <button
-                    type="button"
-                    className="h-6.5 flex items-center justify-center aspect-square rounded-md hover:bg-(--darkest)/10 bg-(--dim) border-(--gray-page) border"
-                    onClick={() => handleDeleteIdea(idea.id)}
-                  >
-                    <Trash size={16} />
-                  </button>
-                  <span className="min-w-0">
-                    {idea.idea}
-                    <span className="text-(--gray-page)">
-                      {" "}
-                      by {getIdeaAuthorName(idea, authorNames)}
-                    </span>
-                  </span>
-                </div>
-              ))
-            ) : (
-              <span className="text-(--gray-page)">No ideas setup</span>
-            )}
-          </>
+              <button
+                type="button"
+                className="h-6.5 flex items-center justify-center aspect-square rounded-md hover:bg-(--darkest-hover) bg-(--dim) border-(--gray) border px-2 gap-1 text-sm ml-auto"
+                onClick={() => handleDeleteIdea(idea.id)}
+              >
+                <Trash size={14} />
+                Delete
+              </button>
+            </div>
+          ))
+        ) : (
+          <span className="text-(--gray-page)">No ideas yet.</span>
         )}
       </div>
     </>

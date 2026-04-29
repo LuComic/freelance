@@ -15,6 +15,8 @@ export default function SettingsPage() {
     projectData,
     projectMembers,
     joinCode,
+    isJoinAccessEnabled,
+    isTogglingJoinAccess,
     canRegenerateJoinCode,
     joinCodeError,
     isJoinCodeLoading,
@@ -49,6 +51,8 @@ export default function SettingsPage() {
     handleDeleteProject,
     handleLeaveProject,
     handleRemoveProjectMember,
+    handleEnableJoinAccess,
+    handleDisableJoinAccess,
     handleRegenerateJoinCode,
   } = useProjectSettingsController(projectId);
 
@@ -104,6 +108,8 @@ export default function SettingsPage() {
           manageLabel="Manage clients"
           members={clients}
           joinCode={isJoinCodeLoading ? null : joinCode}
+          isJoinAccessEnabled={isJoinAccessEnabled}
+          isTogglingJoinAccess={isTogglingJoinAccess}
           canCopyJoinCode={!isJoinCodeLoading}
           canRegenerateJoinCode={canRegenerateJoinCode}
           isRegeneratingJoinCode={isRegeneratingJoinCode}
@@ -113,6 +119,8 @@ export default function SettingsPage() {
           pendingRemovalUserId={pendingMemberRemovalUserId}
           error={joinCodeError ?? memberActionError}
           onRemove={(userId) => void handleRemoveProjectMember(userId)}
+          onEnableJoinAccess={() => void handleEnableJoinAccess()}
+          onDisableJoinAccess={() => void handleDisableJoinAccess()}
           onRegenerateJoinCode={() => void handleRegenerateJoinCode()}
           onManage={() => {
             if (!project) {

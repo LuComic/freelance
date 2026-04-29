@@ -15,8 +15,12 @@ type ProjectEmailListSectionProps = {
   manageLabel: string;
   members: ProjectMemberListItem[];
   joinCode?: string | null;
+  isJoinAccessEnabled?: boolean;
+  isTogglingJoinAccess?: boolean;
   onRemove: (userId: Id<"users">) => void;
   onManage: () => void;
+  onEnableJoinAccess?: () => void;
+  onDisableJoinAccess?: () => void;
   onRegenerateJoinCode?: () => void;
   pendingRemovalUserId?: Id<"users"> | null;
   error?: string | null;
@@ -45,8 +49,12 @@ export function ProjectEmailListSection({
   manageLabel,
   members,
   joinCode = null,
+  isJoinAccessEnabled = false,
+  isTogglingJoinAccess = false,
   onRemove,
   onManage,
+  onEnableJoinAccess,
+  onDisableJoinAccess,
   onRegenerateJoinCode,
   pendingRemovalUserId = null,
   error = null,
@@ -110,116 +118,134 @@ export function ProjectEmailListSection({
                 Enable joining via code and link
               </p>
               <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
-                Enabled
+                {isJoinAccessEnabled ? "Enabled" : "Disabled"}
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
-                  className="w-max rounded-md border px-2 py-1 border-(--accepted-border) bg-(--accepted-bg)/10 hover:bg-(--accepted-bg)/20"
+                  disabled={isJoinAccessEnabled || isTogglingJoinAccess}
+                  onClick={() => onEnableJoinAccess?.()}
+                  className={`w-max rounded-md border px-2 py-1 ${
+                    isJoinAccessEnabled
+                      ? "border-(--accepted-border) bg-(--accepted-bg)/10 hover:bg-(--accepted-bg)/20"
+                      : "border-(--gray) hover:bg-(--gray)/20"
+                  }`}
                 >
                   Enable
                 </button>
                 <button
                   type="button"
-                  className="w-max rounded-md border px-2 py-1 border-(--gray) hover:bg-(--gray)/20"
+                  disabled={!isJoinAccessEnabled || isTogglingJoinAccess}
+                  onClick={() => onDisableJoinAccess?.()}
+                  className={`w-max rounded-md border px-2 py-1 ${
+                    !isJoinAccessEnabled
+                      ? "border-(--declined-border) bg-(--declined-bg)/10 hover:bg-(--declined-bg)/20"
+                      : "border-(--gray) hover:bg-(--gray)/20"
+                  }`}
                 >
                   Disable
                 </button>
               </div>
 
-              <div className="flex items-center justify-start gap-2 h-auto">
-                <p className="text-(--gray-page)">
-                  Join code (click to copy
-                  <span className="hidden @[40rem]:inline">
-                    {" "}
-                    | hover to see
-                  </span>
-                  ):
-                </p>
-                <button
-                  type="button"
-                  disabled={!joinCode || !canCopyJoinCode}
-                  className="font-medium"
-                  onClick={async () => {
-                    if (!joinCode || !canCopyJoinCode) {
-                      return;
-                    }
+              {isJoinAccessEnabled ? (
+                <>
+                  <div className="flex items-center justify-start gap-2 h-auto">
+                    <p className="text-(--gray-page)">
+                      Join code (click to copy
+                      <span className="hidden @[40rem]:inline">
+                        {" "}
+                        | hover to see
+                      </span>
+                      ):
+                    </p>
+                    <button
+                      type="button"
+                      disabled={!joinCode || !canCopyJoinCode}
+                      className="font-medium"
+                      onClick={async () => {
+                        if (!joinCode || !canCopyJoinCode) {
+                          return;
+                        }
 
-                    await navigator.clipboard.writeText(joinCode);
-                    setCopiedTarget("code");
-                    setTimeout(() => {
-                      setCopiedTarget((target) =>
-                        target === "code" ? null : target,
-                      );
-                    }, 1500);
-                  }}
-                  onMouseEnter={() => setHoverCode(true)}
-                  onMouseLeave={() => setHoverCode(false)}
-                >
-                  <span className="italic">
-                    {copiedTarget === "code"
-                      ? "Copied"
-                      : hoverCode
-                        ? (joinCode ?? "Loading...")
-                        : "******"}
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  disabled={!canRegenerateJoinCode || isRegeneratingJoinCode}
-                  className="p-1 rounded-md hover:bg-(--gray-page)/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-                  onClick={() => onRegenerateJoinCode?.()}
-                >
-                  <Dices size={18} />
-                </button>
-              </div>
+                        await navigator.clipboard.writeText(joinCode);
+                        setCopiedTarget("code");
+                        setTimeout(() => {
+                          setCopiedTarget((target) =>
+                            target === "code" ? null : target,
+                          );
+                        }, 1500);
+                      }}
+                      onMouseEnter={() => setHoverCode(true)}
+                      onMouseLeave={() => setHoverCode(false)}
+                    >
+                      <span className="italic">
+                        {copiedTarget === "code"
+                          ? "Copied"
+                          : hoverCode
+                            ? (joinCode ?? "Loading...")
+                            : "******"}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      disabled={
+                        !canRegenerateJoinCode || isRegeneratingJoinCode
+                      }
+                      className="p-1 rounded-md hover:bg-(--gray-page)/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                      onClick={() => onRegenerateJoinCode?.()}
+                    >
+                      <Dices size={18} />
+                    </button>
+                  </div>
 
-              <div className="flex items-center justify-start gap-2 h-auto">
-                <p className="text-(--gray-page)">
-                  Join link (click to copy
-                  <span className="hidden @[40rem]:inline">
-                    {" "}
-                    | hover to see
-                  </span>
-                  ):
-                </p>
-                <button
-                  type="button"
-                  disabled={!joinCode || !canCopyJoinCode}
-                  className="font-medium"
-                  onClick={async () => {
-                    if (!joinCode || !canCopyJoinCode) {
-                      return;
-                    }
+                  <div className="flex items-center justify-start gap-2 h-auto">
+                    <p className="text-(--gray-page)">
+                      Join link (click to copy
+                      <span className="hidden @[40rem]:inline">
+                        {" "}
+                        | hover to see
+                      </span>
+                      ):
+                    </p>
+                    <button
+                      type="button"
+                      disabled={!joinCode || !canCopyJoinCode}
+                      className="font-medium"
+                      onClick={async () => {
+                        if (!joinCode || !canCopyJoinCode) {
+                          return;
+                        }
 
-                    const joinLink = buildProjectJoinLink(joinCode);
+                        const joinLink = buildProjectJoinLink(joinCode);
 
-                    if (!joinLink) {
-                      return;
-                    }
+                        if (!joinLink) {
+                          return;
+                        }
 
-                    await navigator.clipboard.writeText(joinLink);
-                    setCopiedTarget("link");
-                    setTimeout(() => {
-                      setCopiedTarget((target) =>
-                        target === "link" ? null : target,
-                      );
-                    }, 1500);
-                  }}
-                  onMouseEnter={() => setHoverLink(true)}
-                  onMouseLeave={() => setHoverLink(false)}
-                >
-                  <span className="italic">
-                    {copiedTarget === "link"
-                      ? "Copied"
-                      : hoverLink
-                        ? joinCode
-                          ? (buildProjectJoinLink(joinCode) ?? "Loading...")
-                          : "Loading..."
-                        : "************"}
-                  </span>
-                </button>
-              </div>
+                        await navigator.clipboard.writeText(joinLink);
+                        setCopiedTarget("link");
+                        setTimeout(() => {
+                          setCopiedTarget((target) =>
+                            target === "link" ? null : target,
+                          );
+                        }, 1500);
+                      }}
+                      onMouseEnter={() => setHoverLink(true)}
+                      onMouseLeave={() => setHoverLink(false)}
+                    >
+                      <span className="italic">
+                        {copiedTarget === "link"
+                          ? "Copied"
+                          : hoverLink
+                            ? joinCode
+                              ? (buildProjectJoinLink(joinCode) ?? "Loading...")
+                              : "Loading..."
+                            : "************"}
+                      </span>
+                    </button>
+                  </div>
+                </>
+              ) : null}
             </>
           ) : null}
 

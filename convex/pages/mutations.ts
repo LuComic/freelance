@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import type { Doc, Id } from "../_generated/dataModel";
 import { mutation } from "../_generated/server";
 import { requireCurrentAuth } from "../lib/auth";
 import { invalidState, notFound } from "../lib/errors";
@@ -91,6 +92,208 @@ function sanitizeCreatorIdeaBoardDocument(
 
 function getCreatorConfigSnapshot(document: PageDocumentV1) {
   return JSON.stringify(normalizePageConfigDocument(document));
+}
+
+type SelectDocument = Extract<
+  PageDocumentV1["components"][string],
+  { type: "Select" }
+>;
+type RadioDocument = Extract<
+  PageDocumentV1["components"][string],
+  { type: "Radio" }
+>;
+type IdeaBoardDocument = Extract<
+  PageDocumentV1["components"][string],
+  { type: "IdeaBoard" }
+>;
+type IdeaBoardIdea = IdeaBoardDocument["state"]["ideas"][number];
+
+function sanitizeClientSelectState(component: SelectDocument): SelectDocument {
+  const optionIds = new Set(
+    component.config.options.map((option) => option.id),
+  );
+  const selectedOptionIds = Array.from(
+    new Set(
+      component.state.selectedOptionIds.filter((optionId) =>
+        optionIds.has(optionId),
+      ),
+    ),
+  );
+
+  return {
+    ...component,
+    state: {
+      ...component.state,
+      selectedOptionIds,
+    },
+  };
+}
+
+function sanitizeClientRadioState(component: RadioDocument): RadioDocument {
+  const selectedOptionId =
+    component.state.selectedOptionId !== null &&
+    component.config.options.some(
+      (option) => option.id === component.state.selectedOptionId,
+    )
+      ? component.state.selectedOptionId
+      : null;
+
+  return {
+    ...component,
+    state: {
+      ...component.state,
+      selectedOptionId,
+    },
+  };
+}
+
+function sanitizeIdeaVotes(args: {
+  currentVotes: string[];
+  submittedVotes: string[];
+  currentUserId: string;
+  canClientVote: boolean;
+}) {
+  const currentOtherVotes = args.currentVotes.filter(
+    (voteUserId) => voteUserId !== args.currentUserId,
+  );
+
+  if (!args.canClientVote) {
+    return Array.from(new Set(args.currentVotes));
+  }
+
+  const nextVotes = [...currentOtherVotes];
+
+  if (args.submittedVotes.includes(args.currentUserId)) {
+    nextVotes.push(args.currentUserId);
+  }
+
+  return Array.from(new Set(nextVotes));
+}
+
+function sanitizeClientIdeaBoardState(args: {
+  currentComponent: IdeaBoardDocument;
+  nextComponent: IdeaBoardDocument;
+  userId: Id<"users">;
+}): IdeaBoardDocument {
+  const currentUserId = String(args.userId);
+  const currentIdeasById = new Map(
+    args.currentComponent.state.ideas.map((idea) => [idea.id, idea]),
+  );
+  const usedIdeaIds = new Set(
+    args.currentComponent.state.ideas.map((idea) => idea.id),
+  );
+  const emittedCurrentIdeaIds = new Set<string>();
+  const nextIdeas: IdeaBoardIdea[] = [];
+
+  for (const submittedIdea of args.nextComponent.state.ideas) {
+    const currentIdea = currentIdeasById.get(submittedIdea.id);
+
+    if (currentIdea) {
+      if (emittedCurrentIdeaIds.has(currentIdea.id)) {
+        continue;
+      }
+
+      emittedCurrentIdeaIds.add(currentIdea.id);
+      nextIdeas.push({
+        ...currentIdea,
+        votes: sanitizeIdeaVotes({
+          currentVotes: currentIdea.votes,
+          submittedVotes: submittedIdea.votes,
+          currentUserId,
+          canClientVote: args.currentComponent.config.canClientVote,
+        }),
+      });
+      continue;
+    }
+
+    if (!args.currentComponent.config.canClientAdd) {
+      continue;
+    }
+
+    let nextIdeaId = submittedIdea.id.trim();
+
+    if (!nextIdeaId || usedIdeaIds.has(nextIdeaId)) {
+      nextIdeaId = crypto.randomUUID();
+    }
+    usedIdeaIds.add(nextIdeaId);
+
+    nextIdeas.push({
+      ...submittedIdea,
+      id: nextIdeaId,
+      createdByUserId: currentUserId,
+      votes:
+        args.currentComponent.config.canClientVote &&
+        submittedIdea.votes.includes(currentUserId)
+          ? [currentUserId]
+          : [],
+    });
+  }
+
+  for (const currentIdea of args.currentComponent.state.ideas) {
+    if (!emittedCurrentIdeaIds.has(currentIdea.id)) {
+      nextIdeas.push(currentIdea);
+    }
+  }
+
+  return {
+    ...args.nextComponent,
+    state: {
+      ...args.nextComponent.state,
+      ideas: nextIdeas,
+    },
+  };
+}
+
+function enforceClientLiveStatePermissions(args: {
+  currentDocument: PageDocumentV1;
+  nextDocument: PageDocumentV1;
+  userId: Id<"users">;
+  role: Doc<"projectMembers">["role"];
+}): PageDocumentV1 {
+  if (args.role === "owner" || args.role === "coCreator") {
+    return args.nextDocument;
+  }
+
+  const components = Object.fromEntries(
+    Object.entries(args.nextDocument.components).map(
+      ([instanceId, component]) => {
+        const currentComponent = args.currentDocument.components[instanceId];
+
+        if (!currentComponent || currentComponent.type !== component.type) {
+          return [instanceId, component];
+        }
+
+        if (component.type === "Select") {
+          return [instanceId, sanitizeClientSelectState(component)];
+        }
+
+        if (component.type === "Radio") {
+          return [instanceId, sanitizeClientRadioState(component)];
+        }
+
+        if (
+          component.type === "IdeaBoard" &&
+          currentComponent.type === "IdeaBoard"
+        ) {
+          return [
+            instanceId,
+            sanitizeClientIdeaBoardState({
+              currentComponent,
+              nextComponent: component,
+              userId: args.userId,
+            }),
+          ];
+        }
+
+        return [instanceId, component];
+      },
+    ),
+  ) as PageDocumentV1["components"];
+
+  return {
+    ...args.nextDocument,
+    components,
+  };
 }
 
 export const createPage = mutation({
@@ -300,10 +503,16 @@ export const savePageLiveState = mutation({
       throw notFound(`Project ${page.projectId} was not found.`);
     }
     const currentDocument = parsePageDocument(page.contentJson);
-    const nextDocument = mergePageLiveStateDocument(
+    const mergedDocument = mergePageLiveStateDocument(
       currentDocument,
       args.document,
     );
+    const nextDocument = enforceClientLiveStatePermissions({
+      currentDocument,
+      nextDocument: mergedDocument,
+      userId,
+      role: membership.role,
+    });
     const shouldRenamePage = trimmedTitle !== page.title;
 
     if (shouldRenamePage) {

@@ -389,7 +389,15 @@ export const changeProjectMemberRole = mutation({
       throw notFound(`User ${args.targetUserId} was not found.`);
     }
 
-    await requireProjectEditor(ctx, project._id, userId);
+    const viewerMembership = await requireProjectEditor(
+      ctx,
+      project._id,
+      userId,
+    );
+
+    if (viewerMembership.role !== "owner") {
+      throw invalidState("Only the project owner can change member roles.");
+    }
 
     const targetMembership = await ctx.db
       .query("projectMembers")

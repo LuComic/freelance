@@ -138,6 +138,8 @@ const schema = defineSchema({
   })
     .index("by_project", ["projectId"])
     .index("by_email", ["email"])
+    .index("by_invited_by", ["invitedByUserId"])
+    .index("by_invited_user", ["invitedUserId"])
     .index("by_project_email", ["projectId", "email"])
     .index("by_project_status", ["projectId", "status"]),
 
@@ -180,7 +182,10 @@ const schema = defineSchema({
     updatedAt: v.number(),
   })
     .index("by_user", ["userId"])
-    .index("by_user_read", ["userId", "isRead"]),
+    .index("by_user_read", ["userId", "isRead"])
+    .index("by_actor", ["actorUserId"])
+    .index("by_connection_user", ["connectionUserId"])
+    .index("by_project", ["projectId"]),
 
   projectActivity: defineTable({
     projectId: v.id("projects"),
@@ -204,7 +209,9 @@ const schema = defineSchema({
     newValue: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
-  }).index("by_project_created", ["projectId", "createdAt"]),
+  })
+    .index("by_project_created", ["projectId", "createdAt"])
+    .index("by_actor", ["actorUserId"]),
 
   projectChatMessages: defineTable({
     projectId: v.id("projects"),
@@ -252,6 +259,7 @@ const schema = defineSchema({
     updatedAt: v.number(),
   })
     .index("by_project", ["projectId"])
+    .index("by_submitter", ["submittedByUserId"])
     .index("by_page_form", ["pageId", "formInstanceId"])
     .index("by_page_form_user", [
       "pageId",
@@ -273,6 +281,15 @@ const schema = defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_project", ["projectId"]),
+
+  joinCodeAttempts: defineTable({
+    key: v.string(),
+    count: v.number(),
+    windowStartedAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_key", ["key"])
+    .index("by_updated", ["updatedAt"]),
 
   betaFeedbackIdeas: defineTable({
     body: v.string(),

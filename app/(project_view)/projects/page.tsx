@@ -19,9 +19,7 @@ import { MAX_NAME_LENGTH } from "@/lib/inputLimits";
 
 type JoinTarget = {
   joinCode: string;
-  projectId: string;
   projectName: string;
-  firstPageId: string | null;
   redirectPath: string;
 };
 

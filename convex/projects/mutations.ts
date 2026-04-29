@@ -18,7 +18,6 @@ import { serializePageDocumentWithLimits } from "../lib/pageLimits";
 import { upsertProjectInviteForUser } from "./invites";
 import { projectInviteRoleValidator } from "../lib/validators";
 import { createInitialPageConfig } from "../pages/content";
-import { generateUniqueJoinCode } from "./model";
 import {
   appendProjectTemplatePages,
   getTemplateBlueprint,
@@ -82,7 +81,6 @@ export const createProject = mutation({
       );
     }
 
-    const joinCode = await generateUniqueJoinCode(ctx);
     let selectedTemplate: {
       templateId: Doc<"templates">["_id"];
       contentJson: string;
@@ -124,7 +122,6 @@ export const createProject = mutation({
       name: trimmedName,
       description: trimmedDescription,
       pageIds: [],
-      joinCode,
       sourceTemplateId: selectedTemplate?.templateId,
       sourceTemplateContentJson: selectedTemplate?.contentJson,
       createdAt: now,

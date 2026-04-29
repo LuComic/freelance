@@ -3,7 +3,7 @@
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 export function useProjectSettingsController(projectId: string) {
   const [nameDraft, setNameDraft] = useState("");
@@ -29,10 +29,9 @@ export function useProjectSettingsController(projectId: string) {
   const [isLeavingProject, setIsLeavingProject] = useState(false);
   const [pendingMemberRemovalUserId, setPendingMemberRemovalUserId] =
     useState<Id<"users"> | null>(null);
-  const ensuredJoinCodeProjectIdRef = useRef<string | null>(null);
   const [joinCodeSnapshot, setJoinCodeSnapshot] = useState<string | null>(null);
   const [joinCodeError, setJoinCodeError] = useState<string | null>(null);
-  const [isEnsuringJoinCode, setIsEnsuringJoinCode] = useState(false);
+  const [isTogglingJoinAccess, setIsTogglingJoinAccess] = useState(false);
   const [isRegeneratingJoinCode, setIsRegeneratingJoinCode] = useState(false);
 
   const redirectToProjectsIndex = () => {
@@ -52,8 +51,11 @@ export function useProjectSettingsController(projectId: string) {
   const removeProjectMember = useMutation(
     api.projects.members.removeProjectMember,
   );
-  const ensureProjectJoinCode = useMutation(
-    api.projects.join.ensureProjectJoinCode,
+  const enableProjectJoinCode = useMutation(
+    api.projects.join.enableProjectJoinCode,
+  );
+  const disableProjectJoinCode = useMutation(
+    api.projects.join.disableProjectJoinCode,
   );
   const regenerateProjectJoinCode = useMutation(
     api.projects.join.regenerateProjectJoinCode,
@@ -125,7 +127,6 @@ export function useProjectSettingsController(projectId: string) {
       setPendingMemberRemovalUserId(null);
       setJoinCodeError(null);
       setJoinCodeSnapshot(null);
-      ensuredJoinCodeProjectIdRef.current = null;
     });
   }, [projectData?.project.id]);
 
@@ -156,68 +157,29 @@ export function useProjectSettingsController(projectId: string) {
     projectMembers?.viewerRole === "coCreator";
 
   useEffect(() => {
-    if (!canViewClientJoinAccess) {
-      queueMicrotask(() => {
-        setJoinCodeSnapshot(null);
-        setJoinCodeError(null);
-        setIsEnsuringJoinCode(false);
-      });
-      ensuredJoinCodeProjectIdRef.current = null;
-      return;
-    }
-
-    if (!currentProjectId || projectJoinCode === undefined) {
-      return;
-    }
-
-    if (projectJoinCode === null) {
+    if (!canViewClientJoinAccess || projectJoinCode === null) {
       queueMicrotask(() => {
         setJoinCodeSnapshot(null);
         setJoinCodeError(null);
       });
-      ensuredJoinCodeProjectIdRef.current = null;
       return;
     }
 
-    if (projectJoinCode.joinCode) {
+    if (projectJoinCode && !projectJoinCode.enabled) {
+      queueMicrotask(() => {
+        setJoinCodeSnapshot(null);
+        setJoinCodeError(null);
+      });
+      return;
+    }
+
+    if (projectJoinCode?.joinCode) {
       queueMicrotask(() => {
         setJoinCodeSnapshot(projectJoinCode.joinCode);
         setJoinCodeError(null);
       });
-      ensuredJoinCodeProjectIdRef.current = null;
-      return;
     }
-
-    if (ensuredJoinCodeProjectIdRef.current === currentProjectId) {
-      return;
-    }
-
-    ensuredJoinCodeProjectIdRef.current = currentProjectId;
-    setIsEnsuringJoinCode(true);
-    setJoinCodeError(null);
-
-    void ensureProjectJoinCode({
-      projectId: currentProjectId as never,
-    })
-      .then((result) => {
-        setJoinCodeSnapshot(result.joinCode);
-      })
-      .catch((error) => {
-        setJoinCodeError(
-          error instanceof Error
-            ? error.message
-            : "Could not load the join code.",
-        );
-      })
-      .finally(() => {
-        setIsEnsuringJoinCode(false);
-      });
-  }, [
-    canViewClientJoinAccess,
-    currentProjectId,
-    ensureProjectJoinCode,
-    projectJoinCode,
-  ]);
+  }, [canViewClientJoinAccess, projectJoinCode]);
 
   const handleProjectRename = async () => {
     if (!currentProjectId || isSavingName || !canRenameProject) {
@@ -375,12 +337,60 @@ export function useProjectSettingsController(projectId: string) {
     }
   };
 
+  const handleEnableJoinAccess = async () => {
+    if (!currentProjectId || isTogglingJoinAccess || !canViewClientJoinAccess) {
+      return;
+    }
+
+    setJoinCodeError(null);
+    setIsTogglingJoinAccess(true);
+
+    try {
+      const result = await enableProjectJoinCode({
+        projectId: currentProjectId as never,
+      });
+      setJoinCodeSnapshot(result.joinCode);
+    } catch (error) {
+      setJoinCodeError(
+        error instanceof Error
+          ? error.message
+          : "Could not enable join access.",
+      );
+    } finally {
+      setIsTogglingJoinAccess(false);
+    }
+  };
+
+  const handleDisableJoinAccess = async () => {
+    if (!currentProjectId || isTogglingJoinAccess || !canViewClientJoinAccess) {
+      return;
+    }
+
+    setJoinCodeError(null);
+    setIsTogglingJoinAccess(true);
+
+    try {
+      await disableProjectJoinCode({
+        projectId: currentProjectId as never,
+      });
+      setJoinCodeSnapshot(null);
+    } catch (error) {
+      setJoinCodeError(
+        error instanceof Error
+          ? error.message
+          : "Could not disable join access.",
+      );
+    } finally {
+      setIsTogglingJoinAccess(false);
+    }
+  };
+
   const handleRegenerateJoinCode = async () => {
     if (
       !currentProjectId ||
       isRegeneratingJoinCode ||
       !canViewClientJoinAccess ||
-      !projectJoinCode?.canRegenerate
+      projectJoinCode?.enabled !== true
     ) {
       return;
     }
@@ -410,12 +420,13 @@ export function useProjectSettingsController(projectId: string) {
     joinCode: canViewClientJoinAccess
       ? (projectJoinCode?.joinCode ?? joinCodeSnapshot)
       : null,
+    isJoinAccessEnabled:
+      canViewClientJoinAccess && (projectJoinCode?.enabled ?? false),
+    isTogglingJoinAccess,
     canRegenerateJoinCode:
       canViewClientJoinAccess && (projectJoinCode?.canRegenerate ?? false),
     joinCodeError,
-    isJoinCodeLoading:
-      canViewClientJoinAccess &&
-      (projectJoinCode === undefined || isEnsuringJoinCode),
+    isJoinCodeLoading: canViewClientJoinAccess && projectJoinCode === undefined,
     isRegeneratingJoinCode,
     currentProjectName,
     canManageMembers,
@@ -447,6 +458,8 @@ export function useProjectSettingsController(projectId: string) {
     handleDeleteProject,
     handleLeaveProject,
     handleRemoveProjectMember,
+    handleEnableJoinAccess,
+    handleDisableJoinAccess,
     handleRegenerateJoinCode,
   };
 }

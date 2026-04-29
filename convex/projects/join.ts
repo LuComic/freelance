@@ -27,6 +27,13 @@ import {
 type RedirectProject = Pick<Doc<"projects">, "_id" | "pageIds" | "isArchived">;
 type RedirectCtx = QueryCtx | MutationCtx;
 
+const JOIN_CODE_VALIDATE_LIMIT = 20;
+const JOIN_CODE_VALIDATE_WINDOW_MS = 60_000;
+const JOIN_CODE_JOIN_LIMIT = 10;
+const JOIN_CODE_JOIN_WINDOW_MS = 60_000;
+const JOIN_CODE_ATTEMPT_RETENTION_MS = 1000 * 60 * 60 * 24;
+const STALE_JOIN_CODE_ATTEMPT_CLEANUP_BATCH_SIZE = 25;
+
 function resolveTransferredRole(
   existingRole: Doc<"projectMembers">["role"],
   guestRole: Doc<"projectMembers">["role"],
@@ -95,6 +102,92 @@ async function resolvePreferredProjectPath(
     : defaultPath;
 }
 
+async function cleanupStaleJoinCodeAttempts(ctx: MutationCtx, now: number) {
+  const staleAttempts = await ctx.db
+    .query("joinCodeAttempts")
+    .withIndex("by_updated", (query) =>
+      query.lt("updatedAt", now - JOIN_CODE_ATTEMPT_RETENTION_MS),
+    )
+    .take(STALE_JOIN_CODE_ATTEMPT_CLEANUP_BATCH_SIZE);
+
+  await Promise.all(staleAttempts.map((attempt) => ctx.db.delete(attempt._id)));
+}
+
+async function recordJoinCodeAttempt(
+  ctx: MutationCtx,
+  args: {
+    key: string;
+    limit: number;
+    windowMs: number;
+  },
+) {
+  const now = Date.now();
+  const existingAttempt = await ctx.db
+    .query("joinCodeAttempts")
+    .withIndex("by_key", (query) => query.eq("key", args.key))
+    .unique();
+
+  if (
+    !existingAttempt ||
+    existingAttempt.windowStartedAt + args.windowMs <= now
+  ) {
+    if (existingAttempt) {
+      await ctx.db.patch(existingAttempt._id, {
+        count: 1,
+        windowStartedAt: now,
+        updatedAt: now,
+      });
+      await cleanupStaleJoinCodeAttempts(ctx, now);
+      return;
+    }
+
+    await ctx.db.insert("joinCodeAttempts", {
+      key: args.key,
+      count: 1,
+      windowStartedAt: now,
+      updatedAt: now,
+    });
+    await cleanupStaleJoinCodeAttempts(ctx, now);
+    return;
+  }
+
+  if (existingAttempt.count >= args.limit) {
+    await ctx.db.patch(existingAttempt._id, {
+      updatedAt: now,
+    });
+    await cleanupStaleJoinCodeAttempts(ctx, now);
+    throw invalidState("Too many attempts. Try again in a minute.");
+  }
+
+  await ctx.db.patch(existingAttempt._id, {
+    count: existingAttempt.count + 1,
+    updatedAt: now,
+  });
+  await cleanupStaleJoinCodeAttempts(ctx, now);
+}
+
+async function recordJoinWriteAttempt(
+  ctx: MutationCtx,
+  args: {
+    userId?: Id<"users">;
+    normalizedJoinCode: string;
+  },
+) {
+  await recordJoinCodeAttempt(ctx, {
+    key: `code:${args.normalizedJoinCode}`,
+    limit: JOIN_CODE_VALIDATE_LIMIT,
+    windowMs: JOIN_CODE_VALIDATE_WINDOW_MS,
+  });
+
+  if (args.userId) {
+    await recordJoinCodeAttempt(ctx, {
+      key: `user:${args.userId}`,
+      limit: JOIN_CODE_JOIN_LIMIT,
+      windowMs: JOIN_CODE_JOIN_WINDOW_MS,
+    });
+  }
+}
+
 export const validateJoinCode = query({
   args: {
     joinCode: v.string(),
@@ -119,9 +212,7 @@ export const validateJoinCode = query({
 
     return {
       joinCode: normalizedJoinCode,
-      projectId: project._id,
       projectName: project.name,
-      firstPageId: pages[0]?._id ?? null,
       redirectPath: pages[0]
         ? `/projects/${project._id}/${pages[0]._id}`
         : `/projects/${project._id}`,
@@ -145,8 +236,9 @@ export const getProjectJoinCode = query({
       await requireProjectEditor(ctx, project._id, userId);
 
       return {
+        enabled: project.joinCode !== undefined,
         joinCode: project.joinCode ?? null,
-        canRegenerate: true,
+        canRegenerate: project.joinCode !== undefined,
       };
     } catch (error) {
       if (
@@ -162,7 +254,7 @@ export const getProjectJoinCode = query({
   },
 });
 
-export const ensureProjectJoinCode = mutation({
+export const enableProjectJoinCode = mutation({
   args: {
     projectId: v.id("projects"),
   },
@@ -186,8 +278,38 @@ export const ensureProjectJoinCode = mutation({
     }
 
     return {
+      enabled: true,
       joinCode,
       canRegenerate: true,
+    };
+  },
+});
+
+export const ensureProjectJoinCode = enableProjectJoinCode;
+
+export const disableProjectJoinCode = mutation({
+  args: {
+    projectId: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    const { userId } = await requireCurrentAuth(ctx);
+    const project = await ctx.db.get(args.projectId);
+
+    if (!project || project.isArchived === true) {
+      throw notFound(`Project ${args.projectId} was not found.`);
+    }
+
+    await requireProjectEditor(ctx, project._id, userId);
+
+    await ctx.db.patch(project._id, {
+      joinCode: undefined,
+      updatedAt: Date.now(),
+    });
+
+    return {
+      enabled: false,
+      joinCode: null,
+      canRegenerate: false,
     };
   },
 });
@@ -205,6 +327,13 @@ export const regenerateProjectJoinCode = mutation({
     }
 
     await requireProjectEditor(ctx, project._id, userId);
+
+    if (!project.joinCode) {
+      throw invalidState(
+        "Enable join access before regenerating the join code.",
+      );
+    }
+
     const joinCode = await generateUniqueJoinCode(ctx, project._id);
 
     await ctx.db.patch(project._id, {
@@ -213,7 +342,9 @@ export const regenerateProjectJoinCode = mutation({
     });
 
     return {
+      enabled: true,
       joinCode,
+      canRegenerate: true,
     };
   },
 });
@@ -242,6 +373,16 @@ export const createGuestMembershipFromJoin = internalMutation({
     }
 
     const normalizedJoinCode = normalizeJoinCode(args.joinCode);
+
+    if (!normalizedJoinCode) {
+      throw invalidState("Enter a valid project code.");
+    }
+
+    await recordJoinWriteAttempt(ctx, {
+      userId: args.userId,
+      normalizedJoinCode,
+    });
+
     const project = await getProjectByNormalizedJoinCode(
       ctx,
       normalizedJoinCode,
@@ -298,6 +439,11 @@ export const joinCurrentUserByCode = mutation({
     if (!normalizedJoinCode) {
       throw invalidState("Enter a valid project code.");
     }
+
+    await recordJoinWriteAttempt(ctx, {
+      userId,
+      normalizedJoinCode,
+    });
 
     const project = await getProjectByNormalizedJoinCode(
       ctx,
