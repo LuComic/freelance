@@ -84,10 +84,58 @@ export function ProjectEmailListSection({
       {open ? (
         <div className="pl-7 flex flex-col gap-2 pb-2">
           <p className="text-(--gray-page)">{currentLabel}</p>
+          <div className="flex items-center justify-start gap-2 w-full flex-wrap">
+            {members.map((member) => (
+              <div
+                key={member.userId}
+                className="pl-1.5 pr-0.5 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) flex items-center gap-1"
+              >
+                {member.name}
+                <button
+                  type="button"
+                  disabled={
+                    !canRemove || pendingRemovalUserId === member.userId
+                  }
+                  className="hover:bg-(--gray)/20 p-1 rounded-sm disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                  onClick={() => onRemove(member.userId)}
+                >
+                  <Trash size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
           {showJoinAccess ? (
             <>
+              <p className="text-(--gray-page)">
+                Enable joining via code and link
+              </p>
+              <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
+                Enabled
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  className="w-max rounded-md border px-2 py-1 border-(--accepted-border) bg-(--accepted-bg)/10 hover:bg-(--accepted-bg)/20"
+                >
+                  Enable
+                </button>
+                <button
+                  type="button"
+                  className="w-max rounded-md border px-2 py-1 border-(--gray) hover:bg-(--gray)/20"
+                >
+                  Disable
+                </button>
+              </div>
+
               <div className="flex items-center justify-start gap-2 h-auto">
-                <p className="text-(--gray-page)">Join code (click to copy):</p>
+                <p className="text-(--gray-page)">
+                  Join code (click to copy
+                  <span className="hidden @[40rem]:inline">
+                    {" "}
+                    | hover to see
+                  </span>
+                  ):
+                </p>
                 <button
                   type="button"
                   disabled={!joinCode || !canCopyJoinCode}
@@ -127,7 +175,14 @@ export function ProjectEmailListSection({
               </div>
 
               <div className="flex items-center justify-start gap-2 h-auto">
-                <p className="text-(--gray-page)">Join link (click to copy):</p>
+                <p className="text-(--gray-page)">
+                  Join link (click to copy
+                  <span className="hidden @[40rem]:inline">
+                    {" "}
+                    | hover to see
+                  </span>
+                  ):
+                </p>
                 <button
                   type="button"
                   disabled={!joinCode || !canCopyJoinCode}
@@ -167,26 +222,6 @@ export function ProjectEmailListSection({
               </div>
             </>
           ) : null}
-          <div className="flex items-center justify-start gap-2 w-full flex-wrap">
-            {members.map((member) => (
-              <div
-                key={member.userId}
-                className="pl-1.5 pr-0.5 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) flex items-center gap-1"
-              >
-                {member.name}
-                <button
-                  type="button"
-                  disabled={
-                    !canRemove || pendingRemovalUserId === member.userId
-                  }
-                  className="hover:bg-(--gray)/20 p-1 rounded-sm disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-                  onClick={() => onRemove(member.userId)}
-                >
-                  <Trash size={16} />
-                </button>
-              </div>
-            ))}
-          </div>
 
           <button
             type="button"
