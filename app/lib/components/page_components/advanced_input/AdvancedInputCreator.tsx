@@ -21,7 +21,7 @@ import {
 import {
   getAdvancedInputModeLabel,
   type AdvancedInputMode,
-} from "./advancedInputEntries";
+} from "./AdvancedInput.shared";
 import { resolveAdvancedInputColor } from "./colors";
 import { getAdvancedInputFont } from "./fonts";
 

@@ -508,7 +508,9 @@ export default function TestingEditorClient() {
 
   const livePreviewPane = (
     <EditModeSubtreeModeProvider isEditing={false} isLive={true}>
-      <div className="w-full flex flex-col gap-1">{renderedContent}</div>
+      <div className="w-full flex flex-col gap-1 @container">
+        {renderedContent}
+      </div>
     </EditModeSubtreeModeProvider>
   );
 

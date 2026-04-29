@@ -19,7 +19,7 @@ import {
   ADVANCED_INPUT_COLOR_TYPES,
   createAdvancedInputEntryId,
   type AdvancedInputColorType,
-} from "./advancedInputEntries";
+} from "./AdvancedInput.shared";
 import { resolveAdvancedInputColor } from "./colors";
 import { ADVANCED_INPUT_FONTS, getAdvancedInputFont } from "./fonts";
 
