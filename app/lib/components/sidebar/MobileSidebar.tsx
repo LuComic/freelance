@@ -145,10 +145,7 @@ export const MobileSidebar = ({
               <Settings size={20} className="mx-auto" />
             </button>
             {isSignedInRealUser ? (
-              <CreateProjectModal
-                ui="sidebar"
-                redirectWhenBlocked="/settings?section=plan"
-              />
+              <CreateProjectModal ui="sidebar" />
             ) : null}
           </div>
 

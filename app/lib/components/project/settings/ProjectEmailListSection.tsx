@@ -117,9 +117,6 @@ export function ProjectEmailListSection({
               <p className="text-(--gray-page)">
                 Enable joining via code and link
               </p>
-              <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
-                {isJoinAccessEnabled ? "Enabled" : "Disabled"}
-              </div>
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
@@ -131,7 +128,7 @@ export function ProjectEmailListSection({
                       : "border-(--gray) hover:bg-(--gray)/20"
                   }`}
                 >
-                  Enable
+                  {isJoinAccessEnabled ? "Enabled" : "Enable"}
                 </button>
                 <button
                   type="button"
@@ -143,7 +140,7 @@ export function ProjectEmailListSection({
                       : "border-(--gray) hover:bg-(--gray)/20"
                   }`}
                 >
-                  Disable
+                  {isJoinAccessEnabled ? "Disable" : "Disabled"}
                 </button>
               </div>
 

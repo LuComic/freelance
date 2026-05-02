@@ -211,7 +211,7 @@ export const PersonModal = ({
         : selectedRole;
   const inviteActionLabel =
     inviteActionMode === "upgrade"
-      ? "Upgrade to co-creator"
+      ? "Make co-creator"
       : inviteActionMode === "downgrade"
         ? "Downgrade to client"
         : "Invite";

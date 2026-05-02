@@ -3,7 +3,6 @@
 import { useSearchParams } from "next/navigation";
 import { AccountSettingsSection } from "./AccountSettingsSection";
 import { LegalSettingsSection } from "./LegalSettingsSection";
-import { PlanSettingsSection } from "./PlanSettingsSection";
 import { useAccountSettingsController } from "./useAccountSettingsController";
 import { LimitsSettingsSection } from "./LimitsSettingsSection";
 import { PreferencesSection } from "./PreferencesSettingsSection";
@@ -60,7 +59,6 @@ export function SettingsSections() {
         onDeleteAccount={handleDeleteAccount}
       />
       <PreferencesSection activeSection={section} />
-      {/* <PlanSettingsSection activeSection={section} /> */}
       <LimitsSettingsSection activeSection={section} />
       <LegalSettingsSection activeSection={section} />
     </div>

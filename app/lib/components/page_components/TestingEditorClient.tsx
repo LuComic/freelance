@@ -74,11 +74,8 @@ export default function TestingEditorClient() {
   const lastCursorRef = useRef(0);
   const content = pageDocument?.document?.editorText ?? INITIAL_TEXT;
   const allowedInsertableCommands = useMemo(
-    () =>
-      listAllowedInsertableCommands(
-        pageDocument?.canUseLimitedComponents === true,
-      ),
-    [pageDocument?.canUseLimitedComponents],
+    () => listAllowedInsertableCommands(),
+    [],
   );
 
   const lines = useMemo(() => {

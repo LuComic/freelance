@@ -28,8 +28,6 @@ import {
   type PageDocumentV1,
 } from "../../lib/pageDocument";
 import { createInitialPage, parsePageDocument } from "./content";
-import { getCurrentEntitlementsForUser } from "../billing/model";
-import { findLimitedComponentAccessViolation } from "../../lib/pageDocument/componentAccess";
 import { MAX_SHORT_TITLE_LENGTH } from "../../lib/inputLimits";
 
 function buildProjectActorSnapshot(
@@ -442,19 +440,6 @@ export const savePage = mutation({
       mergePageConfigDocument(currentDocument, args.document),
       activeClientUserIds,
     );
-    const entitlements = await getCurrentEntitlementsForUser(ctx, userId);
-    const limitedComponentViolation = findLimitedComponentAccessViolation({
-      currentDocument,
-      nextDocument,
-      planTier: entitlements.plan.tier,
-    });
-
-    if (limitedComponentViolation) {
-      throw invalidState(
-        `Upgrade to Pro to use ${limitedComponentViolation.componentName}.`,
-      );
-    }
-
     const now = Date.now();
     const contentJson = serializePageDocumentWithLimits(nextDocument);
 

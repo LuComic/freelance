@@ -37,9 +37,8 @@ export default function Page() {
         </p>
         <p className="wrap-break-word">
           3. Third-party cookies. If you choose Google sign-in, Google may set
-          cookies on Google-owned domains. If paid plans or the billing portal
-          are enabled, Stripe may set cookies on Stripe-hosted pages. Those
-          cookies are governed by the relevant third party on its own domains.
+          cookies on Google-owned domains. Those cookies are governed by Google
+          on its own domains.
         </p>
         <p className="wrap-break-word">
           4. Categories. Based on the code reviewed on {LAST_UPDATED}, the

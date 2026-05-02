@@ -39,7 +39,7 @@ export default function Page() {
 
       <p className="@[40rem]:text-xl text-lg font-medium">Login page</p>
       <p className="text-(--gray-page)">
-        In here this component you can login with either Google or Apple
+        In this component you can login with Google
       </p>
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
         <Suspense fallback={null}>

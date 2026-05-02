@@ -1,8 +1,6 @@
 "use client";
 
 import { api } from "@/convex/_generated/api";
-import type { PlanTier } from "@/lib/billing/plans";
-import { currentEntitlementsQuery } from "@/lib/convexFunctionReferences";
 import {
   createComponentInstanceId,
   createComponentToken,
@@ -125,7 +123,6 @@ export function PageDocumentProvider({
     [route],
   );
   const pageData = useQuery(api.pages.queries.getPageEditor, pageQueryArgs);
-  const entitlements = useQuery(currentEntitlementsQuery, {});
   const projects = useQuery(api.projects.queries.listCurrentUserProjects);
   const activeProjectId = activePage?.project.id ?? null;
   const activeProjectMembersArgs = useMemo(
@@ -150,9 +147,6 @@ export function PageDocumentProvider({
       ),
     [activeProjectMembers],
   );
-  const planTier = (entitlements?.plan.tier ?? null) as PlanTier | null;
-  const canUseLimitedComponents =
-    entitlements?.canUseLimitedComponents === true;
   const savePage = useMutation(api.pages.mutations.savePage);
   const savePageLiveState = useMutation(api.pages.mutations.savePageLiveState);
   const applyPageTemplateMutation = useMutation(
@@ -452,7 +446,7 @@ export function PageDocumentProvider({
         };
       }
 
-      if (!canInsertComponentCommand(command, canUseLimitedComponents)) {
+      if (!canInsertComponentCommand(command)) {
         return null;
       }
 
@@ -493,7 +487,7 @@ export function PageDocumentProvider({
         nextCursor: start + token.length,
       };
     },
-    [canUseLimitedComponents, markConfigChange, setDocument, setSaveError],
+    [markConfigChange, setDocument, setSaveError],
   );
 
   const persistDocument = useCallback(
@@ -839,8 +833,6 @@ export function PageDocumentProvider({
       hasUnsavedChanges,
       activePage,
       viewerRole,
-      planTier,
-      canUseLimitedComponents,
       document,
       setPageTitle,
       updateEditorText,
@@ -861,7 +853,6 @@ export function PageDocumentProvider({
       deleteError,
       deletePage,
       deleteStatus,
-      canUseLimitedComponents,
       commitPageTitle,
       document,
       commitComponentLiveState,
@@ -873,7 +864,6 @@ export function PageDocumentProvider({
       saveError,
       saveStatus,
       setPageTitle,
-      planTier,
       canUseActivePageFallback,
       updateComponentConfig,
       updateComponentLiveState,

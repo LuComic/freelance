@@ -21,9 +21,9 @@ export default function Page() {
           1. Scope and provider. These Terms form a binding agreement between
           you and Lukas Jääger, the individual operator of Pageboard, based in
           Estonia. They apply to your use of the website, app, authenticated
-          workspaces, guest join flows, project templates, and any related paid
-          plans or support services made available through Pageboard if those
-          are introduced later.
+          workspaces, guest join flows, project templates, and any related
+          support services made available through Pageboard if those are
+          introduced later.
         </p>
         <p className="wrap-break-word">
           2. Accounts and eligibility. You must be at least 18 years old or
@@ -42,13 +42,10 @@ export default function Page() {
           reasons.
         </p>
         <p className="wrap-break-word">
-          4. Paid plans. The codebase includes subscription and billing support
-          through Stripe. If paid plans are enabled, pricing, renewals,
-          cancellations, taxes, refunds, and plan limits will be governed by the
-          plan information shown at checkout and these Terms. Payment card
-          details are handled by Stripe, not stored in the visible application
-          code. Until paid plans are launched, any references to subscriptions
-          are informational only.
+          4. Service limits. Pageboard may apply safety limits to accounts,
+          projects, pages, content size, components, invites, messages, or
+          similar usage to prevent abuse, control storage and infrastructure
+          usage, and keep the service available for other users.
         </p>
         <p className="wrap-break-word">
           5. Your content and responsibilities. You retain ownership of the
@@ -63,25 +60,24 @@ export default function Page() {
           fraudulent, abusive, infringing, or security-harming activity. You
           must not upload malware, try to gain unauthorized access, interfere
           with service security, misuse invites, impersonate others, harvest
-          user data without authorization, or bypass access restrictions or plan
+          user data without authorization, or bypass access restrictions or
           limits.
         </p>
         <p className="wrap-break-word">
           7. Suspension and termination. We may update, change, suspend, or
           discontinue any part of the service. We may suspend or terminate
           access if we reasonably believe you violated these Terms, created a
-          security risk, failed to pay applicable fees, or where suspension is
-          required by law. You may stop using the service at any time and may
-          use any available account deletion controls subject to legal and
-          technical retention requirements.
+          security risk, abused service limits, or where suspension is required
+          by law. You may stop using the service at any time and may use any
+          available account deletion controls subject to legal and technical
+          retention requirements.
         </p>
         <p className="wrap-break-word">
           8. Intellectual property and third parties. The service itself,
           including our software, branding, design, and non-user content,
           belongs to Lukas Jääger or its licensors. The service also uses
-          third-party providers including Google for authentication and Stripe
-          for billing when enabled. Their separate terms and privacy notices may
-          also apply.
+          third-party providers including Google for authentication. Their
+          separate terms and privacy notices may also apply.
         </p>
         <p className="wrap-break-word">
           9. Disclaimer and limitation of liability. To the maximum extent
@@ -99,8 +95,7 @@ export default function Page() {
           permitted by law, we are not liable for indirect or consequential
           damages or for lost profits, revenue, goodwill, or data. Our total
           aggregate liability for claims arising out of or relating to the
-          service will not exceed the greater of the amount you paid us in the
-          12 months before the claim and EUR 100. Nothing in these Terms limits
+          service will not exceed EUR 100. Nothing in these Terms limits
           liability that cannot be limited under mandatory law.
         </p>
         <p className="wrap-break-word">

@@ -51,7 +51,7 @@ export const SimpleInputClient = ({
         />
 
         <button
-          className="w-max rounded-md py-1 px-2 bg-(--vibrant) hover:bg-(--vibrant-hover) "
+          className="w-max rounded-md py-1 px-2 bg-(--vibrant) hover:bg-(--vibrant-hover)"
           onClick={handleSubmit}
         >
           Send

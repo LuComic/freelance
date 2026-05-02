@@ -159,7 +159,7 @@ export const DesktopChat = ({
               {activeTab === "components"
                 ? "Components"
                 : activeTab === "config"
-                  ? "Config"
+                  ? "Configuration"
                   : "Messages"}
             </span>
           </div>

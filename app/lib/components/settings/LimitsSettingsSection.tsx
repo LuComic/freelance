@@ -3,11 +3,8 @@
 import { ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
-  BILLING_BETA_MODE,
-  BILLING_BETA_OWNED_PROJECT_LIMIT,
-} from "@/lib/billing/config";
-import {
   MAX_COMPONENTS_PER_PAGE,
+  MAX_OWNED_PROJECTS_PER_USER,
   MAX_PAGE_CONTENT_BYTES,
   MAX_PAGES_PER_PROJECT,
   PAGE_CONTENT_WARNING_BYTES,
@@ -47,19 +44,18 @@ export function LimitsSettingsSection({
       {open ? (
         <div className="pl-7 flex flex-col gap-2 pb-2">
           <p className="text-(--gray-page)">
-            These limits are for preventing spam, saving storage and keeping up
-            with the user base (if the project will even have that problem). If
-            you find these too limiting, contact support at
-            lukasjaager@gmail.com
+            These platform-wide limits help prevent abuse, control Convex usage
+            and storage, and keep the app usable as more people join. If you run
+            into a real project need that does not fit, contact support at
+            lukasjaager@gmail.com.
           </p>
-          {BILLING_BETA_MODE && BILLING_BETA_OWNED_PROJECT_LIMIT !== null ? (
-            <p>
-              - During beta, users are limited to{" "}
-              {BILLING_BETA_OWNED_PROJECT_LIMIT} projects.
-            </p>
-          ) : null}
-          <p>- Projects are limited to {MAX_PAGES_PER_PROJECT} pages.</p>
-          <p>- Pages are limited to {MAX_COMPONENTS_PER_PAGE} components.</p>
+          <p>
+            - Users can own up to {MAX_OWNED_PROJECTS_PER_USER} active projects.
+          </p>
+          <p>- Each project can have up to {MAX_PAGES_PER_PROJECT} pages.</p>
+          <p>
+            - Each page can have up to {MAX_COMPONENTS_PER_PAGE} components.
+          </p>
           <p>
             - Try to keep page content around {warningKilobytes} KB or smaller.
           </p>

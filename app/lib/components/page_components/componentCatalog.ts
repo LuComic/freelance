@@ -170,17 +170,12 @@ export function isInsertableCommandLimited(command: InsertableComponentCommand) 
 
 export function canInsertComponentCommand(
   command: InsertableComponentCommand,
-  canUseLimitedComponents: boolean,
 ) {
-  return canUseLimitedComponents || !isInsertableCommandLimited(command);
+  return INSERTABLE_COMPONENT_COMMANDS.some((item) => item.command === command);
 }
 
-export function listAllowedInsertableCommands(
-  canUseLimitedComponents: boolean,
-) {
-  return PAGE_COMPONENT_CATALOG.flatMap(({ commands, componentLibrary }) =>
-    canUseLimitedComponents || !componentLibrary.limited ? [...commands] : [],
-  );
+export function listAllowedInsertableCommands() {
+  return PAGE_COMPONENT_CATALOG.flatMap(({ commands }) => [...commands]);
 }
 
 export const COMPONENT_LIBRARY_ITEMS: readonly ComponentLibraryItem[] = [

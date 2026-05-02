@@ -9,7 +9,6 @@ import {
   requireProjectById,
 } from "../lib/projectRecords";
 import { parsePageDocument } from "../pages/content";
-import { getCurrentEntitlementsForUser } from "../billing/model";
 import {
   PAGE_COMPONENT_TOKEN_REGEX,
   type FeedbackItem,
@@ -645,12 +644,6 @@ export const getProjectAnalytics = query({
       const membership = await requireProjectMember(ctx, project._id, userId);
 
       if (membership.role === "client") {
-        return null;
-      }
-
-      const entitlements = await getCurrentEntitlementsForUser(ctx, userId);
-
-      if (!entitlements.canAccessAnalytics) {
         return null;
       }
 

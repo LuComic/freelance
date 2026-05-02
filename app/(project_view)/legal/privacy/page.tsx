@@ -12,8 +12,7 @@ export default function Page() {
         processes personal data when you use Pageboard, a hobby collaboration
         platform used by freelancers, clients, and co-creators to create
         projects, invite other users, join workspaces by code, collaborate on
-        page content, submit feedback, manage project activity, and, if later
-        enabled, handle paid subscriptions.
+        page content, submit feedback, and manage project activity.
       </p>
       <div className="w-full flex flex-col gap-3">
         <p className="wrap-break-word">
@@ -37,19 +36,17 @@ export default function Page() {
           logs, notifications, and searchable profile indexes; relationship and
           access data such as memberships, roles, project invites, invited email
           addresses, friend or collaborator relationships, blocked or hidden
-          states, join codes, and former display names; billing data such as
-          plan tier, Stripe customer IDs, Stripe subscription IDs, and billing
-          status when paid plans are enabled; and device or local state data
-          such as first-party interface cookies and the temporary sessionStorage
-          guest-upgrade token.
+          states, join codes, and former display names; and device or local
+          state data such as first-party interface cookies and the temporary
+          sessionStorage guest-upgrade token.
         </p>
         <p className="wrap-break-word">
           3. Purposes and legal bases. We process personal data to create
           accounts, authenticate users, let guests join projects, provide shared
           workspaces, operate projects, pages, templates, collaboration tools,
           notifications, search, and invite flows, secure the service,
-          investigate abuse, and, where enabled, manage subscriptions,
-          invoicing, and tax compliance. The main legal bases are Article
+          investigate abuse, and enforce service limits. The main legal bases
+          are Article
           6(1)(b) GDPR, contract or pre-contractual steps; Article 6(1)(c) GDPR,
           compliance with legal obligations; Article 6(1)(f) GDPR, our
           legitimate interests in operating and securing the service; and, if
@@ -61,10 +58,9 @@ export default function Page() {
           you sign in, edit your profile, create or join a project, submit
           content, feedback, or other workspace changes. We also receive data
           from Google when you use Google OAuth, from other users when they
-          invite or connect with you, from Stripe if billing is enabled, and
-          from infrastructure providers that necessarily process request
-          metadata such as IP addresses and technical logs to deliver and secure
-          the service.
+          invite or connect with you, and from infrastructure providers that
+          necessarily process request metadata such as IP addresses and
+          technical logs to deliver and secure the service.
         </p>
         <p className="wrap-break-word">
           5. Recipients and visibility. Authorized project members may see your
@@ -72,10 +68,9 @@ export default function Page() {
           invitation status, and activity snapshots where relevant to
           collaboration. We use third-party service providers including Convex
           for backend infrastructure and authentication support, Google for
-          OAuth sign-in, Stripe for billing when enabled, and any hosting or CDN
-          provider used to deploy the frontend. Add the final hosting provider
-          name here if you want to identify it explicitly: [HOSTING OR CDN
-          PROVIDER NAME].
+          OAuth sign-in, and any hosting or CDN provider used to deploy the
+          frontend. Add the final hosting provider name here if you want to
+          identify it explicitly: [HOSTING OR CDN PROVIDER NAME].
         </p>
         <p className="wrap-break-word">
           6. International transfers. Some providers may process personal data
@@ -91,10 +86,8 @@ export default function Page() {
           obligations. Workspace data, project content, invites, notifications,
           and collaboration history are generally kept until the relevant
           account, project, or content is deleted unless longer retention is
-          required for legal claims, billing, audit, or security reasons.
-          Billing and transaction records may be retained longer where required
-          by accounting, tax, or fraud-prevention rules. Cookies remain on your
-          device until expiry or deletion.
+          required for legal claims, audit, security, or abuse-prevention
+          reasons. Cookies remain on your device until expiry or deletion.
         </p>
         <p className="wrap-break-word">
           8. Security. We use role-based project permissions, authenticated

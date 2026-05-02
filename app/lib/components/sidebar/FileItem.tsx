@@ -9,8 +9,7 @@ import {
   EllipsisVertical,
 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
-import { currentEntitlementsQuery } from "@/lib/convexFunctionReferences";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -55,14 +54,11 @@ export const FileItem = ({
 }: SidebarItemProps) => {
   const router = useRouter();
   const createPage = useMutation(api.pages.mutations.createPage);
-  const entitlements = useQuery(currentEntitlementsQuery, {});
   const projectBasePath = getProjectPath(project.id);
   const [isCreatingPage, setIsCreatingPage] = useState(false);
   const isCreatePageDisabled =
     isCreatingPage || project.viewerRole === "client";
-  const canAccessAnalytics =
-    entitlements?.canAccessAnalytics === true &&
-    project.viewerRole !== "client";
+  const canViewAnalytics = project.viewerRole !== "client";
 
   return (
     <>
@@ -95,7 +91,7 @@ export const FileItem = ({
                     Settings
                   </Link>
                 </MenubarItem>
-                {canAccessAnalytics ? (
+                {canViewAnalytics ? (
                   <MenubarItem
                     asChild
                     className="hover:bg-(--darkest)! hover:text-(--light)! "

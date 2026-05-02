@@ -253,128 +253,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* <section
-        id="plans"
-        className="mx-auto w-full px-4 max-w-7xl scroll-mt-20 py-8 sm:pt-6 lg:pt-8 border-t border-(--gray)"
-      >
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <h2
-              className="text-2xl font-semibold sm:text-3xl"
-              style={{ fontFamily: '"Lexend Variable", sans-serif' }}
-            >
-              No payments in beta testing.
-            </h2>
-          </div>
-        </div>
-
-        <div className="mt-8 grid gap-4 lg:grid-cols-3">
-          <div className="relative h-full overflow-hidden rounded-lg border border-(--gray) bg-(--darkest) py-3 px-3.5">
-            <div className="relative z-10 flex h-full flex-col gap-4">
-              <div className="flex flex-1 flex-col gap-4">
-                <p className="font-medium">Free</p>
-                <p className="text-(--gray-page)">
-                  Join projects as a client or co-creator.
-                </p>
-
-                <p className="text-3xl font-semibold">
-                  $0
-                  <span className="text-base font-medium text-(--gray-page)">
-                    /mo
-                  </span>
-                </p>
-
-                <ul className="space-y-2 text-(--gray-page)">
-                  <li>Join shared projects</li>
-                  <li>Co-create in invited projects</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <div className="relative h-full overflow-hidden rounded-lg border border-(--gray) bg-(--darkest) py-3 px-3.5">
-            <div className="relative z-10 flex h-full flex-col gap-4">
-              <div className="flex flex-1 flex-col gap-4">
-                <p className="font-medium">Starter</p>
-                <p className="text-(--gray-page)">
-                  For getting started with your own work.
-                </p>
-
-                <p className="text-3xl font-semibold">
-                  $5
-                  <span className="text-base font-medium text-(--gray-page)">
-                    /mo
-                  </span>
-                </p>
-
-                <ul className="space-y-2 text-(--gray-page)">
-                  <li>Create up to 3 projects</li>
-                  <li>Core components included</li>
-                  <li>Client sharing and feedback</li>
-                </ul>
-
-                <p className="font-medium">Best place to start</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="relative h-full overflow-hidden rounded-lg border border-(--gray) bg-(--darkest) py-3 px-3.5">
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
-            >
-              <svg
-                viewBox="0 0 900 600"
-                className="absolute -right-50 -top-20 h-120 w-120 blur-3xl opacity-40"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-              >
-                <g transform="translate(420.69996617713275 327.69466148331287) scale(0.82 1.35)">
-                  <path
-                    d="M88.4 -150.2C122.3 -115.7 163.1 -104.4 190.9 -77.3C218.7 -50.1 233.5 -7.2 232.3 36.7C231.1 80.6 213.8 125.4 183.8 158.2C153.7 190.9 111 211.6 70.8 208.4C30.6 205.3 -6.9 178.5 -49 166.4C-91.1 154.3 -137.8 157.1 -158.7 135.9C-179.7 114.7 -175 69.6 -167 32.6C-159 -4.5 -147.7 -33.4 -143.6 -75.2C-139.4 -117 -142.4 -171.6 -119.7 -211.3C-97 -250.9 -48.5 -275.4 -10.6 -258.9C27.2 -242.3 54.4 -184.7 88.4 -150.2"
-                    fill="#0061ff"
-                  />
-                </g>
-              </svg>
-            </div>
-            <div className="relative z-10 flex h-full flex-col gap-4">
-              <div className="flex flex-1 flex-col gap-4">
-                <p className="font-medium">Pro Unlimited</p>
-                <p className="text-(--gray-page)">
-                  For active freelancers and small teams shipping often.
-                </p>
-
-                <p className="text-3xl font-semibold">
-                  $15
-                  <span className="text-base font-medium text-(--gray-page)">
-                    /mo
-                  </span>
-                </p>
-
-                <ul className="space-y-2 text-(--gray-page)">
-                  <li>Unlimited projects</li>
-                  <li>All components included</li>
-                  <li>Early access to upcoming features</li>
-                </ul>
-
-                <p className="font-medium">Best value for regular use</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <p className="mt-6 text-(--gray-page)">
-          Corporations and teams can get custom pricing, onboarding, and rollout
-          support.
-          <a
-            href="#contact"
-            className="ml-2 underline decoration-(--vibrant) underline-offset-4 hover:text-(--gray)"
-          >
-            Contact us
-          </a>
-        </p>
-      </section> */}
-
       <section
         id="create-account"
         className="mx-auto w-full px-4 max-w-7xl scroll-mt-20 pt-8 pb-14 border-t border-(--gray) bg-(--gray)/10"
@@ -385,7 +263,7 @@ export default function Home() {
               className="text-2xl font-semibold sm:text-3xl"
               style={{ fontFamily: '"Lexend Variable", sans-serif' }}
             >
-              Start with one client page.
+              Completely free.
             </p>
             <p className="mt-3 max-w-2xl text-(--gray-page)">
               Create your account and build a clearer way to share work, collect

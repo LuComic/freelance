@@ -1,9 +1,8 @@
 "use client";
 
 import { api } from "@/convex/_generated/api";
-import { currentEntitlementsQuery } from "@/lib/convexFunctionReferences";
 import { ChevronRight, Plus, Search, Trash } from "lucide-react";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getProjectPagePath } from "./paths";
@@ -13,12 +12,10 @@ import { MAX_DESCRIPTION_LENGTH, MAX_NAME_LENGTH } from "@/lib/inputLimits";
 
 type CreateProjectModalProps = {
   ui?: "sidebar" | "projects";
-  redirectWhenBlocked?: string;
 };
 
 export const CreateProjectModal = ({
   ui = "sidebar",
-  redirectWhenBlocked,
 }: CreateProjectModalProps) => {
   const router = useRouter();
   const {
@@ -27,7 +24,6 @@ export const CreateProjectModal = ({
     openTemplateSearch,
   } = useSearchBar();
   const createProject = useMutation(api.projects.mutations.createProject);
-  const entitlements = useQuery(currentEntitlementsQuery, {});
   const [open, setOpen] = useState(false);
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
@@ -42,9 +38,6 @@ export const CreateProjectModal = ({
   const [coCreators, setCoCreators] = useState<SearchPerson[]>([]);
   const selectedProjectTemplate =
     selectedTemplate?.templateType === "project" ? selectedTemplate : null;
-  const canCreateOwnedProjects = entitlements?.canCreateOwnedProjects === true;
-  const createProjectMessage =
-    entitlements?.createProjectMessage ?? "Loading plan access...";
 
   const getPersonLabel = (person: SearchPerson) => person.name;
 
@@ -102,8 +95,8 @@ export const CreateProjectModal = ({
   }, [isSearchOpen, open]);
 
   const submit = async () => {
-    if (!projectName.trim() || isSubmitting || !canCreateOwnedProjects) {
-      setError(createProjectMessage);
+    if (!projectName.trim() || isSubmitting) {
+      setError("Project name cannot be empty.");
       return;
     }
 
@@ -151,16 +144,7 @@ export const CreateProjectModal = ({
 
   const openButtonProps = {
     type: "button" as const,
-    disabled: !canCreateOwnedProjects && !redirectWhenBlocked,
-    title: !canCreateOwnedProjects ? createProjectMessage : undefined,
     onClick: () => {
-      if (!canCreateOwnedProjects) {
-        if (redirectWhenBlocked) {
-          router.push(redirectWhenBlocked);
-        }
-        return;
-      }
-
       setOpen(true);
     },
   };

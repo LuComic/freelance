@@ -1,6 +1,8 @@
-import type { Doc } from "../_generated/dataModel";
+import type { Doc, Id } from "../_generated/dataModel";
+import type { QueryCtx, MutationCtx } from "../_generated/server";
 import { invalidState } from "./errors";
 import {
+  MAX_OWNED_PROJECTS_PER_USER,
   MAX_COMPONENTS_PER_PAGE,
   MAX_PAGE_CONTENT_BYTES,
   MAX_PAGES_PER_PROJECT,
@@ -10,6 +12,25 @@ import type { PageDocumentV1 } from "../../lib/pageDocument";
 
 function toKilobytes(byteLength: number) {
   return Math.ceil(byteLength / 1024);
+}
+
+export async function assertUserCanCreateOwnedProject(
+  ctx: QueryCtx | MutationCtx,
+  userId: Id<"users">,
+) {
+  const projects = await ctx.db
+    .query("projects")
+    .withIndex("by_owner", (query) => query.eq("ownerId", userId))
+    .collect();
+  const activeOwnedProjectCount = projects.filter(
+    (project) => project.isArchived !== true,
+  ).length;
+
+  if (activeOwnedProjectCount >= MAX_OWNED_PROJECTS_PER_USER) {
+    throw invalidState(
+      `You can create up to ${MAX_OWNED_PROJECTS_PER_USER} active projects.`,
+    );
+  }
 }
 
 export function assertProjectCanAddPages(

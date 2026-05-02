@@ -10,9 +10,6 @@
 
 import type * as auth from "../auth.js";
 import type * as betaAccess_queries from "../betaAccess/queries.js";
-import type * as billing_actions from "../billing/actions.js";
-import type * as billing_model from "../billing/model.js";
-import type * as billing_queries from "../billing/queries.js";
 import type * as chat_model from "../chat/model.js";
 import type * as chat_mutations from "../chat/mutations.js";
 import type * as chat_queries from "../chat/queries.js";
@@ -67,9 +64,6 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   "betaAccess/queries": typeof betaAccess_queries;
-  "billing/actions": typeof billing_actions;
-  "billing/model": typeof billing_model;
-  "billing/queries": typeof billing_queries;
   "chat/model": typeof chat_model;
   "chat/mutations": typeof chat_mutations;
   "chat/queries": typeof chat_queries;
@@ -142,6 +136,4 @@ export declare const internal: FilterApi<
   FunctionReference<any, "internal">
 >;
 
-export declare const components: {
-  stripe: import("@convex-dev/stripe/_generated/component.js").ComponentApi<"stripe">;
-};
+export declare const components: {};

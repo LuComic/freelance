@@ -154,7 +154,7 @@ export const MobileChat = ({ projectId }: MobileChatProps) => {
               {activeTab === "components"
                 ? "Components"
                 : activeTab === "config"
-                  ? "Config"
+                  ? "Configuration"
                   : "Messages"}
             </span>
           </div>

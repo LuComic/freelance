@@ -14,7 +14,10 @@ import {
   requireProjectEditor,
   requireProjectMember,
 } from "../lib/permissions";
-import { serializePageDocumentWithLimits } from "../lib/pageLimits";
+import {
+  assertUserCanCreateOwnedProject,
+  serializePageDocumentWithLimits,
+} from "../lib/pageLimits";
 import { upsertProjectInviteForUser } from "./invites";
 import { projectInviteRoleValidator } from "../lib/validators";
 import { createInitialPageConfig } from "../pages/content";
@@ -24,7 +27,6 @@ import {
 } from "../templates/content";
 import { requireReadableTemplate } from "../templates/model";
 import type { ProjectTemplateBlueprint } from "../../lib/templateBlueprint";
-import { getCurrentEntitlementsForUser } from "../billing/model";
 import { MAX_DESCRIPTION_LENGTH, MAX_NAME_LENGTH } from "../../lib/inputLimits";
 
 export const createProject = mutation({
@@ -49,14 +51,7 @@ export const createProject = mutation({
   handler: async (ctx, args) => {
     const { userId, user } = await requireCurrentAuth(ctx);
     assertNonAnonymousUser(user, "Guest accounts can't create projects.");
-    const entitlements = await getCurrentEntitlementsForUser(ctx, userId);
-
-    if (!entitlements.canCreateOwnedProjects) {
-      throw invalidState(
-        entitlements.createProjectMessage ??
-          "Upgrade your plan to create more projects.",
-      );
-    }
+    await assertUserCanCreateOwnedProject(ctx, userId);
 
     const now = Date.now();
     const trimmedName = args.name.trim();

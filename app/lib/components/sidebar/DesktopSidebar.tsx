@@ -205,10 +205,7 @@ export const DesktopSidebar = ({
               <Search size={20} className="mx-auto" />
             </button>
             {isSignedInRealUser ? (
-              <CreateProjectModal
-                ui="sidebar"
-                redirectWhenBlocked="/settings?section=plan"
-              />
+              <CreateProjectModal ui="sidebar" />
             ) : null}
           </div>
           {userProfile ? (
@@ -299,10 +296,7 @@ export const DesktopSidebar = ({
               <Search size={20} className="mx-auto" />
             </button>
             {isSignedInRealUser ? (
-              <CreateProjectModal
-                ui="sidebar"
-                redirectWhenBlocked="/settings?section=plan"
-              />
+              <CreateProjectModal ui="sidebar" />
             ) : null}
           </div>
           <div className="flex flex-col gap-2 items-center justify-center mt-auto w-full">

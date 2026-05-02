@@ -6,6 +6,7 @@ export const BETA_ALLOWLIST_EMAILS = [
   "veiko@jaager.net",
   "henri.haugas.hh@gmail.com",
   "robinjogi07@gmail.com",
+  "autistlikkartul@gmail.com",
 ];
 
 const normalizedAllowlist = new Set(
