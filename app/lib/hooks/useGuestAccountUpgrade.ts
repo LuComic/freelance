@@ -36,7 +36,7 @@ export function useGuestAccountUpgrade() {
       });
       storeGuestUpgradeToken(result.token);
       await signIn("google", {
-        redirectTo: "/projects?betaUpgradeAttempt=google",
+        redirectTo: "/projects",
       });
     } catch (error) {
       setUpgradeError(

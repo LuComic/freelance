@@ -17,20 +17,14 @@ export default function Home() {
             <p className="mt-3 max-w-2xl text-base leading-7 text-(--gray-page) sm:text-xl sm:leading-8">
               A client-facing workspace for freelancers and small teams.
               <br />
-              Build project pages, collect feedback and inputs, track progress,
-              and keep communication in one clear place.
-              <br />
-              <em>
-                The site is right now in early beta. Only select people can sign
-                up.
-              </em>
+              Projects, feedback, progress, and more - all in one clear place.
             </p>
 
             <div className="mt-6 flex w-full max-w-md flex-col gap-3 sm:flex-row sm:justify-center">
               <CreateAccButton />
               <Link
                 href="/projects"
-                className="inline-flex h-10 items-center justify-center rounded-md bg-white/90 px-1.5 py-0.5 font-medium text-(--dim) hover:bg-white"
+                className="inline-flex h-10 items-center justify-center rounded-md bg-white/90 md:w-max md:px-1.5 font-medium text-(--dim) hover:bg-white w-full"
               >
                 Join a Project
               </Link>
@@ -63,7 +57,7 @@ export default function Home() {
         >
           What is Pageboard?
         </h2>
-        <p className="mt-4 max-w-3xl text-(--gray-page)">
+        <p className="mt-4 max-w-3xl text-(--gray-page) text-lg">
           Pageboard is a client-freelancer communication tool. Instead of
           splitting a project across chat, docs, forms, and boards, you create
           shared pages with components, inputs, feedback, and progress that stay
@@ -77,22 +71,24 @@ export default function Home() {
       >
         <div className="grid gap-x-10 gap-y-8 md:grid-cols-3">
           <div>
-            <p className="font-medium">Pages built for client work</p>
-            <p className="mt-3 text-(--gray-page)">
+            <p className="font-medium text-xl">Pages built for client work</p>
+            <p className="mt-3 text-(--gray-page) text-lg">
               Create project pages for briefs, updates, approvals, questions,
               and deliverables instead of sending scattered messages.
             </p>
           </div>
           <div>
-            <p className="font-medium">Structured feedback and inputs</p>
-            <p className="mt-3 text-(--gray-page)">
+            <p className="font-medium text-xl">
+              Structured feedback and inputs
+            </p>
+            <p className="mt-3 text-(--gray-page) text-lg">
               Use feedback blocks, selects, radios, idea boards, and text inputs
               directly next to the work so replies stay organised.
             </p>
           </div>
           <div>
-            <p className="font-medium">Progress and analytics</p>
-            <p className="mt-3 text-(--gray-page)">
+            <p className="font-medium text-xl">Progress and analytics</p>
+            <p className="mt-3 text-(--gray-page) text-lg">
               Keep progress visible and review the latest live changes and
               current client selections without digging through conversations.
             </p>
@@ -112,7 +108,7 @@ export default function Home() {
             >
               Why use it over chat, docs, or generic tools?
             </h2>
-            <p className="mt-4 max-w-2xl text-(--gray-page)">
+            <p className="mt-4 max-w-2xl text-(--gray-page) text-lg">
               Most freelance projects end up spread across email, DMs, notes,
               forms, and task boards. Pageboard keeps the client-facing side of
               the project in one place, so it is faster to understand, easier to
@@ -122,7 +118,7 @@ export default function Home() {
           <div className="flex flex-col gap-4 text-(--gray-page)">
             <div>
               <p className="font-medium text-(--light)">What makes it useful</p>
-              <p className="mt-2">
+              <p className="mt-2 text-lg">
                 One link for the client instead of a stack of tools.
               </p>
             </div>
@@ -130,7 +126,7 @@ export default function Home() {
               <p className="font-medium text-(--light)">
                 Better than back-and-forth
               </p>
-              <p className="mt-2">
+              <p className="mt-2 text-lg">
                 Feedback, progress, and decisions stay attached to the exact
                 page or component they belong to.
               </p>
@@ -139,7 +135,7 @@ export default function Home() {
               <p className="font-medium text-(--light)">
                 Reusable for new work
               </p>
-              <p className="mt-2">
+              <p className="mt-2 text-lg">
                 Turn a setup into a repeatable structure for the next client or
                 project type.
               </p>
@@ -163,11 +159,11 @@ export default function Home() {
             <Link
               href="/tutorial"
               target="_blank"
-              className="text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover) cursor-pointer"
+              className="text-(--vibrant) mt-2 inline-block underline underline-offset-4 hover:text-(--vibrant-hover) cursor-pointer"
             >
               More in-depth tutorial with videos
             </Link>
-            <p className="mt-4 max-w-3xl text-(--gray-page)">
+            <p className="mt-4 max-w-3xl text-(--gray-page) text-lg">
               This example shows a client page being built with the Select
               component: first you create the page structure, then you tune each
               component&apos;s settings, and finally the client sees the live
@@ -181,8 +177,8 @@ export default function Home() {
             <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[0.9fr_1.1fr] lg:gap-6">
               <div>
                 <p className="font-medium text-(--gray-page)">Step 1</p>
-                <p className="mt-2 text-lg font-medium">Set up the page</p>
-                <p className="mt-3 text-(--gray-page)">
+                <p className="mt-2 text-xl font-medium">Set up the page</p>
+                <p className="mt-3 text-(--gray-page) text-lg">
                   Start by creating a new page and adding the first sections.
                   This defines what the client needs to see, respond to, or
                   review.
@@ -205,10 +201,10 @@ export default function Home() {
             <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[0.9fr_1.1fr] lg:gap-6">
               <div>
                 <p className="font-medium text-(--gray-page)">Step 2</p>
-                <p className="mt-2 text-lg font-medium">
+                <p className="mt-2 text-xl font-medium">
                   Adjust component settings
                 </p>
-                <p className="mt-3 text-(--gray-page)">
+                <p className="mt-3 text-(--gray-page) text-lg">
                   Edit each block and tweak the Select component options,
                   labels, and behaviour. This is where the page becomes specific
                   to the project and the input you want to collect.
@@ -231,8 +227,8 @@ export default function Home() {
             <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[0.9fr_1.1fr] lg:gap-6">
               <div>
                 <p className="font-medium text-(--gray-page)">Step 3</p>
-                <p className="mt-2 text-lg font-medium">Share the live page</p>
-                <p className="mt-3 text-(--gray-page)">
+                <p className="mt-2 text-xl font-medium">Share the live page</p>
+                <p className="mt-3 text-(--gray-page) text-lg">
                   Live view shows exactly what the client sees. They get one
                   clear page for reviewing progress and responding without extra
                   back-and-forth.
@@ -265,7 +261,7 @@ export default function Home() {
             >
               Completely free.
             </p>
-            <p className="mt-3 max-w-2xl text-(--gray-page)">
+            <p className="mt-3 max-w-2xl text-(--gray-page) text-lg">
               Create your account and build a clearer way to share work, collect
               feedback, and keep projects moving.
             </p>
@@ -307,22 +303,42 @@ export default function Home() {
           </svg>
         </div>
 
-        <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:px-8">
+        <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 md:flex-row md:justify-between md:px-8">
           <div>
-            <p className="text-sm text-(--gray-page)">Built by</p>
-            <a
-              className="mt-2 text-lg font-medium underline underline-offset-4"
-              target="_blank"
-              href="https://jaager.dev/"
-            >
-              Lukas Jääger
-            </a>{" "}
+            <p className="text-(--gray-page)">Built by</p>
+            <p className="text-lg font-medium">Lukas Jääger</p>
           </div>
 
-          <div className="lg:text-right">
-            <p className="text-sm text-(--gray-page)">Project repo</p>
+          <div className="flex items-center gap-2 md:mx-auto">
             <a
-              className="mt-2 text-lg font-medium underline underline-offset-4"
+              href="https://jaager.dev/"
+              className="underline underline-offset-4"
+              target="_blank"
+            >
+              Portfolio
+            </a>
+            <span>-</span>
+            <a
+              href="https://x.com/LuComic3"
+              className="underline underline-offset-4"
+              target="_blank"
+            >
+              X
+            </a>
+            <span>-</span>
+            <a
+              href="https://www.instagram.com/ai.nurakk/"
+              className="underline underline-offset-4"
+              target="_blank"
+            >
+              Instagram
+            </a>
+          </div>
+
+          <div className="md:text-right">
+            <p className="text-(--gray-page)">Project repo</p>
+            <a
+              className="text-lg font-medium underline underline-offset-4"
               target="_blank"
               href="https://github.com/LuComic/freelance"
             >

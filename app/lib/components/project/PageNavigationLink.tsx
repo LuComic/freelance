@@ -1,18 +1,32 @@
 "use client";
 
-import type { ComponentProps } from "react";
+import type {
+  FocusEventHandler,
+  MouseEventHandler,
+  ReactNode,
+  TouchEventHandler,
+} from "react";
 import Link from "next/link";
 import { getProjectPagePath } from "./paths";
 import { usePageQueryPreloader } from "./usePageQueryPreloader";
 
-type PageNavigationLinkProps = Omit<ComponentProps<typeof Link>, "href"> & {
+type PageNavigationLinkProps = {
   projectId: string;
   pageId: string;
+  name: string;
+  icon?: ReactNode;
+  className?: string;
+  onMouseEnter?: MouseEventHandler<HTMLAnchorElement>;
+  onFocus?: FocusEventHandler<HTMLAnchorElement>;
+  onTouchStart?: TouchEventHandler<HTMLAnchorElement>;
+  onClick?: MouseEventHandler<HTMLAnchorElement>;
 };
 
 export function PageNavigationLink({
   projectId,
   pageId,
+  name,
+  icon,
   onMouseEnter,
   onFocus,
   onTouchStart,
@@ -44,6 +58,9 @@ export function PageNavigationLink({
       onClick={(event) => {
         onClick?.(event);
       }}
-    />
+    >
+      {icon}
+      {name}
+    </Link>
   );
 }

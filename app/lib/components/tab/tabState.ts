@@ -7,7 +7,6 @@ import {
 
 export type StoredTabKind =
   | "projectsIndex"
-  | "feedback"
   | "notifications"
   | "accountSettings"
   | "legalOverview"
@@ -78,13 +77,6 @@ const STATIC_TABS = {
     title: "Notifications",
     contextLabel: "Workspace",
   },
-  feedback: {
-    tabId: "feedback",
-    kind: "feedback",
-    path: "/feedback",
-    title: "Feedback and ideas",
-    contextLabel: "Workspace",
-  },
   accountSettings: {
     tabId: "account-settings",
     kind: "accountSettings",
@@ -136,7 +128,6 @@ export const EMPTY_TABS_STATE: StoredTabsState = {
 function isStoredTabKind(value: unknown): value is StoredTabKind {
   return (
     value === "projectsIndex" ||
-    value === "feedback" ||
     value === "notifications" ||
     value === "accountSettings" ||
     value === "legalOverview" ||
@@ -196,8 +187,6 @@ function normalizeStoredTab(tab: StoredTab): StoredTab | null {
   switch (tab.kind) {
     case "projectsIndex":
       return STATIC_TABS.projectsIndex;
-    case "feedback":
-      return STATIC_TABS.feedback;
     case "notifications":
       return STATIC_TABS.notifications;
     case "accountSettings":
@@ -272,8 +261,6 @@ function getStaticTabFromPath(pathname: string) {
   switch (pathname) {
     case "/projects":
       return STATIC_TABS.projectsIndex;
-    case "/feedback":
-      return STATIC_TABS.feedback;
     case "/notifications":
       return STATIC_TABS.notifications;
     case "/settings":

@@ -150,18 +150,19 @@ export const FileItem = ({
               key={page.id}
               projectId={project.id}
               pageId={page.id}
+              name={
+                page.title.length > 20
+                  ? page.title.slice(0, 20) + "..."
+                  : page.title
+              }
+              icon={<File size={18} />}
               className={`pl-8 flex w-full items-center justify-start gap-2 rounded-lg p-1 text-base ${
                 page.id === currentPageId
                   ? "bg-(--darkest-hover) text-(--light)"
                   : "hover:bg-(--darkest-hover)"
               }`}
               onClick={closeSidebar}
-            >
-              <File size={18} />
-              {page.title.length > 20
-                ? page.title.slice(0, 20) + "..."
-                : page.title}
-            </PageNavigationLink>
+            />
           ))}
         </>
       )}

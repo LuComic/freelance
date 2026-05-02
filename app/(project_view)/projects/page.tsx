@@ -51,25 +51,7 @@ export default function Page() {
   const isAnonymous = profile?.isAnonymous === true;
   const isSignedInRealUser =
     profile !== undefined && profile !== null && profile.isAnonymous !== true;
-  const didReturnFromGuestUpgrade =
-    searchParams.get("betaUpgradeAttempt") === "google";
   const joinCodeFromLink = searchParams.get("joinCode");
-
-  useEffect(() => {
-    if (
-      !didReturnFromGuestUpgrade ||
-      isAuthLoading ||
-      profile === undefined ||
-      !profile?.isAnonymous
-    ) {
-      return;
-    }
-
-    void Promise.resolve().then(() => {
-      setUpgradeError("This Google account is not approved for beta yet.");
-    });
-    router.replace("/projects");
-  }, [didReturnFromGuestUpgrade, isAuthLoading, profile, router]);
 
   useEffect(() => {
     if (!profile || profile.isAnonymous) {

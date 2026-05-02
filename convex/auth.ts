@@ -9,7 +9,6 @@ import { api, internal } from "./_generated/api";
 import { MAX_NAME_LENGTH } from "../lib/inputLimits";
 import type { Doc } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
-import { isBetaAllowlistedEmail } from "./lib/betaAccess";
 import { buildUserSearchText } from "./users/model";
 
 type AuthProfile = {
@@ -264,9 +263,6 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
           );
         }
 
-        if (!isBetaAllowlistedEmail(userData.email)) {
-          throw new Error("This Google account is not approved for beta yet.");
-        }
       }
 
       return await ctx.db.insert("users", userData);

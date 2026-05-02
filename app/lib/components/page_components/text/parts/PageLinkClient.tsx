@@ -33,9 +33,8 @@ export const PageLinkClient = ({
     <PageNavigationLink
       projectId={projectId}
       pageId={targetPage.id}
+      name={displayText}
       className="w-max text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover) page-link-selected"
-    >
-      {displayText}
-    </PageNavigationLink>
+    />
   );
 };

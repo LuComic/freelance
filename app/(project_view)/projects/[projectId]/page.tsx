@@ -34,7 +34,7 @@ export default function ProjectPage() {
       <p className="text-(--gray-page)">
         This is the project overview. Open a page to either edit or view it.
       </p>
-      <div className="rounded-xl border border-dashed border-(--gray) bg-(--gray)/10 p-4 flex flex-col gap-2">
+      <div className="flex flex-col gap-2">
         {data === undefined ? (
           <p className="text-(--gray-page)">Loading pages...</p>
         ) : data === null ? (
@@ -43,14 +43,18 @@ export default function ProjectPage() {
           <>
             <p className="font-medium">Pages</p>
             {data.pages.map((page) => (
-              <PageNavigationLink
+              <div
+                className="flex gap-2 items-center justify-start"
                 key={page.id}
-                projectId={data.project.id}
-                pageId={page.id}
-                className="text-(--gray-page) hover:text-(--vibrant)"
               >
-                {page.title}
-              </PageNavigationLink>
+                -
+                <PageNavigationLink
+                  projectId={data.project.id}
+                  pageId={page.id}
+                  name={page.title}
+                  className="text-(--gray-page) hover:text-(--vibrant)"
+                />
+              </div>
             ))}
           </>
         ) : (

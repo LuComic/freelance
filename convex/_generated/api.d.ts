@@ -9,18 +9,14 @@
  */
 
 import type * as auth from "../auth.js";
-import type * as betaAccess_queries from "../betaAccess/queries.js";
 import type * as chat_model from "../chat/model.js";
 import type * as chat_mutations from "../chat/mutations.js";
 import type * as chat_queries from "../chat/queries.js";
 import type * as connections_model from "../connections/model.js";
 import type * as connections_mutations from "../connections/mutations.js";
 import type * as connections_queries from "../connections/queries.js";
-import type * as feedback_mutations from "../feedback/mutations.js";
-import type * as feedback_queries from "../feedback/queries.js";
 import type * as http from "../http.js";
 import type * as lib_auth from "../lib/auth.js";
-import type * as lib_betaAccess from "../lib/betaAccess.js";
 import type * as lib_errors from "../lib/errors.js";
 import type * as lib_guests from "../lib/guests.js";
 import type * as lib_inputValidation from "../lib/inputValidation.js";
@@ -63,18 +59,14 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
-  "betaAccess/queries": typeof betaAccess_queries;
   "chat/model": typeof chat_model;
   "chat/mutations": typeof chat_mutations;
   "chat/queries": typeof chat_queries;
   "connections/model": typeof connections_model;
   "connections/mutations": typeof connections_mutations;
   "connections/queries": typeof connections_queries;
-  "feedback/mutations": typeof feedback_mutations;
-  "feedback/queries": typeof feedback_queries;
   http: typeof http;
   "lib/auth": typeof lib_auth;
-  "lib/betaAccess": typeof lib_betaAccess;
   "lib/errors": typeof lib_errors;
   "lib/guests": typeof lib_guests;
   "lib/inputValidation": typeof lib_inputValidation;

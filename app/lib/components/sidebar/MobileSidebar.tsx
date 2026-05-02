@@ -89,7 +89,6 @@ export const MobileSidebar = ({
           <div className="flex items-center justify-between w-full">
             <Link href="/projects" className="text-(--gray) text-xl inline">
               Pageboard
-              <span className="text-(--light) ml-1">Beta</span>
             </Link>
             <button
               onClick={() => {
@@ -148,19 +147,6 @@ export const MobileSidebar = ({
               <CreateProjectModal ui="sidebar" />
             ) : null}
           </div>
-
-          {userProfile ? (
-            <Link
-              href="/feedback"
-              onClick={() => {
-                acknowledgeConnectionsRequest();
-                setSidebarOpen(false);
-              }}
-              className="px-1.5 py-0.5 rounded-md border border-(--vibrant) bg-(--vibrant)/20 hover:bg-(--vibrant-hover)/20 text-sm"
-            >
-              Feedback and ideas
-            </Link>
-          ) : null}
 
           {resolvedActiveTab === "files" ? (
             <Files closeSidebar={() => setSidebarOpen(false)} />

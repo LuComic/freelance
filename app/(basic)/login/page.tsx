@@ -2,31 +2,7 @@
 
 import { LoginPageButtons } from "@/app/lib/components/landing/login/LoginPageButtons";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
-
-function AuthDeniedMessage() {
-  const searchParams = useSearchParams();
-  const didReturnFromGoogle = searchParams.get("betaAuthAttempt") === "google";
-
-  useEffect(() => {
-    if (!didReturnFromGoogle) {
-      return;
-    }
-
-    window.history.replaceState(null, "", "/login");
-  }, [didReturnFromGoogle]);
-
-  if (!didReturnFromGoogle) {
-    return null;
-  }
-
-  return (
-    <p className="rounded-md border border-(--declined-border) bg-(--declined-border)/10 px-3 py-2">
-      This Google account is not approved for beta yet.
-    </p>
-  );
-}
+import { useState } from "react";
 
 export default function Page() {
   const [agree, setAgree] = useState(false);
@@ -42,9 +18,6 @@ export default function Page() {
         In this component you can login with Google
       </p>
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
-        <Suspense fallback={null}>
-          <AuthDeniedMessage />
-        </Suspense>
         <button
           type="button"
           className={`flex w-full items-start gap-2 border px-2 py-1.5 text-left @[40rem]:w-1/2 ${
@@ -92,7 +65,7 @@ export default function Page() {
         <LoginPageButtons
           type={"google"}
           disabled={!agree}
-          redirectTo="/login?betaAuthAttempt=google"
+          redirectTo="/projects"
         />
         {/* <LoginPageButtons type={"apple"} /> */}
       </div>

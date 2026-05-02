@@ -291,17 +291,6 @@ const schema = defineSchema({
     .index("by_key", ["key"])
     .index("by_updated", ["updatedAt"]),
 
-  betaFeedbackIdeas: defineTable({
-    body: v.string(),
-    tags: v.array(v.string()),
-    authorUserId: v.id("users"),
-    authorNameSnapshot: v.string(),
-    voterUserIds: v.array(v.id("users")),
-    createdAt: v.number(),
-    updatedAt: v.number(),
-  })
-    .index("by_created_at", ["createdAt"])
-    .index("by_author", ["authorUserId"]),
 });
 
 export default schema;
