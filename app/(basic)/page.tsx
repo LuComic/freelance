@@ -24,7 +24,7 @@ export default function Home() {
               <CreateAccButton />
               <Link
                 href="/projects"
-                className="inline-flex h-10 items-center justify-center rounded-md bg-white/90 md:w-max md:px-1.5 font-medium text-(--dim) hover:bg-white w-full"
+                className="inline-flex h-9 items-center justify-center rounded-md bg-white/90 md:w-max md:px-1.5 font-medium text-(--dim) hover:bg-white w-full"
               >
                 Join a Project
               </Link>

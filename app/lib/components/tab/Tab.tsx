@@ -299,8 +299,13 @@ export const Tab = ({ initialTabsState }: TabProps) => {
               {canScrollLeft ? (
                 <button
                   type="button"
-                  className="flex h-9 w-8 shrink-0 items-center justify-center border-r border-(--gray) text-(--gray-page) hover:bg-(--darkest) hover:text-(--light)"
-                  onClick={() => scrollTabs("left")}
+                  className="relative z-10 flex h-9 w-8 shrink-0 items-center justify-center border-r border-(--gray) text-(--gray-page) hover:bg-(--darkest) hover:text-(--light)"
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    scrollTabs("left");
+                  }}
                   aria-label="Scroll tabs left"
                 >
                   <ChevronLeft size={18} />
@@ -329,8 +334,13 @@ export const Tab = ({ initialTabsState }: TabProps) => {
               {canScrollRight ? (
                 <button
                   type="button"
-                  className="flex h-9 w-8 shrink-0 items-center justify-center border-l border-(--gray) text-(--gray-page) hover:bg-(--darkest) hover:text-(--light)"
-                  onClick={() => scrollTabs("right")}
+                  className="relative z-10 flex h-9 w-8 shrink-0 items-center justify-center border-l border-(--gray) text-(--gray-page) hover:bg-(--darkest) hover:text-(--light)"
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    scrollTabs("right");
+                  }}
                   aria-label="Scroll tabs right"
                 >
                   <ChevronRight size={18} />
