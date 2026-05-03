@@ -54,7 +54,7 @@ export const FeedbackCreator = ({
     if (config.tags.length >= MAX_OPTIONS_PER_FIELD) return;
     onChangeConfig((currentConfig) => ({
       ...currentConfig,
-      tags: [tagInput.trim(), ...currentConfig.tags],
+      tags: [tagInput, ...currentConfig.tags],
     }));
     setTagInput("");
   };

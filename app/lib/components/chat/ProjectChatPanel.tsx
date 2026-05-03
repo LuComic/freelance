@@ -223,7 +223,7 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
                   {message.authorName}
                 </span>
                 {message.authorRole ? (
-                  <span className="border opacity-80 px-0.5 rounded-sm text-xs">
+                  <span className="opacity-80 text-xs">
                     {ROLE_LABELS[message.authorRole]}
                   </span>
                 ) : null}

@@ -31,7 +31,7 @@ export const TutorialCreator = () => {
             preload="metadata"
             className="w-full max-w-4xl rounded-md border border-(--gray) bg-(--darkest)"
           >
-            <source src="/tutorial/creator-pov.mp4" type="video/mp4" />
+            <source src="/tutorial/tutorial-video.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         </div>

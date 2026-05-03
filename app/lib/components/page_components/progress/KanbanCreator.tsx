@@ -52,7 +52,7 @@ export const KanbanCreator = ({
       items: [
         {
           id: highestId + 1,
-          feature: taskInput.trim(),
+          feature: taskInput,
           status: newTaskStatus,
         },
         ...currentLiveState.items,

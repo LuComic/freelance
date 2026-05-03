@@ -108,9 +108,9 @@ export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
   };
 
   const handleAddOption = (field: FormFieldConfig) => {
-    const nextLabel = optionInputs[field.id]?.trim() ?? "";
+    const nextLabel = optionInputs[field.id] ?? "";
 
-    if (!nextLabel) {
+    if (!nextLabel.trim()) {
       return;
     }
     if (field.options.length >= MAX_OPTIONS_PER_FIELD) {

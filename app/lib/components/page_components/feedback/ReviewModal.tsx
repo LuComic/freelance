@@ -70,7 +70,7 @@ export const ReviewModal = ({
     <>
       {review && (
         <div
-          className="fixed px-2 inset-0 z-30 flex items-center justify-center bg-black/60"
+          className="fixed px-2 inset-0 z-30 flex items-center justify-center bg-black/40 backdrop-blur-sm"
           onClick={() => {
             closeReview();
             setReviewInput("");
@@ -81,8 +81,9 @@ export const ReviewModal = ({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-start gap-4">
-              <p className="md:text-3xl text-xl font-medium capitalize">
-                {action} Client&apos;s idea
+              <p className="md:text-3xl text-xl font-medium">
+                <span className="capitalize">{action} </span>
+                client&apos;s idea
               </p>
               {feature.tags.length > 0 && (
                 <span className="px-2 py-0.5 border rounded-md border-(--gray-page) text-(--gray-page)">
@@ -90,7 +91,7 @@ export const ReviewModal = ({
                 </span>
               )}
             </div>
-            <p className="text-(--gray-page)">{feature.feature}</p>
+            <p className="text-(--gray-page) mb-2">{feature.feature}</p>
             <p className="md:text-xl text-lg font-medium">
               Description for {action === "accept" ? "accepting" : "declining"}
             </p>
@@ -106,7 +107,7 @@ export const ReviewModal = ({
                 adjustTextareaHeight();
               }}
             ></textarea>
-            <div className="w-full flex items-center gap-1 mt-4">
+            <div className="w-full flex items-center gap-1">
               <button
                 className="gap-1 flex items-center justify-center px-2 py-1 rounded-sm  w-full border border-(--gray)  hover:bg-(--gray)/20"
                 onClick={closeReview}

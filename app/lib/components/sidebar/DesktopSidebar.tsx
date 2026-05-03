@@ -203,9 +203,7 @@ export const DesktopSidebar = ({
             >
               <Search size={20} className="mx-auto" />
             </button>
-            {isSignedInRealUser ? (
-              <CreateProjectModal ui="sidebar" />
-            ) : null}
+            {isSignedInRealUser ? <CreateProjectModal ui="sidebar" /> : null}
           </div>
           {resolvedActiveTab === "files" ? <Files /> : null}
           {isSignedInRealUser && resolvedActiveTab === "friends" ? (
@@ -286,9 +284,7 @@ export const DesktopSidebar = ({
             >
               <Search size={20} className="mx-auto" />
             </button>
-            {isSignedInRealUser ? (
-              <CreateProjectModal ui="sidebar" />
-            ) : null}
+            {isSignedInRealUser ? <CreateProjectModal ui="sidebar" /> : null}
           </div>
           <div className="flex flex-col gap-2 items-center justify-center mt-auto w-full">
             <SidebarUserInfo profile={userProfile} compact={true} />

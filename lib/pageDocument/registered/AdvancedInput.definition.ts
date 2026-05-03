@@ -61,9 +61,9 @@ function normalizeColors(value: unknown): AdvancedInputColorEntry[] {
         return null;
       }
 
-      const name = truncateInput(color.name.trim(), MAX_OPTION_LABEL_LENGTH);
+      const name = truncateInput(color.name, MAX_OPTION_LABEL_LENGTH);
 
-      if (!name) {
+      if (!name.trim()) {
         return null;
       }
 
@@ -130,11 +130,11 @@ export const AdvancedInputDefinition = defineRegisteredPageComponentDefinition({
     return {
       title:
         typeof value.title === "string"
-          ? truncateInput(value.title.trim(), MAX_SHORT_TITLE_LENGTH)
+          ? truncateInput(value.title, MAX_SHORT_TITLE_LENGTH)
           : fallback.title,
       description:
         typeof value.description === "string"
-          ? truncateInput(value.description.trim(), MAX_DESCRIPTION_LENGTH)
+          ? truncateInput(value.description, MAX_DESCRIPTION_LENGTH)
           : fallback.description,
       mode: isAdvancedInputMode(value.mode) ? value.mode : fallback.mode,
     };
@@ -153,7 +153,7 @@ export const AdvancedInputDefinition = defineRegisteredPageComponentDefinition({
     name: "Advanced Input",
     description:
       "Collect specific client details like colors and fonts. Commands: /advancedinput, /advanced",
-    previewSrc: "/component-previews/simple-input.svg",
+    previewSrc: "/component-previews/advanced-input.svg",
     tag: "input",
     limited: true,
   },

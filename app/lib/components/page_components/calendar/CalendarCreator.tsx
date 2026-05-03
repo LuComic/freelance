@@ -60,7 +60,7 @@ export const CalendarCreator = ({
 
     const newEvent: CalendarEvent = {
       id: crypto.randomUUID(),
-      title: titleInput.trim(),
+      title: titleInput,
       color: selectedColor,
       ...nextRange,
     };

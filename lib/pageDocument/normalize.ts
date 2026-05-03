@@ -60,7 +60,7 @@ function normalizeOptions(value: unknown, fallback: PageOption[]) {
           : index + 1;
       const label =
         typeof item.label === "string" && item.label.trim()
-          ? truncateInput(item.label.trim(), MAX_OPTION_LABEL_LENGTH)
+          ? truncateInput(item.label, MAX_OPTION_LABEL_LENGTH)
           : null;
 
       if (!label) {
@@ -85,9 +85,9 @@ function normalizeFeedbackItems(value: unknown) {
         return null;
       }
 
-      const feature = truncateInput(item.feature.trim(), MAX_IDEA_LENGTH);
+      const feature = truncateInput(item.feature, MAX_IDEA_LENGTH);
 
-      if (!feature) {
+      if (!feature.trim()) {
         return null;
       }
 
@@ -103,10 +103,10 @@ function normalizeFeedbackItems(value: unknown) {
             .slice(0, MAX_OPTIONS_PER_FIELD)
             .map((tag) =>
               typeof tag === "string"
-                ? truncateInput(tag.trim(), MAX_TAG_LENGTH)
+                ? truncateInput(tag, MAX_TAG_LENGTH)
                 : "",
             )
-            .filter((tag): tag is string => tag.length > 0)
+            .filter((tag): tag is string => tag.trim().length > 0)
         : [];
 
       const result: FeedbackItem = {
@@ -115,7 +115,7 @@ function normalizeFeedbackItems(value: unknown) {
         tags,
         ...(typeof item.reason === "string"
           ? {
-              reason: truncateInput(item.reason.trim(), MAX_DESCRIPTION_LENGTH),
+              reason: truncateInput(item.reason, MAX_DESCRIPTION_LENGTH),
             }
           : {}),
         ...(item.dismissed === true ? { dismissed: true } : {}),
@@ -137,12 +137,9 @@ function normalizeKanbanItems(value: unknown) {
         return null;
       }
 
-      const feature = truncateInput(
-        item.feature.trim(),
-        MAX_KANBAN_TASK_LENGTH,
-      );
+      const feature = truncateInput(item.feature, MAX_KANBAN_TASK_LENGTH);
 
-      if (!feature) {
+      if (!feature.trim()) {
         return null;
       }
 
@@ -208,16 +205,13 @@ function normalizeCalendarEvents(value: unknown) {
           typeof item.id === "string" && item.id.trim().length > 0
             ? item.id
             : crypto.randomUUID(),
-        title: truncateInput(
-          item.title.trim(),
-          MAX_CALENDAR_EVENT_TITLE_LENGTH,
-        ),
+        title: truncateInput(item.title, MAX_CALENDAR_EVENT_TITLE_LENGTH),
         color,
         startAt,
         endAt,
       };
 
-      if (!result.title) {
+      if (!result.title.trim()) {
         return null;
       }
 
@@ -330,12 +324,12 @@ function normalizeComponentInstance(
         config: {
           title:
             typeof value.config.title === "string"
-              ? truncateInput(value.config.title.trim(), MAX_SHORT_TITLE_LENGTH)
+              ? truncateInput(value.config.title, MAX_SHORT_TITLE_LENGTH)
               : fallback.config.title,
           description:
             typeof value.config.description === "string"
               ? truncateInput(
-                  value.config.description.trim(),
+                  value.config.description,
                   MAX_DESCRIPTION_LENGTH,
                 )
               : fallback.config.description,
@@ -362,12 +356,12 @@ function normalizeComponentInstance(
         config: {
           title:
             typeof value.config.title === "string"
-              ? truncateInput(value.config.title.trim(), MAX_SHORT_TITLE_LENGTH)
+              ? truncateInput(value.config.title, MAX_SHORT_TITLE_LENGTH)
               : fallback.config.title,
           description:
             typeof value.config.description === "string"
               ? truncateInput(
-                  value.config.description.trim(),
+                  value.config.description,
                   MAX_DESCRIPTION_LENGTH,
                 )
               : fallback.config.description,
@@ -397,10 +391,10 @@ function normalizeComponentInstance(
                 .slice(0, MAX_OPTIONS_PER_FIELD)
                 .map((tag) =>
                   typeof tag === "string"
-                    ? truncateInput(tag.trim(), MAX_TAG_LENGTH)
+                    ? truncateInput(tag, MAX_TAG_LENGTH)
                     : "",
                 )
-                .filter((tag): tag is string => tag.length > 0)
+                .filter((tag): tag is string => tag.trim().length > 0)
             : fallback.config.tags,
         },
       };
@@ -443,7 +437,7 @@ function normalizeComponentInstance(
           text:
             typeof value.config.text === "string"
               ? truncateInput(
-                  value.config.text.trim(),
+                  value.config.text,
                   type === "Subheader"
                     ? MAX_DESCRIPTION_LENGTH
                     : MAX_SHORT_TITLE_LENGTH,
@@ -471,7 +465,7 @@ function normalizeComponentInstance(
         config: {
           text:
             typeof value.config.text === "string"
-              ? truncateInput(value.config.text.trim(), MAX_SHORT_TITLE_LENGTH)
+              ? truncateInput(value.config.text, MAX_SHORT_TITLE_LENGTH)
               : fallback.config.text,
           targetPageId:
             typeof value.config.targetPageId === "string" ||

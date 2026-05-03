@@ -1,5 +1,6 @@
 import "../globals.css";
 import { LandingHeader } from "@/app/lib/components/landing/LandingHeader";
+import { Footer } from "../lib/components/landing/Footer";
 
 export default function DashboardLayout({
   children,
@@ -17,6 +18,7 @@ export default function DashboardLayout({
       <main className="min-h-dvh w-full overflow-x-hidden bg-(--quite-dark) text-(--light)">
         <LandingHeader />
         {children}
+        <Footer />
       </main>
     </div>
   );

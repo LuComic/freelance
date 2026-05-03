@@ -47,7 +47,7 @@ export const SelectCreator = ({
     onChangeConfig((currentConfig) => ({
       ...currentConfig,
       options: [
-        { id: nextId, label: optionInput.trim() },
+        { id: nextId, label: optionInput },
         ...currentConfig.options,
       ],
     }));

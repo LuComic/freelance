@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CreateAccButton } from "../lib/components/landing/CreateAccButton";
-import { Footer } from "../lib/components/landing/Footer";
 
 export default function Home() {
   return (
@@ -35,10 +34,10 @@ export default function Home() {
           <div className="mt-10 px-2 pb-2 sm:mt-12 sm:px-3 sm:pb-3">
             <div className="overflow-hidden rounded-lg border border-(--gray)">
               <Image
-                src="/landing/landing_image.webp"
+                src="/landing/hero.png"
                 alt="Project workspace preview"
-                width={3024}
-                height={1830}
+                width={3002}
+                height={1822}
                 preload
                 sizes="(min-width: 1280px) 1192px, (min-width: 1024px) calc(100vw - 88px), (min-width: 640px) calc(100vw - 72px), calc(100vw - 48px)"
                 className="h-auto w-full"
@@ -188,10 +187,10 @@ export default function Home() {
 
               <div>
                 <Image
-                  src="/landing/step1.webp"
+                  src="/landing/step1.png"
                   alt="Creating the base page layout for a Select component example"
-                  width={1600}
-                  height={900}
+                  width={778}
+                  height={426}
                   className="h-auto w-full"
                 />
               </div>
@@ -214,10 +213,10 @@ export default function Home() {
 
               <div>
                 <Image
-                  src="/landing/step2.webp"
+                  src="/landing/step2.jpg"
                   alt="Tweaking Select component settings while building a client page"
-                  width={1600}
-                  height={900}
+                  width={1148}
+                  height={1120}
                   className="h-auto w-full"
                 />
               </div>
@@ -238,10 +237,10 @@ export default function Home() {
 
               <div>
                 <Image
-                  src="/landing/step3.webp"
+                  src="/landing/step3.png"
                   alt="Live client-facing page view for the Select component example"
-                  width={1600}
-                  height={900}
+                  width={1474}
+                  height={982}
                   className="h-auto w-full"
                 />
               </div>

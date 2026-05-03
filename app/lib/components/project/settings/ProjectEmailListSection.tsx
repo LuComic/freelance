@@ -92,26 +92,28 @@ export function ProjectEmailListSection({
       {open ? (
         <div className="pl-7 flex flex-col gap-2 pb-2">
           <p className="text-(--gray-page)">{currentLabel}</p>
-          <div className="flex items-center justify-start gap-2 w-full flex-wrap">
-            {members.map((member) => (
-              <div
-                key={member.userId}
-                className="pl-1.5 pr-0.5 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) flex items-center gap-1"
-              >
-                {member.name}
-                <button
-                  type="button"
-                  disabled={
-                    !canRemove || pendingRemovalUserId === member.userId
-                  }
-                  className="hover:bg-(--gray)/20 p-1 rounded-sm disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-                  onClick={() => onRemove(member.userId)}
+          {members.length > 0 ? (
+            <div className="flex items-center justify-start gap-2 w-full flex-wrap">
+              {members.map((member) => (
+                <div
+                  key={member.userId}
+                  className="pl-1.5 pr-0.5 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) flex items-center gap-1"
                 >
-                  <Trash size={16} />
-                </button>
-              </div>
-            ))}
-          </div>
+                  {member.name}
+                  <button
+                    type="button"
+                    disabled={
+                      !canRemove || pendingRemovalUserId === member.userId
+                    }
+                    className="hover:bg-(--gray)/20 p-1 rounded-sm disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                    onClick={() => onRemove(member.userId)}
+                  >
+                    <Trash size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : null}
           {showJoinAccess ? (
             <>
               <p className="text-(--gray-page)">

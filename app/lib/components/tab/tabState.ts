@@ -13,6 +13,7 @@ export type StoredTabKind =
   | "legalTerms"
   | "legalPrivacy"
   | "legalCookies"
+  | "tutorial"
   | "projectRoot"
   | "projectSettings"
   | "projectAnalytics"
@@ -112,6 +113,13 @@ const STATIC_TABS = {
     title: "Cookies",
     contextLabel: "Legal",
   },
+  tutorial: {
+    tabId: "tutorial",
+    kind: "tutorial",
+    path: "/tutorial",
+    title: "Tutorial",
+    contextLabel: "Workspace",
+  },
 } satisfies Record<
   Exclude<
     StoredTabKind,
@@ -134,6 +142,7 @@ function isStoredTabKind(value: unknown): value is StoredTabKind {
     value === "legalTerms" ||
     value === "legalPrivacy" ||
     value === "legalCookies" ||
+    value === "tutorial" ||
     value === "projectRoot" ||
     value === "projectSettings" ||
     value === "projectAnalytics" ||
@@ -199,6 +208,8 @@ function normalizeStoredTab(tab: StoredTab): StoredTab | null {
       return STATIC_TABS.legalPrivacy;
     case "legalCookies":
       return STATIC_TABS.legalCookies;
+    case "tutorial":
+      return STATIC_TABS.tutorial;
     case "projectRoot":
       return tab.projectId
         ? {
@@ -273,6 +284,8 @@ function getStaticTabFromPath(pathname: string) {
       return STATIC_TABS.legalPrivacy;
     case "/legal/cookies":
       return STATIC_TABS.legalCookies;
+    case "/tutorial":
+      return STATIC_TABS.tutorial;
     default:
       return null;
   }

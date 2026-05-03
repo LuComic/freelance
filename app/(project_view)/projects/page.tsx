@@ -270,17 +270,17 @@ export default function Page() {
   };
 
   return (
-    <div className="h-max md:max-w-2/3 mx-auto w-full flex flex-col gap-4 items-start justify-center">
+    <div className="h-max @[50rem]:max-w-2/3 mx-auto w-full flex flex-col gap-4 items-start justify-center">
       <div className="w-full border-b border-(--gray) pb-2 flex flex-col gap-2">
-        <p className="md:text-3xl text-xl font-medium">Welcome!</p>
+        <p className="@[50rem]:text-3xl text-xl font-medium">Welcome!</p>
       </div>
 
-      <div className="flex lg:flex-row flex-col items-start lg:items-center justify-center gap-2">
+      <div className="flex @[55rem]:flex-row flex-col items-start @[55rem]:items-center justify-center gap-2">
         {isSignedInRealUser ? <CreateProjectModal ui="projects" /> : null}
         {isSignedInRealUser ? (
-          <span className="text-(--gray-page) lg:inline hidden">or</span>
+          <span className="text-(--gray-page) @[55rem]:inline hidden">or</span>
         ) : null}
-        <span className="font-medium lg:mt-0 mt-4">Join via code</span>
+        <span className="font-medium @[55rem]:mt-0 mt-4">Join via code</span>
         <form onSubmit={(event) => void handleJoinSubmit(event)}>
           <input
             type="text"

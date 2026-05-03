@@ -6,24 +6,24 @@ import { useState } from "react";
 
 const screenshots = [
   {
-    src: "/tutorial/analytics-tutorial.png",
+    src: "/tutorial/analytics-view.png",
     alt: "Analytics view tutorial screenshot",
     title: "Analytics",
   },
   {
-    src: "/tutorial/ideas.png",
-    alt: "Ideas board tutorial screenshot",
-    title: "Page for collecting different ideas from clients and creators",
+    src: "/tutorial/input-view.png",
+    alt: "Input page tutorial screenshot",
+    title: "Page for collecting different ideas",
   },
   {
-    src: "/tutorial/pref-live.png",
-    alt: "Preference page tutorial screenshot",
-    title: "From just a Select and a Radio to a Dropdown and client input page",
-  },
-  {
-    src: "/tutorial/progress-edit.png",
-    alt: "Progress edit tutorial screenshot",
+    src: "/tutorial/edit-view.png",
+    alt: "Edit view tutorial screenshot",
     title: "Editing/creating a page with Dropdowns, Kanban and Calendar",
+  },
+  {
+    src: "/tutorial/chat-view.png",
+    alt: "Chat view tutorial screenshot",
+    title: "Each project even has a chat for communication",
   },
 ] as const;
 
@@ -50,16 +50,18 @@ export const TutorialInDepth = () => {
             Analytics page of the same project - freelancer can quickly and
             easily see the changes the client made.
             <br />
-            Other images show a more advanced version of the same project,
-            client&apos;s view and the workflow.
+            Other images show a more advanced pages, client&apos;s view and the
+            workflow.
           </p>
           <div className="flex flex-col gap-2">
             {screenshots.map((screenshot) => (
               <div key={screenshot.src} className="flex flex-col gap-1">
                 <p className="font-medium">{screenshot.title}</p>
-                <img
+                <Image
                   src={screenshot.src}
                   alt={screenshot.alt}
+                  width={3248}
+                  height={2120}
                   className="w-full rounded-md"
                 />
               </div>

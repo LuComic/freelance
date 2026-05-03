@@ -196,9 +196,9 @@ export const FeedbackClient = ({
           </>
         )}
       </div>
-      <div className="grid grid-cols-2 @[40rem]:flex items-center justify-between @[40rem]:justify-start w-full gap-2">
+      <div className="grid grid-cols-2 @[45rem]:flex items-center justify-between @[45rem]:justify-start w-full gap-2">
         <button
-          className="flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border text-(--gray-page) border-(--gray-page) hover:bg-(--gray)/20"
+          className="flex items-center justify-center gap-1 w-full @[45rem]:w-max rounded-md px-2 py-1 border text-(--gray-page) border-(--gray-page) hover:bg-(--gray)/20"
           onClick={() => {
             const nextLayout = layout === "grid" ? "list" : "grid";
             setCookie(FEEDBACK_CLIENT_LAYOUT_COOKIE, nextLayout);
@@ -219,28 +219,28 @@ export const FeedbackClient = ({
         </button>
 
         <button
-          className={`flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border ${filter !== "accepted" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
+          className={`flex items-center justify-center gap-1 w-full @[45rem]:w-max rounded-md px-2 py-1 border ${filter !== "accepted" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
           onClick={() => changeFilter("accepted")}
         >
           <ThumbsUp size={16} />
           Accepted ({acceptedCount})
         </button>
         <button
-          className={`flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border ${filter !== "declined" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
+          className={`flex items-center justify-center gap-1 w-full @[45rem]:w-max rounded-md px-2 py-1 border ${filter !== "declined" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
           onClick={() => changeFilter("declined")}
         >
           <ThumbsDown size={16} />
           Declined ({declinedCount})
         </button>
         <button
-          className={`flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border ${filter !== "pending" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
+          className={`flex items-center justify-center gap-1 w-full @[45rem]:w-max rounded-md px-2 py-1 border ${filter !== "pending" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
           onClick={() => changeFilter("pending")}
         >
           <Hourglass size={16} />
           Pending ({pendingCount})
         </button>
         <button
-          className={`flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border ${filter !== "dismissed" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
+          className={`flex items-center justify-center gap-1 w-full @[45rem]:w-max rounded-md px-2 py-1 border ${filter !== "dismissed" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
           onClick={() => changeFilter("dismissed")}
         >
           <X size={16} />

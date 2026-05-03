@@ -43,9 +43,9 @@ export const IdeaBoradCreator = ({
   const [clientEditing, setClientEditing] = useState(false);
 
   const handleNewIdea = () => {
-    const nextIdea = addingInput.trim();
+    const nextIdea = addingInput;
 
-    if (nextIdea === "") return;
+    if (nextIdea.trim() === "") return;
 
     onChangeLiveState((currentState) => ({
       ...currentState,

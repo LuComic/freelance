@@ -53,9 +53,9 @@ function normalizeFormFieldOptions(
         return null;
       }
 
-      const label = truncateInput(option.label.trim(), MAX_OPTION_LABEL_LENGTH);
+      const label = truncateInput(option.label, MAX_OPTION_LABEL_LENGTH);
 
-      if (!label) {
+      if (!label.trim()) {
         return null;
       }
 
@@ -90,15 +90,15 @@ function normalizeFormFields(value: unknown, fallback: FormFieldConfig[]) {
         type: field.type,
         label:
           typeof field.label === "string"
-            ? truncateInput(field.label.trim(), MAX_SHORT_TITLE_LENGTH)
+            ? truncateInput(field.label, MAX_SHORT_TITLE_LENGTH)
             : "",
         description:
           typeof field.description === "string"
-            ? truncateInput(field.description.trim(), MAX_DESCRIPTION_LENGTH)
+            ? truncateInput(field.description, MAX_DESCRIPTION_LENGTH)
             : "",
         placeholder:
           typeof field.placeholder === "string"
-            ? truncateInput(field.placeholder.trim(), MAX_SHORT_TITLE_LENGTH)
+            ? truncateInput(field.placeholder, MAX_SHORT_TITLE_LENGTH)
             : "",
         required: field.required === true,
         options: normalizeFormFieldOptions(field.options, field.type),

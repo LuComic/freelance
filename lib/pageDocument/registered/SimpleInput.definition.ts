@@ -32,11 +32,11 @@ export const SimpleInputDefinition = defineRegisteredPageComponentDefinition({
           }
 
           const nextValue = truncateInput(
-            input.value.trim(),
+            input.value,
             MAX_FORM_TEXT_ANSWER_LENGTH,
           );
 
-          if (nextValue.length === 0) {
+          if (nextValue.trim().length === 0) {
             return null;
           }
 

@@ -58,9 +58,9 @@ export const IdeaBoardDefinition = defineRegisteredPageComponentDefinition({
             return null;
           }
 
-          const nextIdea = truncateInput(idea.idea.trim(), MAX_IDEA_LENGTH);
+          const nextIdea = truncateInput(idea.idea, MAX_IDEA_LENGTH);
 
-          if (nextIdea.length === 0) {
+          if (nextIdea.trim().length === 0) {
             return null;
           }
 
