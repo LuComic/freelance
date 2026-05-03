@@ -39,9 +39,6 @@ export function LegalSettingsSection({
       {open ? (
         <div className="pl-7 flex flex-col gap-2 pb-2">
           <p className="text-(--gray-page)">Cookies</p>
-          <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
-            {cookiesAccepted ? "Accepted" : "Not accepted"}
-          </div>
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
@@ -52,7 +49,7 @@ export function LegalSettingsSection({
               }`}
               onClick={() => setCookiesAccepted(true)}
             >
-              Accept
+              {cookiesAccepted ? "Accepted" : "Accept"}
             </button>
             <button
               type="button"
@@ -63,7 +60,7 @@ export function LegalSettingsSection({
               }`}
               onClick={() => setCookiesAccepted(false)}
             >
-              Deny
+              {cookiesAccepted ? "Deny" : "Denied"}
             </button>
             <Link
               href="/legal/cookies"
@@ -74,9 +71,6 @@ export function LegalSettingsSection({
           </div>
 
           <p className="text-(--gray-page)">Terms of Service</p>
-          <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
-            {termsAccepted ? "Accepted" : "Not accepted"}
-          </div>
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
@@ -87,7 +81,7 @@ export function LegalSettingsSection({
               }`}
               onClick={() => setTermsAccepted(true)}
             >
-              Accept
+              {termsAccepted ? "Accepted" : "Accept"}
             </button>
             <button
               type="button"
@@ -98,7 +92,7 @@ export function LegalSettingsSection({
               }`}
               onClick={() => setTermsAccepted(false)}
             >
-              Deny
+              {termsAccepted ? "Deny" : "Denied"}
             </button>
             <Link
               href="/legal/terms"
@@ -109,9 +103,6 @@ export function LegalSettingsSection({
           </div>
 
           <p className="text-(--gray-page)">Privacy Policy</p>
-          <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
-            {privacyAccepted ? "Accepted" : "Not accepted"}
-          </div>
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
@@ -122,7 +113,7 @@ export function LegalSettingsSection({
               }`}
               onClick={() => setPrivacyAccepted(true)}
             >
-              Accept
+              {privacyAccepted ? "Accepted" : "Accept"}
             </button>
             <button
               type="button"
@@ -133,7 +124,7 @@ export function LegalSettingsSection({
               }`}
               onClick={() => setPrivacyAccepted(false)}
             >
-              Deny
+              {privacyAccepted ? "Deny" : "Denied"}
             </button>
             <Link
               href="/legal/privacy"

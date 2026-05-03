@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Coffee } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   getCookie,
@@ -58,9 +58,6 @@ export function PreferencesSection({ activeSection }: PreferencesSectionProps) {
       {open ? (
         <div className="pl-7 flex flex-col gap-2 pb-2">
           <p className="text-(--gray-page)">Suggestions on ctrl/cmd press</p>
-          <div className="w-full rounded-md border px-2 py-1 border-(--gray) wrap-break-word">
-            {showSuggestions ? "Enabled" : "Disabled"}
-          </div>
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
@@ -71,7 +68,7 @@ export function PreferencesSection({ activeSection }: PreferencesSectionProps) {
               }`}
               onClick={() => setShowSuggestions(true)}
             >
-              Show suggestions
+              {showSuggestions ? "Showing" : "Show"}
             </button>
             <button
               type="button"
@@ -82,9 +79,28 @@ export function PreferencesSection({ activeSection }: PreferencesSectionProps) {
               }`}
               onClick={() => setShowSuggestions(false)}
             >
-              Don&apos;t show suggestions
+              {showSuggestions ? "Don't show" : "Not showing"}
             </button>
           </div>
+          <p className="font-semibold mt-4">
+            <span className="text-(--vibrant)">*</span>
+            Support me and the project!
+            <span className="text-(--vibrant)">*</span>
+          </p>
+          <p>
+            The project is completely free and open source, so your support is
+            much appreciated! Your tips help me continue building useful, cool
+            things.
+            <br />
+            <a
+              href="https://ko-fi.com/ainurakk"
+              className="underline decoration-(--vibrant) underline-offset-4 mt-2 flex items-center justify-start gap-2"
+              target="_blank"
+            >
+              <Coffee />
+              My Ko-fi page
+            </a>
+          </p>
         </div>
       ) : null}
     </div>

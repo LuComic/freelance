@@ -29,6 +29,7 @@ import {
   SIDEBAR_MAX_WIDTH,
   SIDEBAR_MIN_WIDTH,
 } from "../lib/components/project/desktopPanelSizing";
+import { Footer } from "../lib/components/landing/Footer";
 
 export const metadata: Metadata = {
   title: "Pageboard",

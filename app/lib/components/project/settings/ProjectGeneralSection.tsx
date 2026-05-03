@@ -59,11 +59,7 @@ export function ProjectGeneralSection({
 
       {open ? (
         <div className="pl-7 flex flex-col gap-2 pb-2">
-          <div className="w-max font-medium">
-            {isLoading ? "Loading..." : currentProjectName || "Not set"}
-          </div>
-
-          <p className="text-(--gray-page)">Rename project</p>
+          <p className="text-(--gray-page)">Project name</p>
           <input
             type="text"
             placeholder="Enter a new project name..."
@@ -89,9 +85,6 @@ export function ProjectGeneralSection({
           {renameError ? (
             <p className="text-sm text-(--declined-border)">{renameError}</p>
           ) : null}
-          <div className="w-max font-medium">
-            {isLoading ? "Loading..." : currentProjectDescription || "Not set"}
-          </div>
 
           <p className="text-(--gray-page)">Change the description</p>
           <textarea

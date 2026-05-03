@@ -102,12 +102,6 @@ export function AccountSettingsSection({
           ) : null}
           {!isAnonymous ? (
             <>
-              <div className="w-full font-medium wrap-break-word">
-                {isProfileLoading
-                  ? "Loading..."
-                  : currentName || "Name not set"}
-              </div>
-
               <p className="text-(--gray-page)">Change username</p>
               <input
                 type="text"
@@ -131,10 +125,6 @@ export function AccountSettingsSection({
               >
                 {isSavingName ? "Saving..." : "Save"}
               </button>
-
-              <div className="w-full font-medium wrap-break-word">
-                {isProfileLoading ? "Loading..." : currentBio || "Bio not set"}
-              </div>
 
               <p className="text-(--gray-page)">Change bio</p>
               <input
@@ -160,10 +150,10 @@ export function AccountSettingsSection({
                 {isSavingBio ? "Saving..." : "Save"}
               </button>
 
-              <div className="w-full font-medium wrap-break-word">
+              <div className="w-full wrap-break-word">
                 {isProfileLoading
                   ? "Loading..."
-                  : currentEmail || "Email not set"}
+                  : "Gmail account - " + currentEmail || "Email not set"}
               </div>
               <p className="text-(--gray-page)">Delete account</p>
               <button

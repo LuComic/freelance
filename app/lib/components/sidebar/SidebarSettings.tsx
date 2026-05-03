@@ -16,7 +16,7 @@ export const SidebarSettings = ({ setSidebarOpen }: SidebarSettingsProps) => {
       />
       <SettingsItem
         title="Preferences"
-        items={["Suggestions"]}
+        items={["Suggestions", "Support the project"]}
         setSidebarOpen={setSidebarOpen}
       />
       <SettingsItem
