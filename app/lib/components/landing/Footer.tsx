@@ -26,7 +26,7 @@ export const Footer = () => {
           <p className="text-lg font-medium">Lukas Jääger</p>
         </div>
 
-        <div className="flex items-center gap-2 md:mx-auto">
+        <div className="grid grid-cols-2 sm:flex items-center gap-2 md:mx-auto">
           <a
             href="https://jaager.dev/"
             className="underline underline-offset-4"
@@ -34,7 +34,7 @@ export const Footer = () => {
           >
             Portfolio
           </a>
-          <span>-</span>
+          <span className="hidden sm:inline">-</span>
           <a
             href="https://x.com/LuComic3"
             className="underline underline-offset-4"
@@ -42,7 +42,7 @@ export const Footer = () => {
           >
             X
           </a>
-          <span>-</span>
+          <span className="hidden sm:inline">-</span>
           <a
             href="https://www.instagram.com/ai.nurakk/"
             className="underline underline-offset-4"
@@ -50,7 +50,15 @@ export const Footer = () => {
           >
             Instagram
           </a>
-          <span>-</span>
+          <span className="hidden sm:inline">-</span>
+          <a
+            href="https://www.linkedin.com/in/lukas-jääger-6a0747307/"
+            className="underline underline-offset-4"
+            target="_blank"
+          >
+            Linkedin
+          </a>
+          <span className="hidden sm:inline">-</span>
           <a
             href="https://ko-fi.com/ainurakk"
             className="underline underline-offset-4"

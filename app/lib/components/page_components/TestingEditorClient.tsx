@@ -493,7 +493,7 @@ export default function TestingEditorClient() {
             style={{
               top: ghostCompletion.top,
               left: ghostCompletion.left,
-              transform: "translateY(-4.8px)",
+              transform: "translateY(-5.1px)",
             }}
           >
             {ghostCompletion.suffix}

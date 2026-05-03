@@ -117,13 +117,15 @@ export default function Home() {
           </div>
           <div className="flex flex-col gap-4 text-(--gray-page)">
             <div>
-              <p className="font-medium text-(--light)">What makes it useful</p>
+              <p className="font-medium text-(--light) text-lg">
+                What makes it useful
+              </p>
               <p className="mt-2 text-lg">
                 One link for the client instead of a stack of tools.
               </p>
             </div>
             <div>
-              <p className="font-medium text-(--light)">
+              <p className="font-medium text-(--light) text-lg">
                 Better than back-and-forth
               </p>
               <p className="mt-2 text-lg">
@@ -132,7 +134,7 @@ export default function Home() {
               </p>
             </div>
             <div>
-              <p className="font-medium text-(--light)">
+              <p className="font-medium text-(--light) text-lg">
                 Reusable for new work
               </p>
               <p className="mt-2 text-lg">

@@ -287,7 +287,6 @@ export const Tab = ({ initialTabsState }: TabProps) => {
   }, [resolvedTabs.length, updateScrollButtons]);
 
   // Check if its desktop. Avoid using hidden for optimization
-
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   return (
