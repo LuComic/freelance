@@ -5,11 +5,11 @@ import { useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
 
 const NAV_LINKS = [
-  { label: "About", href: "#about" },
-  { label: "Features", href: "#features" },
-  { label: "Why us?", href: "#why" },
-  { label: "How?", href: "#how" },
-  { label: "Contact", href: "#contact" },
+  { label: "About", href: "/#about" },
+  { label: "Features", href: "/#features" },
+  { label: "Why us?", href: "/#why" },
+  { label: "How?", href: "/#how" },
+  { label: "Contact", href: "/#contact" },
   { label: "Components", href: "/components" },
 ];
 

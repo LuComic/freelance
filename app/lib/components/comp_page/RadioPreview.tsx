@@ -59,7 +59,7 @@ export const RadioPreview = () => {
         return (
           <button
             key={option.id}
-            className="flex items-center gap-2 justify-start w-max"
+            className="flex items-center gap-2 justify-start w-full"
             onClick={() => toggleOption(option.id)}
           >
             <span

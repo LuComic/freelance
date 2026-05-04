@@ -1,0 +1,50 @@
+const KANBAN_ITEMS = [
+  { id: 1, feature: "Write homepage copy", status: "Todo" },
+  { id: 2, feature: "Build settings panel", status: "In Progress" },
+  { id: 3, feature: "Connect form analytics", status: "In Progress" },
+  { id: 4, feature: "Publish project brief", status: "Done" },
+];
+
+const COLUMNS = ["Todo", "In Progress", "Done"] as const;
+
+export const KanbanPreview = () => {
+  const rows = Array.from({ length: 2 }, (_, index) =>
+    COLUMNS.map(
+      (status) => KANBAN_ITEMS.filter((item) => item.status === status)[index],
+    ),
+  );
+
+  return (
+    <div className="w-full max-w-full min-w-0 overflow-x-auto border rounded-md border-(--gray)">
+      <div className="min-w-225 flex flex-col">
+        <div className="w-full text-(--gray-page) border-b border-(--gray) text-left grid justify-between items-start grid-cols-3 bg-(--darkest)">
+          <span className="text-(--declined-border) border-r p-2 border-(--gray) h-full text-wrap">
+            Todo
+          </span>
+          <span className="p-2 border-r border-(--gray) h-full text-wrap">
+            In Progress
+          </span>
+          <span className="text-(--accepted-border) text-wrap p-2 h-full">
+            Done
+          </span>
+        </div>
+
+        {rows.map((row, index) => (
+          <div
+            key={index}
+            className={`w-full ${index !== rows.length - 1 && "border-b"} border-(--gray) text-left grid justify-between items-start grid-cols-3 ${index % 2 !== 0 && "bg-(--gray)/10"}`}
+          >
+            {row.map((item, itemIndex) => (
+              <div
+                key={itemIndex}
+                className="p-2 border-r border-(--gray) last:border-r-0 h-full flex flex-col items-start justify-start gap-2 text-wrap"
+              >
+                {item ? <span>{item.feature}</span> : <div />}
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};

@@ -1,0 +1,28 @@
+"use client";
+
+import { ChevronRight } from "lucide-react";
+import { useState } from "react";
+
+export const DropdownPreview = () => {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="w-full p-2 flex flex-col gap-2 my-1 border-b border-(--gray)">
+      <button
+        type="button"
+        className={`flex font-medium @[40rem]:text-lg text-base items-center justify-start gap-2 ${open ? "underline" : null} underline-offset-4 decoration-1`}
+        onClick={() => setOpen((current) => !current)}
+      >
+        <ChevronRight
+          size={20}
+          className={`${open ? "rotate-90" : "rotate-0"}`}
+        />
+        Dropdown
+      </button>
+
+      {open ? (
+        <div className="pl-7 flex flex-col gap-2 pb-2">im a dropdown</div>
+      ) : null}
+    </div>
+  );
+};

@@ -94,6 +94,12 @@ export default function Home() {
             </p>
           </div>
         </div>
+        <Link
+          href="/components"
+          className="text-(--vibrant) mt-4 inline-block underline underline-offset-4 hover:text-(--vibrant-hover) cursor-pointer text-lg"
+        >
+          Check out Pageboard&apos;s component selection
+        </Link>
       </section>
 
       <section
@@ -161,7 +167,7 @@ export default function Home() {
             <Link
               href="/tutorial"
               target="_blank"
-              className="text-(--vibrant) mt-2 inline-block underline underline-offset-4 hover:text-(--vibrant-hover) cursor-pointer"
+              className="text-(--vibrant) mt-2 inline-block underline underline-offset-4 hover:text-(--vibrant-hover) cursor-pointer text-lg"
             >
               More in-depth tutorial with videos
             </Link>

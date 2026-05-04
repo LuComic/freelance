@@ -8,11 +8,10 @@ export default function Page() {
   const [agree, setAgree] = useState(false);
 
   return (
-    <div className="w-full mx-auto flex flex-col gap-2 md:max-w-2xl px-4 pt-20 pb-12 sm:px-6 lg:px-8">
+    <div className="w-full mx-auto flex flex-col gap-2 md:max-w-3xl px-4 pt-20 pb-12 sm:px-6 lg:px-8">
       <div className="w-full border-b border-(--gray) pb-2 flex flex-col gap-2">
         <p className="md:text-3xl text-xl font-medium">Login or Sign up</p>
       </div>
-
       <p className="md:text-xl text-lg font-medium">Login page</p>
       <p className="text-(--gray-page)">
         In this component you can login with Google
