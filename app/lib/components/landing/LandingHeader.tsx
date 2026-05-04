@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { label: "Why us?", href: "#why" },
   { label: "How?", href: "#how" },
   { label: "Contact", href: "#contact" },
+  { label: "Components", href: "/components" },
 ];
 
 export const LandingHeader = () => {

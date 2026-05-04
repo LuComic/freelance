@@ -18,8 +18,8 @@ export default function DashboardLayout({
       <main className="min-h-dvh w-full overflow-x-hidden bg-(--quite-dark) text-(--light)">
         <LandingHeader />
         {children}
-        <Footer />
       </main>
+      <Footer />
     </div>
   );
 }

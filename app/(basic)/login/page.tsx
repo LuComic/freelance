@@ -13,7 +13,7 @@ export default function Page() {
         <p className="md:text-3xl text-xl font-medium">Login or Sign up</p>
       </div>
 
-      <p className="@[40rem]:text-xl text-lg font-medium">Login page</p>
+      <p className="md:text-xl text-lg font-medium">Login page</p>
       <p className="text-(--gray-page)">
         In this component you can login with Google
       </p>

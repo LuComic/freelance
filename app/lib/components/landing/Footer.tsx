@@ -1,6 +1,6 @@
 export const Footer = () => {
   return (
-    <footer className="relative overflow-hidden border-t border-(--gray)">
+    <footer className="relative overflow-hidden border-t border-(--gray) w-full">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
