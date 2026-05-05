@@ -1,16 +1,30 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useMutation, usePaginatedQuery } from "convex/react";
+import { useMutation, usePaginatedQuery, useQuery } from "convex/react";
 import { Send } from "lucide-react";
+import { api } from "@/convex/_generated/api";
 import {
   deleteProjectChatMessageMutation,
   listProjectChatMessagesQuery,
   sendProjectChatMessageMutation,
 } from "@/lib/convexFunctionReferences";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type ProjectChatPanelProps = {
   projectId: string | null;
+};
+
+type ProjectOption = {
+  id: string;
+  name: string;
 };
 
 type ProjectChatMessage = {
@@ -81,6 +95,9 @@ function LinkifiedText({ text }: { text: string }) {
 }
 
 export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
+    projectId,
+  );
   const [messageBody, setMessageBody] = useState("");
   const [mutationError, setMutationError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
@@ -88,9 +105,21 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const shouldScrollAfterSendRef = useRef(false);
   const trimmedBody = messageBody.trim();
+  const projects = useQuery(api.projects.queries.listCurrentUserProjects) as
+    | ProjectOption[]
+    | undefined;
+  const selectedProject =
+    projects?.find((project) => project.id === selectedProjectId) ?? null;
+  const selectPlaceholder =
+    projects === undefined
+      ? "Loading projects..."
+      : projects.length === 0
+        ? "No projects available"
+        : "Select project";
   const queryArgs = useMemo(
-    () => (projectId ? { projectId: projectId as never } : "skip"),
-    [projectId],
+    () =>
+      selectedProjectId ? { projectId: selectedProjectId as never } : "skip",
+    [selectedProjectId],
   );
   const { results, status, loadMore } = usePaginatedQuery(
     listProjectChatMessagesQuery,
@@ -104,6 +133,18 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
     [results],
   );
   const newestMessageId = messages[messages.length - 1]?.id ?? null;
+
+  useEffect(() => {
+    if (projectId) {
+      setSelectedProjectId(projectId);
+    }
+  }, [projectId]);
+
+  useEffect(() => {
+    if (projects !== undefined && selectedProjectId && !selectedProject) {
+      setSelectedProjectId(null);
+    }
+  }, [projects, selectedProject, selectedProjectId]);
 
   const resizeTextarea = () => {
     const textarea = textareaRef.current;
@@ -136,7 +177,7 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
   }, [newestMessageId]);
 
   const submitMessage = async () => {
-    if (!projectId || !trimmedBody || sending) {
+    if (!selectedProjectId || !trimmedBody || sending) {
       return;
     }
 
@@ -145,7 +186,7 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
 
     try {
       await sendMessage({
-        projectId: projectId as never,
+        projectId: selectedProjectId as never,
         body: messageBody,
       });
       shouldScrollAfterSendRef.current = true;
@@ -159,7 +200,7 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
   };
 
   const handleDelete = async (messageId: string) => {
-    if (!projectId) {
+    if (!selectedProjectId) {
       return;
     }
 
@@ -167,7 +208,7 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
 
     try {
       await deleteMessage({
-        projectId: projectId as never,
+        projectId: selectedProjectId as never,
         messageId: messageId as never,
       });
     } catch (error) {
@@ -175,20 +216,47 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
     }
   };
 
-  if (!projectId) {
-    return (
-      <div className="text-(--gray)">Open a project to use project chat.</div>
-    );
-  }
-
   return (
     <div className="h-full min-h-0 flex flex-col gap-2">
+      <Select
+        value={selectedProjectId ?? ""}
+        onValueChange={(value) => {
+          setSelectedProjectId(value);
+          setMutationError(null);
+          setMessageBody("");
+          requestAnimationFrame(resetTextareaHeight);
+        }}
+        disabled={projects === undefined || projects.length === 0}
+      >
+        <SelectTrigger className="w-full px-0 border-none font-medium text-lg text-(--light)">
+          <SelectValue placeholder={selectPlaceholder} />
+        </SelectTrigger>
+        <SelectContent className="bg-(--dim) border-none text-(--gray-page)">
+          <SelectGroup className="bg-(--dim)">
+            {(projects ?? []).map((project) => (
+              <SelectItem
+                key={project.id}
+                value={project.id}
+                className="data-highlighted:bg-(--darkest) data-highlighted:text-(--light) text-base"
+              >
+                {project.name}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
       <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain flex flex-col gap-2 pr-1">
-        {status === "LoadingFirstPage" ? (
+        {!selectedProjectId ? (
+          <div className="text-(--gray)">
+            Select a project to use project chat.
+          </div>
+        ) : null}
+
+        {selectedProjectId && status === "LoadingFirstPage" ? (
           <div className="text-(--gray)">Loading messages...</div>
         ) : null}
 
-        {status === "CanLoadMore" ? (
+        {selectedProjectId && status === "CanLoadMore" ? (
           <button
             type="button"
             onClick={() => loadMore(LOAD_MORE_MESSAGE_COUNT)}
@@ -198,7 +266,9 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
           </button>
         ) : null}
 
-        {status !== "LoadingFirstPage" && messages.length === 0 ? (
+        {selectedProjectId &&
+        status !== "LoadingFirstPage" &&
+        messages.length === 0 ? (
           <div className="text-(--gray)">No messages yet.</div>
         ) : null}
 
@@ -276,7 +346,7 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
         <button
           type="button"
           onClick={() => void submitMessage()}
-          disabled={!trimmedBody || sending}
+          disabled={!selectedProjectId || !trimmedBody || sending}
           className="aspect-square rounded-md h-10 bg-(--vibrant) hover:bg-(--vibrant-hover) disabled:opacity-50 disabled:hover:bg-(--vibrant) flex items-center justify-center"
           aria-label="Send message"
         >
