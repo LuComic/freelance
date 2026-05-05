@@ -5,6 +5,7 @@ import { requireCurrentAuth } from "../lib/auth";
 import { invalidState } from "../lib/errors";
 import { assertMaxLength } from "../lib/inputValidation";
 import { requirePageAccess, requireProjectMember } from "../lib/permissions";
+import { createNotification } from "../notifications/model";
 import { buildProjectMemberDisplayName } from "../projects/model";
 import { parsePageDocument } from "../pages/content";
 import type { FormFieldConfig } from "../../lib/pageDocument/registered/Form.definition";
@@ -248,6 +249,7 @@ export const submitForm = mutation({
       user,
       membership,
     );
+    const project = await ctx.db.get(page.projectId);
     const existingSubmission = await ctx.db
       .query("formSubmissions")
       .withIndex("by_page_form_user", (index) =>
@@ -257,15 +259,68 @@ export const submitForm = mutation({
           .eq("submittedByUserId", userId),
       )
       .unique();
-
-    if (existingSubmission) {
-      await ctx.db.patch(existingSubmission._id, {
-        submitterNameSnapshot,
-        submitterImageSnapshot: user.image ?? undefined,
+    const activityValue = existingSubmission
+      ? "Form resubmitted"
+      : "Form submitted";
+    const writeFormActivity = () =>
+      ctx.db.insert("projectActivity", {
+        projectId: page.projectId,
+        pageId: page._id,
         pageTitleSnapshot: page.title,
-        answers,
+        actorUserId: userId,
+        actorNameSnapshot: submitterNameSnapshot,
+        actorImageSnapshot: user.image ?? undefined,
+        activityGroupId: `${page._id}:${userId}:${args.formInstanceId}:${now}`,
+        entryOrder: 0,
+        componentInstanceId: args.formInstanceId,
+        componentType: "Form" as const,
+        componentLabelSnapshot: "Form",
+        newValue: activityValue,
+        createdAt: now,
         updatedAt: now,
       });
+    const projectMembers = await ctx.db
+      .query("projectMembers")
+      .withIndex("by_project", (query) => query.eq("projectId", page.projectId))
+      .collect();
+    const notificationWrites = projectMembers
+      .filter(
+        (projectMember) =>
+          projectMember.status === "active" &&
+          projectMember.userId !== userId &&
+          (projectMember.role === "owner" ||
+            projectMember.role === "coCreator"),
+      )
+      .map((recipient) =>
+        createNotification(ctx, {
+          userId: recipient.userId,
+          type: "clientStateChanged",
+          actorUserId: userId,
+          actorNameSnapshot: submitterNameSnapshot,
+          actorImageSnapshot: user.image ?? null,
+          projectId: page.projectId,
+          projectNameSnapshot: project?.name,
+          pageId: page._id,
+          pageTitleSnapshot: page.title,
+          componentInstanceId: args.formInstanceId,
+          componentLabelSnapshot: activityValue,
+          changedComponentCount: 1,
+        }),
+      );
+
+    if (existingSubmission) {
+      await Promise.all([
+        ctx.db.patch(existingSubmission._id, {
+          submitterNameSnapshot,
+          submitterImageSnapshot: user.image ?? undefined,
+          pageTitleSnapshot: page.title,
+          formTitleSnapshot: "Form",
+          answers,
+          updatedAt: now,
+        }),
+        writeFormActivity(),
+        ...notificationWrites,
+      ]);
 
       return toSubmissionSummary({
         _id: existingSubmission._id,
@@ -274,18 +329,23 @@ export const submitForm = mutation({
       });
     }
 
-    const submissionId = await ctx.db.insert("formSubmissions", {
-      projectId: page.projectId,
-      pageId: page._id,
-      formInstanceId: args.formInstanceId,
-      submittedByUserId: userId,
-      submitterNameSnapshot,
-      submitterImageSnapshot: user.image ?? undefined,
-      pageTitleSnapshot: page.title,
-      answers,
-      createdAt: now,
-      updatedAt: now,
-    });
+    const [submissionId] = await Promise.all([
+      ctx.db.insert("formSubmissions", {
+        projectId: page.projectId,
+        pageId: page._id,
+        formInstanceId: args.formInstanceId,
+        submittedByUserId: userId,
+        submitterNameSnapshot,
+        submitterImageSnapshot: user.image ?? undefined,
+        pageTitleSnapshot: page.title,
+        formTitleSnapshot: "Form",
+        answers,
+        createdAt: now,
+        updatedAt: now,
+      }),
+      writeFormActivity(),
+      ...notificationWrites,
+    ]);
 
     return toSubmissionSummary({
       _id: submissionId,

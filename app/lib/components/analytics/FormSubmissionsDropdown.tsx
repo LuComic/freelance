@@ -44,7 +44,7 @@ export const FormSubmissionsDropdown = ({
                       submissionIndex === 0 ? "border-y" : "border-b"
                     }`}
                   >
-                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-4 flex-wrap">
                       <p className="font-medium">{submission.clientName}</p>
                       <p className="text-(--gray-page) text-sm">
                         {formatSubmittedAt(submission.submittedAt)}
@@ -52,7 +52,7 @@ export const FormSubmissionsDropdown = ({
                     </div>
                     {submission.answers.length > 0 ? (
                       <div className="flex flex-col gap-2">
-                        {submission.answers.map((answer, answerIndex) => (
+                        {submission.answers.map((answer) => (
                           <div
                             key={`${submission.id}-${answer.fieldId}`}
                             className="w-full rounded-md border border-(--gray) px-2 py-1"

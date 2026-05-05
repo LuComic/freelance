@@ -166,7 +166,7 @@ export const DesktopChat = ({
 
           <div className="flex items-center justify-around p-1 rounded-xl bg-(--dim) w-full gap-1">
             <button
-              className={`p-1 rounded-lg hover:bg-(--quite-dark) w-full text-sm ${
+              className={`p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
                 activeTab === "components"
                   ? "bg-(--quite-dark) text-(--vibrant)"
                   : ""
@@ -177,7 +177,7 @@ export const DesktopChat = ({
               <Component size={20} className="mx-auto" />
             </button>
             <button
-              className={`p-1 rounded-lg hover:bg-(--quite-dark) w-full text-sm ${
+              className={`p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
                 activeTab === "config"
                   ? "bg-(--quite-dark) text-(--vibrant)"
                   : ""
@@ -188,7 +188,7 @@ export const DesktopChat = ({
               <Settings2 size={20} className="mx-auto" />
             </button>
             <button
-              className={`p-1 rounded-lg hover:bg-(--quite-dark) w-full text-sm ${
+              className={`p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
                 activeTab === "messages"
                   ? "bg-(--quite-dark) text-(--vibrant)"
                   : ""
@@ -246,15 +246,37 @@ export const DesktopChat = ({
           {!componentsLocked ? (
             <div className="flex flex-col bg-(--dim) rounded-lg justify-center p-1 h-max gap-4">
               <button
-                className="h-full p-1 rounded-md bg-(--quite-dark) text-(--vibrant) hover:bg-(--quite-dark) w-full"
+                className={`p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
+                  activeTab === "components"
+                    ? "bg-(--quite-dark) text-(--vibrant)"
+                    : ""
+                }`}
                 onClick={() => {
+                  setActiveTab("components");
                   setChatOpen(true);
                 }}
               >
                 <LayoutGrid size={20} className="mx-auto" />
               </button>
               <button
-                className="h-full p-1 rounded-md hover:bg-(--quite-dark) w-full"
+                className={`p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
+                  activeTab === "config"
+                    ? "bg-(--quite-dark) text-(--vibrant)"
+                    : ""
+                }`}
+                onClick={() => {
+                  setActiveTab("config");
+                  setChatOpen(true);
+                }}
+              >
+                <Settings2 size={20} className="mx-auto" />
+              </button>
+              <button
+                className={`p-1 rounded-lg hover:bg-(--quite-dark) w-full ${
+                  activeTab === "messages"
+                    ? "bg-(--quite-dark) text-(--vibrant)"
+                    : ""
+                }`}
                 onClick={() => {
                   setActiveTab("messages");
                   setChatOpen(true);

@@ -22,7 +22,8 @@ type AnalyticsComponentType =
   | "Radio"
   | "Feedback"
   | "Kanban"
-  | "SimpleInput";
+  | "SimpleInput"
+  | "Form";
 
 type AnalyticsActivityChange = {
   componentInstanceId: string;

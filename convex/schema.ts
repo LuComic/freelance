@@ -203,6 +203,7 @@ const schema = defineSchema({
       v.literal("Feedback"),
       v.literal("Kanban"),
       v.literal("SimpleInput"),
+      v.literal("Form"),
     ),
     componentLabelSnapshot: v.string(),
     oldValue: v.optional(v.string()),

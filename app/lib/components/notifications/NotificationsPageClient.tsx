@@ -30,6 +30,14 @@ function getNotificationText(notification: AppNotification) {
     case "friendRequestAccepted":
       return `${notification.actorName} accepted your friend request`;
     case "clientStateChanged":
+      if (notification.componentLabel === "Form submitted") {
+        return `${notification.actorName} submitted a form in '${notification.pageTitle ?? "a page"}'`;
+      }
+
+      if (notification.componentLabel === "Form resubmitted") {
+        return `${notification.actorName} resubmitted a form in '${notification.pageTitle ?? "a page"}'`;
+      }
+
       if (notification.changedComponentCount > 1) {
         return `${notification.actorName} updated ${notification.changedComponentCount} component states in '${notification.projectName ?? "a project"}'`;
       }
@@ -121,7 +129,7 @@ export const NotificationsPageClient = () => {
             <button
               type="button"
               key={notification.id}
-              className={`flex items-start justify-start text-left flex-col gap-1 p-2 w-full hover:bg-(--gray)/20 ${
+              className={`flex items-start justify-start text-left flex-col gap-1 p-2 w-full hover:bg-(--gray)/10 ${
                 index === 0
                   ? "border-y border-(--gray)"
                   : "border-b border-(--gray)"
