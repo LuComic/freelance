@@ -1,3 +1,11 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Pageboard | Privacy Policy",
+  description:
+    "Learn how Pageboard processes account, workspace, collaboration, and authentication data.",
+};
+
 const LAST_UPDATED = "April 23, 2026";
 
 export default function Page() {

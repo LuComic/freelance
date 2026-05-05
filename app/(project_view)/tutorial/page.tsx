@@ -1,6 +1,13 @@
+import type { Metadata } from "next";
 import { TutorialCreator } from "@/app/lib/components/tutorial/TutorialCreator";
 import { TutorialClient } from "@/app/lib/components/tutorial/TutorialClient";
 import { TutorialInDepth } from "@/app/lib/components/tutorial/TutorialInDepth";
+
+export const metadata: Metadata = {
+  title: "Pageboard | Tutorial",
+  description:
+    "Follow a Pageboard demo showing how creators and clients use projects together.",
+};
 
 export default function Page() {
   return (

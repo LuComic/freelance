@@ -1,3 +1,11 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Pageboard | Cookies Policy",
+  description:
+    "Learn how Pageboard uses cookies and similar technologies for sessions and workspace preferences.",
+};
+
 const LAST_UPDATED = "March 27, 2026";
 
 export default function Page() {

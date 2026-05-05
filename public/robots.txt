@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://www.pageboard.app
+
+# Sitemaps
+Sitemap: https://www.pageboard.app/sitemap.xml

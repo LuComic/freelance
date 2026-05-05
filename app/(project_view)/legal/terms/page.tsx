@@ -1,3 +1,11 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Pageboard | Terms of Service",
+  description:
+    "Review the terms for using Pageboard projects, workspaces, invites, and collaboration tools.",
+};
+
 const LAST_UPDATED = "April 23, 2026";
 
 export default function Page() {

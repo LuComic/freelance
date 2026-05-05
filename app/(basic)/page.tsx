@@ -1,6 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CreateAccButton } from "../lib/components/landing/CreateAccButton";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Pageboard | Homepage",
+  description: "A client-facing workspace for freelancers and small teams.",
+};
 
 export default function Home() {
   return (

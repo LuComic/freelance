@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import type { ComponentType } from "react";
 import { AdvancedInputPreview } from "@/app/lib/components/comp_page/AdvancedInputPreview";
 import { DropdownPreview } from "@/app/lib/components/comp_page/DropdownPreview";
@@ -10,6 +11,12 @@ import { Prologue } from "@/app/lib/components/comp_page/Prologue";
 import { RadioPreview } from "@/app/lib/components/comp_page/RadioPreview";
 import { SelectPreview } from "@/app/lib/components/comp_page/SelectPreview";
 import { SimpleInputPreview } from "@/app/lib/components/comp_page/SimpleInputPreview";
+
+export const metadata: Metadata = {
+  title: "Pageboard | Components",
+  description:
+    "Explore Pageboard components for feedback, inputs, boards, calendars, and more",
+};
 
 type ComponentPageSection = {
   title: string;

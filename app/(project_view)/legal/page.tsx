@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Pageboard | Legal",
+  description:
+    "Access Pageboard legal documents, including cookies, privacy, and terms of service.",
+};
 
 export default function Page() {
   return (
