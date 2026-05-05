@@ -1,6 +1,7 @@
 "use client";
 
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -52,7 +53,7 @@ export const TemplateModal = ({
         });
       } else {
         await applyProjectTemplate({
-          projectId: pageDocument.activePage.project.id as never,
+          projectId: pageDocument.activePage.project.id as Id<"projects">,
           templateId: template.id,
           expectedUpdatedAt: template.updatedAt,
         });

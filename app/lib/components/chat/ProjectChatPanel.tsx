@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, usePaginatedQuery, useQuery } from "convex/react";
 import { Send } from "lucide-react";
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import {
   deleteProjectChatMessageMutation,
   listProjectChatMessagesQuery,
@@ -118,7 +119,7 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
         : "Select project";
   const queryArgs = useMemo(
     () =>
-      selectedProjectId ? { projectId: selectedProjectId as never } : "skip",
+      selectedProjectId ? { projectId: selectedProjectId as Id<"projects"> } : "skip",
     [selectedProjectId],
   );
   const { results, status, loadMore } = usePaginatedQuery(
@@ -186,7 +187,7 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
 
     try {
       await sendMessage({
-        projectId: selectedProjectId as never,
+        projectId: selectedProjectId as Id<"projects">,
         body: messageBody,
       });
       shouldScrollAfterSendRef.current = true;
@@ -208,8 +209,8 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
 
     try {
       await deleteMessage({
-        projectId: selectedProjectId as never,
-        messageId: messageId as never,
+        projectId: selectedProjectId as Id<"projects">,
+        messageId: messageId as Id<"projectChatMessages">,
       });
     } catch (error) {
       setMutationError(getErrorMessage(error));

@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useConvex } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { getProjectPagePath } from "./paths";
 
 const PAGE_QUERY_PREWARM_MS = 15_000;
@@ -33,8 +34,8 @@ export function usePageQueryPreloader() {
         convex.prewarmQuery({
           query: api.pages.queries.getPageEditor,
           args: {
-            projectId: projectId as never,
-            pageId: pageId as never,
+            projectId: projectId as Id<"projects">,
+            pageId: pageId as Id<"pages">,
           },
           extendSubscriptionFor: PAGE_QUERY_PREWARM_MS,
         });

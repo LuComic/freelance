@@ -1,5 +1,6 @@
 "use client";
 
+import type { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { useEffect, useState } from "react";
 import type { PageComponentInstanceByType } from "@/lib/pageDocument";
@@ -143,7 +144,7 @@ export const FormClient = ({
   config,
 }: FormClientProps) => {
   const viewerSubmission = useQuery(getViewerFormSubmissionQuery, {
-    pageId: pageId as never,
+    pageId: pageId as Id<"pages">,
     formInstanceId,
   }) as ViewerFormSubmission | undefined;
   const submitForm = useMutation(submitFormMutation);
@@ -200,7 +201,7 @@ export const FormClient = ({
       setSubmitting(true);
       setErrorMessage(null);
       await submitForm({
-        pageId: pageId as never,
+        pageId: pageId as Id<"pages">,
         formInstanceId,
         answers: config.fields.map((field) => ({
           fieldId: field.id,

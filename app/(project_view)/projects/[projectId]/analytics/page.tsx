@@ -5,6 +5,7 @@ import { InputDropdown } from "@/app/lib/components/analytics/InputDropdown";
 import type { AnalyticsPageData } from "@/app/lib/components/analytics/types";
 import { getProjectPath } from "@/app/lib/components/project/paths";
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -15,7 +16,7 @@ export default function AnalyticsPage() {
   const projectId = params.projectId;
   const data = useQuery(
     api.pageRuntime.analytics.getProjectAnalytics,
-    projectId ? { projectId: projectId as never } : "skip",
+    projectId ? { projectId: projectId as Id<"projects"> } : "skip",
   ) as AnalyticsPageData | null | undefined;
 
   useEffect(() => {

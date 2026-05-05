@@ -2,6 +2,7 @@
 
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { useEditMode } from "@/app/lib/components/project/EditModeContext";
 import {
   usePageComponentState,
@@ -21,7 +22,7 @@ export const PageLink = ({ instanceId }: { instanceId: string }) => {
     "PageLink",
   );
   const projectData = useQuery(api.projects.queries.getProjectRoot, {
-    projectId: activePage.project.id as never,
+    projectId: activePage.project.id as Id<"projects">,
   });
 
   const selectablePages: ProjectPageOption[] =

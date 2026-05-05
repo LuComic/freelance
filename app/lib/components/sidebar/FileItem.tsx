@@ -9,6 +9,7 @@ import {
   EllipsisVertical,
 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -130,7 +131,7 @@ export const FileItem = ({
             setIsCreatingPage(true);
             try {
               const result = await createPage({
-                projectId: project.id as never,
+                projectId: project.id as Id<"projects">,
               });
               closeSidebar?.();
               router.push(getProjectPagePath(project.id, result.pageId));

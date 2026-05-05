@@ -1,6 +1,7 @@
 "use client";
 
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import {
   createComponentInstanceId,
   createComponentToken,
@@ -117,8 +118,8 @@ export function PageDocumentProvider({
       route === null
         ? "skip"
         : {
-            projectId: route.projectId as never,
-            pageId: route.pageId as never,
+            projectId: route.projectId as Id<"projects">,
+            pageId: route.pageId as Id<"pages">,
           },
     [route],
   );
@@ -129,7 +130,7 @@ export function PageDocumentProvider({
     () =>
       activeProjectId
         ? {
-            projectId: activeProjectId as never,
+            projectId: activeProjectId as Id<"projects">,
           }
         : "skip",
     [activeProjectId],
@@ -531,7 +532,7 @@ export function PageDocumentProvider({
       try {
         if (shouldSaveLiveState) {
           const result = await savePageLiveState({
-            pageId: currentPage.page.id as never,
+            pageId: currentPage.page.id as Id<"pages">,
             title: trimmedTitle,
             document: nextDocument,
           });
@@ -561,7 +562,7 @@ export function PageDocumentProvider({
         }
 
         const result = await savePage({
-          pageId: currentPage.page.id as never,
+          pageId: currentPage.page.id as Id<"pages">,
           title: trimmedTitle,
           document: nextDocument,
           baseTitle,
@@ -639,8 +640,8 @@ export function PageDocumentProvider({
 
       try {
         const result = await applyPageTemplateMutation({
-          pageId: currentPage.page.id as never,
-          templateId: args.templateId as never,
+          pageId: currentPage.page.id as Id<"pages">,
+          templateId: args.templateId as Id<"templates">,
           expectedUpdatedAt: args.expectedUpdatedAt,
           baseTitle: currentPage.page.title,
           baseDocument: currentDocument,
@@ -762,7 +763,7 @@ export function PageDocumentProvider({
     }
 
     const result = await createPage({
-      projectId: currentPage.project.id as never,
+      projectId: currentPage.project.id as Id<"projects">,
     });
     router.push(getProjectPagePath(currentPage.project.id, result.pageId));
   }, [createPage, router]);
@@ -791,7 +792,7 @@ export function PageDocumentProvider({
       pendingDeleteRedirectPathRef.current = fallbackPath;
 
       await deletePageMutation({
-        pageId: currentPage.page.id as never,
+        pageId: currentPage.page.id as Id<"pages">,
       });
       projectVisitHistoryRef.current.set(
         currentPage.project.id,

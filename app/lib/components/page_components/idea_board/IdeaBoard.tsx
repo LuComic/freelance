@@ -1,6 +1,7 @@
 "use client";
 
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { useEditMode } from "@/app/lib/components/project/EditModeContext";
 import {
   usePageComponentState,
@@ -17,7 +18,7 @@ export const IdeaBoard = ({ instanceId }: { instanceId: string }) => {
   const liveConfigActivator = useLiveComponentConfigActivator(instanceId);
   const { activePage } = usePageDocument();
   const projectMembers = useQuery(api.projects.members.getProjectMembers, {
-    projectId: activePage.project.id as never,
+    projectId: activePage.project.id as Id<"projects">,
   });
   const { liveState, updateLiveState, component, updateConfig } =
     usePageComponentState(instanceId, "IdeaBoard");

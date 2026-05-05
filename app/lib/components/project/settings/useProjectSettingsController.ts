@@ -40,7 +40,7 @@ export function useProjectSettingsController(projectId: string) {
 
   const projectData = useQuery(
     api.projects.queries.getProjectRoot,
-    projectId ? { projectId: projectId as never } : "skip",
+    projectId ? { projectId: projectId as Id<"projects"> } : "skip",
   );
   const renameProject = useMutation(api.projects.mutations.renameProject);
   const updateProjectDescription = useMutation(
@@ -134,7 +134,7 @@ export function useProjectSettingsController(projectId: string) {
     projectData === null ? null : (projectData?.project.id ?? projectId);
   const projectMembers = useQuery(
     api.projects.members.getProjectMembers,
-    currentProjectId ? { projectId: currentProjectId as never } : "skip",
+    currentProjectId ? { projectId: currentProjectId as Id<"projects"> } : "skip",
   );
   const canManageMembers =
     projectMembers?.viewerRole === "owner" ||
@@ -143,7 +143,7 @@ export function useProjectSettingsController(projectId: string) {
   const projectJoinCode = useQuery(
     api.projects.join.getProjectJoinCode,
     currentProjectId && canViewClientJoinAccess
-      ? { projectId: currentProjectId as never }
+      ? { projectId: currentProjectId as Id<"projects"> }
       : "skip",
   );
   const canRemoveMembers = projectMembers?.viewerRole === "owner";
@@ -203,7 +203,7 @@ export function useProjectSettingsController(projectId: string) {
 
     try {
       const result = await renameProject({
-        projectId: currentProjectId as never,
+        projectId: currentProjectId as Id<"projects">,
         name: trimmedName,
       });
       setNameDraft(result.name);
@@ -239,7 +239,7 @@ export function useProjectSettingsController(projectId: string) {
 
     try {
       const result = await updateProjectDescription({
-        projectId: currentProjectId as never,
+        projectId: currentProjectId as Id<"projects">,
         description: descriptionDraft,
       });
       setDescriptionDraft(result.description ?? "");
@@ -271,7 +271,7 @@ export function useProjectSettingsController(projectId: string) {
 
     try {
       await deleteProject({
-        projectId: currentProjectId as never,
+        projectId: currentProjectId as Id<"projects">,
       });
       redirectToProjectsIndex();
     } catch (error) {
@@ -300,7 +300,7 @@ export function useProjectSettingsController(projectId: string) {
 
     try {
       await leaveProject({
-        projectId: currentProjectId as never,
+        projectId: currentProjectId as Id<"projects">,
       });
       redirectToProjectsIndex();
     } catch (error) {
@@ -323,8 +323,8 @@ export function useProjectSettingsController(projectId: string) {
 
     try {
       await removeProjectMember({
-        projectId: currentProjectId as never,
-        targetUserId: targetUserId as never,
+        projectId: currentProjectId as Id<"projects">,
+        targetUserId: targetUserId,
       });
     } catch (error) {
       setMemberActionError(
@@ -347,7 +347,7 @@ export function useProjectSettingsController(projectId: string) {
 
     try {
       const result = await enableProjectJoinCode({
-        projectId: currentProjectId as never,
+        projectId: currentProjectId as Id<"projects">,
       });
       setJoinCodeSnapshot(result.joinCode);
     } catch (error) {
@@ -371,7 +371,7 @@ export function useProjectSettingsController(projectId: string) {
 
     try {
       await disableProjectJoinCode({
-        projectId: currentProjectId as never,
+        projectId: currentProjectId as Id<"projects">,
       });
       setJoinCodeSnapshot(null);
     } catch (error) {
@@ -400,7 +400,7 @@ export function useProjectSettingsController(projectId: string) {
 
     try {
       const result = await regenerateProjectJoinCode({
-        projectId: currentProjectId as never,
+        projectId: currentProjectId as Id<"projects">,
       });
       setJoinCodeSnapshot(result.joinCode);
     } catch (error) {

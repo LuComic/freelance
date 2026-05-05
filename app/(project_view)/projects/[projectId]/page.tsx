@@ -1,6 +1,7 @@
 "use client";
 
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -12,7 +13,7 @@ export default function ProjectPage() {
   const projectId = params.projectId;
   const data = useQuery(
     api.projects.queries.getProjectRoot,
-    projectId ? { projectId: projectId as never } : "skip",
+    projectId ? { projectId: projectId as Id<"projects"> } : "skip",
   );
 
   useEffect(() => {

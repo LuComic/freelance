@@ -1,6 +1,7 @@
 "use client";
 
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -51,7 +52,7 @@ export const SaveTemplateModal = ({
     api.templates.queries.getProjectTemplateSource,
     open && hasActivePage
       ? {
-          projectId: activeProjectId as never,
+          projectId: activeProjectId as Id<"projects">,
         }
       : "skip",
   );
