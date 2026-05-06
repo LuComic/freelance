@@ -96,11 +96,9 @@ export const CalendarModal = ({
         className="w-full max-h-1/2 h-auto flex flex-col items-start justify-start gap-2 p-3 md:max-w-xl bg-(--darkest) rounded-xl overflow-y-auto border border-(--gray)"
         onClick={(clickEvent) => clickEvent.stopPropagation()}
       >
-        <div className="flex items-center justify-start gap-4">
-          <p className="md:text-3xl text-xl font-medium capitalize">
-            {event.title}
-          </p>
-          <span className="px-2 py-0.5 border text-nowrap rounded-md border-(--gray-page) text-(--gray-page)">
+        <div className="flex items-center justify-start gap-4 md:text-3xl text-xl">
+          <p className=" font-medium capitalize">{event.title}</p>
+          <span className="text-nowrap text-(--gray-page) text-base md:text-lg">
             {format(new Date(event.startAt), "d. MMMM")}
             {!isSameDay(new Date(event.startAt), new Date(event.endAt)) &&
               " - " + format(new Date(event.endAt), "d. MMMM")}

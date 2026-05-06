@@ -87,9 +87,7 @@ export const KanbanCreator = ({
 
   return (
     <>
-      <p className="@[40rem]:text-xl text-lg font-medium mt-2">
-        Current Progress
-      </p>
+      <p className="text-lg font-medium mt-2">Current Progress</p>
       <p className="text-(--gray-page)">
         Here you can display the progress of your work as a kanban table. The
         table is divided into &quot;Todo&quot; (features/things to do or fix),
@@ -98,7 +96,7 @@ export const KanbanCreator = ({
       </p>
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
         <button
-          className="@[40rem]:text-lg text-base font-medium flex items-center justify-start gap-2 w-full"
+          className="text-base font-medium flex items-center justify-start gap-2 w-full"
           onClick={() => setAdding((prev) => !prev)}
         >
           New Task
@@ -126,7 +124,7 @@ export const KanbanCreator = ({
                 setNewTaskStatus(value as KanbanItem["status"])
               }
             >
-              <SelectTrigger className="w-full @[40rem]:w-52 bg-(--dim) border-(--gray-page)">
+              <SelectTrigger className="w-full bg-(--dim) border-(--gray-page)">
                 <SelectValue placeholder="Set the status" />
               </SelectTrigger>
               <SelectContent className="bg-(--dim) border-none text-(--gray-page)">
@@ -156,7 +154,7 @@ export const KanbanCreator = ({
         <div className="w-full h-px bg-(--gray)" />
 
         <button
-          className="@[40rem]:text-lg text-(--declined-border) text-base font-medium flex items-center justify-start gap-2 w-full"
+          className="text-(--declined-border) text-base font-medium flex items-center justify-start gap-2 w-full"
           onClick={() => setEditingTodo((prev) => !prev)}
         >
           Todo
@@ -194,7 +192,8 @@ export const KanbanCreator = ({
                     </SelectContent>
                   </Select>
                   <button
-                    className="h-6.5 flex items-center justify-center aspect-square rounded-md hover:bg-(--darkest-hover) bg-(--dim) border-(--gray-page) border"
+                    type="button"
+                    className="h-6.5 flex shrink-0 items-center justify-center aspect-square rounded-md hover:bg-(--darkest-hover) bg-(--dim) border-(--gray-page) border"
                     onClick={() => handleDeleteTask(item.id)}
                   >
                     <Trash size={16} />
@@ -213,7 +212,7 @@ export const KanbanCreator = ({
         <div className="w-full h-px bg-(--gray)" />
 
         <button
-          className="@[40rem]:text-lg text-(--gray-page) text-base font-medium flex items-center justify-start gap-2 w-full"
+          className="text-(--gray-page) text-base font-medium flex items-center justify-start gap-2 w-full"
           onClick={() => setEditingProgress((prev) => !prev)}
         >
           In Progress
@@ -254,7 +253,8 @@ export const KanbanCreator = ({
                     </SelectContent>
                   </Select>
                   <button
-                    className="h-6.5 flex items-center justify-center aspect-square rounded-md hover:bg-(--darkest)/10 bg-(--dim) border-(--gray-page) border"
+                    type="button"
+                    className="h-6.5 flex shrink-0 items-center justify-center aspect-square rounded-md hover:bg-(--darkest-hover) bg-(--dim) border-(--gray-page) border"
                     onClick={() => handleDeleteTask(item.id)}
                   >
                     <Trash size={16} />
@@ -273,7 +273,7 @@ export const KanbanCreator = ({
         <div className="w-full h-px bg-(--gray)" />
 
         <button
-          className="@[40rem]:text-lg text-(--accepted-border) text-base font-medium flex items-center justify-start gap-2 w-full"
+          className="text-(--accepted-border) text-base font-medium flex items-center justify-start gap-2 w-full"
           onClick={() => setEditingDone((prev) => !prev)}
         >
           Done
@@ -311,7 +311,8 @@ export const KanbanCreator = ({
                     </SelectContent>
                   </Select>
                   <button
-                    className="h-6.5 flex items-center justify-center aspect-square rounded-md hover:bg-(--darkest)/10 bg-(--dim) border-(--gray-page) border"
+                    type="button"
+                    className="h-6.5 flex shrink-0 items-center justify-center aspect-square rounded-md hover:bg-(--darkest-hover) bg-(--dim) border-(--gray-page) border"
                     onClick={() => handleDeleteTask(item.id)}
                   >
                     <Trash size={16} />

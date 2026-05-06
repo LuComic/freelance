@@ -37,9 +37,6 @@ type FormCreatorProps = {
   ) => void;
 };
 
-const FILTER_BUTTON_CLASS_NAME =
-  "flex items-center text-sm md:text-base justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border hover:bg-(--gray)/20";
-
 export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
   const [openFieldIds, setOpenFieldIds] = useState<Set<string>>(new Set());
   const [addingField, setAddingField] = useState(false);
@@ -146,7 +143,7 @@ export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
 
   return (
     <>
-      <p className="@[40rem]:text-xl text-lg font-medium mt-2">Form</p>
+      <p className="text-lg font-medium mt-2">Form</p>
       <p className="text-(--gray-page)">
         Collect individual client submissions without changing the shared page
         state.
@@ -155,7 +152,7 @@ export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
         <button
           type="button"
-          className="@[40rem]:text-lg text-base font-medium flex items-center justify-start gap-2 w-full"
+          className="text-base font-medium flex items-center justify-start gap-2 w-full"
           onClick={() => setAddingField((prev) => !prev)}
         >
           Add Field
@@ -172,7 +169,7 @@ export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
                 setFieldTypeToAdd(value as FormFieldType)
               }
             >
-              <SelectTrigger className="w-full @[40rem]:w-52 bg-(--dim) border-(--gray-page)">
+              <SelectTrigger className="w-full bg-(--dim) border-(--gray-page)">
                 <SelectValue placeholder="Select field type" />
               </SelectTrigger>
               <SelectContent className="bg-(--dim) border-none text-(--gray-page)">
@@ -214,7 +211,7 @@ export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
                 <div className="flex items-center justify-between gap-2">
                   <button
                     type="button"
-                    className="@[40rem]:text-lg text-base font-medium flex flex-1 items-center justify-start gap-2 min-w-0"
+                    className="text-base font-medium flex flex-1 items-center justify-start gap-2 min-w-0"
                     onClick={() => toggleFieldOpen(field.id)}
                   >
                     <span className="min-w-0 wrap-break-word text-left">
@@ -302,7 +299,9 @@ export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
                           type="button"
                           className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
                           onClick={() => handleAddOption(field)}
-                          disabled={field.options.length >= MAX_OPTIONS_PER_FIELD}
+                          disabled={
+                            field.options.length >= MAX_OPTIONS_PER_FIELD
+                          }
                         >
                           Add
                         </button>
@@ -312,7 +311,7 @@ export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
                             field.options.map((option) => (
                               <div
                                 key={option.id}
-                                className="max-w-full min-w-0 pl-2 pr-1.5 py-1 rounded-md border border-(--gray-page) text-(--gray-page) flex items-center gap-1 wrap-break-word hover:bg-(--gray)/20"
+                                className="max-w-full min-w-0 pl-1.5 pr-0.5 py-0.5 rounded-md border border-(--gray-page) text-(--gray-page) flex items-center gap-1 wrap-break-word hover:bg-(--gray)/20"
                               >
                                 <span className="min-w-0 wrap-break-word">
                                   {option.label}
@@ -337,12 +336,13 @@ export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
                       </>
                     ) : null}
 
-                    <div className="grid grid-cols-2 @[40rem]:flex items-center justify-start w-full gap-1 md:gap-2">
+                    <div className="grid grid-cols-2 items-center justify-start w-full gap-1">
                       <button
                         type="button"
-                        className={`${FILTER_BUTTON_CLASS_NAME} ${
-                          !field.required &&
-                          "text-(--gray-page) border-(--gray-page)"
+                        className={`flex items-center text-sm justify-center gap-1 w-full rounded-md px-2 py-1 border ${
+                          !field.required
+                            ? "text-(--gray-page) border-(--gray-page) hover:bg-(--gray)/20"
+                            : "bg-(--light)/10 hover:bg-(--light)/15"
                         }`}
                         onClick={() => setFieldRequired(field.id, true)}
                       >
@@ -350,9 +350,10 @@ export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
                       </button>
                       <button
                         type="button"
-                        className={`${FILTER_BUTTON_CLASS_NAME} ${
-                          field.required &&
-                          "text-(--gray-page) border-(--gray-page)"
+                        className={`flex items-center text-sm justify-center gap-1 w-full rounded-md px-2 py-1 border ${
+                          field.required
+                            ? "text-(--gray-page) border-(--gray-page) hover:bg-(--gray)/20"
+                            : "bg-(--light)/10 hover:bg-(--light)/15"
                         }`}
                         onClick={() => setFieldRequired(field.id, false)}
                       >

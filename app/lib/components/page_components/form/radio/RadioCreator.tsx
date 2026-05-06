@@ -48,10 +48,7 @@ export const RadioCreator = ({
     const nextId = highestId + 1;
     onChangeConfig((currentConfig) => ({
       ...currentConfig,
-      options: [
-        { id: nextId, label: optionInput },
-        ...currentConfig.options,
-      ],
+      options: [{ id: nextId, label: optionInput }, ...currentConfig.options],
     }));
     onChangeLiveState((currentLiveState) => ({
       ...currentLiveState,
@@ -77,9 +74,7 @@ export const RadioCreator = ({
 
   return (
     <>
-      <p className="@[40rem]:text-xl text-lg font-medium mt-2">
-        Radio field setup
-      </p>
+      <p className="text-lg font-medium mt-2">Radio field setup</p>
       <p className="text-(--gray-page)">
         Configure the title, description, and available choices for a
         single-choice radio component.
@@ -87,7 +82,7 @@ export const RadioCreator = ({
 
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
         <button
-          className="@[40rem]:text-lg text-base font-medium flex items-center justify-start gap-2  w-max"
+          className="text-base font-medium flex items-center justify-start gap-2  w-max"
           onClick={() => setEditing((prev) => !prev)}
         >
           Edit field
@@ -150,9 +145,11 @@ export const RadioCreator = ({
       {config.title || config.description || config.options.length > 0 ? (
         <div className="w-full max-w-full min-w-0 flex flex-col gap-2">
           <p className="min-w-0 wrap-break-word font-medium">{config.title}</p>
-          <p className="min-w-0 wrap-break-word text-(--gray-page)">
-            {config.description}
-          </p>
+          {config.description ? (
+            <p className="min-w-0 wrap-break-word text-(--gray-page)">
+              {config.description}
+            </p>
+          ) : null}
           <div className="w-full min-w-0 flex flex-wrap items-center justify-start gap-2">
             {config.options.map((option) => (
               <div

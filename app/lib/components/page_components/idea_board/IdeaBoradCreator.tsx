@@ -82,7 +82,7 @@ export const IdeaBoradCreator = ({
 
   return (
     <>
-      <p className="@[40rem]:text-xl text-lg font-medium mt-2">Idea Board</p>
+      <p className="text-lg font-medium mt-2">Idea Board</p>
       <p className="text-(--gray-page)">
         Here you can add and vote on ideas submitted by all project members
         (unless the client is denied). Only creators can remove ideas
@@ -90,7 +90,7 @@ export const IdeaBoradCreator = ({
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
         <button
           type="button"
-          className="@[40rem]:text-lg text-base font-medium flex items-center justify-start gap-2  w-max"
+          className="text-base font-medium flex items-center justify-start gap-2  w-max"
           onClick={() => setAdding((prev) => !prev)}
         >
           Add Idea
@@ -126,7 +126,7 @@ export const IdeaBoradCreator = ({
 
         <button
           type="button"
-          className="@[40rem]:text-lg text-base font-medium flex items-center justify-start gap-2 w-max"
+          className="text-base font-medium flex items-center justify-start gap-2 w-max"
           onClick={() => setClientEditing((prev) => !prev)}
         >
           Client permissions
@@ -189,34 +189,34 @@ export const IdeaBoradCreator = ({
             </div>
           </>
         )}
-        {liveState.ideas.length > 0 ? (
-          liveState.ideas.map((idea, index) => (
-            <div
-              key={idea.id}
-              className={`w-full min-w-0 flex items-center border-(--gray) justify-between gap-2 flex-wrap ${index !== 0 ? "border-dashed" : null} border-t pt-2`}
-            >
-              <span className="min-w-0 wrap-break-word">
-                {idea.idea}
-                <span className="text-(--gray-page)">
-                  {" "}
-                  by {getIdeaAuthorName(idea, authorNames)}
-                </span>
-              </span>
-
-              <button
-                type="button"
-                className="h-6.5 flex items-center justify-center aspect-square rounded-md hover:bg-(--darkest-hover) bg-(--dim) border-(--gray) border px-2 gap-1 text-sm ml-auto"
-                onClick={() => handleDeleteIdea(idea.id)}
-              >
-                <Trash size={14} />
-                Delete
-              </button>
-            </div>
-          ))
-        ) : (
-          <span className="text-(--gray-page)">No ideas yet.</span>
-        )}
       </div>
+
+      {liveState.ideas.length > 0 ? (
+        liveState.ideas.map((idea, index) => (
+          <div
+            key={idea.id}
+            className={`w-full min-w-0 flex items-center border-(--gray) justify-between gap-2 flex-wrap ${index !== 0 ? "border-dashed pt-2 border-t" : null}`}
+          >
+            <span className="min-w-0 wrap-break-word">
+              {idea.idea}
+              <span className="text-(--gray-page)">
+                {" "}
+                by {getIdeaAuthorName(idea, authorNames)}
+              </span>
+            </span>
+
+            <button
+              type="button"
+              className="h-6.5 flex shrink-0 items-center justify-center aspect-square rounded-md hover:bg-(--darkest-hover) bg-(--dim) border-(--gray-page) border"
+              onClick={() => handleDeleteIdea(idea.id)}
+            >
+              <Trash size={16} />
+            </button>
+          </div>
+        ))
+      ) : (
+        <span className="text-(--gray-page)">No ideas yet.</span>
+      )}
     </>
   );
 };

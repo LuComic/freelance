@@ -64,16 +64,14 @@ export const AdvancedInputCreator = ({
 
   return (
     <>
-      <p className="@[40rem]:text-xl text-lg font-medium mt-2">
-        Advanced input setup
-      </p>
+      <p className="text-lg font-medium mt-2">Advanced input setup</p>
       <p className="text-(--gray-page)">
         Client submissions are listed here. Creators can remove entries.
       </p>
 
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
         <button
-          className="@[40rem]:text-lg text-base font-medium flex items-center justify-start gap-2 w-max"
+          className="text-base font-medium flex items-center justify-start gap-2 w-max"
           onClick={() => setEditing((prev) => !prev)}
         >
           Edit field
@@ -117,7 +115,7 @@ export const AdvancedInputCreator = ({
                 }))
               }
             >
-              <SelectTrigger className="w-full @[40rem]:w-52 bg-(--dim) border-(--gray-page)">
+              <SelectTrigger className="w-full bg-(--dim) border-(--gray-page)">
                 <SelectValue placeholder="Select mode" />
               </SelectTrigger>
               <SelectContent className="bg-(--dim) border-none text-(--gray-page)">
@@ -145,7 +143,7 @@ export const AdvancedInputCreator = ({
               liveState.colors.map((color, index) => (
                 <div
                   key={color.id}
-                  className={`w-full min-w-0 flex items-center border-(--gray) border-dashed justify-between gap-2 flex-wrap ${index !== 0 ? "border-t pt-2" : null}`}
+                  className={`w-full min-w-0 flex items-center border-(--gray) border-dashed justify-start gap-2 flex-wrap ${index !== 0 ? "border-t pt-2" : null}`}
                 >
                   <span
                     className="h-5 w-5 shrink-0 rounded-sm border border-(--gray)"
@@ -153,14 +151,16 @@ export const AdvancedInputCreator = ({
                       backgroundColor: resolveAdvancedInputColor(color.name),
                     }}
                   />
-                  <span className="min-w-0 wrap-break-word">{color.name}</span>
+                  <span className="min-w-0 wrap-break-word ml-0.5">
+                    {color.name}
+                  </span>
                   <span className="text-(--gray-page)">{color.type}</span>
                   <button
-                    className="h-6.5 flex items-center justify-center aspect-square rounded-md hover:bg-(--darkest-hover) bg-(--dim) border-(--gray) border px-2 gap-1 text-sm ml-auto"
+                    type="button"
+                    className="h-6.5 flex shrink-0 items-center justify-center aspect-square rounded-md hover:bg-(--darkest-hover) bg-(--dim) border-(--gray-page) border ml-auto"
                     onClick={() => deleteColor(color.id)}
                   >
-                    <Trash size={14} />
-                    Delete
+                    <Trash size={16} />
                   </button>
                 </div>
               ))
@@ -183,11 +183,11 @@ export const AdvancedInputCreator = ({
                     {font.name}
                   </span>
                   <button
-                    className="h-6.5 flex items-center justify-center aspect-square rounded-md hover:bg-(--darkest-hover) bg-(--dim) border-(--gray) border px-2 gap-1 text-sm ml-auto"
+                    type="button"
+                    className="h-6.5 flex shrink-0 items-center justify-center aspect-square rounded-md hover:bg-(--darkest-hover) bg-(--dim) border-(--gray-page) border"
                     onClick={() => deleteFont(fontEntry.id)}
                   >
-                    <Trash size={14} />
-                    Delete
+                    <Trash size={16} />
                   </button>
                 </div>
               ) : null;

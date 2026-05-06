@@ -106,9 +106,7 @@ export const FeedbackCreator = ({
     (item) => item.dismissed,
   ).length;
 
-  const changeFilter = (
-    newFilter: "accepted" | "declined" | "dismissed",
-  ) => {
+  const changeFilter = (newFilter: "accepted" | "declined" | "dismissed") => {
     if (filter === newFilter) {
       setFilter("");
       return;
@@ -131,9 +129,7 @@ export const FeedbackCreator = ({
 
   return (
     <>
-      <p className="@[40rem]:text-xl text-lg font-medium mt-2">
-        Client&apos;s ideas
-      </p>
+      <p className="text-lg font-medium mt-2">Client&apos;s ideas</p>
       <p className="text-(--gray-page)">
         Here you can accept or decline the ideas proposed by the client and give
         an explanation to your decision. Live view shows what the client sees
@@ -141,7 +137,7 @@ export const FeedbackCreator = ({
       </p>
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
         <button
-          className="@[40rem]:text-lg text-base font-medium flex items-center justify-start gap-2  w-max"
+          className="text-base font-medium flex items-center justify-start gap-2  w-max"
           onClick={() => setEditing((prev) => !prev)}
         >
           Tags
@@ -173,7 +169,7 @@ export const FeedbackCreator = ({
                     {tag}
                     <button
                       type="button"
-                      className=" hover:bg-(--gray)/20 p-1 rounded-sm"
+                      className="h-6.5 flex shrink-0 items-center justify-center aspect-square rounded-md hover:bg-(--darkest-hover) bg-(--dim) border-(--gray-page) border"
                       onClick={() => deleteTag(tag)}
                     >
                       <Trash size={16} />
@@ -196,35 +192,35 @@ export const FeedbackCreator = ({
         )}
       </div>
 
-      <div className="grid grid-cols-3 @[40rem]:flex items-center justify-between @[40rem]:justify-start w-full gap-1 md:gap-2">
+      <div className="grid grid-cols-3 items-center justify-between w-full gap-1">
         <button
-          className={`flex items-center text-sm md:text-base justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border ${filter !== "accepted" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
+          className={`flex items-center text-sm justify-center gap-1 w-full rounded-md px-2 py-1 border ${filter !== "accepted" ? "text-(--gray-page) border-(--gray-page) hover:bg-(--gray)/20" : "bg-(--light)/10 hover:bg-(--light)/15"}`}
           onClick={() => changeFilter("accepted")}
         >
-          <ThumbsUp size={16} />
+          <ThumbsUp size={16} className="shrink-0" />
           Accepted
-          <span className="hidden md:inline">({acceptedCount})</span>
+          <span className="hidden">({acceptedCount})</span>
         </button>
         <button
-          className={`flex items-center text-sm md:text-base justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border ${filter !== "declined" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
+          className={`flex items-center text-sm justify-center gap-1 w-full rounded-md px-2 py-1 border ${filter !== "declined" ? "text-(--gray-page) border-(--gray-page) hover:bg-(--gray)/20" : "bg-(--light)/10 hover:bg-(--light)/15"}`}
           onClick={() => changeFilter("declined")}
         >
-          <ThumbsDown size={16} />
+          <ThumbsDown size={16} className="shrink-0" />
           Declined
-          <span className="hidden md:inline">({declinedCount})</span>
+          <span className="hidden">({declinedCount})</span>
         </button>
         <button
-          className={`flex items-center text-sm md:text-base justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border ${filter !== "dismissed" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
+          className={`flex items-center text-sm justify-center gap-1 w-full rounded-md px-2 py-1 border ${filter !== "dismissed" ? "text-(--gray-page) border-(--gray-page) hover:bg-(--gray)/20" : "bg-(--light)/10 hover:bg-(--light)/15"}`}
           onClick={() => changeFilter("dismissed")}
         >
-          <X size={16} />
+          <X size={16} className="shrink-0" />
           Dismissed
-          <span className="hidden md:inline">({dismissedCount})</span>
+          <span className="hidden">({dismissedCount})</span>
         </button>
       </div>
       {visibleData.length > 0 ? (
         <div
-          className={`w-full flex flex-col @[40rem]:grid ${visibleData.length === 1 ? "grid-cols-[repeat(auto-fit,minmax(280px,500px))]" : "grid-cols-[repeat(auto-fit,minmax(280px,1fr))]"}  gap-2`}
+          className={`w-full flex flex-col ${visibleData.length === 1 ? "grid-cols-[repeat(auto-fit,minmax(280px,500px))]" : "grid-cols-[repeat(auto-fit,minmax(280px,1fr))]"}  gap-2`}
         >
           {visibleData.map((feature) => (
             <div

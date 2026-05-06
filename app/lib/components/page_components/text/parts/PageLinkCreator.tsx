@@ -46,7 +46,7 @@ export const PageLinkCreator = ({
 
   return (
     <>
-      <p className="@[40rem]:text-xl text-lg font-medium mt-2">Page link</p>
+      <p className="text-lg font-medium mt-2">Page link</p>
       <p className="text-(--gray-page)">
         Create special text that can link to other pages in your project
       </p>
@@ -99,7 +99,7 @@ export const PageLinkCreator = ({
         }
         disabled={isLoadingPages || pages.length === 0}
       >
-        <SelectTrigger className="w-full @[40rem]:w-52 bg-(--dim) border-(--gray-page)">
+        <SelectTrigger className="w-full bg-(--dim) border-(--gray-page)">
           <SelectValue placeholder={selectPlaceholder} />
         </SelectTrigger>
         <SelectContent className="bg-(--dim) border-none text-(--gray-page)">

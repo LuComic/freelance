@@ -131,18 +131,18 @@ export const IdeaBoardClient = ({
       <div className="grid grid-cols-2 @[40rem]:flex items-center justify-between @[40rem]:justify-start w-full gap-2">
         <button
           type="button"
-          className={`flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border ${filter !== "all" ? "text-(--gray-page) border-(--gray-page)" : ""} hover:bg-(--gray)/20`}
+          className={`flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border ${filter !== "all" ? "text-(--gray-page) border-(--gray-page) hover:bg-(--gray)/20" : "bg-(--light)/10 hover:bg-(--light)/15"}`}
           onClick={() => setFilter("all")}
         >
-          <List size={16} />
+          <List size={16} className="shrink-0" />
           All
         </button>
         <button
           type="button"
-          className={`flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border ${filter !== "rankings" ? "text-(--gray-page) border-(--gray-page)" : ""} hover:bg-(--gray)/20`}
+          className={`flex items-center justify-center gap-1 w-full @[40rem]:w-max rounded-md px-2 py-1 border ${filter !== "rankings" ? "text-(--gray-page) border-(--gray-page) hover:bg-(--gray)/20" : "bg-(--light)/10 hover:bg-(--light)/15"}`}
           onClick={() => setFilter("rankings")}
         >
-          <Medal size={16} />
+          <Medal size={16} className="shrink-0" />
           Rankings
         </button>
       </div>

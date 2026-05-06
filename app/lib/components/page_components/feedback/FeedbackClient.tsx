@@ -166,7 +166,7 @@ export const FeedbackClient = ({
                 config.tags.map((tag) => (
                   <button
                     key={tag}
-                    className={`px-1.5 py-0.5 rounded-md border ${!selectedTags.includes(tag) && "border-(--gray-page) text-(--gray-page)"} `}
+                    className={`px-1.5 py-0.5 rounded-md border ${!selectedTags.includes(tag) ? "border-(--gray-page) text-(--gray-page) hover:bg-(--gray)/20" : "bg-(--light)/10 hover:bg-(--light)/15"}`}
                     onClick={() => {
                       if (selectedTags.includes(tag)) {
                         setSelectedTags((prev) =>
@@ -222,28 +222,28 @@ export const FeedbackClient = ({
           className={`flex items-center justify-center gap-1 w-full @[45rem]:w-max rounded-md px-2 py-1 border ${filter !== "accepted" ? "text-(--gray-page) border-(--gray-page) hover:bg-(--gray)/20" : "bg-(--light)/10 hover:bg-(--light)/15"}`}
           onClick={() => changeFilter("accepted")}
         >
-          <ThumbsUp size={16} />
+          <ThumbsUp size={16} className="shrink-0" />
           Accepted ({acceptedCount})
         </button>
         <button
-          className={`flex items-center justify-center gap-1 w-full @[45rem]:w-max rounded-md px-2 py-1 border ${filter !== "declined" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
+          className={`flex items-center justify-center gap-1 w-full @[45rem]:w-max rounded-md px-2 py-1 border ${filter !== "declined" ? "text-(--gray-page) border-(--gray-page) hover:bg-(--gray)/20" : "bg-(--light)/10 hover:bg-(--light)/15"}`}
           onClick={() => changeFilter("declined")}
         >
-          <ThumbsDown size={16} />
+          <ThumbsDown size={16} className="shrink-0" />
           Declined ({declinedCount})
         </button>
         <button
-          className={`flex items-center justify-center gap-1 w-full @[45rem]:w-max rounded-md px-2 py-1 border ${filter !== "pending" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
+          className={`flex items-center justify-center gap-1 w-full @[45rem]:w-max rounded-md px-2 py-1 border ${filter !== "pending" ? "text-(--gray-page) border-(--gray-page) hover:bg-(--gray)/20" : "bg-(--light)/10 hover:bg-(--light)/15"}`}
           onClick={() => changeFilter("pending")}
         >
-          <Hourglass size={16} />
+          <Hourglass size={16} className="shrink-0" />
           Pending ({pendingCount})
         </button>
         <button
-          className={`flex items-center justify-center gap-1 w-full @[45rem]:w-max rounded-md px-2 py-1 border ${filter !== "dismissed" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
+          className={`flex items-center justify-center gap-1 w-full @[45rem]:w-max rounded-md px-2 py-1 border ${filter !== "dismissed" ? "text-(--gray-page) border-(--gray-page) hover:bg-(--gray)/20" : "bg-(--light)/10 hover:bg-(--light)/15"}`}
           onClick={() => changeFilter("dismissed")}
         >
-          <X size={16} />
+          <X size={16} className="shrink-0" />
           Dismissed ({dismissedCount})
         </button>
       </div>

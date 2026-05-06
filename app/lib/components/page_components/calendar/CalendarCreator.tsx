@@ -102,13 +102,13 @@ export const CalendarCreator = ({
         onSave={updateEvent}
       />
 
-      <p className="@[40rem]:text-xl text-lg font-medium mt-2">Calendar</p>
+      <p className="text-lg font-medium mt-2">Calendar</p>
       <p className="text-(--gray-page)">
         A calendar for scheduling different dates for clients and creators
       </p>
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
         <button
-          className="@[40rem]:text-lg text-base font-medium flex items-center justify-start gap-2  w-max"
+          className="text-base font-medium flex items-center justify-start gap-2  w-max"
           onClick={() => setAdding((previousValue) => !previousValue)}
           type="button"
         >
@@ -164,7 +164,7 @@ export const CalendarCreator = ({
                   setError(null);
                 }}
               >
-                <SelectTrigger className="w-full @[40rem]:w-52 bg-(--dim) border-(--gray-page)">
+                <SelectTrigger className="w-full bg-(--dim) border-(--gray-page)">
                   <SelectValue placeholder="Set the status" />
                 </SelectTrigger>
                 <SelectContent className="bg-(--dim) border-none text-(--gray-page)">

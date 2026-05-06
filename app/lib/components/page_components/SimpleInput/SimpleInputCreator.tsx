@@ -25,12 +25,12 @@ export const SimpleInputCreator = ({
 
   return (
     <>
-      <p className="@[40rem]:text-xl text-lg font-medium mt-2">Simple Input</p>
+      <p className="text-lg font-medium mt-2">Simple Input</p>
       <p className="text-(--gray-page)">
         Client submissions are listed here. Creators can remove entries.
       </p>
 
-      <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
+      <div className="border-(--gray) border-t pt-2 w-full flex flex-col gap-2">
         {liveState.inputs.length > 0 ? (
           liveState.inputs.map((input, index) => (
             <div
@@ -40,11 +40,11 @@ export const SimpleInputCreator = ({
               <span className="min-w-0 wrap-break-word">{input.value}</span>
 
               <button
-                className="h-6.5 flex items-center justify-center aspect-square rounded-md hover:bg-(--darkest-hover) bg-(--dim) border-(--gray) border px-2 gap-1 text-sm ml-auto"
+                type="button"
+                className="h-6.5 flex shrink-0 items-center justify-center aspect-square rounded-md hover:bg-(--darkest-hover) bg-(--dim) border-(--gray-page) border"
                 onClick={() => handleDeleteInput(input.id)}
               >
-                <Trash size={14} />
-                Delete
+                <Trash size={16} />
               </button>
             </div>
           ))
