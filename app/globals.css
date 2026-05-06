@@ -1,8 +1,8 @@
 @import "tailwindcss";
 @import "@fontsource-variable/lexend";
 @import "@fontsource-variable/work-sans";
+@import "@fontsource/dejavu-mono";
 @import "@fontsource-variable/fira-code/wght.css";
-@import "@fontsource-variable/jetbrains-mono/wght.css";
 @import "@fontsource/inter";
 @import "@fontsource/roboto";
 @import "@fontsource/open-sans";
@@ -55,7 +55,7 @@
   --accepted-border: #0f7233;
   --accepted-bg: #61d88d;
   --declined-border: #b61034;
-  --declined-bg: #fa808e; 
+  --declined-bg: #fa808e;
   */
 
   --google-bg: #fff;
@@ -258,7 +258,7 @@
   }
 
   .text-editor-font {
-    font-family: "JetBrains Mono Variable", monospace;
+    font-family: "DejaVu Mono", monospace;
   }
 
   .erle {
