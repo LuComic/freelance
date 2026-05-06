@@ -189,7 +189,16 @@ function buildUserData(
 }
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
-  providers: [Google, projectGuest],
+  providers: [
+    Google({
+      authorization: {
+        params: {
+          prompt: "select_account",
+        },
+      },
+    }),
+    projectGuest,
+  ],
   callbacks: {
     async createOrUpdateUser(ctx, args) {
       const profile = args.profile as AuthProfile;
@@ -262,7 +271,6 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
             "This Google account cannot be used because it does not provide an email address.",
           );
         }
-
       }
 
       return await ctx.db.insert("users", userData);

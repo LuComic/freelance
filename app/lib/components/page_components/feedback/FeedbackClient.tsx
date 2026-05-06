@@ -219,7 +219,7 @@ export const FeedbackClient = ({
         </button>
 
         <button
-          className={`flex items-center justify-center gap-1 w-full @[45rem]:w-max rounded-md px-2 py-1 border ${filter !== "accepted" && "text-(--gray-page) border-(--gray-page)"}  hover:bg-(--gray)/20`}
+          className={`flex items-center justify-center gap-1 w-full @[45rem]:w-max rounded-md px-2 py-1 border ${filter !== "accepted" ? "text-(--gray-page) border-(--gray-page) hover:bg-(--gray)/20" : "bg-(--light)/10 hover:bg-(--light)/15"}`}
           onClick={() => changeFilter("accepted")}
         >
           <ThumbsUp size={16} />
