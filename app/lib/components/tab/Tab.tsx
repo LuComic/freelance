@@ -218,7 +218,10 @@ export const Tab = ({ initialTabsState }: TabProps) => {
       return;
     }
 
-    closeTabsById([resolvedTabs[tabIndex + 1].tabId]);
+    closeTabsById(
+      resolvedTabs.slice(tabIndex + 1).map((tab) => tab.tabId),
+      tabId,
+    );
   };
 
   const closeTabsToLeft = (tabId: string) => {
@@ -228,7 +231,10 @@ export const Tab = ({ initialTabsState }: TabProps) => {
       return;
     }
 
-    closeTabsById([resolvedTabs[tabIndex - 1].tabId]);
+    closeTabsById(
+      resolvedTabs.slice(0, tabIndex).map((tab) => tab.tabId),
+      tabId,
+    );
   };
 
   const updateScrollButtons = useCallback(() => {

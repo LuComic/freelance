@@ -128,7 +128,7 @@ export const TabItem = ({
           }}
         >
           <MoveRight />
-          Close right
+          Close all right
         </ContextMenuItem>
         <ContextMenuItem
           className="data-highlighted:bg-(--darkest) data-highlighted:text-(--light) text-xs"
@@ -138,7 +138,7 @@ export const TabItem = ({
           }}
         >
           <MoveLeft />
-          Close left
+          Close all left
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
