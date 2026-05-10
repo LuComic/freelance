@@ -2,10 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { CreateAccButton } from "../lib/components/landing/CreateAccButton";
 import type { Metadata } from "next";
+import { canonicalUrl } from "../lib/seo";
 
 export const metadata: Metadata = {
   title: "Pageboard | Homepage",
   description: "A client-facing workspace for freelancers and small teams.",
+  alternates: {
+    canonical: canonicalUrl(),
+  },
 };
 
 export default function Home() {

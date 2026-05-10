@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
+import { canonicalUrl } from "@/app/lib/seo";
 
 export const metadata: Metadata = {
   title: "Pageboard | Terms of Service",
   description:
     "Review the terms for using Pageboard projects, workspaces, invites, and collaboration tools.",
+  alternates: {
+    canonical: canonicalUrl("/legal/terms"),
+  },
 };
 
 const LAST_UPDATED = "April 23, 2026";

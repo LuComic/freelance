@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { canonicalUrl } from "@/app/lib/seo";
 
 export const metadata: Metadata = {
   title: "Pageboard | Legal",
   description:
     "Access Pageboard legal documents, including cookies, privacy, and terms of service.",
+  alternates: {
+    canonical: canonicalUrl("/legal"),
+  },
 };
 
 export default function Page() {

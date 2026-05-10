@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
+import { canonicalUrl } from "@/app/lib/seo";
 
 export const metadata: Metadata = {
   title: "Pageboard | Cookies Policy",
   description:
     "Learn how Pageboard uses cookies and similar technologies for sessions and workspace preferences.",
+  alternates: {
+    canonical: canonicalUrl("/legal/cookies"),
+  },
 };
 
 const LAST_UPDATED = "March 27, 2026";

@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
+import { canonicalUrl } from "@/app/lib/seo";
 
 export const metadata: Metadata = {
   title: "Pageboard | Privacy Policy",
   description:
     "Learn how Pageboard processes account, workspace, collaboration, and authentication data.",
+  alternates: {
+    canonical: canonicalUrl("/legal/privacy"),
+  },
 };
 
 const LAST_UPDATED = "April 23, 2026";

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ComponentType } from "react";
+import { canonicalUrl } from "@/app/lib/seo";
 import { AdvancedInputPreview } from "@/app/lib/components/comp_page/AdvancedInputPreview";
 import { DropdownPreview } from "@/app/lib/components/comp_page/DropdownPreview";
 import { FeedbackPreview } from "@/app/lib/components/comp_page/FeedbackPreview";
@@ -16,6 +17,9 @@ export const metadata: Metadata = {
   title: "Pageboard | Components",
   description:
     "Explore Pageboard components for feedback, inputs, boards, calendars, and more",
+  alternates: {
+    canonical: canonicalUrl("/components"),
+  },
 };
 
 type ComponentPageSection = {
