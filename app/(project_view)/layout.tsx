@@ -11,6 +11,7 @@ import {
   SIDEBAR_WIDTH_COOKIE,
   CHAT_WIDTH_COOKIE,
   TABS_COOKIE,
+  EDIT_MODE_COOKIE,
   parsePanelWidthCookie,
 } from "../lib/cookies";
 import { Tab } from "../lib/components/tab/Tab";
@@ -29,7 +30,6 @@ import {
   SIDEBAR_MAX_WIDTH,
   SIDEBAR_MIN_WIDTH,
 } from "../lib/components/project/desktopPanelSizing";
-import { Footer } from "../lib/components/landing/Footer";
 
 export const metadata: Metadata = {
   title: "Pageboard",
@@ -47,6 +47,7 @@ export default async function ProjectViewLayout({
   const sidebarWidthValue = cookieStore.get(SIDEBAR_WIDTH_COOKIE)?.value;
   const chatWidthValue = cookieStore.get(CHAT_WIDTH_COOKIE)?.value;
   const tabsValue = cookieStore.get(TABS_COOKIE)?.value;
+  const editModeValue = cookieStore.get(EDIT_MODE_COOKIE)?.value;
   const initialSidebarOpen =
     sidebarValue != null ? sidebarValue === "true" : undefined;
   const initialChatOpen = chatValue != null ? chatValue === "true" : undefined;
@@ -63,6 +64,7 @@ export default async function ProjectViewLayout({
     CHAT_DEFAULT_WIDTH,
   );
   const initialTabsState = parseTabsCookie(tabsValue);
+  const initialIsLive = editModeValue === "live";
 
   return (
     <ConvexAuthNextjsServerProvider>
@@ -84,7 +86,7 @@ export default async function ProjectViewLayout({
                   initialSidebarOpen={initialSidebarOpen}
                   initialSidebarWidth={initialSidebarWidth}
                 />
-                <EditModeProvider>
+                <EditModeProvider initialIsLive={initialIsLive}>
                   <PageDocumentProvider>
                     <SearchBar />
                     <div className="relative flex-1 min-w-0 flex flex-col items-start justify-start md:h-full md:min-h-0">

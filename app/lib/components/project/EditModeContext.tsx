@@ -1,5 +1,6 @@
 "use client";
 
+import { EDIT_MODE_COOKIE, setCookie } from "@/app/lib/cookies";
 import type { InsertableComponentCommand } from "@/app/lib/components/page_components/componentCatalog";
 import {
   createContext,
@@ -55,9 +56,15 @@ const EditModeOverrideContext = createContext<EditModeOverrideValue | null>(
   null,
 );
 
-export function EditModeProvider({ children }: { children: ReactNode }) {
-  const [rawIsEditing, rawSetIsEditing] = useState(true);
-  const [rawIsLive, rawSetIsLive] = useState(false);
+export function EditModeProvider({
+  children,
+  initialIsLive = false,
+}: {
+  children: ReactNode;
+  initialIsLive?: boolean;
+}) {
+  const [rawIsEditing, rawSetIsEditing] = useState(!initialIsLive);
+  const [rawIsLive, rawSetIsLive] = useState(initialIsLive);
   const [isSplitView, setIsSplitView] = useState(false);
   const [modeLock, setModeLock] = useState<ModeLock>(null);
   const [pendingComponentInsert, setPendingComponentInsert] =
@@ -90,6 +97,7 @@ export function EditModeProvider({ children }: { children: ReactNode }) {
       rawSetIsEditing(value);
       if (value) {
         rawSetIsLive(false);
+        setCookie(EDIT_MODE_COOKIE, "edit");
       }
     },
     [modeLock],
@@ -107,6 +115,7 @@ export function EditModeProvider({ children }: { children: ReactNode }) {
       rawSetIsLive(value);
       if (value) {
         rawSetIsEditing(false);
+        setCookie(EDIT_MODE_COOKIE, "live");
       }
     },
     [modeLock],
@@ -121,6 +130,7 @@ export function EditModeProvider({ children }: { children: ReactNode }) {
       const next = !prev;
       if (next) {
         rawSetIsLive(false);
+        setCookie(EDIT_MODE_COOKIE, "edit");
       }
       return next;
     });
@@ -135,6 +145,7 @@ export function EditModeProvider({ children }: { children: ReactNode }) {
       const next = !prev;
       if (next) {
         rawSetIsEditing(false);
+        setCookie(EDIT_MODE_COOKIE, "live");
       }
       return next;
     });
