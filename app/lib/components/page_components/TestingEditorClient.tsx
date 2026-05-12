@@ -70,6 +70,7 @@ export default function TestingEditorClient() {
     minRatio: SPLIT_MIN_RATIO,
     maxRatio: SPLIT_MAX_RATIO,
   });
+  const editorPaneRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lastCursorRef = useRef(0);
   const content = pageDocument?.document?.editorText ?? INITIAL_TEXT;
@@ -141,9 +142,23 @@ export default function TestingEditorClient() {
     [allowedInsertableCommands, isEditing, isLive],
   );
 
-  useLayoutEffect(() => {
+  const scheduleEditorMeasurements = useCallback(() => {
     recalculateLineHeights();
-  }, [content, recalculateLineHeights]);
+
+    requestAnimationFrame(() => {
+      recalculateLineHeights();
+      const textarea = textareaRef.current;
+      if (!textarea) {
+        return;
+      }
+
+      updateGhostCompletion(textarea.value, textarea.selectionStart);
+    });
+  }, [recalculateLineHeights, updateGhostCompletion]);
+
+  useLayoutEffect(() => {
+    scheduleEditorMeasurements();
+  }, [content, isSplitView, splitRatio, scheduleEditorMeasurements]);
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -162,6 +177,10 @@ export default function TestingEditorClient() {
     });
 
     observer.observe(textarea);
+    if (editorPaneRef.current) {
+      observer.observe(editorPaneRef.current);
+    }
+
     return () => observer.disconnect();
   }, [isEditing, isLive, recalculateLineHeights, updateGhostCompletion]);
 
@@ -274,7 +293,10 @@ export default function TestingEditorClient() {
   }
 
   const editorPane = (
-    <div className="h-full w-full flex items-start justify-start">
+    <div
+      ref={editorPaneRef}
+      className="h-full w-full flex items-start justify-start"
+    >
       <div
         aria-hidden
         className="@[35rem]:block hidden w-11 shrink-0 h-full text-right text-sm text-(--gray-page) select-none overflow-hidden border-r border-(--gray)/40"
