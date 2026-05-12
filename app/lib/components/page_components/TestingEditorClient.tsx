@@ -11,28 +11,25 @@ import {
 import {
   EditModeSubtreeModeProvider,
   useEditMode,
-  type InsertableComponentCommand,
 } from "@/app/lib/components/project/EditModeContext";
 import { useOptionalPageDocument } from "@/app/lib/components/project/PageDocumentContext";
 import { useSearchBar } from "@/app/lib/components/searchbar/SearchBarContext";
-import {
-  getCaretCoordinates,
-  measureWrappedLineHeights,
-} from "@/app/lib/components/page_components/testing_editor/caret";
-import {
-  completeSlashCommand,
-  consumeSlashActionCommand,
-  getActiveLineFromCursor,
-  getSlashCommandTokenRange,
-  getSlashCompletionSuffix,
-  replaceSlashCommandWithStructuralBlock,
-  resolveComponentTypeFromCommand,
-} from "@/app/lib/components/page_components/testing_editor/commands";
+import { getActiveLineFromCursor } from "@/app/lib/components/page_components/testing_editor/commands";
 import { listAllowedInsertableCommands } from "@/app/lib/components/page_components/componentCatalog";
 import { INITIAL_TEXT } from "@/app/lib/components/page_components/testing_editor/constants";
 import { renderContentWithComponents } from "@/app/lib/components/page_components/testing_editor/renderContent";
 import { EDITOR_SPLIT_RATIO_COOKIE } from "@/app/lib/cookies";
 import { useResizableSplitRatio } from "@/app/lib/hooks/useResizableSplitRatio";
+import {
+  getEditorLineNumbers,
+  handleEditorChange,
+  handleEditorKeyDown,
+  handleEditorSelectionChange,
+  recalculateTextareaLineHeights,
+  setTextareaCaretPosition,
+  useTextareaGhostCompletion,
+  type GhostCompletion,
+} from "@/app/lib/components/page_components/testingeEditorClientHelpers";
 
 const SPLIT_MIN_RATIO = 1 / 3;
 const SPLIT_DEFAULT_RATIO = 1 / 2;
@@ -52,11 +49,7 @@ export default function TestingEditorClient() {
   const [activeLine, setActiveLine] = useState(1);
   const [lineHeights, setLineHeights] = useState<number[]>([24]);
   const [scrollTop, setScrollTop] = useState(0);
-  const [ghostCompletion, setGhostCompletion] = useState<{
-    suffix: string;
-    top: number;
-    left: number;
-  } | null>(null);
+  const [ghostCompletion, setGhostCompletion] = useState<GhostCompletion>(null);
   const {
     containerRef: splitContainerRef,
     ratio: splitRatio,
@@ -79,68 +72,37 @@ export default function TestingEditorClient() {
     [],
   );
 
-  const lines = useMemo(() => {
-    const lineCount = Math.max(1, content.split("\n").length);
-    return Array.from({ length: lineCount }, (_, index) => index + 1);
-  }, [content]);
+  const lines = useMemo(() => getEditorLineNumbers(content), [content]);
   const renderedContent = useMemo(
     () => renderContentWithComponents(content),
     [content],
   );
 
   const recalculateLineHeights = useCallback(() => {
-    const textarea = textareaRef.current;
-    if (!textarea || !isEditing || isLive) {
-      return;
-    }
-
-    const nextLineHeights = measureWrappedLineHeights(textarea);
-    setLineHeights((currentLineHeights) => {
-      if (
-        currentLineHeights.length === nextLineHeights.length &&
-        currentLineHeights.every(
-          (height, index) => height === nextLineHeights[index],
-        )
-      ) {
-        return currentLineHeights;
-      }
-
-      return nextLineHeights;
+    recalculateTextareaLineHeights({
+      textareaRef,
+      isEditing,
+      isLive,
+      setLineHeights,
     });
   }, [isEditing, isLive]);
 
   const updateActiveLine = () => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-
-    const cursorPosition = textarea.selectionStart;
-    lastCursorRef.current = cursorPosition;
-    setActiveLine(getActiveLineFromCursor(textarea.value, cursorPosition));
+    handleEditorSelectionChange({
+      textareaRef,
+      lastCursorRef,
+      setActiveLine,
+      updateGhostCompletion,
+    });
   };
 
-  const updateGhostCompletion = useCallback(
-    (value: string, cursorPosition: number) => {
-      const textarea = textareaRef.current;
-      if (!textarea || !isEditing || isLive) {
-        setGhostCompletion(null);
-        return;
-      }
-
-      const suffix = getSlashCompletionSuffix(
-        value,
-        cursorPosition,
-        allowedInsertableCommands,
-      );
-      if (!suffix) {
-        setGhostCompletion(null);
-        return;
-      }
-
-      const { top, left } = getCaretCoordinates(textarea, cursorPosition);
-      setGhostCompletion({ suffix, top, left });
-    },
-    [allowedInsertableCommands, isEditing, isLive],
-  );
+  const updateGhostCompletion = useTextareaGhostCompletion({
+    textareaRef,
+    allowedInsertableCommands,
+    isEditing,
+    isLive,
+    setGhostCompletion,
+  });
 
   const scheduleEditorMeasurements = useCallback(() => {
     recalculateLineHeights();
@@ -226,14 +188,11 @@ export default function TestingEditorClient() {
 
   const setCaretPosition = useCallback(
     (position: number) => {
-      lastCursorRef.current = position;
-      requestAnimationFrame(() => {
-        const textarea = textareaRef.current;
-        if (!textarea) return;
-        textarea.selectionStart = position;
-        textarea.selectionEnd = position;
-        textarea.focus();
-        updateGhostCompletion(textarea.value, position);
+      setTextareaCaretPosition({
+        textareaRef,
+        lastCursorRef,
+        position,
+        updateGhostCompletion,
       });
     },
     [updateGhostCompletion],
@@ -321,182 +280,33 @@ export default function TestingEditorClient() {
           ref={textareaRef}
           value={content}
           onChange={(event) => {
-            const nextValue = event.target.value;
-            const cursorPosition = event.target.selectionStart;
-            lastCursorRef.current = cursorPosition;
-
-            const slashRange = getSlashCommandTokenRange(
-              nextValue,
-              cursorPosition,
-            );
-            const command = slashRange?.token.slice(1).toLowerCase() as
-              | InsertableComponentCommand
-              | undefined;
-            const structuralReplacement =
-              replaceSlashCommandWithStructuralBlock(nextValue, cursorPosition);
-
-            if (structuralReplacement) {
-              updateEditorText(structuralReplacement.nextValue);
-              setActiveLine(
-                getActiveLineFromCursor(
-                  structuralReplacement.nextValue,
-                  structuralReplacement.nextCursor,
-                ),
-              );
-              setCaretPosition(structuralReplacement.nextCursor);
-              return;
-            }
-
-            const replacement =
-              slashRange &&
-              command &&
-              allowedInsertableCommands.includes(command) &&
-              resolveComponentTypeFromCommand(command)
-                ? insertComponentAtRange({
-                    command,
-                    value: nextValue,
-                    start: slashRange.start,
-                    end: slashRange.end,
-                  })
-                : null;
-
-            if (replacement) {
-              setActiveLine(
-                getActiveLineFromCursor(
-                  replacement.nextValue,
-                  replacement.nextCursor,
-                ),
-              );
-              setCaretPosition(replacement.nextCursor);
-              return;
-            }
-
-            updateEditorText(nextValue);
-            setActiveLine(getActiveLineFromCursor(nextValue, cursorPosition));
-            recalculateLineHeights();
-            updateGhostCompletion(nextValue, cursorPosition);
+            handleEditorChange({
+              event,
+              lastCursorRef,
+              allowedInsertableCommands,
+              insertComponentAtRange,
+              updateEditorText,
+              setActiveLine,
+              setCaretPosition,
+              recalculateLineHeights,
+              updateGhostCompletion,
+            });
           }}
           onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              const textarea = event.currentTarget;
-              const slashAction = consumeSlashActionCommand(
-                textarea.value,
-                textarea.selectionStart,
-              );
-              if (slashAction) {
-                event.preventDefault();
-                event.stopPropagation();
-                if (slashAction.action.type === "open-component-library") {
-                  requestOpenComponentLibrary();
-                } else if (slashAction.action.type === "open-tagged-search") {
-                  openTaggedSearch(slashAction.action.tag);
-                }
-                updateEditorText(slashAction.nextValue);
-                setActiveLine(
-                  getActiveLineFromCursor(
-                    slashAction.nextValue,
-                    slashAction.nextCursor,
-                  ),
-                );
-                setCaretPosition(slashAction.nextCursor);
-                return;
-              }
-
-              const structuralReplacement =
-                replaceSlashCommandWithStructuralBlock(
-                  textarea.value,
-                  textarea.selectionStart,
-                );
-              if (structuralReplacement) {
-                event.preventDefault();
-                updateEditorText(structuralReplacement.nextValue);
-                setActiveLine(
-                  getActiveLineFromCursor(
-                    structuralReplacement.nextValue,
-                    structuralReplacement.nextCursor,
-                  ),
-                );
-                setCaretPosition(structuralReplacement.nextCursor);
-                return;
-              }
-
-              const slashRange = getSlashCommandTokenRange(
-                textarea.value,
-                textarea.selectionStart,
-              );
-              const command = slashRange?.token.slice(1).toLowerCase() as
-                | InsertableComponentCommand
-                | undefined;
-              const replacement =
-                slashRange &&
-                command &&
-                allowedInsertableCommands.includes(command) &&
-                resolveComponentTypeFromCommand(command)
-                  ? insertComponentAtRange({
-                      command,
-                      value: textarea.value,
-                      start: slashRange.start,
-                      end: slashRange.end,
-                    })
-                  : null;
-              if (!replacement) {
-                return;
-              }
-
-              event.preventDefault();
-              const nextValue = `${replacement.nextValue.slice(
-                0,
-                replacement.nextCursor,
-              )}\n${replacement.nextValue.slice(replacement.nextCursor)}`;
-              const nextCursor = replacement.nextCursor + 1;
-              updateEditorText(nextValue);
-              setActiveLine(getActiveLineFromCursor(nextValue, nextCursor));
-              setCaretPosition(nextCursor);
-              return;
-            }
-
-            if (event.key !== "Tab") {
-              return;
-            }
-
-            const textarea = event.currentTarget;
-            const completion = completeSlashCommand(
-              textarea.value,
-              textarea.selectionStart,
+            handleEditorKeyDown({
+              event,
               allowedInsertableCommands,
-            );
-            if (!completion) {
-              return;
-            }
-
-            event.preventDefault();
-            updateEditorText(completion.nextValue);
-            setActiveLine(
-              getActiveLineFromCursor(
-                completion.nextValue,
-                completion.nextCursor,
-              ),
-            );
-            setCaretPosition(completion.nextCursor);
+              insertComponentAtRange,
+              updateEditorText,
+              setActiveLine,
+              setCaretPosition,
+              requestOpenComponentLibrary,
+              openTaggedSearch,
+            });
           }}
-          onClick={() => {
-            updateActiveLine();
-            const textarea = textareaRef.current;
-            if (!textarea) return;
-            updateGhostCompletion(textarea.value, textarea.selectionStart);
-          }}
-          onKeyUp={() => {
-            updateActiveLine();
-            const textarea = textareaRef.current;
-            if (!textarea) return;
-            updateGhostCompletion(textarea.value, textarea.selectionStart);
-          }}
-          onSelect={() => {
-            updateActiveLine();
-            const textarea = textareaRef.current;
-            if (!textarea) return;
-            updateGhostCompletion(textarea.value, textarea.selectionStart);
-          }}
+          onClick={updateActiveLine}
+          onKeyUp={updateActiveLine}
+          onSelect={updateActiveLine}
           onScroll={(event) => {
             setScrollTop(event.currentTarget.scrollTop);
             updateGhostCompletion(
