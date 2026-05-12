@@ -66,7 +66,7 @@ export const SelectCreator = ({
 
   return (
     <>
-      <p className="text-lg font-medium mt-2">Select field setup</p>
+      <p className="text-lg font-medium">Select field setup</p>
       <p className="text-(--gray-page)">
         Configure the title, description, and available choices for a
         select-style multi-choice component.

@@ -74,7 +74,7 @@ export const RadioCreator = ({
 
   return (
     <>
-      <p className="text-lg font-medium mt-2">Radio field setup</p>
+      <p className="text-lg font-medium">Radio field setup</p>
       <p className="text-(--gray-page)">
         Configure the title, description, and available choices for a
         single-choice radio component.

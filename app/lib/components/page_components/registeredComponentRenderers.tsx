@@ -6,6 +6,7 @@ import { IdeaBoard } from "./idea_board/IdeaBoard";
 import { SimpleInput } from "./SimpleInput/SimpleInput";
 import { Form } from "./form/form/Form";
 import { AdvancedInput } from "./advanced_input/AdvancedInput";
+import { Table } from "./table/Table";
 
 export type PageComponentRenderer = {
   type: PageComponentType;
@@ -28,5 +29,9 @@ export const REGISTERED_PAGE_COMPONENT_RENDERERS = [
   {
     type: "Form",
     Component: Form,
+  },
+  {
+    type: "Table",
+    Component: Table,
   },
 ] as const satisfies readonly PageComponentRenderer[];

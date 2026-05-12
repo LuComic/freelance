@@ -64,7 +64,7 @@ export const AdvancedInputCreator = ({
 
   return (
     <>
-      <p className="text-lg font-medium mt-2">Advanced input setup</p>
+      <p className="text-lg font-medium">Advanced input setup</p>
       <p className="text-(--gray-page)">
         Client submissions are listed here. Creators can remove entries.
       </p>

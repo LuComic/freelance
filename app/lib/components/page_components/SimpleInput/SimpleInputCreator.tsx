@@ -25,7 +25,7 @@ export const SimpleInputCreator = ({
 
   return (
     <>
-      <p className="text-lg font-medium mt-2">Simple Input</p>
+      <p className="text-lg font-medium">Simple Input</p>
       <p className="text-(--gray-page)">
         Client submissions are listed here. Creators can remove entries.
       </p>

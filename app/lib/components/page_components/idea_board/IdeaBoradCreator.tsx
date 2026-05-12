@@ -82,7 +82,7 @@ export const IdeaBoradCreator = ({
 
   return (
     <>
-      <p className="text-lg font-medium mt-2">Idea Board</p>
+      <p className="text-lg font-medium">Idea Board</p>
       <p className="text-(--gray-page)">
         Here you can add and vote on ideas submitted by all project members
         (unless the client is denied). Only creators can remove ideas

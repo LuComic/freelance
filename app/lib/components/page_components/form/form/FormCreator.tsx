@@ -143,7 +143,7 @@ export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
 
   return (
     <>
-      <p className="text-lg font-medium mt-2">Form</p>
+      <p className="text-lg font-medium">Form</p>
       <p className="text-(--gray-page)">
         Collect individual client submissions without changing the shared page
         state.

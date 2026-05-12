@@ -87,7 +87,7 @@ export const KanbanCreator = ({
 
   return (
     <>
-      <p className="text-lg font-medium mt-2">Current Progress</p>
+      <p className="text-lg font-medium">Current Progress</p>
       <p className="text-(--gray-page)">
         Here you can display the progress of your work as a kanban table. The
         table is divided into &quot;Todo&quot; (features/things to do or fix),

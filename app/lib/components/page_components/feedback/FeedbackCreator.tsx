@@ -129,7 +129,7 @@ export const FeedbackCreator = ({
 
   return (
     <>
-      <p className="text-lg font-medium mt-2">Client&apos;s ideas</p>
+      <p className="text-lg font-medium">Client&apos;s ideas</p>
       <p className="text-(--gray-page)">
         Here you can accept or decline the ideas proposed by the client and give
         an explanation to your decision. Live view shows what the client sees
