@@ -28,11 +28,11 @@ export const TableCreator = ({
   const [newColumn, setNewColumn] = useState("1");
   const [newValue, setNewValue] = useState("");
 
-  const setCellValue = (row: number, column: number, value: string) => {
+  const setCellValue = (column: number, row: number, value: string) => {
     onChangeLiveState((currentState) => {
       const nextValue = value.slice(0, MAX_FORM_TEXT_ANSWER_LENGTH);
       const existing = currentState.cells.find(
-        (cell) => cell.row === row && cell.column === column,
+        (cell) => cell.column === column && cell.row === row,
       );
 
       if (existing) {
@@ -79,14 +79,16 @@ export const TableCreator = ({
       newValue.trim() === ""
     )
       return;
-    setCellValue(row, column, newValue);
+    setCellValue(column, row, newValue);
     setNewValue("");
   };
 
-  const deleteCell = (cellId: string) => {
+  const deleteCell = (column: number, row: number) => {
     onChangeLiveState((currentState) => ({
       ...currentState,
-      cells: currentState.cells.filter((cell) => cell.id !== cellId),
+      cells: currentState.cells.filter(
+        (cell) => cell.column !== column || cell.row !== row,
+      ),
     }));
   };
 
@@ -97,7 +99,12 @@ export const TableCreator = ({
         Configure the table and add text to cells.
       </p>
 
-      <TableBoard liveState={liveState} editable onCellChange={setCellValue} />
+      <TableBoard
+        liveState={liveState}
+        editable
+        onCellChange={setCellValue}
+        onCellDelete={deleteCell}
+      />
 
       <div className="border-(--gray) border-b py-2 w-full flex flex-col gap-2">
         <button
@@ -198,7 +205,7 @@ export const TableCreator = ({
             <button
               type="button"
               className="h-6.5 flex shrink-0 items-center justify-center aspect-square rounded-md hover:bg-(--darkest-hover) bg-(--dim) border-(--gray-page) border"
-              onClick={() => deleteCell(cell.id)}
+              onClick={() => deleteCell(cell.column, cell.row)}
             >
               <Trash size={16} />
             </button>

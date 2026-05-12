@@ -1,18 +1,13 @@
 "use client";
 
-import { api } from "@/convex/_generated/api";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { getCookie, SHOW_SUGGESTIONS_COOKIE } from "@/app/lib/cookies";
-import type {
-  PageTemplateBlueprint,
-  ProjectTemplateBlueprint,
-} from "@/lib/templateBlueprint";
 import { useConvex } from "convex/react";
 import { Search } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { MAX_SEARCH_QUERY_LENGTH } from "@/lib/inputLimits";
-import { getProjectPagePath } from "../project/paths";
+import { getSearchItems, handleTemplateSelect } from "./SearchBarItems";
 import { PersonModal } from "./PersonModal";
 import {
   getEmptyMessage,
@@ -21,25 +16,13 @@ import {
   getSearchPlaceholder,
   getTagCommandMatch,
   getTagGhostCompletion,
-  type SearchPageResult,
   useSearchBarResults,
 } from "./SearchBarHelpers";
 import { SearchBarItem } from "./SearchBarItem";
 import { useSearchBar } from "./SearchBarContext";
-import type {
-  SearchPerson,
-  SearchTemplate,
-  SearchTemplateSummary,
-} from "./SearchBarData";
+import { useEditMode } from "../project/EditModeContext";
+import type { SearchTemplate } from "./SearchBarData";
 import { TemplateModal } from "./TemplateModal";
-
-type SearchItem = {
-  key: string;
-  title: string;
-  subtitle?: string;
-  badge?: string;
-  onSelect: () => void;
-};
 
 export const SearchBar = () => {
   const convex = useConvex();
@@ -58,6 +41,7 @@ export const SearchBar = () => {
   const pathnameSegments = pathname.split("/").filter(Boolean);
   const currentProjectId =
     pathnameSegments[0] === "projects" ? (pathnameSegments[1] ?? null) : null;
+  const { isLive, setIsEditing, setIsLive, toggleSplitView } = useEditMode();
   const {
     isOpen,
     activeTag,
@@ -127,9 +111,11 @@ export const SearchBar = () => {
       });
     }
 
-    setSearchQuery("");
-    setSelectedIndex(0);
-    setTemplateActionError(null);
+    queueMicrotask(() => {
+      setSearchQuery("");
+      setSelectedIndex(0);
+      setTemplateActionError(null);
+    });
   }, [
     activeTag,
     openTaggedSearch,
@@ -141,97 +127,32 @@ export const SearchBar = () => {
     templateSearchTypes,
   ]);
 
-  const handleTemplateSelect = async (template: SearchTemplateSummary) => {
-    setTemplateActionError(null);
-    setIsLoadingTemplatePreview(true);
-
-    try {
-      const preview = await convex.query(
-        api.templates.content.getTemplatePreview,
-        {
-          templateId: template.id,
-        },
-      );
-      const typedPreview: SearchTemplate =
-        preview.templateType === "page" && "page" in preview && preview.page
-          ? {
-              ...preview,
-              templateType: "page",
-              blueprint: preview.blueprint as PageTemplateBlueprint,
-              page: preview.page,
-            }
-          : preview.templateType === "project" &&
-              "pages" in preview &&
-              preview.pages
-            ? {
-                ...preview,
-                templateType: "project",
-                blueprint: preview.blueprint as ProjectTemplateBlueprint,
-                pages: preview.pages,
-              }
-            : (() => {
-                throw new Error("Template preview shape is invalid.");
-              })();
-
-      closeSearch();
-      setSearchQuery("");
-      setSelectedIndex(0);
-
-      if (templateSearchSelectHandler) {
-        templateSearchSelectHandler(typedPreview);
-      } else {
-        setSelectedTemplate(typedPreview);
-      }
-    } catch (error) {
-      setTemplateActionError(
-        error instanceof Error
-          ? error.message
-          : "Could not open this template.",
-      );
-    } finally {
-      setIsLoadingTemplatePreview(false);
-    }
-  };
-
-  const searchItems: SearchItem[] =
-    activeTag === "people"
-      ? visiblePeopleSearchResults.map((person: SearchPerson) => ({
-          key: String(person.userId),
-          title: person.name,
-          onSelect: () => {
-            if (peopleSearchSelectHandler) {
-              peopleSearchSelectHandler(person);
-            } else {
-              openPersonModal(person, searchInviteDefaults ?? undefined);
-            }
-            closeSearch();
-            setSearchQuery("");
-            setSelectedIndex(0);
-          },
-        }))
-      : activeTag === "template"
-        ? visibleTemplateSearchResults.map(
-            (template: SearchTemplateSummary) => ({
-              key: String(template.id),
-              title: template.name,
-              subtitle: `by ${template.author}`,
-              badge: `${template.templateType} template`,
-              onSelect: () => {
-                void handleTemplateSelect(template);
-              },
-            }),
-          )
-        : prioritizedPageSearchResults.map((page: SearchPageResult) => ({
-            key: `${page.projectId}:${page.pageId}`,
-            title: page.pageTitle,
-            subtitle: page.projectName,
-            onSelect: () => {
-              closeSearch();
-              setSearchQuery("");
-              setSelectedIndex(0);
-              router.push(getProjectPagePath(page.projectId, page.pageId));
-            },
-          }));
+  const searchItems = getSearchItems({
+    activeTag,
+    visiblePeopleSearchResults,
+    visibleTemplateSearchResults,
+    prioritizedPageSearchResults,
+    peopleSearchSelectHandler,
+    searchInviteDefaults,
+    openPersonModal,
+    closeSearch,
+    setSearchQuery,
+    setSelectedIndex,
+    routerPush: router.push,
+    onTemplateSelect: (template) => {
+      void handleTemplateSelect({
+        convex,
+        template,
+        templateSearchSelectHandler,
+        closeSearch,
+        setSearchQuery,
+        setSelectedIndex,
+        setSelectedTemplate,
+        setTemplateActionError,
+        setIsLoadingTemplatePreview,
+      });
+    },
+  });
   const selectedSearchItemIndex =
     searchItems.length === 0
       ? 0
@@ -249,7 +170,21 @@ export const SearchBar = () => {
         setSelectedIndex(0);
       }
 
-      if (e.metaKey || e.ctrlKey) {
+      if (e.altKey && e.shiftKey && e.code === "KeyE") {
+        e.preventDefault();
+        if (isLive) {
+          setIsEditing(true);
+        } else {
+          setIsLive(true);
+        }
+      }
+
+      if (e.altKey && e.shiftKey && e.code === "KeyS") {
+        e.preventDefault();
+        toggleSplitView();
+      }
+
+      if (e.metaKey || e.ctrlKey || e.altKey) {
         setCommandSuggestions(getCookie(SHOW_SUGGESTIONS_COOKIE) !== "false");
       }
 
@@ -280,7 +215,7 @@ export const SearchBar = () => {
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
-      if (!e.metaKey && !e.ctrlKey) {
+      if (!e.metaKey && !e.ctrlKey && !e.altKey) {
         setCommandSuggestions(false);
       }
     };
@@ -297,7 +232,17 @@ export const SearchBar = () => {
       window.removeEventListener("keyup", handleKeyUp);
       window.removeEventListener("blur", handleWindowBlur);
     };
-  }, [closeSearch, isOpen, openSearch, searchItems, selectedSearchItemIndex]);
+  }, [
+    closeSearch,
+    isLive,
+    isOpen,
+    openSearch,
+    searchItems,
+    selectedSearchItemIndex,
+    setIsEditing,
+    setIsLive,
+    toggleSplitView,
+  ]);
 
   useEffect(() => {
     if (searchItems.length === 0) return;
@@ -331,6 +276,12 @@ export const SearchBar = () => {
           </span>
           <span>
             cmd/ctrl + shift + L for <strong>Right Sidebar</strong>
+          </span>
+          <span>
+            alt + shift + E for <strong>Edit/Client View</strong>
+          </span>
+          <span>
+            alt + shift + S for <strong>Split View</strong>
           </span>
         </div>
       )}

@@ -8,7 +8,8 @@ type TableState = PageComponentLiveStateByType<"Table">["state"];
 type TableBoardProps = {
   liveState: TableState;
   editable?: boolean;
-  onCellChange?: (row: number, column: number, value: string) => void;
+  onCellChange?: (column: number, row: number, value: string) => void;
+  onCellDelete?: (column: number, row: number) => void;
 };
 
 function getCellValue(cells: TableState["cells"], row: number, column: number) {
@@ -22,6 +23,7 @@ export const TableBoard = ({
   liveState,
   editable = false,
   onCellChange,
+  onCellDelete,
 }: TableBoardProps) => {
   const [editingCell, setEditingCell] = useState<{
     row: number;
@@ -31,7 +33,14 @@ export const TableBoard = ({
 
   const commitEdit = () => {
     if (!editingCell) return;
-    onCellChange?.(editingCell.row, editingCell.column, draftValue);
+
+    if (draftValue.trim() === "") {
+      onCellDelete?.(editingCell.column, editingCell.row);
+      setEditingCell(null);
+      return;
+    }
+
+    onCellChange?.(editingCell.column, editingCell.row, draftValue);
     setEditingCell(null);
   };
 
