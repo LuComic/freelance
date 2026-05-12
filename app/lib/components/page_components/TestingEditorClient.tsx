@@ -315,7 +315,7 @@ export default function TestingEditorClient() {
             );
           }}
           spellCheck={false}
-          className="relative z-10 h-full w-full resize-none bg-transparent p-0 pt-2 @[35rem]:pt-0 pl-4 text-base leading-6 text-(--light) caret-(--light) border-none outline-none focus:ring-0 text-editor-font"
+          className="relative z-10 h-full w-full resize-none bg-transparent p-0 @[35rem]:pt-0 @[35rem]:pl-4 text-base leading-6 text-(--light) caret-(--light) border-none outline-none focus:ring-0 text-editor-font"
           placeholder="Start typing..."
         />
         {ghostCompletion ? (
