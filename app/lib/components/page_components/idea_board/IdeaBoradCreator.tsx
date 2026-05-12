@@ -195,7 +195,7 @@ export const IdeaBoradCreator = ({
         liveState.ideas.map((idea, index) => (
           <div
             key={idea.id}
-            className={`w-full min-w-0 flex items-center border-(--gray) justify-between gap-2 flex-wrap ${index !== 0 ? "border-dashed pt-2 border-t" : null}`}
+            className={`w-full min-w-0 flex items-center border-(--gray) justify-between gap-2 ${index !== 0 ? "border-dashed pt-2 border-t" : null}`}
           >
             <span className="min-w-0 wrap-break-word">
               {idea.idea}

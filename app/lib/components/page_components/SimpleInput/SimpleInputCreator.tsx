@@ -35,7 +35,7 @@ export const SimpleInputCreator = ({
           liveState.inputs.map((input, index) => (
             <div
               key={input.id}
-              className={`w-full min-w-0 flex items-center border-(--gray) border-dashed justify-between gap-2 flex-wrap ${index !== 0 ? "border-t pt-2" : null}`}
+              className={`w-full min-w-0 flex items-center border-(--gray) border-dashed justify-between gap-2 ${index !== 0 ? "border-t pt-2" : null}`}
             >
               <span className="min-w-0 wrap-break-word">{input.value}</span>
 

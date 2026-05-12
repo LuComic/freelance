@@ -166,7 +166,7 @@ export const KanbanCreator = ({
               todoItems.map((item) => (
                 <div
                   key={item.id}
-                  className="w-full min-w-0 flex items-center justify-start gap-2 flex-wrap"
+                  className="w-full min-w-0 flex items-center justify-start gap-2"
                 >
                   <Select
                     value={item.status}
@@ -227,7 +227,7 @@ export const KanbanCreator = ({
               progressItems.map((item) => (
                 <div
                   key={item.id}
-                  className="w-full min-w-0 flex items-center justify-start gap-2 flex-wrap"
+                  className="w-full min-w-0 flex items-center justify-start gap-2"
                 >
                   <Select
                     value={item.status}
@@ -285,7 +285,7 @@ export const KanbanCreator = ({
               doneItems.map((item) => (
                 <div
                   key={item.id}
-                  className="w-full min-w-0 flex items-center justify-start gap-2 flex-wrap"
+                  className="w-full min-w-0 flex items-center justify-start gap-2"
                 >
                   <Select
                     value={item.status}

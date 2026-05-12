@@ -143,7 +143,7 @@ export const AdvancedInputCreator = ({
               liveState.colors.map((color, index) => (
                 <div
                   key={color.id}
-                  className={`w-full min-w-0 flex items-center border-(--gray) border-dashed justify-start gap-2 flex-wrap ${index !== 0 ? "border-t pt-2" : null}`}
+                  className={`w-full min-w-0 flex items-center border-(--gray) border-dashed justify-start gap-2 ${index !== 0 ? "border-t pt-2" : null}`}
                 >
                   <span
                     className="h-5 w-5 shrink-0 rounded-sm border border-(--gray)"
@@ -174,7 +174,7 @@ export const AdvancedInputCreator = ({
               return font ? (
                 <div
                   key={fontEntry.id}
-                  className={`w-full min-w-0 flex items-center border-(--gray) border-dashed justify-between gap-2 flex-wrap ${index !== 0 ? "border-t pt-2" : null}`}
+                  className={`w-full min-w-0 flex items-center border-(--gray) border-dashed justify-between gap-2 ${index !== 0 ? "border-t pt-2" : null}`}
                 >
                   <span
                     className="min-w-0 wrap-break-word"
