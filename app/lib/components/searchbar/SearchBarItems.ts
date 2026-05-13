@@ -105,6 +105,7 @@ export const getSearchItems = ({
   setSearchQuery,
   setSelectedIndex,
   routerPush,
+  onPageSelect,
   onTemplateSelect,
 }: {
   activeTag: "people" | "template" | null;
@@ -121,6 +122,7 @@ export const getSearchItems = ({
   setSearchQuery: (value: string) => void;
   setSelectedIndex: (value: number) => void;
   routerPush: (href: string) => void;
+  onPageSelect?: (page: SearchPageResult) => void;
   onTemplateSelect: (template: SearchTemplateSummary) => void;
 }): SearchItem[] =>
   activeTag === "people"
@@ -151,6 +153,7 @@ export const getSearchItems = ({
           title: page.pageTitle,
           subtitle: page.projectName,
           onSelect: () => {
+            onPageSelect?.(page);
             closeSearch();
             setSearchQuery("");
             setSelectedIndex(0);

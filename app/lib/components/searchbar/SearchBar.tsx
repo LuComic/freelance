@@ -1,7 +1,12 @@
 "use client";
 
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
-import { getCookie, SHOW_SUGGESTIONS_COOKIE } from "@/app/lib/cookies";
+import {
+  getCookie,
+  setCookie,
+  SHOW_SUGGESTIONS_COOKIE,
+  TABS_COOKIE,
+} from "@/app/lib/cookies";
 import { useConvex } from "convex/react";
 import { Search } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
@@ -23,6 +28,12 @@ import { useSearchBar } from "./SearchBarContext";
 import { useEditMode } from "../project/EditModeContext";
 import type { SearchTemplate } from "./SearchBarData";
 import { TemplateModal } from "./TemplateModal";
+import {
+  parseTabsCookie,
+  serializeTabsCookie,
+  upsertTab,
+} from "../tab/tabState";
+import { getProjectPagePath } from "../project/paths";
 
 export const SearchBar = () => {
   const convex = useConvex();
@@ -147,6 +158,33 @@ export const SearchBar = () => {
     setSearchQuery,
     setSelectedIndex,
     routerPush: router.push,
+    onPageSelect: () => {
+      const currentPage = visiblePageSearchResults.find(
+        (page) =>
+          page.projectId === currentProjectId && page.pageId === currentPageId,
+      );
+
+      if (!currentPage) {
+        return;
+      }
+
+      const tabsState = parseTabsCookie(getCookie(TABS_COOKIE));
+
+      setCookie(
+        TABS_COOKIE,
+        serializeTabsCookie(
+          upsertTab(tabsState, {
+            kind: "projectPage",
+            tabId: `project-page:${currentPage.pageId}`,
+            projectId: currentPage.projectId,
+            pageId: currentPage.pageId,
+            path: getProjectPagePath(currentPage.projectId, currentPage.pageId),
+            title: currentPage.pageTitle,
+            contextLabel: currentPage.projectName,
+          }),
+        ),
+      );
+    },
     onTemplateSelect: (template) => {
       void handleTemplateSelect({
         convex,
