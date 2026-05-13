@@ -41,18 +41,20 @@ export const TableBoard = ({
     setEditingCell(null);
   };
 
+  const tableMinWidth = `max(56.25rem, ${liveState.columns * 12.5}rem)`;
+
   return (
     <div className="w-full max-w-full min-w-0 overflow-x-auto border rounded-md border-(--gray)">
-      <div className="min-w-225 flex flex-col">
+      <div className="flex flex-col" style={{ minWidth: tableMinWidth }}>
         {Array.from({ length: liveState.rows }).map((_, rowIndex) => {
           const row = rowIndex + 1;
 
           return (
             <div
               key={row}
-              className={`w-full ${rowIndex !== liveState.rows - 1 && "border-b"} border-(--gray) text-left grid justify-between items-start ${rowIndex % 2 !== 0 && "bg-(--gray)/10"}`}
+              className={`w-full  ${rowIndex !== liveState.rows - 1 && "border-b"} border-(--gray) text-left grid justify-between items-start ${rowIndex % 2 !== 0 && "bg-(--gray)/10"}`}
               style={{
-                gridTemplateColumns: `repeat(${liveState.columns}, minmax(0, 1fr))`,
+                gridTemplateColumns: `repeat(${liveState.columns}, minmax(12.5rem, 1fr))`,
               }}
             >
               {Array.from({ length: liveState.columns }).map(

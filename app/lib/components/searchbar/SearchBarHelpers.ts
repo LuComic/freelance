@@ -35,7 +35,6 @@ export type SearchPageResult = {
 
 const PAGE_SUGGESTION_LIMIT = 10;
 const RECENT_PAGE_SUGGESTION_LIMIT = 3;
-const SEARCH_DEBUG_ENABLED = true;
 
 const getPageSearchResultKey = (
   page: Pick<SearchPageResult, "projectId" | "pageId">,
@@ -100,16 +99,26 @@ export const getPrioritizedPageSearchResults = ({
     }
   };
 
-  const recentPageSuggestions = getRecentPageSuggestions();
-  const resolvedRecentPageSuggestions = recentPageSuggestions
+  const resolvedRecentPageSuggestions = getRecentPageSuggestions()
     .filter((page) => !isCurrentPage(page))
     .flatMap((page) => {
       const visiblePage = visiblePagesByKey.get(getPageSearchResultKey(page));
       return visiblePage ? [visiblePage] : [];
-    })
+    });
+  const currentProjectRecentPageSuggestions = resolvedRecentPageSuggestions
+    .filter((page) => page.projectId === currentProjectId)
     .slice(0, RECENT_PAGE_SUGGESTION_LIMIT);
+  const otherRecentPageSuggestions = resolvedRecentPageSuggestions
+    .filter((page) => page.projectId !== currentProjectId)
+    .slice(
+      0,
+      RECENT_PAGE_SUGGESTION_LIMIT - currentProjectRecentPageSuggestions.length,
+    );
 
-  addPages(resolvedRecentPageSuggestions);
+  addPages([
+    ...currentProjectRecentPageSuggestions,
+    ...otherRecentPageSuggestions,
+  ]);
 
   if (currentProjectId !== null) {
     addPages(
@@ -127,46 +136,7 @@ export const getPrioritizedPageSearchResults = ({
     addPages(visiblePageSearchResults.filter((page) => !isCurrentPage(page)));
   }
 
-  const prioritizedResults = nextPageResults.slice(0, PAGE_SUGGESTION_LIMIT);
-
-  if (SEARCH_DEBUG_ENABLED) {
-    console.log("[SearchBarDebug] prioritize pages", {
-      currentProjectId,
-      currentPageId,
-      visiblePageSearchResultsCount: visiblePageSearchResults.length,
-      visiblePageSearchResults: visiblePageSearchResults.map((page) => ({
-        projectId: page.projectId,
-        projectName: page.projectName,
-        pageId: page.pageId,
-        pageTitle: page.pageTitle,
-        projectUpdatedAt: page.projectUpdatedAt,
-        pageUpdatedAt: page.pageUpdatedAt,
-        isCurrentPage: isCurrentPage(page),
-      })),
-      rawRecentPageSuggestions: recentPageSuggestions.map((page) => ({
-        projectId: page.projectId,
-        projectName: page.projectName,
-        pageId: page.pageId,
-        pageTitle: page.pageTitle,
-        matchedVisibleResult: visiblePagesByKey.has(getPageSearchResultKey(page)),
-        isCurrentPage: isCurrentPage(page),
-      })),
-      resolvedRecentPageSuggestions: resolvedRecentPageSuggestions.map((page) => ({
-        projectId: page.projectId,
-        projectName: page.projectName,
-        pageId: page.pageId,
-        pageTitle: page.pageTitle,
-      })),
-      prioritizedResults: prioritizedResults.map((page) => ({
-        projectId: page.projectId,
-        projectName: page.projectName,
-        pageId: page.pageId,
-        pageTitle: page.pageTitle,
-      })),
-    });
-  }
-
-  return prioritizedResults;
+  return nextPageResults.slice(0, PAGE_SUGGESTION_LIMIT);
 };
 
 export const getSearchPlaceholder = (activeTag: SearchTag | null) => {
@@ -379,43 +349,6 @@ export const useSearchBarResults = ({
     () => pageSearchResults ?? resolvedPageSearchResults ?? [],
     [pageSearchResults, resolvedPageSearchResults],
   );
-
-  useEffect(() => {
-    if (!SEARCH_DEBUG_ENABLED || !isOpen || activeTag !== null) {
-      return;
-    }
-
-    console.log("[SearchBarDebug] page query state", {
-      searchQuery,
-      deferredSearchQuery,
-      normalizedSearchQuery,
-      currentProjectId,
-      pageSearchArgs,
-      hasLivePageSearchResults: pageSearchResults !== undefined,
-      livePageSearchResultsCount: pageSearchResults?.length ?? null,
-      resolvedPageSearchResultsCount: resolvedPageSearchResults?.length ?? null,
-      visiblePageSearchResultsCount: visiblePageSearchResults.length,
-      visiblePageSearchResults: visiblePageSearchResults.map((page) => ({
-        projectId: page.projectId,
-        projectName: page.projectName,
-        pageId: page.pageId,
-        pageTitle: page.pageTitle,
-        projectUpdatedAt: page.projectUpdatedAt,
-        pageUpdatedAt: page.pageUpdatedAt,
-      })),
-    });
-  }, [
-    activeTag,
-    currentProjectId,
-    deferredSearchQuery,
-    isOpen,
-    normalizedSearchQuery,
-    pageSearchArgs,
-    pageSearchResults,
-    resolvedPageSearchResults,
-    searchQuery,
-    visiblePageSearchResults,
-  ]);
   const visibleTemplateSearchResults: SearchTemplateSummary[] =
     templateSearchResults ?? resolvedTemplateSearchResults ?? [];
 
