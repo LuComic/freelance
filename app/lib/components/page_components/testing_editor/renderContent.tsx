@@ -15,7 +15,7 @@ import {
 
 const LINE_HEADING_REGEX = /^(#{1,6})\s+(.*)$/;
 const CODE_BLOCK_REGEX = /```([\s\S]*?)```/g;
-const HIGHLIGHTED_WORD_REGEX = /\bbeautiful-color\b/gi;
+const HIGHLIGHTED_WORD_REGEX = /\berle\b/gi;
 const LINK_REGEX = /(?:https?:\/\/|www\.)[^\s<]+/gi;
 
 function normalizeFencedCodeBlock(code: string) {
@@ -186,7 +186,7 @@ function renderQuoteText(text: string, keyStart: number) {
         className="flex w-full items-stretch gap-3"
         key={`quote-${renderedInline.nextKey}`}
       >
-        <div className="w-1 shrink-0 self-stretch rounded-full bg-(--beautiful-color)" />
+        <div className="w-1 shrink-0 self-stretch rounded-full bg-(--vibrant)" />
         <div className="min-w-0 whitespace-pre-wrap">
           {renderedInline.nodes}
         </div>
