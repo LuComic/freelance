@@ -2,6 +2,7 @@
 
 import { getCookie, TABS_COOKIE } from "@/app/lib/cookies";
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { startTransition, useDeferredValue, useEffect, useState } from "react";
 import { parseTabsCookie } from "../tab/tabState";
@@ -28,6 +29,7 @@ export type SearchPageResult = {
 };
 
 const PAGE_SUGGESTION_LIMIT = 10;
+const RECENT_PAGE_SUGGESTION_LIMIT = 3;
 
 const getPageSearchResultKey = (
   page: Pick<SearchPageResult, "projectId" | "pageId">,
@@ -62,15 +64,20 @@ const getRecentPageSuggestions = (): SearchPageResult[] => {
 
 export const getPrioritizedPageSearchResults = ({
   currentProjectId,
+  currentPageId,
   visiblePageSearchResults,
 }: {
   currentProjectId: string | null;
+  currentPageId: string | null;
   visiblePageSearchResults: SearchPageResult[];
 }) => {
+  const isCurrentPage = (
+    page: Pick<SearchPageResult, "projectId" | "pageId">,
+  ) => page.projectId === currentProjectId && page.pageId === currentPageId;
   const visiblePagesByKey = new Map(
-    visiblePageSearchResults.map(
-      (page) => [getPageSearchResultKey(page), page] as const,
-    ),
+    visiblePageSearchResults
+      .filter((page) => !isCurrentPage(page))
+      .map((page) => [getPageSearchResultKey(page), page] as const),
   );
   const seenPageKeys = new Set<string>();
   const nextPageResults: SearchPageResult[] = [];
@@ -88,24 +95,23 @@ export const getPrioritizedPageSearchResults = ({
   };
 
   addPages(
-    getRecentPageSuggestions().map(
-      (page) => visiblePagesByKey.get(getPageSearchResultKey(page)) ?? page,
-    ),
+    getRecentPageSuggestions()
+      .filter((page) => !isCurrentPage(page))
+      .slice(0, RECENT_PAGE_SUGGESTION_LIMIT)
+      .map(
+        (page) => visiblePagesByKey.get(getPageSearchResultKey(page)) ?? page,
+      ),
   );
 
   if (currentProjectId !== null) {
     addPages(
       visiblePageSearchResults.filter(
-        (page) => page.projectId === currentProjectId,
+        (page) => page.projectId === currentProjectId && !isCurrentPage(page),
       ),
     );
+  } else {
+    addPages(visiblePageSearchResults.filter((page) => !isCurrentPage(page)));
   }
-
-  addPages(
-    visiblePageSearchResults.filter(
-      (page) => page.projectId !== currentProjectId,
-    ),
-  );
 
   return nextPageResults.slice(0, PAGE_SUGGESTION_LIMIT);
 };
@@ -253,10 +259,11 @@ export const useSearchBarResults = ({
     isOpen && activeTag === null
       ? {
           query: deferredSearchQuery.trim(),
-          limit:
+          limit: 10,
+          currentProjectId:
             currentProjectId !== null && deferredSearchQuery.trim().length === 0
-              ? 100
-              : 10,
+              ? (currentProjectId as Id<"projects">)
+              : undefined,
         }
       : "skip";
   const templateSearchArgs =

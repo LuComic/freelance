@@ -41,6 +41,13 @@ export const SearchBar = () => {
   const pathnameSegments = pathname.split("/").filter(Boolean);
   const currentProjectId =
     pathnameSegments[0] === "projects" ? (pathnameSegments[1] ?? null) : null;
+  const currentPageId =
+    pathnameSegments[0] === "projects" &&
+    pathnameSegments[2] &&
+    pathnameSegments[2] !== "analytics" &&
+    pathnameSegments[2] !== "settings"
+      ? pathnameSegments[2]
+      : null;
   const { isLive, setIsEditing, setIsLive, toggleSplitView } = useEditMode();
   const {
     isOpen,
@@ -83,6 +90,7 @@ export const SearchBar = () => {
     isOpen && activeTag === null && normalizedSearchQuery.length === 0
       ? getPrioritizedPageSearchResults({
           currentProjectId,
+          currentPageId,
           visiblePageSearchResults,
         })
       : visiblePageSearchResults;
