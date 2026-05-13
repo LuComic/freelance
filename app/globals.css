@@ -102,7 +102,8 @@
   --second-place: #a5f3fc;
   --third-place: #b06248;
 
-  --erle: #818cf8;
+  --beautiful-color: #818cf8;
+  --beautiful-color-hover: #606ef6;
 
   --radius: 0.625rem;
   --background: oklch(1 0 0);
@@ -261,8 +262,8 @@
     font-family: "DejaVu Mono", monospace;
   }
 
-  .erle {
-    color: var(--erle);
-    text-shadow: 0 0 8px var(--erle);
+  .brand-highlight {
+    color: var(--beautiful-color);
+    text-shadow: 0 0 8px var(--beautiful-color);
   }
 }

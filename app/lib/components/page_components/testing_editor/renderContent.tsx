@@ -15,18 +15,29 @@ import {
 
 const LINE_HEADING_REGEX = /^(#{1,6})\s+(.*)$/;
 const CODE_BLOCK_REGEX = /```([\s\S]*?)```/g;
-const ERLE_WORD_REGEX = /\berle\b/gi;
+const HIGHLIGHTED_WORD_REGEX = /\bbeautiful-color\b/gi;
+const LINK_REGEX = /(?:https?:\/\/|www\.)[^\s<]+/gi;
 
 function normalizeFencedCodeBlock(code: string) {
   return code.replace(/^\r?\n/, "").replace(/\r?\n$/, "");
 }
 
-function renderSpecialText(value: string, keyStart: number) {
+function stripTrailingLinkPunctuation(value: string) {
+  const match = value.match(/[.,!?;:)]*$/);
+  const trailingText = match?.[0] ?? "";
+
+  return {
+    linkText: value.slice(0, value.length - trailingText.length),
+    trailingText,
+  };
+}
+
+function renderHighlightedText(value: string, keyStart: number) {
   const nodes: ReactNode[] = [];
   let key = keyStart;
   let lastIndex = 0;
 
-  for (const match of value.matchAll(ERLE_WORD_REGEX)) {
+  for (const match of value.matchAll(HIGHLIGHTED_WORD_REGEX)) {
     const index = match.index ?? 0;
     const matchedText = match[0];
 
@@ -35,7 +46,7 @@ function renderSpecialText(value: string, keyStart: number) {
     }
 
     nodes.push(
-      <span className="erle" key={`erle-${key++}`}>
+      <span className="brand-highlight" key={`highlight-${key++}`}>
         {matchedText}
       </span>,
     );
@@ -44,6 +55,58 @@ function renderSpecialText(value: string, keyStart: number) {
 
   if (lastIndex < value.length) {
     nodes.push(value.slice(lastIndex));
+  }
+
+  return { nodes, nextKey: key };
+}
+
+function renderSpecialText(value: string, keyStart: number) {
+  const nodes: ReactNode[] = [];
+  let key = keyStart;
+  let lastIndex = 0;
+
+  const pushHighlightedText = (text: string) => {
+    const renderedText = renderHighlightedText(text, key);
+    nodes.push(...renderedText.nodes);
+    key = renderedText.nextKey;
+  };
+
+  for (const match of value.matchAll(LINK_REGEX)) {
+    const index = match.index ?? 0;
+    const matchedText = match[0];
+    const { linkText, trailingText } =
+      stripTrailingLinkPunctuation(matchedText);
+
+    if (!linkText) {
+      continue;
+    }
+
+    if (index > lastIndex) {
+      pushHighlightedText(value.slice(lastIndex, index));
+    }
+
+    const href = linkText.startsWith("http") ? linkText : `https://${linkText}`;
+    nodes.push(
+      <a
+        className="w-max text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover)"
+        href={href}
+        key={`link-${key++}`}
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        {linkText}
+      </a>,
+    );
+
+    if (trailingText) {
+      nodes.push(trailingText);
+    }
+
+    lastIndex = index + matchedText.length;
+  }
+
+  if (lastIndex < value.length) {
+    pushHighlightedText(value.slice(lastIndex));
   }
 
   return { nodes, nextKey: key };
@@ -123,7 +186,7 @@ function renderQuoteText(text: string, keyStart: number) {
         className="flex w-full items-stretch gap-3"
         key={`quote-${renderedInline.nextKey}`}
       >
-        <div className="w-1 shrink-0 self-stretch rounded-full bg-(--erle)" />
+        <div className="w-1 shrink-0 self-stretch rounded-full bg-(--beautiful-color)" />
         <div className="min-w-0 whitespace-pre-wrap">
           {renderedInline.nodes}
         </div>
