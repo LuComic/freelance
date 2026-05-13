@@ -75,8 +75,8 @@
   --gray: #504f4f;
   --light: #e9e8e9;
 
-  --vibrant: #2563eb;
-  --vibrant-hover: #1d4ed8;
+  --vibrant: #3a4bf4;
+  --vibrant-hover: #3042f3;
 
   --pending-border: #d97706;
   --pending-bg: #fffbeb;
@@ -101,9 +101,6 @@
   --first-place: #fbbf24;
   --second-place: #a5f3fc;
   --third-place: #b06248;
-
-  --beautiful-color: #818cf8;
-  --beautiful-color-hover: #606ef6;
 
   --radius: 0.625rem;
   --background: oklch(1 0 0);
