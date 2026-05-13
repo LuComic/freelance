@@ -2,7 +2,6 @@
 
 import { getCookie, TABS_COOKIE } from "@/app/lib/cookies";
 import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { startTransition, useDeferredValue, useEffect, useState } from "react";
 import { parseTabsCookie } from "../tab/tabState";
@@ -97,16 +96,23 @@ export const getPrioritizedPageSearchResults = ({
   addPages(
     getRecentPageSuggestions()
       .filter((page) => !isCurrentPage(page))
-      .slice(0, RECENT_PAGE_SUGGESTION_LIMIT)
-      .map(
-        (page) => visiblePagesByKey.get(getPageSearchResultKey(page)) ?? page,
-      ),
+      .flatMap((page) => {
+        const visiblePage = visiblePagesByKey.get(getPageSearchResultKey(page));
+        return visiblePage ? [visiblePage] : [];
+      })
+      .slice(0, RECENT_PAGE_SUGGESTION_LIMIT),
   );
 
   if (currentProjectId !== null) {
     addPages(
       visiblePageSearchResults.filter(
         (page) => page.projectId === currentProjectId && !isCurrentPage(page),
+      ),
+    );
+
+    addPages(
+      visiblePageSearchResults.filter(
+        (page) => page.projectId !== currentProjectId && !isCurrentPage(page),
       ),
     );
   } else {
@@ -259,11 +265,10 @@ export const useSearchBarResults = ({
     isOpen && activeTag === null
       ? {
           query: deferredSearchQuery.trim(),
-          limit: 10,
-          currentProjectId:
+          limit:
             currentProjectId !== null && deferredSearchQuery.trim().length === 0
-              ? (currentProjectId as Id<"projects">)
-              : undefined,
+              ? 100
+              : 10,
         }
       : "skip";
   const templateSearchArgs =
@@ -389,7 +394,13 @@ export const useSearchBarResults = ({
         setResolvedPageSearchResults(pageSearchResults);
       });
     }
-  }, [activeTag, isOpen, pageSearchResults]);
+  }, [
+    activeTag,
+    currentProjectId,
+    deferredSearchQuery,
+    isOpen,
+    pageSearchResults,
+  ]);
 
   useEffect(() => {
     if (!isOpen || activeTag !== "template") {

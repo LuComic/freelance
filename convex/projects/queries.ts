@@ -18,6 +18,7 @@ type ProjectSummary = {
   description: string | null;
   pageCount: number;
   createdAt: number;
+  updatedAt: number;
   pages: Array<{
     id: Doc<"pages">["_id"];
     title: string;
@@ -26,8 +27,8 @@ type ProjectSummary = {
 
 function compareProjects(
   projectOrder: Map<string, number>,
-  left: Pick<ProjectSummary, "id" | "createdAt" | "name">,
-  right: Pick<ProjectSummary, "id" | "createdAt" | "name">,
+  left: Pick<ProjectSummary, "id" | "updatedAt" | "name">,
+  right: Pick<ProjectSummary, "id" | "updatedAt" | "name">,
 ) {
   const leftOrder = projectOrder.get(left.id);
   const rightOrder = projectOrder.get(right.id);
@@ -44,8 +45,8 @@ function compareProjects(
     return 1;
   }
 
-  if (left.createdAt !== right.createdAt) {
-    return left.createdAt - right.createdAt;
+  if (left.updatedAt !== right.updatedAt) {
+    return right.updatedAt - left.updatedAt;
   }
 
   return left.name.localeCompare(right.name);
@@ -64,6 +65,7 @@ async function toProjectSummary(
     description: project.description ?? null,
     pageCount: pages.length,
     createdAt: project.createdAt,
+    updatedAt: project.updatedAt,
     pages: pages.map((page) => ({
       id: page._id,
       title: page.title,
@@ -114,6 +116,7 @@ export const listCurrentUserProjects = query({
           viewerRole: summary.viewerRole,
           description: summary.description,
           pageCount: summary.pageCount,
+          updatedAt: summary.updatedAt,
           pages: summary.pages,
         }));
     } catch (error) {

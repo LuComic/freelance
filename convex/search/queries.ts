@@ -133,7 +133,6 @@ export const searchPagesAcrossProjects = query({
   args: {
     query: v.string(),
     limit: v.optional(v.number()),
-    currentProjectId: v.optional(v.id("projects")),
   },
   handler: async (ctx, args) => {
     try {
@@ -165,15 +164,9 @@ export const searchPagesAcrossProjects = query({
         visibleProjects.set(project._id, project);
       }
 
-      const projectsToSearch: Doc<"projects">[] = args.currentProjectId
-        ? visibleProjects.has(args.currentProjectId)
-          ? [visibleProjects.get(args.currentProjectId)!]
-          : []
-        : Array.from(visibleProjects.values());
-
       const candidates = (
         await Promise.all(
-          projectsToSearch.map(async (project) => {
+          Array.from(visibleProjects.values()).map(async (project) => {
             const pages = await getOrderedProjectPages(ctx, project);
             const orderedPages = [...pages].sort(
               (left, right) => right.updatedAt - left.updatedAt,

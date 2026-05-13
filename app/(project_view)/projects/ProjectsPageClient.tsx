@@ -52,6 +52,15 @@ export default function Page() {
   const isSignedInRealUser =
     profile !== undefined && profile !== null && profile.isAnonymous !== true;
   const joinCodeFromLink = searchParams.get("joinCode");
+  const orderedProjects = projects
+    ? [...projects].sort((left, right) => {
+        if (left.updatedAt !== right.updatedAt) {
+          return right.updatedAt - left.updatedAt;
+        }
+
+        return left.name.localeCompare(right.name);
+      })
+    : undefined;
 
   useEffect(() => {
     if (!profile || profile.isAnonymous) {
@@ -355,9 +364,9 @@ export default function Page() {
           <div className="w-full p-4 text-(--gray-page)">
             Loading projects...
           </div>
-        ) : projects.length > 0 ? (
+        ) : orderedProjects && orderedProjects.length > 0 ? (
           <div className="w-full flex flex-col">
-            {projects.map((project) => (
+            {orderedProjects.map((project) => (
               <Link
                 key={project.id}
                 className="w-full p-3 border-b last:border-b-0 border-(--gray) flex flex-col gap-1"
