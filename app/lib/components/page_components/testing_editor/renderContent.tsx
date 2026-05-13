@@ -186,7 +186,7 @@ function renderQuoteText(text: string, keyStart: number) {
         className="flex w-full items-stretch gap-3"
         key={`quote-${renderedInline.nextKey}`}
       >
-        <div className="w-1 shrink-0 self-stretch rounded-full bg-(--vibrant)" />
+        <div className="w-1 shrink-0 self-stretch rounded-full bg-(--beautiful-color)" />
         <div className="min-w-0 whitespace-pre-wrap">
           {renderedInline.nodes}
         </div>
