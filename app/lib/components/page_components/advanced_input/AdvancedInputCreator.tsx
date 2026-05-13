@@ -118,13 +118,13 @@ export const AdvancedInputCreator = ({
               <SelectTrigger className="w-full bg-(--dim) border-(--gray-page)">
                 <SelectValue placeholder="Select mode" />
               </SelectTrigger>
-              <SelectContent className="bg-(--dim) border-none text-(--gray-page)">
-                <SelectGroup className="bg-(--dim)">
+              <SelectContent className="bg-(--quite-dark) border-none text-(--gray-page)">
+                <SelectGroup className="bg-(--quite-dark)">
                   {(["colors", "fonts"] as const).map((mode) => (
                     <SelectItem
                       key={mode}
                       value={mode}
-                      className="data-highlighted:bg-(--darkest) data-highlighted:text-(--light)"
+                      className="data-highlighted:bg-(--quite-dark-hover) data-highlighted:text-(--light)"
                     >
                       {getAdvancedInputModeLabel(mode)}
                     </SelectItem>

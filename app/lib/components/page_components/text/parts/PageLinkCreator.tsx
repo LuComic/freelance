@@ -102,13 +102,13 @@ export const PageLinkCreator = ({
         <SelectTrigger className="w-full bg-(--dim) border-(--gray-page)">
           <SelectValue placeholder={selectPlaceholder} />
         </SelectTrigger>
-        <SelectContent className="bg-(--dim) border-none text-(--gray-page)">
-          <SelectGroup className="bg-(--dim)">
+        <SelectContent className="bg-(--quite-dark) border-none text-(--gray-page)">
+          <SelectGroup className="bg-(--quite-dark)">
             {pages.map((page) => (
               <SelectItem
                 key={page.id}
                 value={page.id}
-                className="data-highlighted:bg-(--darkest) data-highlighted:text-(--light)"
+                className="data-highlighted:bg-(--quite-dark-hover) data-highlighted:text-(--light)"
               >
                 {page.title}
               </SelectItem>

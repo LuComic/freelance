@@ -119,7 +119,9 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
         : "Select project";
   const queryArgs = useMemo(
     () =>
-      selectedProjectId ? { projectId: selectedProjectId as Id<"projects"> } : "skip",
+      selectedProjectId
+        ? { projectId: selectedProjectId as Id<"projects"> }
+        : "skip",
     [selectedProjectId],
   );
   const { results, status, loadMore } = usePaginatedQuery(
@@ -232,13 +234,13 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
         <SelectTrigger className="w-full px-0 border-none font-medium text-lg text-(--light)">
           <SelectValue placeholder={selectPlaceholder} />
         </SelectTrigger>
-        <SelectContent className="bg-(--dim) border-none text-(--gray-page)">
-          <SelectGroup className="bg-(--dim)">
+        <SelectContent className="bg-(--quite-dark) border-none text-(--gray-page)">
+          <SelectGroup className="bg-(--quite-dark)">
             {(projects ?? []).map((project) => (
               <SelectItem
                 key={project.id}
                 value={project.id}
-                className="data-highlighted:bg-(--darkest) data-highlighted:text-(--light) text-base"
+                className="data-highlighted:bg-(--quite-dark-hover) data-highlighted:text-(--light) text-base"
               >
                 {project.name}
               </SelectItem>

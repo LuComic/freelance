@@ -127,13 +127,13 @@ export const KanbanCreator = ({
               <SelectTrigger className="w-full bg-(--dim) border-(--gray-page)">
                 <SelectValue placeholder="Set the status" />
               </SelectTrigger>
-              <SelectContent className="bg-(--dim) border-none text-(--gray-page)">
-                <SelectGroup className="bg-(--dim)">
+              <SelectContent className="bg-(--quite-dark) border-none text-(--gray-page)">
+                <SelectGroup className="bg-(--quite-dark)">
                   {STATUS_OPTIONS.map((status) => (
                     <SelectItem
                       key={status}
                       value={status}
-                      className="data-highlighted:bg-(--darkest) data-highlighted:text-(--light) "
+                      className="data-highlighted:bg-(--quite-dark-hover) data-highlighted:text-(--light) "
                     >
                       {status}
                     </SelectItem>
@@ -177,13 +177,13 @@ export const KanbanCreator = ({
                     <SelectTrigger className="w-max bg-(--dim) border-(--gray-page) h-6.5!">
                       <SelectValue placeholder="Set the status" />
                     </SelectTrigger>
-                    <SelectContent className="bg-(--dim) border-none text-(--gray-page)">
-                      <SelectGroup className="bg-(--dim)">
+                    <SelectContent className="bg-(--quite-dark) border-none text-(--gray-page)">
+                      <SelectGroup className="bg-(--quite-dark)">
                         {STATUS_OPTIONS.map((status) => (
                           <SelectItem
                             key={status}
                             value={status}
-                            className="data-highlighted:bg-(--darkest) data-highlighted:text-(--light) h-6.5!"
+                            className="data-highlighted:bg-(--quite-dark-hover) data-highlighted:text-(--light) h-6.5!"
                           >
                             {status}
                           </SelectItem>
@@ -238,13 +238,13 @@ export const KanbanCreator = ({
                     <SelectTrigger className="w-max bg-(--dim) border-(--gray-page) h-6.5!">
                       <SelectValue placeholder="Set the status" />
                     </SelectTrigger>
-                    <SelectContent className="bg-(--dim) border-none text-(--gray-page)">
-                      <SelectGroup className="bg-(--dim)">
+                    <SelectContent className="bg-(--quite-dark) border-none text-(--gray-page)">
+                      <SelectGroup className="bg-(--quite-dark)">
                         {STATUS_OPTIONS.map((status) => (
                           <SelectItem
                             key={status}
                             value={status}
-                            className="data-highlighted:bg-(--darkest) data-highlighted:text-(--light) h-6.5!"
+                            className="data-highlighted:bg-(--quite-dark-hover) data-highlighted:text-(--light) h-6.5!"
                           >
                             {status}
                           </SelectItem>
@@ -296,13 +296,13 @@ export const KanbanCreator = ({
                     <SelectTrigger className="w-max bg-(--dim) border-(--gray-page) h-6.5!">
                       <SelectValue placeholder="Set the status" />
                     </SelectTrigger>
-                    <SelectContent className="bg-(--dim) border-none text-(--gray-page)">
-                      <SelectGroup className="bg-(--dim)">
+                    <SelectContent className="bg-(--quite-dark) border-none text-(--gray-page)">
+                      <SelectGroup className="bg-(--quite-dark)">
                         {STATUS_OPTIONS.map((status) => (
                           <SelectItem
                             key={status}
                             value={status}
-                            className="data-highlighted:bg-(--darkest) data-highlighted:text-(--light) h-6.5!"
+                            className="data-highlighted:bg-(--quite-dark-hover) data-highlighted:text-(--light) h-6.5!"
                           >
                             {status}
                           </SelectItem>

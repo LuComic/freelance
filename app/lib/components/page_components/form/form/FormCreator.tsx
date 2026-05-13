@@ -172,13 +172,13 @@ export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
               <SelectTrigger className="w-full bg-(--dim) border-(--gray-page)">
                 <SelectValue placeholder="Select field type" />
               </SelectTrigger>
-              <SelectContent className="bg-(--dim) border-none text-(--gray-page)">
-                <SelectGroup className="bg-(--dim)">
+              <SelectContent className="bg-(--quite-dark) border-none text-(--gray-page)">
+                <SelectGroup className="bg-(--quite-dark)">
                   {FORM_FIELD_TYPE_OPTIONS.map((option) => (
                     <SelectItem
                       key={option.type}
                       value={option.type}
-                      className="data-highlighted:bg-(--darkest) data-highlighted:text-(--light)"
+                      className="data-highlighted:bg-(--quite-dark-hover) data-highlighted:text-(--light)"
                     >
                       {option.label}
                     </SelectItem>
