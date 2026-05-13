@@ -20,6 +20,7 @@ export type SidebarUserProfile =
 type SidebarUserInfoProps = {
   profile: SidebarUserProfile;
   compact?: boolean;
+  closeSidebar?: () => void;
 };
 
 function getDisplayName(
@@ -128,6 +129,7 @@ function AvatarImage({
 export const SidebarUserInfo = ({
   profile,
   compact = false,
+  closeSidebar,
 }: SidebarUserInfoProps) => {
   const {
     startGuestUpgrade,
@@ -166,6 +168,7 @@ export const SidebarUserInfo = ({
             href="/settings?section=account"
             aria-label={displayName}
             title={displayName}
+            onClick={closeSidebar}
           >
             <Avatar profile={profile} compact={true} />
           </Link>
@@ -180,6 +183,7 @@ export const SidebarUserInfo = ({
         <Link
           className="rounded-md bg-(--vibrant) px-2 py-1 hover:bg-(--vibrant-hover)"
           href="/login"
+          onClick={closeSidebar}
         >
           Create an account
         </Link>
@@ -209,6 +213,7 @@ export const SidebarUserInfo = ({
           <Link
             className={`${sharedClassName} w-max gap-2 flex items-center justify-start py-1 pl-2 pr-3`}
             href="/settings?section=account"
+            onClick={closeSidebar}
           >
             <Avatar profile={profile} />
             <span className="font-light text-base">

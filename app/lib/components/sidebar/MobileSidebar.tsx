@@ -67,6 +67,11 @@ export const MobileSidebar = ({
     }
   };
 
+  const closeSidebar = () => {
+    acknowledgeConnectionsRequest();
+    setSidebarOpen(false);
+  };
+
   useEffect(() => {
     if (!resolvedSidebarOpen) {
       return;
@@ -91,10 +96,7 @@ export const MobileSidebar = ({
               Pageboard
             </Link>
             <button
-              onClick={() => {
-                acknowledgeConnectionsRequest();
-                setSidebarOpen(false);
-              }}
+              onClick={closeSidebar}
               className=" p-1 rounded-lg hover:bg-(--darkest-hover)"
             >
               <PanelLeftClose size={22} />
@@ -143,31 +145,33 @@ export const MobileSidebar = ({
             >
               <Settings size={20} className="mx-auto" />
             </button>
-            {isSignedInRealUser ? (
-              <CreateProjectModal ui="sidebar" />
-            ) : null}
+            {isSignedInRealUser ? <CreateProjectModal ui="sidebar" /> : null}
           </div>
 
           {resolvedActiveTab === "files" ? (
-            <Files closeSidebar={() => setSidebarOpen(false)} />
+            <Files closeSidebar={closeSidebar} />
           ) : null}
           {isSignedInRealUser && resolvedActiveTab === "friends" ? (
             <Connections
               connections={connections}
-              setSidebarOpen={setSidebarOpen}
+              setSidebarOpen={closeSidebar}
             />
           ) : null}
           {resolvedActiveTab === "settings" ? (
-            <SidebarSettings setSidebarOpen={setSidebarOpen} />
+            <SidebarSettings setSidebarOpen={closeSidebar} />
           ) : null}
           <div className="mt-auto w-full h-max flex items-center">
-            <SidebarUserInfo profile={userProfile} />
+            <SidebarUserInfo
+              profile={userProfile}
+              closeSidebar={closeSidebar}
+            />
             <Authenticated>
               <Link
                 className={`ml-auto p-1 flex items-center justify-center aspect-square rounded-lg h-full hover:bg-(--darkest-hover) ${
                   hasUnreadNotifications ? "notification relative" : ""
                 }`}
                 href="/notifications"
+                onClick={closeSidebar}
               >
                 <Bell size={20} />
               </Link>
