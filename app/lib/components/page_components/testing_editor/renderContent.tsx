@@ -114,6 +114,25 @@ function renderInlineMarkdown(text: string, keyStart: number) {
   return { nodes, nextKey: key };
 }
 
+function renderQuoteText(text: string, keyStart: number) {
+  const renderedInline = renderInlineMarkdown(text, keyStart);
+
+  return {
+    node: (
+      <div
+        className="flex w-full items-stretch gap-3"
+        key={`quote-${renderedInline.nextKey}`}
+      >
+        <div className="w-1 shrink-0 self-stretch rounded-full bg-(--erle)" />
+        <div className="min-w-0 whitespace-pre-wrap">
+          {renderedInline.nodes}
+        </div>
+      </div>
+    ),
+    nextKey: renderedInline.nextKey + 1,
+  };
+}
+
 function renderMarkdownText(text: string, keyStart: number) {
   const nodes: ReactNode[] = [];
   let key = keyStart;
@@ -210,6 +229,9 @@ function renderPlainTextSegment(segment: string, keyStart: number) {
     }
   };
 
+  const isQuoteStart = (value: string) => value.trimStart().startsWith('"');
+  const isQuoteEnd = (value: string) => value.trimEnd().endsWith('"');
+
   for (let lineIndex = 0; lineIndex < lines.length; lineIndex += 1) {
     const line = lines[lineIndex];
 
@@ -230,6 +252,27 @@ function renderPlainTextSegment(segment: string, keyStart: number) {
       );
       lineIndex += emptyLineCount - 1;
       continue;
+    }
+
+    if (isQuoteStart(line)) {
+      let quoteEndIndex = lineIndex;
+      while (
+        quoteEndIndex < lines.length &&
+        !isQuoteEnd(lines[quoteEndIndex] ?? "")
+      ) {
+        quoteEndIndex += 1;
+      }
+
+      if (quoteEndIndex < lines.length) {
+        flushTextBuffer();
+
+        const quoteText = lines.slice(lineIndex, quoteEndIndex + 1).join("\n");
+        const renderedQuote = renderQuoteText(quoteText, key);
+        nodes.push(renderedQuote.node);
+        key = renderedQuote.nextKey;
+        lineIndex = quoteEndIndex;
+        continue;
+      }
     }
 
     const match = line.match(LINE_HEADING_REGEX);
