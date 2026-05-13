@@ -69,7 +69,7 @@ export const TableBoard = ({
                       className="p-2 border-r border-(--gray) last:border-r-0 min-h-10 h-full flex flex-col items-start justify-start gap-2 text-wrap"
                       style={{
                         backgroundColor: cell?.color
-                          ? `var(--${cell.color})`
+                          ? `color-mix(in srgb, var(--${cell.color}) 40%, transparent)`
                           : undefined,
                       }}
                       onClick={() => {

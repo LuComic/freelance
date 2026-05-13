@@ -12,6 +12,7 @@ import { Prologue } from "@/app/lib/components/comp_page/Prologue";
 import { RadioPreview } from "@/app/lib/components/comp_page/RadioPreview";
 import { SelectPreview } from "@/app/lib/components/comp_page/SelectPreview";
 import { SimpleInputPreview } from "@/app/lib/components/comp_page/SimpleInputPreview";
+import { TablePreview } from "@/app/lib/components/comp_page/TablePreview";
 
 export const metadata: Metadata = {
   title: "Pageboard | Components",
@@ -65,6 +66,13 @@ const COMPONENT_SECTIONS: ComponentPageSection[] = [
       "Idea Board lets people share ideas and compare them by vote count. Teams can use it for brainstorming, seeing what the client likes most, or as an alternative to Recommend/Feedback.",
     commands: "Commands: /ideaboard, /board",
     Preview: IdeaBoardPreview,
+  },
+  {
+    title: "Table",
+    description:
+      "Table displays structured text in rows and columns. It can be used for comparisons, summaries, or organizing information for clients.",
+    commands: "Command: /table",
+    Preview: TablePreview,
   },
   {
     title: "Simple Input",
