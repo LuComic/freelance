@@ -12,11 +12,8 @@ type TableBoardProps = {
   onCellDelete?: (column: number, row: number) => void;
 };
 
-function getCellValue(cells: TableState["cells"], row: number, column: number) {
-  return (
-    cells.find((cell) => cell.row === row && cell.column === column)?.value ??
-    ""
-  );
+function getCell(cells: TableState["cells"], row: number, column: number) {
+  return cells.find((cell) => cell.row === row && cell.column === column);
 }
 
 export const TableBoard = ({
@@ -61,7 +58,8 @@ export const TableBoard = ({
               {Array.from({ length: liveState.columns }).map(
                 (_, columnIndex) => {
                   const column = columnIndex + 1;
-                  const value = getCellValue(liveState.cells, row, column);
+                  const cell = getCell(liveState.cells, row, column);
+                  const value = cell?.value ?? "";
                   const isEditing =
                     editingCell?.row === row && editingCell.column === column;
 
@@ -69,6 +67,11 @@ export const TableBoard = ({
                     <div
                       key={column}
                       className="p-2 border-r border-(--gray) last:border-r-0 min-h-10 h-full flex flex-col items-start justify-start gap-2 text-wrap"
+                      style={{
+                        backgroundColor: cell?.color
+                          ? `var(--${cell.color})`
+                          : undefined,
+                      }}
                       onClick={() => {
                         if (!editable) return;
                         setEditingCell({ row, column });

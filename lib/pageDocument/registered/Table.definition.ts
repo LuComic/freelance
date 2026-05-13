@@ -5,6 +5,22 @@ import { MAX_FORM_TEXT_ANSWER_LENGTH, truncateInput } from "../../inputLimits";
 const MIN_TABLE_SIZE = 1;
 const MAX_TABLE_SIZE = 20;
 
+const TABLE_CELL_COLORS = [
+  "red",
+  "green",
+  "yellow",
+  "pink",
+  "purple",
+  "cyan",
+] as const;
+
+function normalizeCellColor(value: unknown) {
+  return typeof value === "string" &&
+    TABLE_CELL_COLORS.includes(value as (typeof TABLE_CELL_COLORS)[number])
+    ? value
+    : undefined;
+}
+
 function normalizeCount(value: unknown, fallback: number) {
   if (typeof value !== "number" || !Number.isFinite(value)) return fallback;
   return Math.min(MAX_TABLE_SIZE, Math.max(MIN_TABLE_SIZE, Math.floor(value)));
@@ -22,6 +38,7 @@ export const TableDefinition = defineRegisteredPageComponentDefinition({
       row: number;
       column: number;
       value: string;
+      color?: string;
     }>,
   }),
   normalizeConfig: (value, fallback) => {
@@ -50,6 +67,8 @@ export const TableDefinition = defineRegisteredPageComponentDefinition({
 
           if (row > rows || column > columns) return null;
 
+          const color = normalizeCellColor(cell.color);
+
           return {
             id:
               typeof cell.id === "string" && cell.id.trim().length > 0
@@ -58,6 +77,7 @@ export const TableDefinition = defineRegisteredPageComponentDefinition({
             row,
             column,
             value: truncateInput(cell.value, MAX_FORM_TEXT_ANSWER_LENGTH),
+            ...(color ? { color } : {}),
           };
         })
         .filter(

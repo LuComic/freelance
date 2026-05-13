@@ -100,7 +100,7 @@ export const IdeaBoradCreator = ({
           <>
             <input
               type="text"
-              placeholder="Add a new tag..."
+              placeholder="Share a new idea..."
               className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
               value={addingInput}
               maxLength={MAX_IDEA_LENGTH}

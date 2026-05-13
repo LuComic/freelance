@@ -5,8 +5,26 @@ import { ChevronRight, Trash } from "lucide-react";
 import type { PageComponentLiveStateByType } from "@/lib/pageDocument";
 import { MAX_FORM_TEXT_ANSWER_LENGTH } from "@/lib/inputLimits";
 import { TableBoard } from "./TableBoard";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type TableState = PageComponentLiveStateByType<"Table">["state"];
+type TableCellColor = NonNullable<TableState["cells"][number]["color"]>;
+
+const TABLE_CELL_COLORS: Array<{ value: TableCellColor; label: string }> = [
+  { value: "red", label: "Red" },
+  { value: "green", label: "Green" },
+  { value: "yellow", label: "Yellow" },
+  { value: "pink", label: "Pink" },
+  { value: "purple", label: "Purple" },
+  { value: "cyan", label: "Cyan" },
+];
 
 type TableCreatorProps = {
   liveState: TableState;
@@ -24,11 +42,17 @@ export const TableCreator = ({
   const [adding, setAdding] = useState(false);
   const [rows, setRows] = useState(String(liveState.rows));
   const [columns, setColumns] = useState(String(liveState.columns));
-  const [newRow, setNewRow] = useState("1");
-  const [newColumn, setNewColumn] = useState("1");
+  const [newRow, setNewRow] = useState("");
+  const [newColumn, setNewColumn] = useState("");
   const [newValue, setNewValue] = useState("");
+  const [newColor, setNewColor] = useState<TableCellColor | undefined>();
 
-  const setCellValue = (column: number, row: number, value: string) => {
+  const setCellValue = (
+    column: number,
+    row: number,
+    value: string,
+    color?: TableCellColor,
+  ) => {
     onChangeLiveState((currentState) => {
       const nextValue = value.slice(0, MAX_FORM_TEXT_ANSWER_LENGTH);
       const existing = currentState.cells.find(
@@ -39,7 +63,9 @@ export const TableCreator = ({
         return {
           ...currentState,
           cells: currentState.cells.map((cell) =>
-            cell.id === existing.id ? { ...cell, value: nextValue } : cell,
+            cell.id === existing.id
+              ? { ...cell, value: nextValue, color: color ?? cell.color }
+              : cell,
           ),
         };
       }
@@ -50,7 +76,7 @@ export const TableCreator = ({
         ...currentState,
         cells: [
           ...currentState.cells,
-          { id: crypto.randomUUID(), row, column, value: nextValue },
+          { id: crypto.randomUUID(), row, column, value: nextValue, color },
         ],
       };
     });
@@ -71,15 +97,25 @@ export const TableCreator = ({
   };
 
   const addItem = () => {
-    const row = clampCount(Number(newRow));
-    const column = clampCount(Number(newColumn));
+    const rowValue = Number(newRow);
+    const columnValue = Number(newColumn);
+
     if (
-      row > liveState.rows ||
-      column > liveState.columns ||
+      newRow.trim() === "" ||
+      newColumn.trim() === "" ||
+      !Number.isFinite(rowValue) ||
+      !Number.isFinite(columnValue) ||
+      rowValue < 1 ||
+      columnValue < 1 ||
       newValue.trim() === ""
     )
       return;
-    setCellValue(column, row, newValue);
+
+    const row = clampCount(rowValue);
+    const column = clampCount(columnValue);
+    if (row > liveState.rows || column > liveState.columns) return;
+
+    setCellValue(column, row, newValue, newColor);
     setNewValue("");
   };
 
@@ -116,6 +152,7 @@ export const TableCreator = ({
         </button>
         {configuring && (
           <>
+            <p className="text-(--gray-page)">Column count</p>
             <input
               type="number"
               min={1}
@@ -125,6 +162,7 @@ export const TableCreator = ({
               onChange={(event) => setColumns(event.target.value)}
               placeholder="Columns"
             />
+            <p className="text-(--gray-page)">Row count</p>
             <input
               type="number"
               min={1}
@@ -154,24 +192,27 @@ export const TableCreator = ({
         </button>
         {adding && (
           <>
-            <input
-              type="number"
-              min={1}
-              max={liveState.columns}
-              className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
-              value={newColumn}
-              onChange={(event) => setNewColumn(event.target.value)}
-              placeholder="Column"
-            />
-            <input
-              type="number"
-              min={1}
-              max={liveState.rows}
-              className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
-              value={newRow}
-              onChange={(event) => setNewRow(event.target.value)}
-              placeholder="Row"
-            />
+            <p className="text-(--gray-page)">Column, row</p>
+            <div className="flex items-center justify-between w-full gap-2">
+              <input
+                type="number"
+                min={1}
+                max={liveState.columns}
+                className="rounded-md bg-(--dim) px-2 py-1.5 outline-none w-full"
+                value={newColumn}
+                onChange={(event) => setNewColumn(event.target.value)}
+                placeholder="Column"
+              />
+              <input
+                type="number"
+                min={1}
+                max={liveState.rows}
+                className="rounded-md bg-(--dim) px-2 py-1.5 outline-none w-full"
+                value={newRow}
+                onChange={(event) => setNewRow(event.target.value)}
+                placeholder="Row"
+              />
+            </div>
             <input
               type="text"
               className="rounded-md bg-(--dim) px-2 py-1.5 outline-none"
@@ -181,8 +222,29 @@ export const TableCreator = ({
               onKeyDown={(event) => {
                 if (event.key === "Enter") addItem();
               }}
-              placeholder="Input"
+              placeholder="Table field value"
             />
+            <Select
+              value={newColor}
+              onValueChange={(value) => setNewColor(value as TableCellColor)}
+            >
+              <SelectTrigger className="w-full bg-(--dim) border-(--gray-page)">
+                <SelectValue placeholder="Select a color (optional)" />
+              </SelectTrigger>
+              <SelectContent className="bg-(--quite-dark) border-none text-(--gray-page)">
+                <SelectGroup className="bg-(--quite-dark)">
+                  {TABLE_CELL_COLORS.map((color) => (
+                    <SelectItem
+                      key={color.value}
+                      value={color.value}
+                      className="data-highlighted:bg-(--quite-dark-hover) data-highlighted:text-(--light)"
+                    >
+                      {color.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
             <button
               className="w-max rounded-md px-2 py-1 bg-(--vibrant) hover:bg-(--vibrant-hover)"
               onClick={addItem}
