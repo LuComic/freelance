@@ -15,7 +15,7 @@ import {
 
 const LINE_HEADING_REGEX = /^(#{1,6})\s+(.*)$/;
 const CODE_BLOCK_REGEX = /```([\s\S]*?)```/g;
-const HIGHLIGHTED_WORD_REGEX = /\berle\b/gi;
+const HIGHLIGHTED_WORD_REGEX = /(\berle\b|\bvaike_myy\b)/gi;
 const LINK_REGEX = /(?:https?:\/\/|www\.)[^\s<]+/gi;
 
 function normalizeFencedCodeBlock(code: string) {
