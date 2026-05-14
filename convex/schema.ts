@@ -278,6 +278,7 @@ const schema = defineSchema({
     sourceTemplateId: v.optional(v.id("templates")),
     createdByUserId: v.id("users"),
     updatedByUserId: v.id("users"),
+    isClientVisible: v.optional(v.boolean()),
     isArchived: v.optional(v.boolean()),
     createdAt: v.number(),
     updatedAt: v.number(),
@@ -291,7 +292,6 @@ const schema = defineSchema({
   })
     .index("by_key", ["key"])
     .index("by_updated", ["updatedAt"]),
-
 });
 
 export default schema;

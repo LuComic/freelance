@@ -8,7 +8,10 @@ import {
 import { requireCurrentAuth } from "../lib/auth";
 import { assertNonAnonymousUser, isAnonymousUser } from "../lib/guests";
 import { APP_ERROR_CODES, ConvexDomainError } from "../lib/errors";
-import { getOrderedProjectPages } from "../lib/projectRecords";
+import {
+  getOrderedProjectPages,
+  isPageVisibleToRole,
+} from "../lib/projectRecords";
 import { truncateInput, MAX_SEARCH_QUERY_LENGTH } from "../../lib/inputLimits";
 
 type ProjectSearchOrder = {
@@ -155,6 +158,12 @@ export const searchPagesAcrossProjects = query({
         Doc<"projects">["_id"],
         Doc<"projects">
       >();
+      const rolesByProjectId = new Map(
+        activeMemberships.map((membership) => [
+          membership.projectId,
+          membership.role,
+        ]),
+      );
 
       for (const project of projects) {
         if (!project || project.isArchived === true) {
@@ -167,7 +176,10 @@ export const searchPagesAcrossProjects = query({
       const candidates = (
         await Promise.all(
           Array.from(visibleProjects.values()).map(async (project) => {
-            const pages = await getOrderedProjectPages(ctx, project);
+            const viewerRole = rolesByProjectId.get(project._id);
+            const pages = (await getOrderedProjectPages(ctx, project)).filter(
+              (page) => viewerRole && isPageVisibleToRole(page, viewerRole),
+            );
             const orderedPages = [...pages].sort(
               (left, right) => right.updatedAt - left.updatedAt,
             );

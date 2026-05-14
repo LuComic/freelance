@@ -4,10 +4,11 @@ import {
   ChartNoAxesCombined,
   ChevronRight,
   Cog,
-  File,
   Plus,
   EllipsisVertical,
   Eye,
+  EyeOff,
+  File,
 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -39,6 +40,7 @@ interface SidebarItemProps {
     pages: Array<{
       id: string;
       title: string;
+      isClientVisible?: boolean;
     }>;
   };
   currentPageId?: string | null;
@@ -57,11 +59,15 @@ export const FileItem = ({
   const router = useRouter();
   const preloadPage = usePageQueryPreloader();
   const createPage = useMutation(api.pages.mutations.createPage);
+  const togglePageClientVisibility = useMutation(
+    api.pages.mutations.togglePageClientVisibility,
+  );
   const projectBasePath = getProjectPath(project.id);
   const [isCreatingPage, setIsCreatingPage] = useState(false);
   const isCreatePageDisabled =
     isCreatingPage || project.viewerRole === "client";
   const canViewAnalytics = project.viewerRole !== "client";
+  const canTogglePageVisibility = project.viewerRole !== "client";
 
   return (
     <>
@@ -153,15 +159,45 @@ export const FileItem = ({
               className={`pl-8 flex hover:bg-(--darkest-hover) w-full items-center justify-start gap-2 ${page.id === currentPageId ? "bg-(--darkest-hover)" : null} w-full rounded-lg p-1`}
               key={page.id}
             >
-              <button
-                className={`hover:text-(--vibrant) ${page.id === currentPageId ? "text-(--light)" : "text-(--gray-page)"}`}
-              >
-                <Eye size={18} className="currentColor" />
-              </button>
+              {project.viewerRole === "client" ? (
+                <File
+                  size={18}
+                  className={`${page.id === currentPageId ? "text-(--light)" : "text-(--gray-page)"}`}
+                />
+              ) : (
+                <button
+                  type="button"
+                  disabled={!canTogglePageVisibility}
+                  className={`hover:text-(--vibrant) disabled:cursor-not-allowed ${page.id === currentPageId ? "text-(--light)" : "text-(--gray-page)"}`}
+                  aria-label={
+                    page.isClientVisible === false
+                      ? "Show page to client"
+                      : "Hide page from client"
+                  }
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    if (!canTogglePageVisibility) {
+                      return;
+                    }
+
+                    void togglePageClientVisibility({
+                      pageId: page.id as Id<"pages">,
+                    });
+                  }}
+                >
+                  {page.isClientVisible === false ? (
+                    <EyeOff size={18} className="currentColor" />
+                  ) : (
+                    <Eye size={18} className="currentColor" />
+                  )}
+                </button>
+              )}
               <Link
                 href={getProjectPagePath(project.id, page.id)}
                 prefetch={false}
-                className={`text-base ${
+                className={`text-base w-full ${
                   page.id === currentPageId
                     ? "text-(--light)"
                     : "text-(--gray-page)"

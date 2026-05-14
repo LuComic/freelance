@@ -7,6 +7,7 @@ import { APP_ERROR_CODES, ConvexDomainError } from "../lib/errors";
 import { requireProjectMember } from "../lib/permissions";
 import {
   getOrderedProjectPages,
+  isPageVisibleToRole,
   requireProjectById,
 } from "../lib/projectRecords";
 import { buildUserDisplayName } from "../connections/model";
@@ -22,6 +23,7 @@ type ProjectSummary = {
   pages: Array<{
     id: Doc<"pages">["_id"];
     title: string;
+    isClientVisible: boolean;
   }>;
 };
 
@@ -57,7 +59,9 @@ async function toProjectSummary(
   project: Doc<"projects">,
   viewerRole: Doc<"projectMembers">["role"],
 ): Promise<ProjectSummary> {
-  const pages = await getOrderedProjectPages(ctx, project);
+  const pages = (await getOrderedProjectPages(ctx, project)).filter((page) =>
+    isPageVisibleToRole(page, viewerRole),
+  );
   return {
     id: project._id,
     name: project.name,
@@ -69,6 +73,7 @@ async function toProjectSummary(
     pages: pages.map((page) => ({
       id: page._id,
       title: page.title,
+      isClientVisible: page.isClientVisible !== false,
     })),
   };
 }
@@ -141,8 +146,14 @@ export const getProjectRoot = query({
     try {
       const { userId } = await requireCurrentAuth(ctx);
       const project = await requireProjectById(ctx, args.projectId);
-      await requireProjectMember(ctx, project._id, userId);
-      const pages = await getOrderedProjectPages(ctx, project);
+      const viewerMembership = await requireProjectMember(
+        ctx,
+        project._id,
+        userId,
+      );
+      const pages = (await getOrderedProjectPages(ctx, project)).filter(
+        (page) => isPageVisibleToRole(page, viewerMembership.role),
+      );
       const owner = await ctx.db.get(project.ownerId);
       const ownerName = owner
         ? buildUserDisplayName(owner)
@@ -161,6 +172,7 @@ export const getProjectRoot = query({
         pages: pages.map((page) => ({
           id: page._id,
           title: page.title,
+          isClientVisible: page.isClientVisible !== false,
         })),
       };
     } catch (error) {

@@ -321,6 +321,7 @@ export const createPage = mutation({
       contentJson,
       createdByUserId: userId,
       updatedByUserId: userId,
+      isClientVisible: true,
       createdAt: now,
       updatedAt: now,
     });
@@ -337,6 +338,31 @@ export const createPage = mutation({
     return {
       pageId,
       title,
+    };
+  },
+});
+
+export const togglePageClientVisibility = mutation({
+  args: {
+    pageId: v.id("pages"),
+  },
+  handler: async (ctx, args) => {
+    const { userId } = await requireCurrentAuth(ctx);
+    const page = await requirePageAccess(ctx, args.pageId, userId);
+    await requireProjectEditor(ctx, page.projectId, userId);
+
+    const isClientVisible = page.isClientVisible === false;
+    const now = Date.now();
+
+    await ctx.db.patch(page._id, {
+      isClientVisible,
+      updatedAt: now,
+      updatedByUserId: userId,
+    });
+
+    return {
+      pageId: page._id,
+      isClientVisible,
     };
   },
 });

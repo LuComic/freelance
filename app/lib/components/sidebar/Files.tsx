@@ -20,6 +20,8 @@ export const Files = ({ closeSidebar }: FilesProps) => {
     segments[2] && segments[2] !== "analytics" && segments[2] !== "settings"
       ? segments[2]
       : null;
+  const isProjectSettingsPage = segments[2] === "settings";
+  const isProjectAnalyticsPage = segments[2] === "analytics";
   const currentProject =
     projects?.find((project) => project.id === currentProjectId) ?? null;
   const projectTitle = currentProject?.name ?? "Projects";
@@ -27,15 +29,25 @@ export const Files = ({ closeSidebar }: FilesProps) => {
   const [collapsedAutoExpansionKey, setCollapsedAutoExpansionKey] = useState<
     string | null
   >(null);
-  const autoExpandedProjectId =
-    currentProjectId && currentPageId ? currentProjectId : null;
-  const autoExpansionKey =
-    currentProjectId && currentPageId
-      ? `${currentProjectId}/${currentPageId}`
-      : null;
+  const currentProjectRouteSegment =
+    currentPageId ??
+    (isProjectSettingsPage ? "settings" : null) ??
+    (isProjectAnalyticsPage ? "analytics" : null);
+  const shouldAutoExpandCurrentProject = Boolean(
+    currentProjectId && currentProjectRouteSegment,
+  );
+  const autoExpandedProjectId = shouldAutoExpandCurrentProject
+    ? currentProjectId
+    : null;
+  const autoExpansionKey = shouldAutoExpandCurrentProject
+    ? `${currentProjectId}/${currentProjectRouteSegment}`
+    : null;
+  const isAutoExpansionActive = Boolean(
+    autoExpandedProjectId && autoExpansionKey !== collapsedAutoExpansionKey,
+  );
   const effectiveExpandedProjectIds =
+    isAutoExpansionActive &&
     autoExpandedProjectId &&
-    autoExpansionKey !== collapsedAutoExpansionKey &&
     !expandedProjectIds.includes(autoExpandedProjectId)
       ? [...expandedProjectIds, autoExpandedProjectId]
       : expandedProjectIds;

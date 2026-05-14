@@ -31,6 +31,13 @@ export async function getOrderedProjectPages(
   );
 }
 
+export function isPageVisibleToRole(
+  page: Doc<"pages">,
+  role: Doc<"projectMembers">["role"],
+) {
+  return role !== "client" || page.isClientVisible !== false;
+}
+
 export async function requirePageByProjectId(
   ctx: ProjectCtx,
   projectId: Id<"projects">,

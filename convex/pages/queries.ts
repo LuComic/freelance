@@ -4,6 +4,7 @@ import { requireCurrentAuth } from "../lib/auth";
 import { APP_ERROR_CODES, ConvexDomainError } from "../lib/errors";
 import { requireProjectMember } from "../lib/permissions";
 import {
+  isPageVisibleToRole,
   requirePageByProjectId,
   requireProjectById,
 } from "../lib/projectRecords";
@@ -24,6 +25,11 @@ export const getPageEditor = query({
         userId,
       );
       const page = await requirePageByProjectId(ctx, project._id, args.pageId);
+
+      if (!isPageVisibleToRole(page, viewerMembership.role)) {
+        return null;
+      }
+
       const document = parsePageDocument(page.contentJson);
 
       return {
@@ -37,6 +43,7 @@ export const getPageEditor = query({
           description: page.description ?? null,
           createdAt: page.createdAt,
           updatedAt: page.updatedAt,
+          isClientVisible: page.isClientVisible !== false,
         },
         viewerRole: viewerMembership.role,
         document,

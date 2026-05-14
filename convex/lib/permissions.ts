@@ -43,7 +43,9 @@ export function assertProjectRole(
   allowedRoles: readonly ProjectMemberRole[],
 ) {
   if (!allowedRoles.includes(membership.role)) {
-    throw unauthorized("You do not have permission to perform this project action.");
+    throw unauthorized(
+      "You do not have permission to perform this project action.",
+    );
   }
 }
 
@@ -57,7 +59,12 @@ export async function requirePageAccess(
     throw notFound(`Page ${pageId} was not found.`);
   }
 
-  await requireProjectMember(ctx, page.projectId, userId);
+  const membership = await requireProjectMember(ctx, page.projectId, userId);
+
+  if (membership.role === "client" && page.isClientVisible === false) {
+    throw notFound(`Page ${pageId} was not found.`);
+  }
+
   return page;
 }
 
