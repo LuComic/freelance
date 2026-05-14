@@ -27,7 +27,9 @@ export function PageContentDropdownBlock({
       </button>
 
       {open ? (
-        <div className="pl-7 flex flex-col gap-2 pb-2">{children}</div>
+        <div className="flex flex-col gap-2 @[40rem]:pl-7 @[40rem]:pb-2">
+          {children}
+        </div>
       ) : null}
     </div>
   );

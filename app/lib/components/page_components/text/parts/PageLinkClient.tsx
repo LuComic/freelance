@@ -1,11 +1,13 @@
 "use client";
 
 import type { PageComponentInstanceByType } from "@/lib/pageDocument";
+import Link from "next/link";
+import { getProjectPagePath } from "@/app/lib/components/project/paths";
+import { usePageQueryPreloader } from "@/app/lib/components/project/usePageQueryPreloader";
 import {
   getPageLinkFallbackText,
   type ProjectPageOption,
 } from "./PageLink.shared";
-import { PageNavigationLink } from "@/app/lib/components/project/PageNavigationLink";
 
 type PageLinkClientProps = {
   config: PageComponentInstanceByType<"PageLink">["config"];
@@ -18,6 +20,7 @@ export const PageLinkClient = ({
   projectId,
   targetPage,
 }: PageLinkClientProps) => {
+  const preloadPage = usePageQueryPreloader();
   const displayText =
     config.text.trim() || getPageLinkFallbackText(targetPage?.title);
 
@@ -30,11 +33,14 @@ export const PageLinkClient = ({
   }
 
   return (
-    <PageNavigationLink
-      projectId={projectId}
-      pageId={targetPage.id}
-      name={displayText}
+    <Link
+      href={getProjectPagePath(projectId, targetPage.id)}
+      prefetch={false}
       className="w-max text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover)"
-    />
+      onMouseEnter={() => preloadPage(projectId, targetPage.id)}
+      onFocus={() => preloadPage(projectId, targetPage.id)}
+    >
+      {displayText}
+    </Link>
   );
 };

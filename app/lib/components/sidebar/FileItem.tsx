@@ -7,6 +7,7 @@ import {
   File,
   Plus,
   EllipsisVertical,
+  Eye,
 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -28,7 +29,7 @@ import {
   getProjectPath,
   getProjectSettingsPath,
 } from "../project/paths";
-import { PageNavigationLink } from "../project/PageNavigationLink";
+import { usePageQueryPreloader } from "../project/usePageQueryPreloader";
 
 interface SidebarItemProps {
   project: {
@@ -54,6 +55,7 @@ export const FileItem = ({
   closeSidebar,
 }: SidebarItemProps) => {
   const router = useRouter();
+  const preloadPage = usePageQueryPreloader();
   const createPage = useMutation(api.pages.mutations.createPage);
   const projectBasePath = getProjectPath(project.id);
   const [isCreatingPage, setIsCreatingPage] = useState(false);
@@ -147,23 +149,32 @@ export const FileItem = ({
       {isExpanded && (
         <>
           {project.pages.map((page) => (
-            <PageNavigationLink
+            <div
+              className={`pl-8 flex hover:bg-(--darkest-hover) w-full items-center justify-start gap-2 ${page.id === currentPageId ? "bg-(--darkest-hover)" : null} w-full rounded-lg p-1`}
               key={page.id}
-              projectId={project.id}
-              pageId={page.id}
-              name={
-                page.title.length > 20
+            >
+              <button
+                className={`hover:text-(--vibrant) ${page.id === currentPageId ? "text-(--light)" : "text-(--gray-page)"}`}
+              >
+                <Eye size={18} className="currentColor" />
+              </button>
+              <Link
+                href={getProjectPagePath(project.id, page.id)}
+                prefetch={false}
+                className={`text-base ${
+                  page.id === currentPageId
+                    ? "text-(--light)"
+                    : "text-(--gray-page)"
+                }`}
+                onMouseEnter={() => preloadPage(project.id, page.id)}
+                onFocus={() => preloadPage(project.id, page.id)}
+                onClick={closeSidebar}
+              >
+                {page.title.length > 20
                   ? page.title.slice(0, 20) + "..."
-                  : page.title
-              }
-              icon={<File size={18} />}
-              className={`pl-8 flex w-full items-center justify-start gap-2 rounded-lg p-1 text-base ${
-                page.id === currentPageId
-                  ? "bg-(--darkest-hover) text-(--light)"
-                  : "hover:bg-(--darkest-hover)"
-              }`}
-              onClick={closeSidebar}
-            />
+                  : page.title}
+              </Link>
+            </div>
           ))}
         </>
       )}

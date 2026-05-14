@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { MAX_DESCRIPTION_LENGTH, MAX_NAME_LENGTH } from "@/lib/inputLimits";
 
@@ -109,6 +109,15 @@ export function ProjectGeneralSection({
               {descriptionError}
             </p>
           ) : null}
+
+          <p className="text-(--gray-page) mt-4">Visibility</p>
+          <p>The eye icon in the sidebar toggles visibility for the client</p>
+          <span>
+            <Eye size={20} className="inline" /> - Client can see the page
+          </span>
+          <span>
+            <EyeOff size={20} className="inline" /> - Client cannot see the page
+          </span>
         </div>
       ) : null}
     </div>

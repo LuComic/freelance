@@ -3,13 +3,16 @@
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { PageNavigationLink } from "@/app/lib/components/project/PageNavigationLink";
+import { getProjectPagePath } from "@/app/lib/components/project/paths";
+import { usePageQueryPreloader } from "@/app/lib/components/project/usePageQueryPreloader";
 
 export default function ProjectPage() {
   const params = useParams<{ projectId: string }>();
   const router = useRouter();
+  const preloadPage = usePageQueryPreloader();
   const projectId = params.projectId;
   const data = useQuery(
     api.projects.queries.getProjectRoot,
@@ -49,12 +52,15 @@ export default function ProjectPage() {
                 key={page.id}
               >
                 -
-                <PageNavigationLink
-                  projectId={data.project.id}
-                  pageId={page.id}
-                  name={page.title}
+                <Link
+                  href={getProjectPagePath(data.project.id, page.id)}
+                  prefetch={false}
                   className="text-(--gray-page) hover:text-(--vibrant)"
-                />
+                  onMouseEnter={() => preloadPage(data.project.id, page.id)}
+                  onFocus={() => preloadPage(data.project.id, page.id)}
+                >
+                  {page.title}
+                </Link>
               </div>
             ))}
           </>
