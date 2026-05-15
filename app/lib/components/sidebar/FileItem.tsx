@@ -31,6 +31,11 @@ import {
   getProjectSettingsPath,
 } from "../project/paths";
 import { usePageQueryPreloader } from "../project/usePageQueryPreloader";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface SidebarItemProps {
   project: {
@@ -165,34 +170,32 @@ export const FileItem = ({
                   className={`${page.id === currentPageId ? "text-(--light)" : "text-(--gray-page)"}`}
                 />
               ) : (
-                <button
-                  type="button"
-                  disabled={!canTogglePageVisibility}
-                  className={`hover:text-(--vibrant) disabled:cursor-not-allowed ${page.id === currentPageId ? "text-(--light)" : "text-(--gray-page)"}`}
-                  aria-label={
-                    page.isClientVisible === false
-                      ? "Show page to client"
-                      : "Hide page from client"
-                  }
-                  onClick={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
+                <Tooltip>
+                  <TooltipTrigger
+                    className={`hover:text-(--vibrant) disabled:cursor-not-allowed ${page.id === currentPageId ? "text-(--light)" : "text-(--gray-page)"}`}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
 
-                    if (!canTogglePageVisibility) {
-                      return;
-                    }
+                      if (!canTogglePageVisibility) {
+                        return;
+                      }
 
-                    void togglePageClientVisibility({
-                      pageId: page.id as Id<"pages">,
-                    });
-                  }}
-                >
-                  {page.isClientVisible === false ? (
-                    <EyeOff size={18} className="currentColor" />
-                  ) : (
-                    <Eye size={18} className="currentColor" />
-                  )}
-                </button>
+                      void togglePageClientVisibility({
+                        pageId: page.id as Id<"pages">,
+                      });
+                    }}
+                  >
+                    {page.isClientVisible === false ? (
+                      <EyeOff size={18} className="currentColor" />
+                    ) : (
+                      <Eye size={18} className="currentColor" />
+                    )}
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Toggle client visibility</p>
+                  </TooltipContent>
+                </Tooltip>
               )}
               <Link
                 href={getProjectPagePath(project.id, page.id)}

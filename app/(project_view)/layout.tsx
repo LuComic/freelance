@@ -30,6 +30,7 @@ import {
   SIDEBAR_MAX_WIDTH,
   SIDEBAR_MIN_WIDTH,
 } from "../lib/components/project/desktopPanelSizing";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export const metadata: Metadata = {
   title: "Pageboard",
@@ -69,43 +70,45 @@ export default async function ProjectViewLayout({
   return (
     <ConvexAuthNextjsServerProvider>
       <ConvexClientProvider>
-        <div
-          className="antialiased min-h-dvh h-auto w-full flex items-start justify-start md:h-dvh md:items-stretch md:overflow-hidden"
-          style={{
-            scrollbarColor: "gray transparent",
-            scrollbarWidth: "thin",
-          }}
-        >
-          <SearchBarProvider>
-            <SidebarControllerProvider>
-              <DesktopPanelLayoutProvider
-                initialSidebarWidth={initialSidebarWidth}
-                initialChatWidth={initialChatWidth}
-              >
-                <Sidebar
-                  initialSidebarOpen={initialSidebarOpen}
+        <TooltipProvider delayDuration={500}>
+          <div
+            className="antialiased min-h-dvh h-auto w-full flex items-start justify-start md:h-dvh md:items-stretch md:overflow-hidden"
+            style={{
+              scrollbarColor: "gray transparent",
+              scrollbarWidth: "thin",
+            }}
+          >
+            <SearchBarProvider>
+              <SidebarControllerProvider>
+                <DesktopPanelLayoutProvider
                   initialSidebarWidth={initialSidebarWidth}
-                />
-                <EditModeProvider initialIsLive={initialIsLive}>
-                  <PageDocumentProvider>
-                    <SearchBar />
-                    <div className="relative flex-1 min-w-0 flex flex-col items-start justify-start md:h-full md:min-h-0">
-                      <Tab initialTabsState={initialTabsState} />
-                      <TopBar />
-                      <div className="@container w-full md:px-4 px-2 pt-4 pb-8 flex flex-col items-start justify-start gap-4 md:flex-1 md:min-h-0 md:overflow-y-auto">
-                        {children}
+                  initialChatWidth={initialChatWidth}
+                >
+                  <Sidebar
+                    initialSidebarOpen={initialSidebarOpen}
+                    initialSidebarWidth={initialSidebarWidth}
+                  />
+                  <EditModeProvider initialIsLive={initialIsLive}>
+                    <PageDocumentProvider>
+                      <SearchBar />
+                      <div className="relative flex-1 min-w-0 flex flex-col items-start justify-start md:h-full md:min-h-0">
+                        <Tab initialTabsState={initialTabsState} />
+                        <TopBar />
+                        <div className="@container w-full md:px-4 px-2 pt-4 pb-8 flex flex-col items-start justify-start gap-4 md:flex-1 md:min-h-0 md:overflow-y-auto">
+                          {children}
+                        </div>
                       </div>
-                    </div>
-                    <Chat
-                      initialChatOpen={initialChatOpen}
-                      initialChatWidth={initialChatWidth}
-                    />
-                  </PageDocumentProvider>
-                </EditModeProvider>
-              </DesktopPanelLayoutProvider>
-            </SidebarControllerProvider>
-          </SearchBarProvider>
-        </div>
+                      <Chat
+                        initialChatOpen={initialChatOpen}
+                        initialChatWidth={initialChatWidth}
+                      />
+                    </PageDocumentProvider>
+                  </EditModeProvider>
+                </DesktopPanelLayoutProvider>
+              </SidebarControllerProvider>
+            </SearchBarProvider>
+          </div>
+        </TooltipProvider>
       </ConvexClientProvider>
     </ConvexAuthNextjsServerProvider>
   );
