@@ -231,7 +231,7 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
         }}
         disabled={projects === undefined || projects.length === 0}
       >
-        <SelectTrigger className="w-full px-0 border-none font-medium text-lg text-(--light)">
+        <SelectTrigger className="w-full px-0 border-none font-medium text-lg text-(--light) rounded-none">
           <SelectValue placeholder={selectPlaceholder} />
         </SelectTrigger>
         <SelectContent className="bg-(--quite-dark) border-none text-(--gray-page)">
