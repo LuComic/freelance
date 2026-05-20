@@ -272,7 +272,6 @@ const schema = defineSchema({
   pages: defineTable({
     projectId: v.id("projects"),
     title: v.string(),
-    description: v.optional(v.string()),
     contentStorageId: v.optional(v.id("_storage")),
     contentJson: v.optional(v.string()),
     sourceTemplateId: v.optional(v.id("templates")),

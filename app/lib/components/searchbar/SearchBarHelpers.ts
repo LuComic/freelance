@@ -28,7 +28,6 @@ export type SearchPageResult = {
   projectName: string;
   pageId: string;
   pageTitle: string;
-  pageDescription: string | null;
   projectUpdatedAt: number;
   pageUpdatedAt: number;
 };
@@ -59,7 +58,6 @@ const getRecentPageSuggestions = (): SearchPageResult[] => {
           projectName: tab.contextLabel,
           pageId: tab.pageId,
           pageTitle: tab.title,
-          pageDescription: null,
           projectUpdatedAt: 0,
           pageUpdatedAt: 0,
         },

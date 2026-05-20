@@ -18,7 +18,6 @@ export type ActivePageState = {
   page: {
     id: string;
     title: string;
-    description: string | null;
     createdAt: number;
     updatedAt: number;
   };

@@ -24,7 +24,6 @@ type PageSearchCandidate = {
   projectName: string;
   pageId: Doc<"pages">["_id"];
   pageTitle: string;
-  pageDescription: string | null;
   projectUpdatedAt: number;
   pageUpdatedAt: number;
   normalizedProjectName: string;
@@ -126,7 +125,6 @@ function toPageSearchResult(candidate: PageSearchCandidate): PageSearchResult {
     projectName: candidate.projectName,
     pageId: candidate.pageId,
     pageTitle: candidate.pageTitle,
-    pageDescription: candidate.pageDescription,
     projectUpdatedAt: candidate.projectUpdatedAt,
     pageUpdatedAt: candidate.pageUpdatedAt,
   };
@@ -189,7 +187,6 @@ export const searchPagesAcrossProjects = query({
               projectName: project.name,
               pageId: page._id,
               pageTitle: page.title,
-              pageDescription: page.description ?? null,
               projectUpdatedAt: project.updatedAt,
               pageUpdatedAt: page.updatedAt,
               normalizedProjectName: normalizeSearchQuery(project.name),

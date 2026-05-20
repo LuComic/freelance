@@ -40,7 +40,6 @@ export const getPageEditor = query({
         page: {
           id: page._id,
           title: page.title,
-          description: page.description ?? null,
           createdAt: page.createdAt,
           updatedAt: page.updatedAt,
           isClientVisible: page.isClientVisible !== false,
