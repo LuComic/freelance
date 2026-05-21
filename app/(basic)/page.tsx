@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <div className="relative isolate min-h-screen overflow-hidden bg-(--dim) flex flex-col gap-8">
+    <div className="relative isolate min-h-screen overflow-hidden bg-(--dim) flex flex-col gap-8 @container">
       <LedBackground />
 
       <section className="relative z-10 mx-auto w-full md:max-w-7xl px-4 pt-20 pb-12 sm:px-6 lg:px-8">
@@ -64,7 +64,7 @@ export default function Home() {
 
       <section
         id="about"
-        className="relative z-10 mx-auto bg-(--gray)/10 w-full max-w-7xl px-4 scroll-mt-20 py-8 sm:pt-6 lg:pt-8 rounded-none xl:rounded-md border-y xl:border-x border-(--beautiful-color)/30 backdrop-blur-sm"
+        className="relative z-10 mx-auto bg-(--gray)/10 w-full max-w-7xl px-4 scroll-mt-20 py-8 sm:pt-6 lg:pt-8 rounded-none @[1285px]:rounded-md border-y @[1285px]:border-x border-(--beautiful-color)/30 backdrop-blur-sm"
       >
         <h2
           className="text-2xl font-semibold sm:text-3xl"
@@ -82,7 +82,7 @@ export default function Home() {
 
       <section
         id="features"
-        className="relative z-10 mx-auto w-full px-4 max-w-7xl scroll-mt-20 py-8 sm:pt-6 lg:pt-8 rounded-none xl:rounded-md border-y xl:border-x border-(--beautiful-color)/30 backdrop-blur-sm bg-(--gray)/10"
+        className="relative z-10 mx-auto w-full px-4 max-w-7xl scroll-mt-20 py-8 sm:pt-6 lg:pt-8 rounded-none @[1285px]:rounded-md border-y @[1285px]:border-x border-(--beautiful-color)/30 backdrop-blur-sm bg-(--gray)/10"
       >
         <div className="grid gap-x-10 gap-y-8 md:grid-cols-3">
           <div>
@@ -119,7 +119,7 @@ export default function Home() {
 
       <section
         id="why"
-        className="relative z-10 mx-auto w-full bg-(--gray)/10 px-4 max-w-7xl scroll-mt-20 py-8 sm:pt-6 lg:pt-8 rounded-none xl:rounded-md border-y xl:border-x border-(--beautiful-color)/30 backdrop-blur-sm"
+        className="relative z-10 mx-auto w-full bg-(--gray)/10 px-4 max-w-7xl scroll-mt-20 py-8 sm:pt-6 lg:pt-8 rounded-none @[1285px]:rounded-md border-y @[1285px]:border-x border-(--beautiful-color)/30 backdrop-blur-sm"
       >
         <div className="grid gap-8 md:grid-cols-[1.4fr_0.8fr]">
           <div>
@@ -169,7 +169,7 @@ export default function Home() {
 
       <section
         id="how"
-        className="relative z-10 mx-auto w-full px-4 max-w-7xl scroll-mt-20 py-8 sm:pt-6 lg:pt-8 rounded-none xl:rounded-md border-y xl:border-x border-(--beautiful-color)/30 backdrop-blur-sm bg-(--gray)/10"
+        className="relative z-10 mx-auto w-full px-4 max-w-7xl scroll-mt-20 py-8 sm:pt-6 lg:pt-8 rounded-none @[1285px]:rounded-md border-y @[1285px]:border-x border-(--beautiful-color)/30 backdrop-blur-sm bg-(--gray)/10"
       >
         <div className="grid gap-4 md:grid-cols-[1.4fr_0.8fr]">
           <div>
@@ -274,7 +274,7 @@ export default function Home() {
 
       <section
         id="create-account"
-        className="relative z-10 mx-auto w-full px-4 max-w-7xl scroll-mt-20 pt-8 pb-14 rounded-none xl:rounded-md border-y xl:border-x border-(--beautiful-color)/30 bg-(--gray)/10 backdrop-blur-sm mb-8"
+        className="relative z-10 mx-auto w-full px-4 max-w-7xl scroll-mt-20 pt-8 pb-14 rounded-none @[1285px]:rounded-md border-y @[1285px]:border-x border-(--beautiful-color)/30 bg-(--gray)/10 backdrop-blur-sm mb-8"
       >
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
