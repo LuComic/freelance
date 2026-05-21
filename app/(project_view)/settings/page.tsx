@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { SettingsSections } from "@/app/lib/components/settings/SettingsSections";
 
 export const metadata: Metadata = {
-  title: "Pageboard | Settings",
+  title: "Settings | Pageboard",
   description:
     "Manage your Pageboard account preferences, app behavior, and legal settings.",
 };

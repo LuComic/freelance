@@ -15,7 +15,7 @@ import { SimpleInputPreview } from "@/app/lib/components/comp_page/SimpleInputPr
 import { TablePreview } from "@/app/lib/components/comp_page/TablePreview";
 
 export const metadata: Metadata = {
-  title: "Pageboard | Components",
+  title: "Components | Pageboard",
   description:
     "Explore Pageboard components for feedback, inputs, boards, calendars, and more",
   alternates: {

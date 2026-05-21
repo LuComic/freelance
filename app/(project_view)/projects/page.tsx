@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import ProjectsPageClient from "./ProjectsPageClient";
 
 export const metadata: Metadata = {
-  title: "Pageboard | Projects",
+  title: "Projects | Pageboard",
   description:
     "View, create, and join Pageboard projects for client collaboration.",
 };

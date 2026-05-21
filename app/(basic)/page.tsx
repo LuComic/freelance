@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import { canonicalUrl } from "../lib/seo";
 
 export const metadata: Metadata = {
-  title: "Pageboard | Client Workspace for Freelancers",
+  title: "Client Workspace for Freelancers | Pageboard",
   description: "A client-facing workspace for freelancers and small teams.",
   alternates: {
     canonical: canonicalUrl(),

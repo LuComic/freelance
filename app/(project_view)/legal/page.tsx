@@ -3,7 +3,7 @@ import Link from "next/link";
 import { canonicalUrl } from "@/app/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Pageboard | Legal",
+  title: "Legal | Pageboard",
   description:
     "Access Pageboard legal documents, including cookies, privacy, and terms of service.",
   alternates: {

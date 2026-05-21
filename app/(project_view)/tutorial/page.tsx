@@ -5,7 +5,7 @@ import { TutorialClient } from "@/app/lib/components/tutorial/TutorialClient";
 import { TutorialInDepth } from "@/app/lib/components/tutorial/TutorialInDepth";
 
 export const metadata: Metadata = {
-  title: "Pageboard | Tutorial",
+  title: "Tutorial | Pageboard",
   description:
     "Follow a Pageboard demo showing how creators and clients use projects together.",
   alternates: {

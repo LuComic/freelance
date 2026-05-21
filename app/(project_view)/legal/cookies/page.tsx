@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { canonicalUrl } from "@/app/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Pageboard | Cookies Policy",
+  title: "Cookies Policy | Pageboard",
   description:
     "Learn how Pageboard uses cookies and similar technologies for sessions and workspace preferences.",
   alternates: {

@@ -3,7 +3,7 @@ import { canonicalUrl } from "@/app/lib/seo";
 import { LoginPageClient } from "./LoginPageClient";
 
 export const metadata: Metadata = {
-  title: "Pageboard | Login",
+  title: "Login | Pageboard",
   description:
     "Sign in or create an account to access Pageboard projects and join client workspaces.",
   alternates: {
