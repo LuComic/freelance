@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CreateAccButton } from "../lib/components/landing/CreateAccButton";
+import { LedBackground } from "../lib/components/landing/LedBackground";
 import type { Metadata } from "next";
 import { canonicalUrl } from "../lib/seo";
 
@@ -14,8 +15,10 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <>
-      <section className="mx-auto w-full md:max-w-7xl px-4 pt-20 pb-12 sm:px-6 lg:px-8">
+    <div className="relative isolate min-h-screen overflow-hidden bg-(--dim) flex flex-col gap-8">
+      <LedBackground />
+
+      <section className="relative z-10 mx-auto w-full md:max-w-7xl px-4 pt-20 pb-12 sm:px-6 lg:px-8">
         <div className="relative z-10 flex min-h-136 flex-col">
           <div className="flex flex-col items-center text-center">
             <h1
@@ -27,7 +30,9 @@ export default function Home() {
             <p className="mt-3 max-w-2xl text-base leading-7 text-(--gray-page) sm:text-xl sm:leading-8">
               A client-facing workspace for freelancers and small teams.
               <br />
-              Projects, feedback, progress, and more - all in one clear place.
+              <span className="md:inline hidden">
+                Projects, feedback, progress, and more - all in one clear place.
+              </span>
             </p>
 
             <div className="mt-6 flex w-full max-w-md flex-col gap-3 sm:flex-row sm:justify-center">
@@ -59,7 +64,7 @@ export default function Home() {
 
       <section
         id="about"
-        className="mx-auto bg-(--gray)/10 w-full max-w-7xl px-4 scroll-mt-20 py-8 sm:pt-6 lg:pt-8 border-t border-(--gray)"
+        className="relative z-10 mx-auto bg-(--gray)/10 w-full max-w-7xl px-4 scroll-mt-20 py-8 sm:pt-6 lg:pt-8 rounded-none xl:rounded-md border-y xl:border-x border-(--beautiful-color)/30 backdrop-blur-sm"
       >
         <h2
           className="text-2xl font-semibold sm:text-3xl"
@@ -77,7 +82,7 @@ export default function Home() {
 
       <section
         id="features"
-        className="mx-auto w-full px-4 max-w-7xl scroll-mt-20 py-8 sm:pt-6 lg:pt-8 border-t border-(--gray)"
+        className="relative z-10 mx-auto w-full px-4 max-w-7xl scroll-mt-20 py-8 sm:pt-6 lg:pt-8 rounded-none xl:rounded-md border-y xl:border-x border-(--beautiful-color)/30 backdrop-blur-sm bg-(--gray)/10"
       >
         <div className="grid gap-x-10 gap-y-8 md:grid-cols-3">
           <div>
@@ -114,7 +119,7 @@ export default function Home() {
 
       <section
         id="why"
-        className="mx-auto w-full bg-(--gray)/10 px-4 max-w-7xl scroll-mt-20 py-8 sm:pt-6 lg:pt-8 border-t border-(--gray)"
+        className="relative z-10 mx-auto w-full bg-(--gray)/10 px-4 max-w-7xl scroll-mt-20 py-8 sm:pt-6 lg:pt-8 rounded-none xl:rounded-md border-y xl:border-x border-(--beautiful-color)/30 backdrop-blur-sm"
       >
         <div className="grid gap-8 md:grid-cols-[1.4fr_0.8fr]">
           <div>
@@ -164,7 +169,7 @@ export default function Home() {
 
       <section
         id="how"
-        className="mx-auto w-full px-4 max-w-7xl scroll-mt-20 py-8 sm:pt-6 lg:pt-8 border-t border-(--gray)"
+        className="relative z-10 mx-auto w-full px-4 max-w-7xl scroll-mt-20 py-8 sm:pt-6 lg:pt-8 rounded-none xl:rounded-md border-y xl:border-x border-(--beautiful-color)/30 backdrop-blur-sm bg-(--gray)/10"
       >
         <div className="grid gap-4 md:grid-cols-[1.4fr_0.8fr]">
           <div>
@@ -190,8 +195,8 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="mt-8 space-y-4">
-          <div className="rounded-lg border border-(--gray) p-3 sm:p-4">
+        <div className="mt-8">
+          <div className="border-b border-(--gray) p-3 sm:p-4">
             <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[0.9fr_1.1fr] lg:gap-6">
               <div>
                 <p className="font-medium text-(--gray-page)">Step 1</p>
@@ -215,7 +220,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="rounded-lg border border-(--gray) p-3 sm:p-4">
+          <div className="border-b border-(--gray) p-3 sm:p-4">
             <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[0.9fr_1.1fr] lg:gap-6">
               <div>
                 <p className="font-medium text-(--gray-page)">Step 2</p>
@@ -241,7 +246,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="rounded-lg border border-(--gray) p-3 sm:p-4">
+          <div className="p-3 sm:p-4">
             <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[0.9fr_1.1fr] lg:gap-6">
               <div>
                 <p className="font-medium text-(--gray-page)">Step 3</p>
@@ -269,7 +274,7 @@ export default function Home() {
 
       <section
         id="create-account"
-        className="mx-auto w-full px-4 max-w-7xl scroll-mt-20 pt-8 pb-14 border-t border-(--gray) bg-(--gray)/10"
+        className="relative z-10 mx-auto w-full px-4 max-w-7xl scroll-mt-20 pt-8 pb-14 rounded-none xl:rounded-md border-y xl:border-x border-(--beautiful-color)/30 bg-(--gray)/10 backdrop-blur-sm mb-8"
       >
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
@@ -313,6 +318,6 @@ export default function Home() {
           </a>
         </div>
       </section>
-    </>
+    </div>
   );
 }
