@@ -491,6 +491,55 @@ export function PageDocumentProvider({
     [markConfigChange, setDocument, setSaveError],
   );
 
+  const insertImageAtRange = useCallback(
+    ({
+      storageId,
+      widthPx = 640,
+      heightPx = null,
+      altText = "",
+      value,
+      start,
+      end,
+    }: {
+      storageId: string;
+      widthPx?: number | null;
+      heightPx?: number | null;
+      altText?: string;
+      value: string;
+      start: number;
+      end?: number;
+    }) => {
+      componentSeedRef.current += 1;
+      const instanceId = createComponentInstanceId(
+        Date.now() + componentSeedRef.current,
+      );
+      const token = createComponentToken("Image", instanceId);
+      const nextValue = `${value.slice(0, start)}${token}${value.slice(end ?? start)}`;
+      const component = createDefaultComponentDocument("Image", instanceId);
+
+      markConfigChange();
+      setDocument((prev) =>
+        prev
+          ? {
+              ...prev,
+              editorText: nextValue,
+              components: {
+                ...prev.components,
+                [instanceId]: {
+                  ...component,
+                  config: { storageId, widthPx, heightPx, altText },
+                } as PageComponentDocument,
+              },
+            }
+          : prev,
+      );
+      setSaveError(null);
+
+      return { nextValue, nextCursor: start + token.length };
+    },
+    [markConfigChange, setDocument, setSaveError],
+  );
+
   const persistDocument = useCallback(
     async (currentPage: ActivePageState, currentDocument: PageDocumentV1) => {
       const hasUnsavedConfigChanges =
@@ -838,6 +887,7 @@ export function PageDocumentProvider({
       setPageTitle,
       updateEditorText,
       insertComponentAtRange,
+      insertImageAtRange,
       updateComponentConfig,
       updateComponentLiveState,
       commitPageTitle,
@@ -859,6 +909,7 @@ export function PageDocumentProvider({
       commitComponentLiveState,
       hasUnsavedChanges,
       insertComponentAtRange,
+      insertImageAtRange,
       pageData,
       route,
       saveDocument,

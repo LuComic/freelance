@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import type { Doc, Id } from "../_generated/dataModel";
-import { mutation } from "../_generated/server";
+import { mutation, type MutationCtx } from "../_generated/server";
 import { requireCurrentAuth } from "../lib/auth";
 import { invalidState, notFound } from "../lib/errors";
 import { assertMaxLength } from "../lib/inputValidation";
@@ -41,6 +41,30 @@ function buildProjectActorSnapshot(
     actorNameSnapshot: buildProjectMemberDisplayName(user, membership),
     actorImageSnapshot: user.image ?? null,
   };
+}
+
+function collectPageImageStorageIds(document: PageDocumentV1) {
+  return new Set(
+    Object.values(document.components)
+      .filter((component) => component.type === "Image")
+      .map((component) => component.config.storageId)
+      .filter((storageId): storageId is string => typeof storageId === "string"),
+  );
+}
+
+async function deleteRemovedPageImages(
+  ctx: MutationCtx,
+  previousDocument: PageDocumentV1,
+  nextDocument: PageDocumentV1,
+) {
+  const previousStorageIds = collectPageImageStorageIds(previousDocument);
+  const nextStorageIds = collectPageImageStorageIds(nextDocument);
+
+  await Promise.all(
+    [...previousStorageIds]
+      .filter((storageId) => !nextStorageIds.has(storageId))
+      .map((storageId) => ctx.storage.delete(storageId as Id<"_storage">)),
+  );
 }
 
 function sanitizeCreatorIdeaBoardDocument(
@@ -475,6 +499,7 @@ export const savePage = mutation({
       updatedAt: now,
       updatedByUserId: userId,
     });
+    await deleteRemovedPageImages(ctx, currentDocument, nextDocument);
 
     return {
       pageId: page._id,

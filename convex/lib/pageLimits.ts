@@ -4,6 +4,7 @@ import { invalidState } from "./errors";
 import {
   MAX_OWNED_PROJECTS_PER_USER,
   MAX_COMPONENTS_PER_PAGE,
+  MAX_IMAGES_PER_PAGE,
   MAX_PAGE_CONTENT_BYTES,
   MAX_PAGES_PER_PROJECT,
   getUtf8ByteLength,
@@ -50,6 +51,16 @@ export function serializePageDocumentWithLimits(document: PageDocumentV1) {
   if (componentCount > MAX_COMPONENTS_PER_PAGE) {
     throw invalidState(
       `This page has ${componentCount} components. Limit is ${MAX_COMPONENTS_PER_PAGE}.`,
+    );
+  }
+
+  const imageCount = Object.values(document.components).filter(
+    (component) => component.type === "Image",
+  ).length;
+
+  if (imageCount > MAX_IMAGES_PER_PAGE) {
+    throw invalidState(
+      `This page has ${imageCount} images. Limit is ${MAX_IMAGES_PER_PAGE}.`,
     );
   }
 

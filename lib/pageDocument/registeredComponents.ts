@@ -3,6 +3,7 @@ import { AdvancedInputDefinition } from "./registered/AdvancedInput.definition";
 import { IdeaBoardDefinition } from "./registered/IdeaBoard.definition";
 import { SimpleInputDefinition } from "./registered/SimpleInput.definition";
 import { TableDefinition } from "./registered/Table.definition";
+import { ImageDefinition } from "./registered/Image.definition";
 
 export const REGISTERED_PAGE_COMPONENT_DEFINITIONS = [
   IdeaBoardDefinition,
@@ -10,6 +11,7 @@ export const REGISTERED_PAGE_COMPONENT_DEFINITIONS = [
   AdvancedInputDefinition,
   FormDefinition,
   TableDefinition,
+  ImageDefinition,
 ] as const;
 
 function collectDefinitionTypes<

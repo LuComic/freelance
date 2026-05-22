@@ -1,5 +1,12 @@
 "use client";
 
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
+import {
+  ALLOWED_PAGE_IMAGE_MIME_TYPES,
+  MAX_PAGE_IMAGE_BYTES,
+} from "@/lib/pageLimits";
 import {
   useCallback,
   useEffect,
@@ -50,6 +57,13 @@ export default function TestingEditorClient() {
   const [lineHeights, setLineHeights] = useState<number[]>([24]);
   const [scrollTop, setScrollTop] = useState(0);
   const [ghostCompletion, setGhostCompletion] = useState<GhostCompletion>(null);
+  const [imageUploadError, setImageUploadError] = useState<string | null>(null);
+  const generateImageUploadUrl = useMutation(
+    api.pages.images.generatePageImageUploadUrl,
+  );
+  const validateUploadedImage = useMutation(
+    api.pages.images.validateUploadedPageImage,
+  );
   const {
     containerRef: splitContainerRef,
     ratio: splitRatio,
@@ -245,7 +259,76 @@ export default function TestingEditorClient() {
     return <div className="w-full text-(--gray-page)">Loading page...</div>;
   }
 
-  const { insertComponentAtRange, updateEditorText } = pageDocument;
+  const {
+    activePage,
+    insertComponentAtRange,
+    insertImageAtRange,
+    updateEditorText,
+  } = pageDocument;
+
+  const insertImageFiles = async (files: FileList | File[], start: number) => {
+    const imageFiles = Array.from(files).filter((file) =>
+      file.type.startsWith("image/"),
+    );
+    if (imageFiles.length === 0) return false;
+
+    setImageUploadError(null);
+    let nextValue = content;
+    let nextCursor = start;
+
+    try {
+      for (const file of imageFiles) {
+        if (
+          !ALLOWED_PAGE_IMAGE_MIME_TYPES.includes(
+            file.type as (typeof ALLOWED_PAGE_IMAGE_MIME_TYPES)[number],
+          )
+        ) {
+          throw new Error(
+            "Only JPEG, PNG, WebP, and GIF images are supported.",
+          );
+        }
+        if (file.size > MAX_PAGE_IMAGE_BYTES) {
+          throw new Error("Images must be smaller than 5 MB.");
+        }
+
+        const uploadUrl = await generateImageUploadUrl({
+          pageId: activePage.page.id as Id<"pages">,
+          contentType: file.type,
+          size: file.size,
+        });
+        const response = await fetch(uploadUrl, {
+          method: "POST",
+          headers: { "Content-Type": file.type },
+          body: file,
+        });
+        if (!response.ok) throw new Error("Image upload failed.");
+        const { storageId } = (await response.json()) as { storageId: string };
+        await validateUploadedImage({
+          pageId: activePage.page.id as Id<"pages">,
+          storageId: storageId as Id<"_storage">,
+        });
+
+        const insertion = insertImageAtRange({
+          storageId,
+          altText: file.name.replace(/\.[^.]+$/, ""),
+          value: nextValue,
+          start: nextCursor,
+        });
+        if (!insertion) throw new Error("Could not insert image.");
+        nextValue = insertion.nextValue;
+        nextCursor = insertion.nextCursor;
+      }
+
+      setActiveLine(getActiveLineFromCursor(nextValue, nextCursor));
+      setCaretPosition(nextCursor);
+    } catch (error) {
+      setImageUploadError(
+        error instanceof Error ? error.message : "Image upload failed.",
+      );
+    }
+
+    return true;
+  };
 
   if (!isEditing || isLive) {
     return <div className="w-full flex flex-col gap-1">{renderedContent}</div>;
@@ -304,6 +387,27 @@ export default function TestingEditorClient() {
               openTaggedSearch,
             });
           }}
+          onPaste={(event) => {
+            const files = event.clipboardData.files;
+            if (files.length === 0) return;
+            event.preventDefault();
+            void insertImageFiles(files, event.currentTarget.selectionStart);
+          }}
+          onDragOver={(event) => {
+            if (
+              Array.from(event.dataTransfer.items).some((item) =>
+                item.type.startsWith("image/"),
+              )
+            ) {
+              event.preventDefault();
+            }
+          }}
+          onDrop={(event) => {
+            const files = event.dataTransfer.files;
+            if (files.length === 0) return;
+            event.preventDefault();
+            void insertImageFiles(files, event.currentTarget.selectionStart);
+          }}
           onClick={updateActiveLine}
           onKeyUp={updateActiveLine}
           onSelect={updateActiveLine}
@@ -318,6 +422,11 @@ export default function TestingEditorClient() {
           className="relative z-10 h-full w-full resize-none bg-transparent p-0 @[35rem]:pt-0 @[35rem]:pl-4 text-base leading-6 text-(--light) caret-(--light) border-none outline-none focus:ring-0 text-editor-font"
           placeholder="Start typing..."
         />
+        {imageUploadError ? (
+          <div className="absolute bottom-3 left-4 z-30 rounded-md border border-red-500/50 bg-black/80 px-3 py-2 text-sm text-red-200">
+            {imageUploadError}
+          </div>
+        ) : null}
         {ghostCompletion ? (
           <span
             aria-hidden

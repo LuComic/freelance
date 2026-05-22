@@ -34,6 +34,7 @@ import type * as pageRuntime_feedback from "../pageRuntime/feedback.js";
 import type * as pageRuntime_forms from "../pageRuntime/forms.js";
 import type * as pageRuntime_progress from "../pageRuntime/progress.js";
 import type * as pages_content from "../pages/content.js";
+import type * as pages_images from "../pages/images.js";
 import type * as pages_mutations from "../pages/mutations.js";
 import type * as pages_queries from "../pages/queries.js";
 import type * as projects_invites from "../projects/invites.js";
@@ -84,6 +85,7 @@ declare const fullApi: ApiFromModules<{
   "pageRuntime/forms": typeof pageRuntime_forms;
   "pageRuntime/progress": typeof pageRuntime_progress;
   "pages/content": typeof pages_content;
+  "pages/images": typeof pages_images;
   "pages/mutations": typeof pages_mutations;
   "pages/queries": typeof pages_queries;
   "projects/invites": typeof projects_invites;

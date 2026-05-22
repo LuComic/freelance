@@ -42,6 +42,15 @@ export type PageDocumentContextValue = {
     start: number;
     end?: number;
   }) => { nextValue: string; nextCursor: number } | null;
+  insertImageAtRange: (args: {
+    storageId: string;
+    widthPx?: number | null;
+    heightPx?: number | null;
+    altText?: string;
+    value: string;
+    start: number;
+    end?: number;
+  }) => { nextValue: string; nextCursor: number } | null;
   updateComponentConfig: (
     instanceId: string,
     updater: (component: PageComponentDocument) => PageComponentDocument,

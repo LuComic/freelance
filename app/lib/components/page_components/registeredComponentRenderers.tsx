@@ -7,6 +7,7 @@ import { SimpleInput } from "./SimpleInput/SimpleInput";
 import { Form } from "./form/form/Form";
 import { AdvancedInput } from "./advanced_input/AdvancedInput";
 import { Table } from "./table/Table";
+import { Image } from "./image/Image";
 
 export type PageComponentRenderer = {
   type: PageComponentType;
@@ -33,5 +34,9 @@ export const REGISTERED_PAGE_COMPONENT_RENDERERS = [
   {
     type: "Table",
     Component: Table,
+  },
+  {
+    type: "Image",
+    Component: Image,
   },
 ] as const satisfies readonly PageComponentRenderer[];
