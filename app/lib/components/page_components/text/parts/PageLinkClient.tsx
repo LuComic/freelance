@@ -26,7 +26,7 @@ export const PageLinkClient = ({
 
   if (!targetPage) {
     return (
-      <span className="mb-1 w-max text-(--gray-page) underline underline-offset-4">
+      <span className="mb-1 max-w-full text-(--gray-page) wrap-anywhere text-wrap underline underline-offset-4">
         {displayText}
       </span>
     );
@@ -36,7 +36,7 @@ export const PageLinkClient = ({
     <Link
       href={getProjectPagePath(projectId, targetPage.id)}
       prefetch={false}
-      className="w-max text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover)"
+      className="max-w-full text-(--vibrant) wrap-anywhere text-wrap underline underline-offset-4 hover:text-(--vibrant-hover)"
       onMouseEnter={() => preloadPage(projectId, targetPage.id)}
       onFocus={() => preloadPage(projectId, targetPage.id)}
     >

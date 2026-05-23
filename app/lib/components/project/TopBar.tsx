@@ -127,7 +127,7 @@ export const TopBar = () => {
     <>
       {isLive ? (
         <div
-          className={`mx-auto h-10 px-1.5 ${isHidden ? "hidden" : "flex"} items-center justify-center shadow-md rounded-lg backdrop-blur-md bg-(--dim)/60 border border-(--gray) gap-2 absolute-center w-max`}
+          className={`mx-auto h-10 px-2 ${isHidden ? "hidden" : "flex"} items-center justify-center shadow-md rounded-lg backdrop-blur-md bg-(--dim)/60 border border-(--gray) gap-2 absolute-center w-max`}
         >
           <span className="text-sm md:text-base">Client&apos;s view</span>
           <Select
@@ -142,13 +142,14 @@ export const TopBar = () => {
             }}
           >
             <SelectTrigger className="w-28 text-sm px-2 h-6.5! bg-(--darkest) border-(--vibrant) text-(--gray-page)">
-              <SelectValue placeholder="Mode" className="text-sm" />
+              <SelectValue placeholder="Mode" />
             </SelectTrigger>
+
             <SelectContent className="bg-(--darkest) border-none text-(--gray-page)">
               <SelectGroup className="bg-(--darkest)">
                 <SelectItem
                   value="edit"
-                  className="data-highlighted:bg-(--dim) data-highlighted:text-(--light)! text-sm h-6.5!"
+                  className="h-8! md:h-6.5! text-base! md:text-sm! data-highlighted:bg-(--dim) data-highlighted:text-(--light)!"
                 >
                   <div className="flex items-center gap-2">
                     <Pencil size={14} className="hover:text-(--light)" />
@@ -157,7 +158,7 @@ export const TopBar = () => {
                 </SelectItem>
                 <SelectItem
                   value="live"
-                  className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) text-sm"
+                  className="h-8! md:h-6.5! text-base! md:text-sm! data-highlighted:bg-(--dim) data-highlighted:text-(--light)!"
                 >
                   <div className="flex items-center gap-2">
                     <Radio size={14} className="hover:text-(--light)" />

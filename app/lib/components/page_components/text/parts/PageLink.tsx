@@ -36,7 +36,7 @@ export const PageLink = ({ instanceId }: { instanceId: string }) => {
 
   return (
     <div
-      className={`w-full flex flex-col gap-2 ${liveConfigActivator.className}`}
+      className={`w-full text-wrap flex flex-col gap-2 ${liveConfigActivator.className}`}
       onClickCapture={liveConfigActivator.onClickCapture}
     >
       {isLive ? (

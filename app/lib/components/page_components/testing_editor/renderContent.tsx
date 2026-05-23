@@ -88,7 +88,7 @@ function renderSpecialText(value: string, keyStart: number) {
     const href = linkText.startsWith("http") ? linkText : `https://${linkText}`;
     nodes.push(
       <a
-        className="w-max text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover)"
+        className="w-max text-(--vibrant) wrap-anywhere text-wrap underline underline-offset-4 hover:text-(--vibrant-hover)"
         href={href}
         key={`link-${key++}`}
         rel="noopener noreferrer"
