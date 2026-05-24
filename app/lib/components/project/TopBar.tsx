@@ -189,13 +189,13 @@ export const TopBar = () => {
             <SelectTrigger
               className={`w-28 text-sm px-2 h-6.5! bg-(--darkest) border-(--vibrant) text-(--gray-page) ${isLive ? "mr-auto" : ""}`}
             >
-              <SelectValue placeholder="Mode" className="text-sm" />
+              <SelectValue placeholder="Mode" />
             </SelectTrigger>
             <SelectContent className="bg-(--darkest) border-none text-(--gray-page)">
               <SelectGroup className="bg-(--darkest)">
                 <SelectItem
                   value="edit"
-                  className="data-highlighted:bg-(--dim) data-highlighted:text-(--light)! text-sm"
+                  className="h-8! md:h-6.5! text-base! md:text-sm! data-highlighted:bg-(--dim) data-highlighted:text-(--light)!"
                 >
                   <div className="flex items-center gap-2">
                     <Pencil size={14} className="hover:text-(--light)" />
@@ -204,7 +204,7 @@ export const TopBar = () => {
                 </SelectItem>
                 <SelectItem
                   value="live"
-                  className="data-highlighted:bg-(--dim) data-highlighted:text-(--light) text-sm"
+                  className="h-8! md:h-6.5! text-base! md:text-sm! data-highlighted:bg-(--dim) data-highlighted:text-(--light)!"
                 >
                   <div className="flex items-center gap-2">
                     <Radio size={14} className="hover:text-(--light)" />
