@@ -45,7 +45,10 @@ import type {
   ViewerProjectRole,
 } from "./page_document_helpers/types";
 import { canInsertComponentCommand } from "../page_components/componentCatalog";
-import { resolveComponentTypeFromCommand } from "../page_components/testing_editor/commands";
+import {
+  isCursorInsideFencedCodeBlock,
+  resolveComponentTypeFromCommand,
+} from "../page_components/testing_editor/commands";
 import {
   createDropdownScaffold,
   DROPDOWN_SLASH_COMMAND,
@@ -424,6 +427,10 @@ export function PageDocumentProvider({
       start: number;
       end?: number;
     }) => {
+      if (isCursorInsideFencedCodeBlock(value, start)) {
+        return null;
+      }
+
       if (command === DROPDOWN_SLASH_COMMAND) {
         markConfigChange();
         const scaffold = createDropdownScaffold();

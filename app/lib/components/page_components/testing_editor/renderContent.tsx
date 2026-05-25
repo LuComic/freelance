@@ -22,6 +22,19 @@ function normalizeFencedCodeBlock(code: string) {
   return code.replace(/^\r?\n/, "").replace(/\r?\n$/, "");
 }
 
+function renderCodeBlockText(code: string) {
+  if (!code.endsWith("\n")) {
+    return code;
+  }
+
+  return (
+    <>
+      {code}
+      {"\u00A0"}
+    </>
+  );
+}
+
 function stripTrailingLinkPunctuation(value: string) {
   const match = value.match(/[.,!?;:)]*$/);
   const trailingText = match?.[0] ?? "";
@@ -136,7 +149,9 @@ function renderInlineMarkdown(text: string, keyStart: number) {
         const renderedBoldText = renderSpecialText(boldText, key);
         key = renderedBoldText.nextKey;
         nodes.push(
-          <strong key={`bold-${key++}`}>{renderedBoldText.nodes}</strong>,
+          <span className="font-semibold" key={`bold-${key++}`}>
+            {renderedBoldText.nodes}
+          </span>,
         );
         index = endIndex + 2;
         continue;
@@ -225,10 +240,10 @@ function renderMarkdownText(text: string, keyStart: number) {
 
     nodes.push(
       <div
-        className="code-snippet-font rounded-xl bg-(--dim) p-2 whitespace-pre-wrap"
+        className="code-snippet-font rounded-md bg-(--dim) p-2 whitespace-pre-wrap text-sm"
         key={`code-${key++}`}
       >
-        {code}
+        {renderCodeBlockText(code)}
       </div>,
     );
 
@@ -294,11 +309,18 @@ function renderPlainTextSegment(segment: string, keyStart: number) {
 
   const isQuoteStart = (value: string) => value.trimStart().startsWith('"');
   const isQuoteEnd = (value: string) => value.trimEnd().endsWith('"');
+  const hasUnclosedCodeFence = () =>
+    (textBuffer.match(/```/g)?.length ?? 0) % 2 === 1;
 
   for (let lineIndex = 0; lineIndex < lines.length; lineIndex += 1) {
     const line = lines[lineIndex];
 
     if (line.length === 0) {
+      if (hasUnclosedCodeFence()) {
+        textBuffer += "\n";
+        continue;
+      }
+
       flushTextBuffer();
 
       let emptyLineCount = 1;
@@ -314,6 +336,12 @@ function renderPlainTextSegment(segment: string, keyStart: number) {
         isTrailingEmptyGroup ? Math.max(0, emptyLineCount - 1) : emptyLineCount,
       );
       lineIndex += emptyLineCount - 1;
+      continue;
+    }
+
+    if (hasUnclosedCodeFence()) {
+      textBuffer += "\n";
+      textBuffer += line;
       continue;
     }
 

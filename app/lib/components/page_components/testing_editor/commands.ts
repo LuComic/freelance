@@ -58,6 +58,12 @@ type SlashAction =
 
 type SlashInsertion = { type: "insert-dropdown-block" };
 
+export function isCursorInsideFencedCodeBlock(value: string, cursor: number) {
+  const textBeforeCursor = value.slice(0, cursor);
+  const fenceMatches = textBeforeCursor.match(/```/g);
+  return (fenceMatches?.length ?? 0) % 2 === 1;
+}
+
 function getTokenRangeAtCursor(value: string, cursor: number) {
   let start = cursor;
   let end = cursor;
@@ -78,6 +84,10 @@ function getTokenRangeAtCursor(value: string, cursor: number) {
 }
 
 export function getSlashCommandTokenRange(value: string, cursor: number) {
+  if (isCursorInsideFencedCodeBlock(value, cursor)) {
+    return null;
+  }
+
   const range = getTokenRangeAtCursor(value, cursor);
   return range.token.startsWith("/") ? range : null;
 }
@@ -97,6 +107,10 @@ export function completeSlashCommand(
   cursor: number,
   allowedInsertableCommands: readonly InsertableComponentCommand[] = PRIMARY_INSERTABLE_COMMANDS,
 ) {
+  if (isCursorInsideFencedCodeBlock(value, cursor)) {
+    return null;
+  }
+
   const { start, end, token } = getTokenRangeAtCursor(value, cursor);
   if (!token.startsWith("/")) {
     return null;
@@ -135,6 +149,10 @@ export function getSlashCompletionSuffix(
   cursor: number,
   allowedInsertableCommands: readonly InsertableComponentCommand[] = PRIMARY_INSERTABLE_COMMANDS,
 ) {
+  if (isCursorInsideFencedCodeBlock(value, cursor)) {
+    return null;
+  }
+
   const { token } = getTokenRangeAtCursor(value, cursor);
   if (!token.startsWith("/")) {
     return null;
@@ -174,6 +192,10 @@ function resolveSlashAction(token: string): SlashAction | null {
 }
 
 export function consumeSlashActionCommand(value: string, cursor: number) {
+  if (isCursorInsideFencedCodeBlock(value, cursor)) {
+    return null;
+  }
+
   const { start, end, token } = getTokenRangeAtCursor(value, cursor);
   if (!token.startsWith("/")) {
     return null;
@@ -204,6 +226,10 @@ export function replaceSlashCommandWithStructuralBlock(
   value: string,
   cursor: number,
 ) {
+  if (isCursorInsideFencedCodeBlock(value, cursor)) {
+    return null;
+  }
+
   const { start, end, token } = getTokenRangeAtCursor(value, cursor);
   if (!token.startsWith("/")) {
     return null;
@@ -232,6 +258,10 @@ export function replaceSlashCommandWithToken(
   cursor: number,
   instanceId: string,
 ) {
+  if (isCursorInsideFencedCodeBlock(value, cursor)) {
+    return null;
+  }
+
   const { start, end, token } = getTokenRangeAtCursor(value, cursor);
   if (!token.startsWith("/")) {
     return null;
