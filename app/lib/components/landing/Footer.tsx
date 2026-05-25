@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export const Footer = () => {
   return (
     <footer className="relative overflow-hidden border-t border-(--gray) w-full">
@@ -20,13 +22,13 @@ export const Footer = () => {
         </svg>
       </div>
 
-      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 md:flex-row md:justify-between md:px-8">
+      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6">
         <div>
           <p className="text-(--gray-page)">Built by</p>
           <p className="text-lg font-medium">Lukas Jääger</p>
         </div>
 
-        <div className="grid grid-cols-2 sm:flex items-center gap-2 md:mx-auto">
+        <div className="grid grid-cols-2 sm:flex items-center gap-2">
           <a
             href="https://jaager.dev/"
             className="underline underline-offset-4"
@@ -66,9 +68,17 @@ export const Footer = () => {
           >
             Support
           </a>
+          <span className="hidden sm:inline">-</span>
+          <Link
+            href="/legal/"
+            className="underline underline-offset-4"
+            target="_blank"
+          >
+            Legal information
+          </Link>
         </div>
 
-        <div className="md:text-right">
+        <div>
           <p className="text-(--gray-page)">Project repo</p>
           <a
             className="text-lg font-medium underline underline-offset-4"
