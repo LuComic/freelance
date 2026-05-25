@@ -21,35 +21,35 @@ export default function Page() {
         Here are the legal documentations for this service. These include
         cookies, privacy policy and tos.
       </p>
-      <span>
-        -{" "}
-        <Link
-          href="/legal/cookies"
-          className="text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover)"
-        >
-          Cookies
-        </Link>
-      </span>
-
-      <span>
-        -{" "}
-        <Link
-          href="/legal/cookies"
-          className="text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover)"
-        >
-          Privacy
-        </Link>
-      </span>
-
-      <span>
-        -{" "}
-        <Link
-          href="/legal/terms"
-          className="text-(--vibrant) underline underline-offset-4 hover:text-(--vibrant-hover)"
-        >
-          Terms of Service
-        </Link>
-      </span>
+      <div className="flex flex-col gap-2">
+        <div className="flex gap-2 items-center justify-start">
+          -
+          <Link
+            href="/legal/cookies"
+            className="text-(--gray-page) hover:text-(--vibrant)"
+          >
+            Cookies
+          </Link>
+        </div>
+        <div className="flex gap-2 items-center justify-start">
+          -
+          <Link
+            href="/legal/cookies"
+            className="text-(--gray-page) hover:text-(--vibrant)"
+          >
+            Privacy
+          </Link>
+        </div>
+        <div className="flex gap-2 items-center justify-start">
+          -
+          <Link
+            href="/legal/terms"
+            className="text-(--gray-page) hover:text-(--vibrant)"
+          >
+            Terms of Service
+          </Link>
+        </div>
+      </div>
     </>
   );
 }
