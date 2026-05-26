@@ -79,7 +79,7 @@ export function ProjectEmailListSection({
     >
       <button
         type="button"
-        className="flex font-medium @[40rem]:text-lg text-base items-center justify-start gap-2"
+        className="flex font-medium @[40rem]:text-lg text-base items-center justify-start gap-2 text-left"
         onClick={() => setOpen((prev) => !prev)}
       >
         <ChevronRight
@@ -90,7 +90,7 @@ export function ProjectEmailListSection({
       </button>
 
       {open ? (
-        <div className="pl-7 flex flex-col gap-2 pb-2">
+        <div className="flex flex-col gap-2 @[40rem]:pl-7 @[40rem]:pb-2">
           <p className="text-(--gray-page)">{currentLabel}</p>
           {members.length > 0 ? (
             <div className="flex items-center justify-start gap-2 w-full flex-wrap">

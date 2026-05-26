@@ -90,7 +90,7 @@ export const IdeaBoradCreator = ({
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
         <button
           type="button"
-          className="text-base font-medium flex items-center justify-start gap-2  w-max"
+          className="text-base font-medium flex items-center justify-start gap-2  w-max text-left"
           onClick={() => setAdding((prev) => !prev)}
         >
           Add Idea
@@ -126,7 +126,7 @@ export const IdeaBoradCreator = ({
 
         <button
           type="button"
-          className="text-base font-medium flex items-center justify-start gap-2 w-max"
+          className="text-base font-medium flex items-center justify-start gap-2 w-max text-left"
           onClick={() => setClientEditing((prev) => !prev)}
         >
           Client permissions

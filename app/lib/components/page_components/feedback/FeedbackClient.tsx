@@ -139,7 +139,7 @@ export const FeedbackClient = ({
       </p>
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
         <button
-          className="@[40rem]:text-lg text-base font-medium flex items-center justify-start gap-2  w-max"
+          className="@[40rem]:text-lg text-base font-medium flex items-center justify-start gap-2  w-max text-left"
           onClick={() => setAdding((prev) => !prev)}
         >
           New idea

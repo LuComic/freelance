@@ -144,7 +144,7 @@ export const TableCreator = ({
 
       <div className="border-(--gray) border-b py-2 w-full flex flex-col gap-2">
         <button
-          className="text-base font-medium flex items-center justify-start gap-2 w-full"
+          className="text-base font-medium flex items-center justify-start gap-2 w-full text-left"
           onClick={() => setConfiguring((prev) => !prev)}
         >
           Configure table
@@ -184,7 +184,7 @@ export const TableCreator = ({
         <div className="w-full h-px bg-(--gray)" />
 
         <button
-          className="text-base font-medium flex items-center justify-start gap-2 w-full"
+          className="text-base font-medium flex items-center justify-start gap-2 w-full text-left"
           onClick={() => setAdding((prev) => !prev)}
         >
           Add item

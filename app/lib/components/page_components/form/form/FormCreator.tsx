@@ -152,7 +152,7 @@ export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
         <button
           type="button"
-          className="text-base font-medium flex items-center justify-start gap-2 w-full"
+          className="text-base font-medium flex items-center justify-start gap-2 w-full text-left"
           onClick={() => setAddingField((prev) => !prev)}
         >
           Add Field
@@ -211,7 +211,7 @@ export const FormCreator = ({ config, onChangeConfig }: FormCreatorProps) => {
                 <div className="flex items-center justify-between gap-2">
                   <button
                     type="button"
-                    className="text-base font-medium flex flex-1 items-center justify-start gap-2 min-w-0"
+                    className="text-base font-medium flex flex-1 items-center justify-start gap-2 min-w-0 text-left"
                     onClick={() => toggleFieldOpen(field.id)}
                   >
                     <span className="min-w-0 wrap-break-word text-left">

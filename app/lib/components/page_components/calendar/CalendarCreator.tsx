@@ -108,7 +108,7 @@ export const CalendarCreator = ({
       </p>
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
         <button
-          className="text-base font-medium flex items-center justify-start gap-2  w-max"
+          className="text-base font-medium flex items-center justify-start gap-2  w-max text-left"
           onClick={() => setAdding((previousValue) => !previousValue)}
           type="button"
         >

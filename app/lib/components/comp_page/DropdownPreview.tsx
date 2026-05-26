@@ -10,7 +10,7 @@ export const DropdownPreview = () => {
     <div className="w-full p-2 flex flex-col gap-2 my-1 border-b border-(--gray)">
       <button
         type="button"
-        className={`flex font-medium @[40rem]:text-lg text-base items-center justify-start gap-2 ${open ? "underline" : null} underline-offset-4 decoration-1`}
+        className={`flex font-medium @[40rem]:text-lg text-base items-center justify-start gap-2 text-left ${open ? "underline" : null} underline-offset-4 decoration-1`}
         onClick={() => setOpen((current) => !current)}
       >
         <ChevronRight
@@ -21,7 +21,7 @@ export const DropdownPreview = () => {
       </button>
 
       {open ? (
-        <div className="pl-7 flex flex-col gap-2 pb-2">im a dropdown</div>
+        <div className="flex flex-col gap-2 @[40rem]:pl-7 @[40rem]:pb-2">im a dropdown</div>
       ) : null}
     </div>
   );

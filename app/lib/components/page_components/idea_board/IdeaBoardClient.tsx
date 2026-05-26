@@ -82,7 +82,7 @@ export const IdeaBoardClient = ({
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
         <button
           type="button"
-          className="@[40rem]:text-lg text-base font-medium flex items-center justify-start gap-2 w-max disabled:text-(--gray-page)"
+          className="@[40rem]:text-lg text-base font-medium flex items-center justify-start gap-2 w-max text-left disabled:text-(--gray-page)"
           onClick={() => setAdding((prev) => !prev)}
           disabled={!config.canClientAdd}
         >

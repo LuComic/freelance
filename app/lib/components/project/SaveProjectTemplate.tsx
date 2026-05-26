@@ -22,7 +22,7 @@ export const SaveProjectTemplate = ({ pages }: SaveProjectTemplateProps) => {
         >
           <button
             type="button"
-            className="flex font-medium md:text-lg text-base items-center justify-start gap-2"
+            className="flex font-medium md:text-lg text-base items-center justify-start gap-2 text-left"
             onClick={() =>
               setPageDropdowns((prev) =>
                 prev.map((value, index) =>
@@ -39,7 +39,7 @@ export const SaveProjectTemplate = ({ pages }: SaveProjectTemplateProps) => {
           </button>
 
           {pageDropdowns[pageIndex] ? (
-            <div className="pl-7 flex flex-col gap-2 pb-2">
+            <div className="flex flex-col gap-2 @[40rem]:pl-7 @[40rem]:pb-2">
               <div className="flex items-center justify-start gap-2 w-full flex-wrap">
                 {page.components.map((componentName, componentIndex) => (
                   <div

@@ -216,7 +216,7 @@ export const CreateProjectModal = ({
               <div className="w-full p-2 flex flex-col gap-2">
                 <button
                   type="button"
-                  className="flex font-medium md:text-lg text-base items-center justify-start gap-2"
+                  className="flex font-medium md:text-lg text-base items-center justify-start gap-2 text-left"
                   onClick={() => setTemplateSectionOpen((prev) => !prev)}
                 >
                   <ChevronRight
@@ -227,7 +227,7 @@ export const CreateProjectModal = ({
                 </button>
 
                 {templateSectionOpen ? (
-                  <div className="pl-7 flex flex-col gap-2 pb-2">
+                  <div className="flex flex-col gap-2 @[40rem]:pl-7 @[40rem]:pb-2">
                     <p className="text-(--gray-page)">Search template</p>
                     <div className="w-full flex items-center gap-2">
                       <button
@@ -327,7 +327,7 @@ export const CreateProjectModal = ({
               <div className="bg-(--gray)/10 w-full p-2 flex flex-col gap-2">
                 <button
                   type="button"
-                  className="flex font-medium md:text-lg text-base items-center justify-start gap-2"
+                  className="flex font-medium md:text-lg text-base items-center justify-start gap-2 text-left"
                   onClick={() => setPeopleSectionOpen((prev) => !prev)}
                 >
                   <ChevronRight
@@ -338,7 +338,7 @@ export const CreateProjectModal = ({
                 </button>
 
                 {peopleSectionOpen ? (
-                  <div className="pl-7 flex flex-col gap-2 pb-2">
+                  <div className="flex flex-col gap-2 @[40rem]:pl-7 @[40rem]:pb-2">
                     <p className="text-(--gray-page)">
                       Invite collaborators while the project is being created.
                     </p>

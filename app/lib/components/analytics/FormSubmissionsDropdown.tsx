@@ -26,14 +26,14 @@ export const FormSubmissionsDropdown = ({
     >
       <button
         type="button"
-        className="flex font-medium @[40rem]:text-lg text-base items-center justify-start gap-2"
+        className="flex font-medium @[40rem]:text-lg text-base items-center justify-start gap-2 text-left"
         onClick={() => setOpen((prev) => !prev)}
       >
         <ChevronRight size={20} className={isOpen ? "rotate-90" : "rotate-0"} />
         {item.page}
       </button>
       {isOpen ? (
-        <div className="pl-7 flex flex-col gap-4 pb-2">
+        <div className="flex flex-col gap-4 @[40rem]:pl-7 @[40rem]:pb-2">
           {item.forms.map((form) => (
             <div key={form.instanceId} className="w-full flex flex-col gap-2">
               {form.submissions.length > 0 ? (

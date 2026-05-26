@@ -30,7 +30,7 @@ export const ImageCreator = ({ config, onChangeConfig }: Props) => {
 
       <div className="border-(--gray) border-b py-2 w-full flex flex-col gap-2">
         <button
-          className="text-base font-medium flex items-center justify-start gap-2 w-full"
+          className="text-base font-medium flex items-center justify-start gap-2 w-full text-left"
           onClick={() => setConfiguring((prev) => !prev)}
         >
           Configure image

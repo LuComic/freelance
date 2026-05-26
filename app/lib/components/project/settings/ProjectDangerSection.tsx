@@ -38,7 +38,7 @@ export function ProjectDangerSection({
     <div className="bg-(--gray)/10 w-full p-2 flex flex-col gap-2">
       <button
         type="button"
-        className="flex font-medium @[40rem]:text-lg text-base items-center justify-start gap-2"
+        className="flex font-medium @[40rem]:text-lg text-base items-center justify-start gap-2 text-left"
         onClick={() => setOpen((prev) => !prev)}
       >
         <ChevronRight
@@ -49,7 +49,7 @@ export function ProjectDangerSection({
       </button>
 
       {open ? (
-        <div className="pl-7 flex flex-col gap-2 pb-2">
+        <div className="flex flex-col gap-2 @[40rem]:pl-7 @[40rem]:pb-2">
           <p className="text-(--gray-page)">Delete project</p>
           <button
             type="button"

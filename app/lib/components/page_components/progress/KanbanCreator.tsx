@@ -96,7 +96,7 @@ export const KanbanCreator = ({
       </p>
       <div className="border-(--gray) border-y py-2 w-full flex flex-col gap-2">
         <button
-          className="text-base font-medium flex items-center justify-start gap-2 w-full"
+          className="text-base font-medium flex items-center justify-start gap-2 w-full text-left"
           onClick={() => setAdding((prev) => !prev)}
         >
           New Task
@@ -154,7 +154,7 @@ export const KanbanCreator = ({
         <div className="w-full h-px bg-(--gray)" />
 
         <button
-          className="text-(--declined-border) text-base font-medium flex items-center justify-start gap-2 w-full"
+          className="text-(--declined-border) text-base font-medium flex items-center justify-start gap-2 w-full text-left"
           onClick={() => setEditingTodo((prev) => !prev)}
         >
           Todo
@@ -212,7 +212,7 @@ export const KanbanCreator = ({
         <div className="w-full h-px bg-(--gray)" />
 
         <button
-          className="text-(--gray-page) text-base font-medium flex items-center justify-start gap-2 w-full"
+          className="text-(--gray-page) text-base font-medium flex items-center justify-start gap-2 w-full text-left"
           onClick={() => setEditingProgress((prev) => !prev)}
         >
           In Progress
@@ -273,7 +273,7 @@ export const KanbanCreator = ({
         <div className="w-full h-px bg-(--gray)" />
 
         <button
-          className="text-(--accepted-border) text-base font-medium flex items-center justify-start gap-2 w-full"
+          className="text-(--accepted-border) text-base font-medium flex items-center justify-start gap-2 w-full text-left"
           onClick={() => setEditingDone((prev) => !prev)}
         >
           Done
