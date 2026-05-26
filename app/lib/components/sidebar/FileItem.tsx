@@ -51,6 +51,7 @@ interface SidebarItemProps {
   currentPageId?: string | null;
   isExpanded: boolean;
   onToggleExpanded: () => void;
+  onProjectRouteAccess: () => void;
   closeSidebar?: () => void;
 }
 
@@ -59,6 +60,7 @@ export const FileItem = ({
   currentPageId,
   isExpanded,
   onToggleExpanded,
+  onProjectRouteAccess,
   closeSidebar,
 }: SidebarItemProps) => {
   const router = useRouter();
@@ -99,7 +101,10 @@ export const FileItem = ({
                   <Link
                     href={getProjectSettingsPath(project.id)}
                     className="flex items-center justify-start gap-2"
-                    onClick={closeSidebar}
+                    onClick={() => {
+                      onProjectRouteAccess();
+                      closeSidebar?.();
+                    }}
                   >
                     <Cog />
                     Settings
@@ -113,7 +118,10 @@ export const FileItem = ({
                     <Link
                       href={getProjectAnalyticsPath(project.id)}
                       className="flex items-center justify-start gap-2"
-                      onClick={closeSidebar}
+                      onClick={() => {
+                        onProjectRouteAccess();
+                        closeSidebar?.();
+                      }}
                     >
                       <ChartNoAxesCombined />
                       Analytics
@@ -147,6 +155,7 @@ export const FileItem = ({
                 projectId: project.id as Id<"projects">,
               });
               closeSidebar?.();
+              onProjectRouteAccess();
               router.push(getProjectPagePath(project.id, result.pageId));
             } finally {
               setIsCreatingPage(false);
@@ -207,7 +216,10 @@ export const FileItem = ({
                 }`}
                 onMouseEnter={() => preloadPage(project.id, page.id)}
                 onFocus={() => preloadPage(project.id, page.id)}
-                onClick={closeSidebar}
+                onClick={() => {
+                  onProjectRouteAccess();
+                  closeSidebar?.();
+                }}
               >
                 {page.title.length > 20
                   ? page.title.slice(0, 20) + "..."

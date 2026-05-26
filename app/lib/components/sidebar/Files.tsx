@@ -52,6 +52,16 @@ export const Files = ({ closeSidebar }: FilesProps) => {
       ? [...expandedProjectIds, autoExpandedProjectId]
       : expandedProjectIds;
 
+  const rememberProjectRouteAccess = (projectId: string) => {
+    setExpandedProjectIds((prev) => {
+      if (prev.includes(projectId)) {
+        return prev;
+      }
+
+      return [...prev, projectId];
+    });
+  };
+
   const toggleProjectExpanded = (projectId: string) => {
     const isExpanded = effectiveExpandedProjectIds.includes(projectId);
 
@@ -86,6 +96,7 @@ export const Files = ({ closeSidebar }: FilesProps) => {
             currentPageId={currentPageId}
             isExpanded={effectiveExpandedProjectIds.includes(project.id)}
             onToggleExpanded={() => toggleProjectExpanded(project.id)}
+            onProjectRouteAccess={() => rememberProjectRouteAccess(project.id)}
             closeSidebar={closeSidebar}
           />
         ))
