@@ -10,47 +10,57 @@ type FilesProps = {
   closeSidebar?: () => void;
 };
 
+type ActiveProjectRoute = {
+  projectId: string;
+  pageId: string | null;
+  autoExpansionKey: string | null;
+};
+
+const AUTO_EXPANDED_PROJECT_ROUTES = new Set(["analytics", "settings"]);
+
+function getActiveProjectRoute(pathname: string): ActiveProjectRoute | null {
+  const [rootSegment, projectId, routeSegment] = pathname
+    .split("/")
+    .filter(Boolean);
+
+  if (rootSegment !== "projects" || !projectId) {
+    return null;
+  }
+
+  if (!routeSegment) {
+    return {
+      projectId,
+      pageId: null,
+      autoExpansionKey: null,
+    };
+  }
+
+  const isProjectUtilityPage = AUTO_EXPANDED_PROJECT_ROUTES.has(routeSegment);
+
+  return {
+    projectId,
+    pageId: isProjectUtilityPage ? null : routeSegment,
+    autoExpansionKey: `${projectId}/${routeSegment}`,
+  };
+}
+
 export const Files = ({ closeSidebar }: FilesProps) => {
   const projects = useQuery(api.projects.queries.listCurrentUserProjects);
-  const pathname = usePathname();
-  const segments = pathname.split("/").filter(Boolean);
-  const currentProjectId =
-    segments[0] === "projects" ? (segments[1] ?? null) : null;
-  const currentPageId =
-    segments[2] && segments[2] !== "analytics" && segments[2] !== "settings"
-      ? segments[2]
-      : null;
-  const isProjectSettingsPage = segments[2] === "settings";
-  const isProjectAnalyticsPage = segments[2] === "analytics";
+  const activeProjectRoute = getActiveProjectRoute(usePathname());
   const currentProject =
-    projects?.find((project) => project.id === currentProjectId) ?? null;
+    projects?.find((project) => project.id === activeProjectRoute?.projectId) ??
+    null;
   const projectTitle = currentProject?.name ?? "Projects";
   const [expandedProjectIds, setExpandedProjectIds] = useState<string[]>([]);
   const [collapsedAutoExpansionKey, setCollapsedAutoExpansionKey] = useState<
     string | null
   >(null);
-  const currentProjectRouteSegment =
-    currentPageId ??
-    (isProjectSettingsPage ? "settings" : null) ??
-    (isProjectAnalyticsPage ? "analytics" : null);
-  const shouldAutoExpandCurrentProject = Boolean(
-    currentProjectId && currentProjectRouteSegment,
-  );
-  const autoExpandedProjectId = shouldAutoExpandCurrentProject
-    ? currentProjectId
-    : null;
-  const autoExpansionKey = shouldAutoExpandCurrentProject
-    ? `${currentProjectId}/${currentProjectRouteSegment}`
-    : null;
-  const isAutoExpansionActive = Boolean(
-    autoExpandedProjectId && autoExpansionKey !== collapsedAutoExpansionKey,
-  );
-  const effectiveExpandedProjectIds =
-    isAutoExpansionActive &&
-    autoExpandedProjectId &&
-    !expandedProjectIds.includes(autoExpandedProjectId)
-      ? [...expandedProjectIds, autoExpandedProjectId]
-      : expandedProjectIds;
+
+  const isProjectExpanded = (projectId: string) =>
+    expandedProjectIds.includes(projectId) ||
+    (projectId === activeProjectRoute?.projectId &&
+      activeProjectRoute.autoExpansionKey !== null &&
+      activeProjectRoute.autoExpansionKey !== collapsedAutoExpansionKey);
 
   const rememberProjectRouteAccess = (projectId: string) => {
     setExpandedProjectIds((prev) => {
@@ -63,10 +73,12 @@ export const Files = ({ closeSidebar }: FilesProps) => {
   };
 
   const toggleProjectExpanded = (projectId: string) => {
-    const isExpanded = effectiveExpandedProjectIds.includes(projectId);
+    const isExpanded = isProjectExpanded(projectId);
 
-    if (projectId === autoExpandedProjectId) {
-      setCollapsedAutoExpansionKey(isExpanded ? autoExpansionKey : null);
+    if (projectId === activeProjectRoute?.projectId) {
+      setCollapsedAutoExpansionKey(
+        isExpanded ? activeProjectRoute.autoExpansionKey : null,
+      );
     }
 
     setExpandedProjectIds((prev) =>
@@ -93,8 +105,8 @@ export const Files = ({ closeSidebar }: FilesProps) => {
           <FileItem
             key={project.id}
             project={project}
-            currentPageId={currentPageId}
-            isExpanded={effectiveExpandedProjectIds.includes(project.id)}
+            currentPageId={activeProjectRoute?.pageId}
+            isExpanded={isProjectExpanded(project.id)}
             onToggleExpanded={() => toggleProjectExpanded(project.id)}
             onProjectRouteAccess={() => rememberProjectRouteAccess(project.id)}
             closeSidebar={closeSidebar}
