@@ -31,6 +31,7 @@ import {
   SIDEBAR_MIN_WIDTH,
 } from "../lib/components/project/desktopPanelSizing";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ClientViewToggle } from "../lib/components/project/ClientViewToggle";
 
 export const metadata: Metadata = {
   title: "Pageboard",
@@ -93,6 +94,7 @@ export default async function ProjectViewLayout({
                       <SearchBar />
                       <div className="relative flex-1 min-w-0 flex flex-col items-start justify-start md:h-full md:min-h-0">
                         <Tab initialTabsState={initialTabsState} />
+                        <ClientViewToggle />
                         <TopBar />
                         <div className="@container w-full md:px-4 px-2 pt-4 pb-8 flex flex-col items-start justify-start gap-4 md:flex-1 md:min-h-0 md:overflow-y-auto">
                           {children}

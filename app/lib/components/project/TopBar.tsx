@@ -127,9 +127,9 @@ export const TopBar = () => {
     <>
       {isLive ? (
         <div
-          className={`mx-auto h-10 px-2 ${isHidden ? "hidden" : "flex"} items-center justify-center shadow-md rounded-lg backdrop-blur-md bg-(--dim)/60 border border-(--gray) gap-2 absolute-center w-max`}
+          className={`mx-auto h-10 px-2 ${isHidden ? "hidden" : "flex md:hidden"} items-center justify-center shadow-md rounded-lg backdrop-blur-md bg-(--dim)/60 border border-(--gray) gap-2 absolute-center w-max`}
         >
-          <span className="text-sm md:text-base">Client&apos;s view</span>
+          <span className="text-sm">Client&apos;s view</span>
           <Select
             value={currentMode}
             onValueChange={(value) => {
@@ -149,7 +149,7 @@ export const TopBar = () => {
               <SelectGroup className="bg-(--darkest)">
                 <SelectItem
                   value="edit"
-                  className="h-8! md:h-6.5! text-base! md:text-sm! data-highlighted:bg-(--dim) data-highlighted:text-(--light)!"
+                  className="h-8! text-base! data-highlighted:bg-(--dim) data-highlighted:text-(--light)!"
                 >
                   <div className="flex items-center gap-2">
                     <Pencil size={14} className="hover:text-(--light)" />
@@ -158,7 +158,7 @@ export const TopBar = () => {
                 </SelectItem>
                 <SelectItem
                   value="live"
-                  className="h-8! md:h-6.5! text-base! md:text-sm! data-highlighted:bg-(--dim) data-highlighted:text-(--light)!"
+                  className="h-8! text-base! data-highlighted:bg-(--dim) data-highlighted:text-(--light)!"
                 >
                   <div className="flex items-center gap-2">
                     <Radio size={14} className="hover:text-(--light)" />
