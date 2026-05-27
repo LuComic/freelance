@@ -1,8 +1,4 @@
-"use client";
-
 import Link from "next/link";
-import { useState } from "react";
-import { Spinner } from "@/components/ui/spinner";
 
 const NAV_LINKS = [
   { label: "About", href: "/#about" },
@@ -14,8 +10,6 @@ const NAV_LINKS = [
 ];
 
 export const LandingHeader = () => {
-  const [loading, setLoading] = useState(false);
-
   return (
     <header className="fixed top-0 z-20 w-full border-b border-(--gray) bg-(--darkest)/75 backdrop-blur-lg">
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -50,9 +44,8 @@ export const LandingHeader = () => {
           <Link
             href="/login"
             className="rounded-md bg-(--vibrant) w-26.5 h-8 font-medium hover:bg-(--vibrant-hover) flex items-center justify-center"
-            onClick={() => setLoading(true)}
           >
-            {loading ? <Spinner /> : "Get started"}
+            Get started
           </Link>
         </div>
       </div>
