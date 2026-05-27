@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <div className="relative isolate min-h-screen overflow-hidden bg-(--dim) flex flex-col @container">
-      <section className="relative z-10 w-full px-4 pt-20 pb-12 sm:px-6 lg:px-8">
+      <section className="relative z-10 w-full overflow-hidden px-4 pt-25 pb-8 lg:pb-18 sm:px-6 lg:px-8">
         <div className="mx-auto w-full md:max-w-7xl">
           <LedBackground />
           <div className="relative z-10 flex min-h-136 flex-col">
@@ -47,7 +47,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="mt-10 px-2 pb-2 sm:mt-12 sm:px-3 sm:pb-3">
+            <div className="mt-10 sm:mt-12">
               <div className="overflow-hidden rounded-lg border border-(--gray)">
                 <Image
                   src="/landing/hero.png"
@@ -65,7 +65,7 @@ export default function Home() {
       </section>
 
       <section id="about" className="relative z-10 w-full scroll-mt-16">
-        <div className="mx-auto w-full max-w-7xl px-4 sm:px-8 py-4 lg:py-18">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-8 py-8 lg:py-18">
           <h2
             className="text-2xl font-semibold sm:text-3xl"
             style={{ fontFamily: '"Lexend Variable", sans-serif' }}
@@ -87,7 +87,7 @@ export default function Home() {
         id="features"
         className="relative z-10 w-full scroll-mt-16 bg-(--darkest)"
       >
-        <div className="mx-auto w-full max-w-7xl px-4 sm:px-8 py-4 lg:py-18">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-8 py-8 lg:py-18">
           <div className="grid gap-x-10 gap-y-8 md:grid-cols-3">
             <div>
               <p className="font-medium text-xl">Pages built for client work</p>
@@ -123,7 +123,7 @@ export default function Home() {
       </section>
 
       <section id="why" className="relative z-10 w-full scroll-mt-16">
-        <div className="mx-auto w-full max-w-7xl px-4 sm:px-8 py-4 lg:py-18">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-8 py-8 lg:py-18">
           <div className="grid gap-8 md:grid-cols-[1.4fr_0.8fr]">
             <div>
               <h2
@@ -177,7 +177,7 @@ export default function Home() {
         id="how"
         className="relative z-10 w-full scroll-mt-16 bg-(--darkest)"
       >
-        <div className="mx-auto w-full max-w-7xl px-4 sm:px-8 py-4 lg:py-18">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-8 py-8 lg:py-18">
           <div className="grid gap-4 md:grid-cols-[1.4fr_0.8fr]">
             <div>
               <h2
@@ -288,7 +288,7 @@ export default function Home() {
         id="create-account"
         className="relative z-10 mb-8 w-full scroll-mt-16"
       >
-        <div className="mx-auto w-full max-w-7xl px-4 sm:px-8 py-4 lg:py-18">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-8 py-8 lg:py-18">
           <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div>
               <h2

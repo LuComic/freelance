@@ -61,8 +61,9 @@ export function LedBackground() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute inset-0 z-0 min-h-screen overflow-hidden bg-(--dim)"
+      className="pointer-events-none absolute inset-0 z-0 overflow-hidden bg-(--dim)"
     >
+      <div className="absolute z-5 w-full h-1/2 bottom-0 left-0 bg-linear-to-t from-(--dim) to-(--dim)/0"></div>
       <div className="grid min-h-full grid-cols-[repeat(auto-fill,minmax(3.9rem,1fr))] auto-rows-[1.55rem] gap-2.5 p-1.5 opacity-55 sm:grid-cols-[repeat(auto-fill,minmax(4.6rem,1fr))] sm:auto-rows-[1.75rem] sm:gap-3">
         {Array.from({ length: LED_COUNT }, (_, index) => {
           const isLit = litIndexes.has(index);
