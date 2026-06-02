@@ -338,7 +338,7 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
               style={{
                 top: ghostCompletion.top,
                 left: ghostCompletion.left,
-                transform: "translateY(-2px)",
+                transform: "translateY(-1.8px)",
               }}
             >
               {ghostCompletion.suffix}
