@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, usePaginatedQuery, useQuery } from "convex/react";
 import { Send } from "lucide-react";
 import { api } from "@/convex/_generated/api";
@@ -11,6 +11,25 @@ import {
   sendProjectChatMessageMutation,
 } from "@/lib/convexFunctionReferences";
 import {
+  completePageTag,
+  deleteProjectChatMessage,
+  EMPTY_PROJECT_PAGES,
+  INITIAL_MESSAGE_COUNT,
+  LOAD_MORE_MESSAGE_COUNT,
+  ProjectChatText,
+  resetProjectChatTextareaHeight,
+  resizeProjectChatTextarea,
+  ROLE_LABELS,
+  setProjectChatTextareaCaretPosition,
+  submitProjectChatMessage,
+  updateProjectChatGhostCompletion,
+  updateProjectChatTextareaGhostCompletion,
+  type GhostCompletion,
+  type ProjectChatMessage,
+  type ProjectChatPanelProps,
+  type ProjectOption,
+} from "./ChatHelpers";
+import {
   Select,
   SelectContent,
   SelectGroup,
@@ -19,87 +38,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-type ProjectChatPanelProps = {
-  projectId: string | null;
-};
-
-type ProjectOption = {
-  id: string;
-  name: string;
-};
-
-type ProjectChatMessage = {
-  id: string;
-  authorName: string;
-  authorImage: string | null;
-  authorRole: "client" | "coCreator" | "owner" | null;
-  body: string | null;
-  createdAt: number;
-  deletedAt: number | null;
-  isDeleted: boolean;
-  isOwn: boolean;
-  canDelete: boolean;
-};
-
-const INITIAL_MESSAGE_COUNT = 50;
-const LOAD_MORE_MESSAGE_COUNT = 50;
-const ROLE_LABELS: Record<
-  NonNullable<ProjectChatMessage["authorRole"]>,
-  string
-> = {
-  client: "client",
-  coCreator: "co-creator",
-  owner: "owner",
-};
-
-function getErrorMessage(error: unknown) {
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "Something went wrong.";
-}
-
-function LinkifiedText({ text }: { text: string }) {
-  const parts = text.split(/(https?:\/\/[^\s<]+)/g);
-
-  return (
-    <>
-      {parts.map((part, index) => {
-        if (!part.startsWith("http://") && !part.startsWith("https://")) {
-          return <span key={`${part}-${index}`}>{part}</span>;
-        }
-
-        try {
-          const url = new URL(part);
-          if (url.protocol !== "http:" && url.protocol !== "https:") {
-            return <span key={`${part}-${index}`}>{part}</span>;
-          }
-        } catch {
-          return <span key={`${part}-${index}`}>{part}</span>;
-        }
-
-        return (
-          <a
-            key={`${part}-${index}`}
-            href={part}
-            target="_blank"
-            rel="noreferrer"
-            className="underline underline-offset-2"
-          >
-            {part}
-          </a>
-        );
-      })}
-    </>
-  );
-}
-
 export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
     projectId,
   );
   const [messageBody, setMessageBody] = useState("");
+  const [ghostCompletion, setGhostCompletion] = useState<GhostCompletion>(null);
   const [mutationError, setMutationError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -111,6 +55,7 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
     | undefined;
   const selectedProject =
     projects?.find((project) => project.id === selectedProjectId) ?? null;
+  const selectedProjectPages = selectedProject?.pages ?? EMPTY_PROJECT_PAGES;
   const selectPlaceholder =
     projects === undefined
       ? "Loading projects..."
@@ -137,36 +82,64 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
   );
   const newestMessageId = messages[messages.length - 1]?.id ?? null;
 
+  const updateGhostCompletion = useCallback(
+    (value: string, cursorPosition: number) => {
+      updateProjectChatGhostCompletion({
+        textareaRef,
+        pages: selectedProjectPages,
+        setGhostCompletion,
+        value,
+        cursorPosition,
+      });
+    },
+    [selectedProjectPages],
+  );
+
+  const updateTextareaGhostCompletion = useCallback(() => {
+    updateProjectChatTextareaGhostCompletion({
+      textareaRef,
+      pages: selectedProjectPages,
+      setGhostCompletion,
+    });
+  }, [selectedProjectPages]);
+
+  const setTextareaCaretPosition = useCallback(
+    (position: number) => {
+      setProjectChatTextareaCaretPosition({
+        textareaRef,
+        pages: selectedProjectPages,
+        setGhostCompletion,
+        position,
+      });
+    },
+    [selectedProjectPages],
+  );
+
   useEffect(() => {
     if (projectId) {
-      setSelectedProjectId(projectId);
+      const frameId = requestAnimationFrame(() => {
+        setSelectedProjectId(projectId);
+      });
+      return () => cancelAnimationFrame(frameId);
     }
   }, [projectId]);
 
   useEffect(() => {
     if (projects !== undefined && selectedProjectId && !selectedProject) {
-      setSelectedProjectId(null);
+      const frameId = requestAnimationFrame(() => {
+        setSelectedProjectId(null);
+        setGhostCompletion(null);
+      });
+      return () => cancelAnimationFrame(frameId);
     }
   }, [projects, selectedProject, selectedProjectId]);
 
-  const resizeTextarea = () => {
-    const textarea = textareaRef.current;
-    if (!textarea) {
-      return;
-    }
+  const resizeTextarea = () => resizeProjectChatTextarea(textareaRef);
+  const resetTextareaHeight = () => resetProjectChatTextareaHeight(textareaRef);
 
-    textarea.style.height = "auto";
-    textarea.style.height = `${textarea.scrollHeight}px`;
-  };
-
-  const resetTextareaHeight = () => {
-    const textarea = textareaRef.current;
-    if (!textarea) {
-      return;
-    }
-
-    textarea.style.height = "";
-  };
+  useEffect(() => {
+    updateTextareaGhostCompletion();
+  }, [selectedProjectId, selectedProjectPages, updateTextareaGhostCompletion]);
 
   useEffect(() => {
     if (!shouldScrollAfterSendRef.current) {
@@ -179,45 +152,29 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
     });
   }, [newestMessageId]);
 
-  const submitMessage = async () => {
-    if (!selectedProjectId || !trimmedBody || sending) {
-      return;
-    }
+  const submitMessage = () =>
+    submitProjectChatMessage({
+      selectedProjectId,
+      trimmedBody,
+      sending,
+      messageBody,
+      pages: selectedProjectPages,
+      sendMessage,
+      shouldScrollAfterSendRef,
+      textareaRef,
+      setSending,
+      setMutationError,
+      setMessageBody,
+      setGhostCompletion,
+    });
 
-    setSending(true);
-    setMutationError(null);
-
-    try {
-      await sendMessage({
-        projectId: selectedProjectId as Id<"projects">,
-        body: messageBody,
-      });
-      shouldScrollAfterSendRef.current = true;
-      setMessageBody("");
-      requestAnimationFrame(resetTextareaHeight);
-    } catch (error) {
-      setMutationError(getErrorMessage(error));
-    } finally {
-      setSending(false);
-    }
-  };
-
-  const handleDelete = async (messageId: string) => {
-    if (!selectedProjectId) {
-      return;
-    }
-
-    setMutationError(null);
-
-    try {
-      await deleteMessage({
-        projectId: selectedProjectId as Id<"projects">,
-        messageId: messageId as Id<"projectChatMessages">,
-      });
-    } catch (error) {
-      setMutationError(getErrorMessage(error));
-    }
-  };
+  const handleDelete = (messageId: string) =>
+    deleteProjectChatMessage({
+      selectedProjectId,
+      messageId,
+      deleteMessage,
+      setMutationError,
+    });
 
   return (
     <div className="h-full min-h-0 flex flex-col gap-2">
@@ -227,6 +184,7 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
           setSelectedProjectId(value);
           setMutationError(null);
           setMessageBody("");
+          setGhostCompletion(null);
           requestAnimationFrame(resetTextareaHeight);
         }}
         disabled={projects === undefined || projects.length === 0}
@@ -291,7 +249,7 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
                   />
                 ) : null}
                 <span
-                  className={`truncate text-sm ${message.isOwn ? "text-(--vibrant)" : "text-(--light) opacity-80"}`}
+                  className={`truncate text-sm ${message.isOwn ? "text-(--beautiful-color)" : "text-(--light) opacity-80"}`}
                 >
                   {message.authorName}
                 </span>
@@ -315,7 +273,11 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
               {message.isDeleted || message.body === null ? (
                 <span className="italic opacity-75">Message deleted.</span>
               ) : (
-                <LinkifiedText text={message.body} />
+                <ProjectChatText
+                  text={message.body}
+                  pages={selectedProjectPages}
+                  projectId={selectedProjectId}
+                />
               )}
             </div>
           </div>
@@ -328,24 +290,61 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
       ) : null}
 
       <div className="flex items-end gap-2">
-        <textarea
-          ref={textareaRef}
-          rows={1}
-          value={messageBody}
-          maxLength={1000}
-          onChange={(event) => {
-            setMessageBody(event.target.value);
-            requestAnimationFrame(resizeTextarea);
-          }}
-          onKeyDown={(event) => {
-            if (event.key === "Enter" && !event.shiftKey) {
-              event.preventDefault();
-              void submitMessage();
-            }
-          }}
-          placeholder="Message"
-          className="rounded-md bg-(--dim) px-2.5 min-h-10 border border-(--gray) w-full resize-none pt-1.75 pb-1.5 outline-none focus:border-(--vibrant) max-h-32"
-        />
+        <div className="relative w-full">
+          <textarea
+            ref={textareaRef}
+            rows={1}
+            value={messageBody}
+            maxLength={1000}
+            onChange={(event) => {
+              const nextValue = event.target.value;
+              setMessageBody(nextValue);
+              updateGhostCompletion(nextValue, event.target.selectionStart);
+              requestAnimationFrame(resizeTextarea);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Tab") {
+                const completion = completePageTag(
+                  event.currentTarget.value,
+                  event.currentTarget.selectionStart,
+                  selectedProjectPages,
+                );
+
+                if (completion) {
+                  event.preventDefault();
+                  setMessageBody(completion.nextValue);
+                  setTextareaCaretPosition(completion.nextCursor);
+                  requestAnimationFrame(resizeTextarea);
+                  return;
+                }
+              }
+
+              if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                void submitMessage();
+              }
+            }}
+            onClick={updateTextareaGhostCompletion}
+            onKeyUp={updateTextareaGhostCompletion}
+            onSelect={updateTextareaGhostCompletion}
+            onScroll={updateTextareaGhostCompletion}
+            placeholder="Message"
+            className="block rounded-md bg-(--dim) px-2.5 min-h-10 border border-(--gray) w-full resize-none pt-1.75 pb-1.5 outline-none focus:border-(--vibrant) max-h-32"
+          />
+          {ghostCompletion ? (
+            <span
+              aria-hidden
+              className="pointer-events-none absolute z-20 leading-6 text-(--vibrant)"
+              style={{
+                top: ghostCompletion.top,
+                left: ghostCompletion.left,
+                transform: "translateY(-2px)",
+              }}
+            >
+              {ghostCompletion.suffix}
+            </span>
+          ) : null}
+        </div>
         <button
           type="button"
           onClick={() => void submitMessage()}
