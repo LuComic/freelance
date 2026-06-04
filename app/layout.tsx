@@ -6,6 +6,12 @@ const PREVIEW_IMAGE_URL = `${SITE_URL}/preview.png`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+    ],
+  },
   openGraph: {
     images: [
       {
