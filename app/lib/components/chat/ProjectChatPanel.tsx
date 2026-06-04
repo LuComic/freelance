@@ -1,31 +1,34 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, usePaginatedQuery, useQuery } from "convex/react";
 import { Send } from "lucide-react";
 import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
 import {
   deleteProjectChatMessageMutation,
   listProjectChatMessagesQuery,
   sendProjectChatMessageMutation,
 } from "@/lib/convexFunctionReferences";
 import {
-  completePageTag,
+  clearUnavailableProjectSelection,
   deleteProjectChatMessage,
   EMPTY_PROJECT_PAGES,
+  getProjectChatMessages,
+  getProjectChatQueryArgs,
+  getProjectSelectPlaceholder,
+  getSelectedProject,
+  handleProjectChatTextareaChange,
+  handleProjectChatTextareaKeyDown,
   INITIAL_MESSAGE_COUNT,
   LOAD_MORE_MESSAGE_COUNT,
   ProjectChatText,
-  resetProjectChatTextareaHeight,
-  resizeProjectChatTextarea,
   ROLE_LABELS,
-  setProjectChatTextareaCaretPosition,
+  scrollProjectChatAfterSend,
+  selectProjectChatProject,
   submitProjectChatMessage,
-  updateProjectChatGhostCompletion,
+  syncSelectedProjectFromRoute,
   updateProjectChatTextareaGhostCompletion,
   type GhostCompletion,
-  type ProjectChatMessage,
   type ProjectChatPanelProps,
   type ProjectOption,
 } from "./ChatHelpers";
@@ -53,20 +56,11 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
   const projects = useQuery(api.projects.queries.listCurrentUserProjects) as
     | ProjectOption[]
     | undefined;
-  const selectedProject =
-    projects?.find((project) => project.id === selectedProjectId) ?? null;
+  const selectedProject = getSelectedProject(projects, selectedProjectId);
   const selectedProjectPages = selectedProject?.pages ?? EMPTY_PROJECT_PAGES;
-  const selectPlaceholder =
-    projects === undefined
-      ? "Loading projects..."
-      : projects.length === 0
-        ? "No projects available"
-        : "Select project";
+  const selectPlaceholder = getProjectSelectPlaceholder(projects);
   const queryArgs = useMemo(
-    () =>
-      selectedProjectId
-        ? { projectId: selectedProjectId as Id<"projects"> }
-        : "skip",
+    () => getProjectChatQueryArgs(selectedProjectId),
     [selectedProjectId],
   );
   const { results, status, loadMore } = usePaginatedQuery(
@@ -76,117 +70,56 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
   );
   const sendMessage = useMutation(sendProjectChatMessageMutation);
   const deleteMessage = useMutation(deleteProjectChatMessageMutation);
-  const messages = useMemo(
-    () => [...(results as ProjectChatMessage[])].reverse(),
-    [results],
-  );
+  const messages = useMemo(() => getProjectChatMessages(results), [results]);
   const newestMessageId = messages[messages.length - 1]?.id ?? null;
 
-  const updateGhostCompletion = useCallback(
-    (value: string, cursorPosition: number) => {
-      updateProjectChatGhostCompletion({
-        textareaRef,
-        pages: selectedProjectPages,
-        setGhostCompletion,
-        value,
-        cursorPosition,
-      });
-    },
-    [selectedProjectPages],
-  );
+  useEffect(() => {
+    return syncSelectedProjectFromRoute({
+      projectId,
+      setSelectedProjectId,
+    });
+  }, [projectId]);
 
-  const updateTextareaGhostCompletion = useCallback(() => {
+  useEffect(() => {
+    return clearUnavailableProjectSelection({
+      projects,
+      selectedProjectId,
+      selectedProject,
+      setSelectedProjectId,
+      setGhostCompletion,
+    });
+  }, [projects, selectedProject, selectedProjectId]);
+
+  useEffect(() => {
     updateProjectChatTextareaGhostCompletion({
       textareaRef,
       pages: selectedProjectPages,
       setGhostCompletion,
     });
-  }, [selectedProjectPages]);
-
-  const setTextareaCaretPosition = useCallback(
-    (position: number) => {
-      setProjectChatTextareaCaretPosition({
-        textareaRef,
-        pages: selectedProjectPages,
-        setGhostCompletion,
-        position,
-      });
-    },
-    [selectedProjectPages],
-  );
+  }, [selectedProjectId, selectedProjectPages]);
 
   useEffect(() => {
-    if (projectId) {
-      const frameId = requestAnimationFrame(() => {
-        setSelectedProjectId(projectId);
-      });
-      return () => cancelAnimationFrame(frameId);
-    }
-  }, [projectId]);
-
-  useEffect(() => {
-    if (projects !== undefined && selectedProjectId && !selectedProject) {
-      const frameId = requestAnimationFrame(() => {
-        setSelectedProjectId(null);
-        setGhostCompletion(null);
-      });
-      return () => cancelAnimationFrame(frameId);
-    }
-  }, [projects, selectedProject, selectedProjectId]);
-
-  const resizeTextarea = () => resizeProjectChatTextarea(textareaRef);
-  const resetTextareaHeight = () => resetProjectChatTextareaHeight(textareaRef);
-
-  useEffect(() => {
-    updateTextareaGhostCompletion();
-  }, [selectedProjectId, selectedProjectPages, updateTextareaGhostCompletion]);
-
-  useEffect(() => {
-    if (!shouldScrollAfterSendRef.current) {
-      return;
-    }
-
-    shouldScrollAfterSendRef.current = false;
-    requestAnimationFrame(() => {
-      messagesEndRef.current?.scrollIntoView({ block: "end" });
+    scrollProjectChatAfterSend({
+      newestMessageId,
+      messagesEndRef,
+      shouldScrollAfterSendRef,
     });
   }, [newestMessageId]);
-
-  const submitMessage = () =>
-    submitProjectChatMessage({
-      selectedProjectId,
-      trimmedBody,
-      sending,
-      messageBody,
-      pages: selectedProjectPages,
-      sendMessage,
-      shouldScrollAfterSendRef,
-      textareaRef,
-      setSending,
-      setMutationError,
-      setMessageBody,
-      setGhostCompletion,
-    });
-
-  const handleDelete = (messageId: string) =>
-    deleteProjectChatMessage({
-      selectedProjectId,
-      messageId,
-      deleteMessage,
-      setMutationError,
-    });
 
   return (
     <div className="h-full min-h-0 flex flex-col gap-2">
       <Select
         value={selectedProjectId ?? ""}
-        onValueChange={(value) => {
-          setSelectedProjectId(value);
-          setMutationError(null);
-          setMessageBody("");
-          setGhostCompletion(null);
-          requestAnimationFrame(resetTextareaHeight);
-        }}
+        onValueChange={(value) =>
+          selectProjectChatProject({
+            projectId: value,
+            textareaRef,
+            setSelectedProjectId,
+            setMutationError,
+            setMessageBody,
+            setGhostCompletion,
+          })
+        }
         disabled={projects === undefined || projects.length === 0}
       >
         <SelectTrigger className="w-full px-0 border-none font-medium text-lg text-(--light) rounded-none">
@@ -262,7 +195,14 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
               {message.canDelete ? (
                 <button
                   type="button"
-                  onClick={() => handleDelete(message.id)}
+                  onClick={() =>
+                    void deleteProjectChatMessage({
+                      selectedProjectId,
+                      messageId: message.id,
+                      deleteMessage,
+                      setMutationError,
+                    })
+                  }
                   className="rounded px-1 text-sm opacity-80 hover:bg-black/20"
                 >
                   unsend
@@ -296,38 +236,68 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
             rows={1}
             value={messageBody}
             maxLength={1000}
-            onChange={(event) => {
-              const nextValue = event.target.value;
-              setMessageBody(nextValue);
-              updateGhostCompletion(nextValue, event.target.selectionStart);
-              requestAnimationFrame(resizeTextarea);
-            }}
-            onKeyDown={(event) => {
-              if (event.key === "Tab") {
-                const completion = completePageTag(
-                  event.currentTarget.value,
-                  event.currentTarget.selectionStart,
-                  selectedProjectPages,
-                );
-
-                if (completion) {
-                  event.preventDefault();
-                  setMessageBody(completion.nextValue);
-                  setTextareaCaretPosition(completion.nextCursor);
-                  requestAnimationFrame(resizeTextarea);
-                  return;
-                }
-              }
-
-              if (event.key === "Enter" && !event.shiftKey) {
-                event.preventDefault();
-                void submitMessage();
-              }
-            }}
-            onClick={updateTextareaGhostCompletion}
-            onKeyUp={updateTextareaGhostCompletion}
-            onSelect={updateTextareaGhostCompletion}
-            onScroll={updateTextareaGhostCompletion}
+            onChange={(event) =>
+              handleProjectChatTextareaChange({
+                event,
+                textareaRef,
+                pages: selectedProjectPages,
+                setMessageBody,
+                setGhostCompletion,
+              })
+            }
+            onKeyDown={(event) =>
+              handleProjectChatTextareaKeyDown({
+                event,
+                textareaRef,
+                pages: selectedProjectPages,
+                submitMessage: () => {
+                  void submitProjectChatMessage({
+                    selectedProjectId,
+                    trimmedBody,
+                    sending,
+                    messageBody,
+                    pages: selectedProjectPages,
+                    sendMessage,
+                    shouldScrollAfterSendRef,
+                    textareaRef,
+                    setSending,
+                    setMutationError,
+                    setMessageBody,
+                    setGhostCompletion,
+                  });
+                },
+                setMessageBody,
+                setGhostCompletion,
+              })
+            }
+            onClick={() =>
+              updateProjectChatTextareaGhostCompletion({
+                textareaRef,
+                pages: selectedProjectPages,
+                setGhostCompletion,
+              })
+            }
+            onKeyUp={() =>
+              updateProjectChatTextareaGhostCompletion({
+                textareaRef,
+                pages: selectedProjectPages,
+                setGhostCompletion,
+              })
+            }
+            onSelect={() =>
+              updateProjectChatTextareaGhostCompletion({
+                textareaRef,
+                pages: selectedProjectPages,
+                setGhostCompletion,
+              })
+            }
+            onScroll={() =>
+              updateProjectChatTextareaGhostCompletion({
+                textareaRef,
+                pages: selectedProjectPages,
+                setGhostCompletion,
+              })
+            }
             placeholder="Message"
             className="block rounded-md bg-(--dim) px-2.5 min-h-10 border border-(--gray) w-full resize-none pt-1.75 pb-1.5 outline-none focus:border-(--vibrant) max-h-32"
           />
@@ -347,7 +317,22 @@ export function ProjectChatPanel({ projectId }: ProjectChatPanelProps) {
         </div>
         <button
           type="button"
-          onClick={() => void submitMessage()}
+          onClick={() =>
+            void submitProjectChatMessage({
+              selectedProjectId,
+              trimmedBody,
+              sending,
+              messageBody,
+              pages: selectedProjectPages,
+              sendMessage,
+              shouldScrollAfterSendRef,
+              textareaRef,
+              setSending,
+              setMutationError,
+              setMessageBody,
+              setGhostCompletion,
+            })
+          }
           disabled={!selectedProjectId || !trimmedBody || sending}
           className="aspect-square rounded-md h-10 bg-(--vibrant) hover:bg-(--vibrant-hover) disabled:opacity-50 disabled:hover:bg-(--vibrant) flex items-center justify-center"
           aria-label="Send message"

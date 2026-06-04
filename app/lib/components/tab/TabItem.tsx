@@ -19,6 +19,7 @@ interface TabItemProps {
   onCloseOthers: () => void;
   onCloseRight: () => void;
   onCloseLeft: () => void;
+  onPreload?: () => void;
 }
 
 function truncateLabel(value: string, maxLength = 8) {
@@ -35,6 +36,7 @@ export const TabItem = ({
   onCloseOthers,
   onCloseRight,
   onCloseLeft,
+  onPreload,
 }: TabItemProps) => {
   const tabRef = useRef<HTMLDivElement>(null);
 
@@ -59,6 +61,8 @@ export const TabItem = ({
             type="button"
             className="min-w-0 flex-1 px-3 py-2 text-left"
             onClick={onSelect}
+            onMouseEnter={onPreload}
+            onFocus={onPreload}
           >
             <span className="flex min-w-0 items-center gap-2 text-sm">
               <span

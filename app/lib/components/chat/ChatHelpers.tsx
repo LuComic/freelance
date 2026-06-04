@@ -1,5 +1,11 @@
 import Link from "next/link";
-import type { RefObject } from "react";
+import type {
+  ChangeEvent,
+  Dispatch,
+  KeyboardEvent,
+  RefObject,
+  SetStateAction,
+} from "react";
 import type { Id } from "@/convex/_generated/dataModel";
 import { getCaretCoordinates } from "@/app/lib/components/page_components/testing_editor/caret";
 import { getProjectPagePath } from "@/app/lib/components/project/paths";
@@ -90,6 +96,103 @@ export function resetProjectChatTextareaHeight(
   textarea.style.height = "";
 }
 
+export function getSelectedProject(
+  projects: ProjectOption[] | undefined,
+  selectedProjectId: string | null,
+) {
+  return projects?.find((project) => project.id === selectedProjectId) ?? null;
+}
+
+export function getProjectSelectPlaceholder(
+  projects: ProjectOption[] | undefined,
+) {
+  if (projects === undefined) {
+    return "Loading projects...";
+  }
+
+  return projects.length === 0 ? "No projects available" : "Select project";
+}
+
+export function getProjectChatQueryArgs(selectedProjectId: string | null) {
+  return selectedProjectId
+    ? { projectId: selectedProjectId as Id<"projects"> }
+    : "skip";
+}
+
+export function getProjectChatMessages(results: unknown[]) {
+  return [...(results as ProjectChatMessage[])].reverse();
+}
+
+export function syncSelectedProjectFromRoute(args: {
+  projectId: string | null;
+  setSelectedProjectId: Dispatch<SetStateAction<string | null>>;
+}) {
+  if (!args.projectId) {
+    return;
+  }
+
+  const frameId = requestAnimationFrame(() => {
+    args.setSelectedProjectId(args.projectId);
+  });
+
+  return () => cancelAnimationFrame(frameId);
+}
+
+export function clearUnavailableProjectSelection(args: {
+  projects: ProjectOption[] | undefined;
+  selectedProjectId: string | null;
+  selectedProject: ProjectOption | null;
+  setSelectedProjectId: Dispatch<SetStateAction<string | null>>;
+  setGhostCompletion: Dispatch<SetStateAction<GhostCompletion>>;
+}) {
+  if (
+    args.projects === undefined ||
+    !args.selectedProjectId ||
+    args.selectedProject
+  ) {
+    return;
+  }
+
+  const frameId = requestAnimationFrame(() => {
+    args.setSelectedProjectId(null);
+    args.setGhostCompletion(null);
+  });
+
+  return () => cancelAnimationFrame(frameId);
+}
+
+export function selectProjectChatProject(args: {
+  projectId: string;
+  textareaRef: RefObject<HTMLTextAreaElement | null>;
+  setSelectedProjectId: Dispatch<SetStateAction<string | null>>;
+  setMutationError: Dispatch<SetStateAction<string | null>>;
+  setMessageBody: Dispatch<SetStateAction<string>>;
+  setGhostCompletion: Dispatch<SetStateAction<GhostCompletion>>;
+}) {
+  args.setSelectedProjectId(args.projectId);
+  args.setMutationError(null);
+  args.setMessageBody("");
+  args.setGhostCompletion(null);
+  requestAnimationFrame(() => resetProjectChatTextareaHeight(args.textareaRef));
+}
+
+export function scrollProjectChatAfterSend(args: {
+  newestMessageId: string | null;
+  messagesEndRef: RefObject<HTMLDivElement | null>;
+  shouldScrollAfterSendRef: RefObject<boolean>;
+}) {
+  void args.newestMessageId;
+
+  if (!args.shouldScrollAfterSendRef.current) {
+    return;
+  }
+
+  args.shouldScrollAfterSendRef.current = false;
+  requestAnimationFrame(() => {
+    args.messagesEndRef.current?.scrollIntoView({ block: "end" });
+  });
+}
+
 export function updateProjectChatGhostCompletion(args: {
   textareaRef: RefObject<HTMLTextAreaElement | null>;
   pages: ProjectChatPageOption[];
@@ -158,6 +261,61 @@ export function setProjectChatTextareaCaretPosition(args: {
       cursorPosition: args.position,
     });
   });
+}
+
+export function handleProjectChatTextareaChange(args: {
+  event: ChangeEvent<HTMLTextAreaElement>;
+  textareaRef: RefObject<HTMLTextAreaElement | null>;
+  pages: ProjectChatPageOption[];
+  setMessageBody: Dispatch<SetStateAction<string>>;
+  setGhostCompletion: Dispatch<SetStateAction<GhostCompletion>>;
+}) {
+  const nextValue = args.event.target.value;
+
+  args.setMessageBody(nextValue);
+  updateProjectChatGhostCompletion({
+    textareaRef: args.textareaRef,
+    pages: args.pages,
+    setGhostCompletion: args.setGhostCompletion,
+    value: nextValue,
+    cursorPosition: args.event.target.selectionStart,
+  });
+  requestAnimationFrame(() => resizeProjectChatTextarea(args.textareaRef));
+}
+
+export function handleProjectChatTextareaKeyDown(args: {
+  event: KeyboardEvent<HTMLTextAreaElement>;
+  textareaRef: RefObject<HTMLTextAreaElement | null>;
+  pages: ProjectChatPageOption[];
+  submitMessage: () => void;
+  setMessageBody: Dispatch<SetStateAction<string>>;
+  setGhostCompletion: Dispatch<SetStateAction<GhostCompletion>>;
+}) {
+  if (args.event.key === "Tab") {
+    const completion = completePageTag(
+      args.event.currentTarget.value,
+      args.event.currentTarget.selectionStart,
+      args.pages,
+    );
+
+    if (completion) {
+      args.event.preventDefault();
+      args.setMessageBody(completion.nextValue);
+      setProjectChatTextareaCaretPosition({
+        textareaRef: args.textareaRef,
+        pages: args.pages,
+        setGhostCompletion: args.setGhostCompletion,
+        position: completion.nextCursor,
+      });
+      requestAnimationFrame(() => resizeProjectChatTextarea(args.textareaRef));
+      return;
+    }
+  }
+
+  if (args.event.key === "Enter" && !args.event.shiftKey) {
+    args.event.preventDefault();
+    args.submitMessage();
+  }
 }
 
 export async function submitProjectChatMessage(args: {

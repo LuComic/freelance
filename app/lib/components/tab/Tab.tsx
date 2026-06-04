@@ -3,21 +3,31 @@
 import { api } from "@/convex/_generated/api";
 import { TABS_COOKIE, setCookie } from "@/app/lib/cookies";
 import { useOptionalPageDocument } from "@/app/lib/components/project/PageDocumentContext";
-import { useQuery } from "convex/react";
+import { useQueries, useQuery } from "convex/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 import { TabItem } from "./TabItem";
+import { usePageQueryPreloader } from "../project/usePageQueryPreloader";
+import {
+  buildRetainedPageQueries,
+  buildTabsById,
+  closeTabsById,
+  getAllTabIds,
+  getOtherTabIds,
+  getPageTabTarget,
+  getTabIdsToLeft,
+  getTabIdsToRight,
+  openTab,
+  scrollTabs,
+  updateTabScrollButtons,
+} from "./tabHelpers";
 import {
   EMPTY_TABS_STATE,
-  getNextRecentTabId,
   reconcileTabsWithProjects,
-  removeTabById,
   resolveTabForRoute,
-  resolveTabPath,
   serializeTabsCookie,
-  type StoredTab,
   type StoredTabsState,
   upsertTab,
 } from "./tabState";
@@ -29,6 +39,7 @@ type TabProps = {
 export const Tab = ({ initialTabsState }: TabProps) => {
   const pathname = usePathname();
   const router = useRouter();
+  const preloadPage = usePageQueryPreloader();
   const pageDocument = useOptionalPageDocument();
   const projects = useQuery(api.projects.queries.listCurrentUserProjects);
   const [tabsState, setTabsState] = useState<StoredTabsState>(
@@ -50,12 +61,19 @@ export const Tab = ({ initialTabsState }: TabProps) => {
   const activeTabId = activeTab?.tabId ?? null;
   const resolvedTabs = tabsState.tabs;
   const resolvedTabsById = useMemo(
-    () =>
-      new Map<string, StoredTab>(
-        resolvedTabs.map((tab) => [tab.tabId, tab] as const),
-      ),
+    () => buildTabsById(resolvedTabs),
     [resolvedTabs],
   );
+  const retainedPageQueries = useMemo(
+    () =>
+      buildRetainedPageQueries({
+        recentTabIds: tabsState.recentTabIds,
+        tabsById: resolvedTabsById,
+      }),
+    [resolvedTabsById, tabsState.recentTabIds],
+  );
+
+  useQueries(retainedPageQueries);
 
   useEffect(() => {
     if (!activeTab) {
@@ -98,177 +116,23 @@ export const Tab = ({ initialTabsState }: TabProps) => {
     });
   }, [isClosingLastTab, pathname]);
 
-  const openTab = (tab: StoredTab) => {
-    if (tab.tabId === activeTabId) {
-      return;
-    }
-
-    const resolvedTab = resolvedTabsById.get(tab.tabId);
-
-    if (projects !== undefined && !resolvedTab) {
-      setTabsState((prev) => removeTabById(prev, tab.tabId));
-      return;
-    }
-
-    router.push((resolvedTab ?? { path: resolveTabPath(tab) }).path);
-  };
-
-  const openNextAvailableTab = (
-    nextState: StoredTabsState,
-    preferredTabId?: string,
-  ) => {
-    const preferredTab = preferredTabId
-      ? nextState.tabs.find((tab) => tab.tabId === preferredTabId)
-      : null;
-
-    if (preferredTab) {
-      const resolvedTab = resolvedTabsById.get(preferredTab.tabId);
-      const nextPath =
-        resolvedTab?.path ??
-        (projects === undefined ? resolveTabPath(preferredTab) : null);
-
-      if (nextPath) {
-        setTabsState(nextState);
-        router.replace(nextPath);
-        return;
-      }
-    }
-
-    let nextRecentTabId = getNextRecentTabId(nextState);
-
-    while (nextRecentTabId) {
-      const nextTab = nextState.tabs.find(
-        (tab) => tab.tabId === nextRecentTabId,
-      );
-
-      if (!nextTab) {
-        nextState = removeTabById(nextState, nextRecentTabId);
-        nextRecentTabId = getNextRecentTabId(nextState);
-        continue;
-      }
-
-      const resolvedTab = resolvedTabsById.get(nextRecentTabId);
-      const nextPath =
-        resolvedTab?.path ??
-        (projects === undefined ? resolveTabPath(nextTab) : null);
-
-      if (nextPath) {
-        setTabsState(nextState);
-        router.replace(nextPath);
-        return;
-      }
-
-      nextState = removeTabById(nextState, nextRecentTabId);
-      nextRecentTabId = getNextRecentTabId(nextState);
-    }
-
-    setTabsState(nextState);
-    router.replace("/projects");
-  };
-
-  const closeTabsById = (tabIds: string[], preferredTabId?: string) => {
-    const tabIdsToClose = new Set(tabIds);
-
-    if (tabIdsToClose.size === 0) {
-      return;
-    }
-
-    const isActiveTabClosing =
-      activeTabId !== null && tabIdsToClose.has(activeTabId);
-    let nextState = tabsState;
-
-    for (const tabId of tabIdsToClose) {
-      nextState = removeTabById(nextState, tabId);
-    }
-
-    if (nextState.tabs.length === 0) {
-      setIsClosingLastTab(true);
-      setCookie(TABS_COOKIE, serializeTabsCookie(nextState));
-      router.replace("/projects");
-      return;
-    }
-
-    if (!isActiveTabClosing) {
-      setTabsState(nextState);
-      return;
-    }
-
-    openNextAvailableTab(nextState, preferredTabId);
-  };
-
-  const closeTab = (tabId: string) => {
-    closeTabsById([tabId]);
-  };
-
-  const closeAllTabs = () => {
-    closeTabsById(resolvedTabs.map((tab) => tab.tabId));
-  };
-
-  const closeOtherTabs = (tabId: string) => {
-    closeTabsById(
-      resolvedTabs.filter((tab) => tab.tabId !== tabId).map((tab) => tab.tabId),
-      tabId,
-    );
-  };
-
-  const closeTabsToRight = (tabId: string) => {
-    const tabIndex = resolvedTabs.findIndex((tab) => tab.tabId === tabId);
-
-    if (tabIndex === -1 || tabIndex === resolvedTabs.length - 1) {
-      return;
-    }
-
-    closeTabsById(
-      resolvedTabs.slice(tabIndex + 1).map((tab) => tab.tabId),
-      tabId,
-    );
-  };
-
-  const closeTabsToLeft = (tabId: string) => {
-    const tabIndex = resolvedTabs.findIndex((tab) => tab.tabId === tabId);
-
-    if (tabIndex === -1 || tabIndex === 0) {
-      return;
-    }
-
-    closeTabsById(
-      resolvedTabs.slice(0, tabIndex).map((tab) => tab.tabId),
-      tabId,
-    );
+  const closeTabsContext = {
+    tabsState,
+    activeTabId,
+    tabsById: resolvedTabsById,
+    canUseFallbackPath: projects === undefined,
+    setTabsState,
+    setIsClosingLastTab,
+    replaceRoute: router.replace,
   };
 
   const updateScrollButtons = useCallback(() => {
-    const tabsContainer = tabsContainerRef.current;
-
-    if (!tabsContainer) {
-      setCanScrollLeft(false);
-      setCanScrollRight(false);
-      return;
-    }
-
-    setCanScrollLeft(tabsContainer.scrollLeft > 0);
-    setCanScrollRight(
-      tabsContainer.scrollLeft + tabsContainer.clientWidth <
-        tabsContainer.scrollWidth - 1,
-    );
-  }, []);
-
-  const scrollTabs = (direction: "left" | "right") => {
-    const tabsContainer = tabsContainerRef.current;
-
-    if (!tabsContainer) {
-      return;
-    }
-
-    const tabWidth =
-      tabsContainer.firstElementChild?.getBoundingClientRect().width ??
-      tabsContainer.clientWidth;
-
-    tabsContainer.scrollBy({
-      left: direction === "left" ? -tabWidth : tabWidth,
-      behavior: "smooth",
+    updateTabScrollButtons({
+      tabsContainerRef,
+      setCanScrollLeft,
+      setCanScrollRight,
     });
-  };
+  }, []);
 
   useEffect(() => {
     const tabsContainer = tabsContainerRef.current;
@@ -309,7 +173,7 @@ export const Tab = ({ initialTabsState }: TabProps) => {
                   onClick={(event) => {
                     event.preventDefault();
                     event.stopPropagation();
-                    scrollTabs("left");
+                    scrollTabs(tabsContainerRef.current, "left");
                   }}
                   aria-label="Scroll tabs left"
                 >
@@ -318,7 +182,7 @@ export const Tab = ({ initialTabsState }: TabProps) => {
               ) : null}
               <div
                 ref={tabsContainerRef}
-                className="flex min-w-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-y-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                className="flex min-w-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-y-none scrollbar-none [&::-webkit-scrollbar]:hidden"
                 onScroll={updateScrollButtons}
               >
                 {resolvedTabs.map((tab) => (
@@ -327,12 +191,58 @@ export const Tab = ({ initialTabsState }: TabProps) => {
                     title={tab.title}
                     contextLabel={tab.contextLabel}
                     isActive={tab.tabId === activeTabId}
-                    onSelect={() => openTab(tab)}
-                    onClose={() => closeTab(tab.tabId)}
-                    onCloseAll={closeAllTabs}
-                    onCloseOthers={() => closeOtherTabs(tab.tabId)}
-                    onCloseRight={() => closeTabsToRight(tab.tabId)}
-                    onCloseLeft={() => closeTabsToLeft(tab.tabId)}
+                    onSelect={() =>
+                      openTab({
+                        tab,
+                        activeTabId,
+                        projectsLoaded: projects !== undefined,
+                        tabsById: resolvedTabsById,
+                        canUseFallbackPath: projects === undefined,
+                        preloadPage,
+                        setTabsState,
+                        pushRoute: router.push,
+                      })
+                    }
+                    onPreload={() => {
+                      const target = getPageTabTarget(tab);
+
+                      if (target) {
+                        preloadPage(target.projectId, target.pageId);
+                      }
+                    }}
+                    onClose={() =>
+                      closeTabsById({
+                        ...closeTabsContext,
+                        tabIds: [tab.tabId],
+                      })
+                    }
+                    onCloseAll={() =>
+                      closeTabsById({
+                        ...closeTabsContext,
+                        tabIds: getAllTabIds(resolvedTabs),
+                      })
+                    }
+                    onCloseOthers={() =>
+                      closeTabsById({
+                        ...closeTabsContext,
+                        tabIds: getOtherTabIds(resolvedTabs, tab.tabId),
+                        preferredTabId: tab.tabId,
+                      })
+                    }
+                    onCloseRight={() =>
+                      closeTabsById({
+                        ...closeTabsContext,
+                        tabIds: getTabIdsToRight(resolvedTabs, tab.tabId),
+                        preferredTabId: tab.tabId,
+                      })
+                    }
+                    onCloseLeft={() =>
+                      closeTabsById({
+                        ...closeTabsContext,
+                        tabIds: getTabIdsToLeft(resolvedTabs, tab.tabId),
+                        preferredTabId: tab.tabId,
+                      })
+                    }
                   />
                 ))}
               </div>
@@ -344,7 +254,7 @@ export const Tab = ({ initialTabsState }: TabProps) => {
                   onClick={(event) => {
                     event.preventDefault();
                     event.stopPropagation();
-                    scrollTabs("right");
+                    scrollTabs(tabsContainerRef.current, "right");
                   }}
                   aria-label="Scroll tabs right"
                 >
