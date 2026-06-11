@@ -6,6 +6,7 @@ const PREVIEW_IMAGE_URL = `${SITE_URL}/preview.png`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
+  applicationName: "Pageboard",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
+    siteName: "Pageboard",
     images: [
       {
         url: PREVIEW_IMAGE_URL,
@@ -28,6 +30,13 @@ export const metadata: Metadata = {
   },
 };
 
+const websiteStructuredData = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Pageboard",
+  url: SITE_URL,
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -35,7 +44,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(websiteStructuredData),
+          }}
+        />
+        {children}
+      </body>
     </html>
   );
 }
