@@ -35,18 +35,23 @@ export const EditableTextField = ({
   };
 
   return (
-    <div className="w-full border-b border-(--gray) pb-1 flex flex-col gap-2 mb-2">
+    <div
+      className={`w-full ${isLive || !editable ? "border-b border-(--gray) pb-1 mb-2" : "flex flex-col gap-2"}`}
+    >
       {isLive || !editable ? (
         renderClient(text)
       ) : (
-        <input
-          type="text"
-          value={text}
-          onChange={(event) => handleChange(event.target.value)}
-          placeholder={placeholder}
-          maxLength={maxLength}
-          className="w-full rounded-md bg-(--dim) px-2 py-1.5 outline-none"
-        />
+        <>
+          <p className="text-lg font-medium">Text</p>
+          <input
+            type="text"
+            value={text}
+            onChange={(event) => handleChange(event.target.value)}
+            placeholder={placeholder}
+            maxLength={maxLength}
+            className="w-full rounded-md bg-(--dim) px-2 py-1.5 outline-none"
+          />
+        </>
       )}
     </div>
   );

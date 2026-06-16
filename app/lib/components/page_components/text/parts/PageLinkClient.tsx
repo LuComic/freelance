@@ -36,7 +36,7 @@ export const PageLinkClient = ({
     <Link
       href={getProjectPagePath(projectId, targetPage.id)}
       prefetch={false}
-      className="max-w-full text-(--vibrant) wrap-anywhere text-wrap underline underline-offset-4 hover:text-(--vibrant-hover)"
+      className="w-max text-(--vibrant) wrap-anywhere text-wrap underline underline-offset-4 hover:text-(--vibrant-hover)"
       onMouseEnter={() => preloadPage(projectId, targetPage.id)}
       onFocus={() => preloadPage(projectId, targetPage.id)}
     >
