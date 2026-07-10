@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, Coffee } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   getCookie,
@@ -82,25 +82,6 @@ export function PreferencesSection({ activeSection }: PreferencesSectionProps) {
               {showSuggestions ? "Don't show" : "Not showing"}
             </button>
           </div>
-          <p className="font-semibold mt-4">
-            <span className="text-(--vibrant)">*</span>
-            Support me and the project!
-            <span className="text-(--vibrant)">*</span>
-          </p>
-          <p>
-            The project is completely free and open source, so your support is
-            much appreciated! Your tips help me continue building useful, cool
-            things.
-            <br />
-            <a
-              href="https://ko-fi.com/ainurakk"
-              className="underline decoration-(--vibrant) underline-offset-4 mt-2 flex items-center justify-start gap-2"
-              target="_blank"
-            >
-              <Coffee />
-              My Ko-fi page
-            </a>
-          </p>
         </div>
       ) : null}
     </div>

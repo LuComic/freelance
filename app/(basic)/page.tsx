@@ -322,15 +322,6 @@ export default function Home() {
             >
               lukasjaager@gmail.com
             </a>
-            <br />
-            If you&apos;d like to support the project or me, check out my{" "}
-            <a
-              href="https://ko-fi.com/ainurakk"
-              className="underline decoration-(--vibrant) underline-offset-4"
-              target="_blank"
-            >
-              Ko-fi page
-            </a>
           </div>
         </div>
       </section>

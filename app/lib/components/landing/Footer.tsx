@@ -61,14 +61,6 @@ export const Footer = () => {
             Linkedin
           </a>
           <span className="hidden sm:inline">-</span>
-          <a
-            href="https://ko-fi.com/ainurakk"
-            className="underline underline-offset-4"
-            target="_blank"
-          >
-            Support
-          </a>
-          <span className="hidden sm:inline">-</span>
           <Link
             href="/legal/"
             className="underline underline-offset-4"
