@@ -5,6 +5,7 @@ import { COMPONENT_TAG_REGEX, COMPONENT_TOKEN_REGEX } from "./constants";
 import { getRenderablePageComponent } from "./componentRegistry";
 import { PageContentDropdownBlock } from "./PageContentDropdownBlock";
 import { parseEditorBlocks } from "./dropdownBlocks";
+import { resolveAdvancedInputColor } from "@/app/lib/components/page_components/advanced_input/colors";
 import { MainHeadline } from "@/app/lib/components/page_components/text/parts/MainHeadline";
 import { SectionHeader } from "@/app/lib/components/page_components/text/parts/SectionHeader";
 import { Subheader } from "@/app/lib/components/page_components/text/parts/Subheader";
@@ -16,6 +17,7 @@ import {
 const LINE_HEADING_REGEX = /^(#{1,6})\s+(.*)$/;
 const CODE_BLOCK_REGEX = /```([\s\S]*?)```/g;
 const HIGHLIGHTED_WORD_REGEX = /(\berle\b|\bvaike_myy\b)/gi;
+const HEX_COLOR_REGEX = /#[0-9a-f]{6}\b|#[0-9a-f]{3}\b/gi;
 const LINK_REGEX = /(?:https?:\/\/|www\.)[^\s<]+/gi;
 
 function normalizeFencedCodeBlock(code: string) {
@@ -45,12 +47,16 @@ function stripTrailingLinkPunctuation(value: string) {
   };
 }
 
-function renderHighlightedText(value: string, keyStart: number) {
+function renderDecoratedText(value: string, keyStart: number) {
   const nodes: ReactNode[] = [];
   let key = keyStart;
   let lastIndex = 0;
+  const matches = [
+    ...value.matchAll(HIGHLIGHTED_WORD_REGEX),
+    ...value.matchAll(HEX_COLOR_REGEX),
+  ].sort((left, right) => (left.index ?? 0) - (right.index ?? 0));
 
-  for (const match of value.matchAll(HIGHLIGHTED_WORD_REGEX)) {
+  for (const match of matches) {
     const index = match.index ?? 0;
     const matchedText = match[0];
 
@@ -58,11 +64,28 @@ function renderHighlightedText(value: string, keyStart: number) {
       nodes.push(value.slice(lastIndex, index));
     }
 
-    nodes.push(
-      <span className="brand-highlight" key={`highlight-${key++}`}>
-        {matchedText}
-      </span>,
-    );
+    if (matchedText.startsWith("#")) {
+      nodes.push(
+        <span
+          className="whitespace-nowrap"
+          key={`color-${key++}`}
+        >
+          <span
+            aria-hidden
+            className="inline-block size-[1em] rounded-sm border border-(--gray) align-[-0.125em]"
+            style={{ backgroundColor: resolveAdvancedInputColor(matchedText) }}
+          />
+          {" "}
+          {matchedText}
+        </span>,
+      );
+    } else {
+      nodes.push(
+        <span className="brand-highlight" key={`highlight-${key++}`}>
+          {matchedText}
+        </span>,
+      );
+    }
     lastIndex = index + matchedText.length;
   }
 
@@ -78,8 +101,8 @@ function renderSpecialText(value: string, keyStart: number) {
   let key = keyStart;
   let lastIndex = 0;
 
-  const pushHighlightedText = (text: string) => {
-    const renderedText = renderHighlightedText(text, key);
+  const pushDecoratedText = (text: string) => {
+    const renderedText = renderDecoratedText(text, key);
     nodes.push(...renderedText.nodes);
     key = renderedText.nextKey;
   };
@@ -95,7 +118,7 @@ function renderSpecialText(value: string, keyStart: number) {
     }
 
     if (index > lastIndex) {
-      pushHighlightedText(value.slice(lastIndex, index));
+      pushDecoratedText(value.slice(lastIndex, index));
     }
 
     const href = linkText.startsWith("http") ? linkText : `https://${linkText}`;
@@ -119,7 +142,7 @@ function renderSpecialText(value: string, keyStart: number) {
   }
 
   if (lastIndex < value.length) {
-    pushHighlightedText(value.slice(lastIndex));
+    pushDecoratedText(value.slice(lastIndex));
   }
 
   return { nodes, nextKey: key };
