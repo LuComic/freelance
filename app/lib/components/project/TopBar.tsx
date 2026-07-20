@@ -312,7 +312,7 @@ export const TopBar = () => {
               <MenubarContent className="bg-(--quite-dark) border border-(--gray) text-(--light) transition-none!">
                 <MenubarGroup>
                   <MenubarItem
-                    className="data-highlighted:bg-(--darkest-hover) data-highlighted:text-(--light)"
+                    className="data-highlighted:bg-(--darkest) data-highlighted:text-(--light)"
                     onSelect={() => openTemplateSearch()}
                   >
                     <button className="flex w-full items-center justify-start gap-2">
@@ -321,7 +321,7 @@ export const TopBar = () => {
                     </button>
                   </MenubarItem>
                   <MenubarItem
-                    className="data-highlighted:bg-(--darkest-hover) data-highlighted:text-(--light)"
+                    className="data-highlighted:bg-(--darkest) data-highlighted:text-(--light)"
                     onSelect={() => setSaveTemplateOpen(true)}
                   >
                     <div className="flex w-full items-center justify-start gap-2">
